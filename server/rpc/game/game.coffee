@@ -3444,7 +3444,7 @@ class Diseased extends Player
             game.werewolf_flag.push "Diseased"   # 病人フラグを立てる
 class Spellcaster extends Player
     type:"Spellcaster"
-    jobname:"诅咒师"
+    jobname:"咒言师"
     sleeping:->true
     jobdone:->@target?
     sunset:(game)->
@@ -3464,14 +3464,14 @@ class Spellcaster extends Player
             arr=[]
         if playerid in arr
             # 既に呪いをかけたことがある
-            return "这个对象已经被诅咒过了。"
+            return "这个对象已经被咒言诅咒过了。"
         @setTarget playerid
         pl=game.getPlayer playerid
         pl.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 诅咒了 #{pl.name}。"
+            comment:"#{@name} 夺去了 #{pl.name} 的声音。"
         splashlog game.id,game,log
         arr.push playerid
         @setFlag JSON.stringify arr
@@ -3483,7 +3483,7 @@ class Spellcaster extends Player
         log=
             mode:"skill"
             to:t.id
-            comment:"#{t.name} 受到了诅咒。白天无法发言。"
+            comment:"#{t.name} 的声音被夺去了。今天白天无法发言。"
         splashlog game.id,game,log
         
         # 複合させる
@@ -4971,7 +4971,7 @@ class HolyMarked extends Human
     jobname:"圣痕者"
 class WanderingGuard extends Player
     type:"WanderingGuard"
-    jobname:"風来猎人"
+    jobname:"游荡猎人"
     sleeping:->@target?
     sunset:(game)->
         @setTarget null

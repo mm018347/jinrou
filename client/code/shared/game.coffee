@@ -737,7 +737,7 @@ exports.jobinfo=
             name:"病人"
             color:"#b35b98"
         Spellcaster:
-            name:"诅咒师"
+            name:"咒言师"
             color:"#4b4f7d"
         Lycan:
             name:"狼凭"
@@ -788,7 +788,7 @@ exports.jobinfo=
             name:"圣痕者"
             color:"#c4e8ff"
         WanderingGuard:
-            name:"風来猎人"
+            name:"游荡猎人"
             color:"#16bf0d"
         TroubleMaker:
             name:"闹事者"
