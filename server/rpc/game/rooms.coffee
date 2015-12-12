@@ -200,8 +200,34 @@ module.exports.actions=(req,res,ss)->
                     res error:"被禁止参与游戏"
                     return
                 ###
-                if !doc.expires || doc.expires.getTime()>=Date.now()
+                if !doc.expires
                     res error:"被禁止参与游戏"
+                    return
+                if doc.expires.getTime()>=Date.now()
+                    expires = {}
+                    strExpires = []
+                    milliseconds = doc.expires.getTime() - Date.now()
+                    expires.days =
+                      name: "天"
+                      value: Math.floor(milliseconds / (24 * 3600 * 1000))
+                    milliseconds = milliseconds % (24 * 3600 * 1000)
+                    expires.hours =
+                      name: "小时"
+                      value: Math.floor(milliseconds / (3600 * 1000))
+                    milliseconds = milliseconds % (3600 * 1000)
+                    expires.minutes =
+                      name: "分"
+                      value: Math.floor(milliseconds / (60 * 1000))
+                    milliseconds = milliseconds % (60 * 1000)
+                    expires.seconds =
+                      name: "秒"
+                      value: Math.floor(milliseconds / (1000))
+
+                    for item of expires
+                      item = expires[item]
+                      if item.value >0
+                        strExpires.push item.value+item.name
+                    res error:"被禁止参与游戏，解禁剩余时间：#{strExpires.join("")}"
                     return
                 if doc.expires? && doc.expires.getTime()<Date.now()
                     M.blacklist.remove {userid:req.session.userId},(err,doc)->
