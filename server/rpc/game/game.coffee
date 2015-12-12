@@ -5702,6 +5702,7 @@ class Blasphemy extends Player
             return "这个对象不存在"
         if pl.dead
             return "对象已经死亡"
+        pl.touched game,@id
 
         log=
             mode:"skill"
