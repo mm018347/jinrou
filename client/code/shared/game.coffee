@@ -607,7 +607,7 @@ exports.getruleobj=(name)->
         # 特殊だ!
         return {
             name:"量子人狼"
-            title:"全员的职业などが確率で表現される。只限村人・人狼・占卜师。"
+            title:"全员的的真实职业以概率表示。只限村人・人狼・占卜师。"
             rule:null
             suggestedNight:{
                 max:60
@@ -1530,6 +1530,32 @@ exports.rules=[
             }
         ]
     }
+    # 埋毒者、猫又
+    {
+        label:null
+        visible:(rule,jobs)->
+            return true if isYaminabe rule
+            return jobs.Poisoner>0 || jobs.Cat>0
+        rules:[
+            {
+                name: "poisonwolf"
+                label: "人狼袭击有毒对象"
+                title: "人狼袭击「埋毒者」・「猫又」时的动作设定。"
+                type: "select"
+                values:[
+                    {
+                        value: "selector"
+                        label: "连坐袭击者"
+                        selected: true
+                    }
+                    {
+                        value: ""
+                        label: "随机连坐"
+                    }
+                ]
+            }
+        ]
+    }
     # 恋人
     {
         label:null
@@ -1546,11 +1572,11 @@ exports.rules=[
                         value:"alive"
                         label:"终了时生存"
                         title:"与妖狐相同。"
+                        selected:true
                     }
                     {
                         value:"ruin"
                         label:"只有恋人生存"
-                        selected:true
                     }
                 ]
             }

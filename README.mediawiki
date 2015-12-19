@@ -3,7 +3,7 @@ Are you a werewolf?
 
 [http://jinrou.sunevsvc.com:/ 月下人狼服务器]运行中!
 == version ==
-1.10.6
+1.10.7
 
 == requirements ==
 * SocketStream
