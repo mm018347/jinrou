@@ -4416,7 +4416,7 @@ class Hoodlum extends Player
         pl=game.getPlayer playerid
         unless pl?
             return "对象无效"
-        plids=JSON.parse(@flag)
+        plids=JSON.parse(@flag||"[]")
         if pl.id in plids
             # 既にいる
             return "#{pl.name} 已经被选为对象"
