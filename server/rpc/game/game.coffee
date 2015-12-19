@@ -2860,16 +2860,10 @@ class WolfDiviner extends Werewolf
             @addGamelog game,"wolfdivine",null,@flag  # 占った
             if p.team=="Werewolf" && p.isHuman()
                 # 狂人変化
+                #避免狂人成为某些职业，"GameMaster"保留
                 jobnames=Object.keys jobs
-                loop #避免狂人成为exceptions的职业，"GameMaster"保留
-                    newjob = jobnames[Math.floor(Math.random() * jobnames.length)]
-                    if ((nj) ->
-                        exceptions=["MinionSelector","Thief","Helper","QuantumPlayer","Waiting","Watching"]
-                        for job_denied in exceptions
-                            return false  if nj is job_denied
-                        true
-                    )(newjob)
-                        break
+                jobnames=jobnames.filter((x)->!(x in ["MinionSelector","Thief","Helper","QuantumPlayer","Waiting","Watching"]))
+                newjob = jobnames[Math.floor(Math.random() * jobnames.length)]
 
                 plobj=p.serialize()
                 plobj.type=newjob
