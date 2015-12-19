@@ -1478,13 +1478,14 @@ class Game
             
 
             # 向房间成员通报猝死统计
-            norevivers=@gamelogs.filter((x)->x.event=="found" && x.flag in ["gone-day","gone-night"]).map((x)->@getPlayer x.id)
+            norevivers=@gamelogs.filter((x)->x.event=="found" && x.flag in ["gone-day","gone-night"]).map((x)->x.id)
             if norevivers.length
                 message = 
                     id:@id
                     userlist:[]
                     time:parseInt(60/@players.length)
-                for pl in norevivers
+                for x in norevivers
+                    pl = @getPlayer x
                     message.userlist.push {"userid":pl.realid,"name":pl.name}
                 @ss.publish.channel "room#{@id}",'punishalert',message
 
