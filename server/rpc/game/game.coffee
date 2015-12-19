@@ -36,7 +36,7 @@ module.exports=
     endlessPlayersNumber:(roomid)->
         game=games[roomid]
         if game?
-            # 强行退出はカウントしない
+            # 拒绝复活はカウントしない
             return game.players.filter((x)->!x.dead || !x.norevive).length
         else
             return Number.NaN
@@ -1148,8 +1148,6 @@ class Game
                     "衰老而死了"
                 when "gmpunish"
                     "被GM处死了"
-                when "gone-norevive"
-                    "强行退出了。"
                 when "gone-day"
                     "因为没有及时投票猝死了。猝死是十分令人困扰的行为，请务必不要再犯。"
                 when "gone-night"
@@ -1423,7 +1421,7 @@ class Game
                             iswin=true
                     # ただし突然死したら負け
                     if @gamelogs.some((log)->
-                        log.id==x.id && log.event=="found" && log.flag in ["gone-day","gone-night","gone-norevive"]
+                        log.id==x.id && log.event=="found" && log.flag in ["gone-day","gone-night"]
                     )
                         iswin=false
                     x.setWinner iswin   #胜利か
@@ -1480,7 +1478,7 @@ class Game
             
 
             # 向房间成员通报猝死统计
-            norevivers=@players.filter((x)->x.norevive)
+            norevivers=@gamelogs.filter((x)->x.event=="found" && x.flag in ["gone-day","gone-night"]).map((x)->@game.getPlayer x.id)
             if norevivers.length
                 message = 
                     id:@id
@@ -1884,7 +1882,7 @@ class Player
         # もと的职业
         @originalType=@type
         @originalJobname=@getJobname()
-        # 强行退出
+        # 拒绝复活
         @norevive=false
 
         
@@ -3962,7 +3960,7 @@ class Tanner extends Player
     jobname:"皮革匠"
     team:""
     die:(game,found)->
-        if found in ["gone-day","gone-night","gone-norevive"]
+        if found in ["gone-day","gone-night"]
             # 突然死はダメ
             @setFlag "gone"
         super
@@ -7726,7 +7724,7 @@ module.exports.actions=(req,res,ss)->
             return
         player.setWill will
         res null
-    #强行退出
+    #拒绝复活
     norevive:(roomid)->
         game=games[roomid]
         unless game?
@@ -7738,17 +7736,11 @@ module.exports.actions=(req,res,ss)->
         player=game.getPlayerReal req.session.userId
         unless player?
             res "没有加入游戏"
-        # kill no revive player immediately
-        player.die game,"gone-norevive"
-        player.setNorevive true
-        game.bury("other")
-        ###
         log=
             mode:"userinfo"
-            comment:"#{player.name} 强行退出了。"
+            comment:"#{player.name} 拒绝复活。"
             to:player.id
         splashlog roomid,game,log
-        ###
         # 全员に通知
         game.splashjobinfo()
         res null
