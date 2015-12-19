@@ -1478,7 +1478,7 @@ class Game
             
 
             # 向房间成员通报猝死统计
-            norevivers=@gamelogs.filter((x)->x.event=="found" && x.flag in ["gone-day","gone-night"]).map((x)->@game.getPlayer x.id)
+            norevivers=@gamelogs.filter((x)->x.event=="found" && x.flag in ["gone-day","gone-night"]).map((x)->@getPlayer x.id)
             if norevivers.length
                 message = 
                     id:@id
@@ -1486,10 +1486,6 @@ class Game
                     time:parseInt(60/@players.length)
                 for pl in norevivers
                     message.userlist.push {"userid":pl.realid,"name":pl.name}
-                ownerID=M.rooms.findOne {id:@id},(err,doc)->
-                    return unless doc?
-                    doc.owner.userid
-                console.log("ownerID:"+ownerID)
                 @ss.publish.channel "room#{@id}",'punishalert',message
 
 
