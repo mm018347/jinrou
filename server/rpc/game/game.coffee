@@ -1158,6 +1158,54 @@ class Game
                 mode:"system"
                 comment:"#{x.name} #{situation}"
             splashlog @id,this,log
+
+            situation=switch x.found
+                #死因
+                when "werewolf","werewolf2"
+                    "人狼的袭击"
+                when "poison"
+                    "毒药"
+                when "hinamizawa"
+                    "雏见泽症候群发作"
+                when "vampire","vampire2"
+                    "吸血鬼的袭击"
+                when "witch"
+                    "魔女的毒药"
+                when "dog"
+                    "犬的袭击"
+                when "trap"
+                    "陷阱"
+                when "marycurse"
+                    "玛丽的诅咒"
+                when "psycho"
+                    "变态杀人狂"
+                when "curse"
+                    "咒杀"
+                when "punish"
+                    "处刑"
+                when "spygone"
+                    "失踪"
+                when "deathnote"
+                    "心梗"
+                when "foxsuicide"
+                    "追随妖狐自尽"
+                when "friendsuicide"
+                    "追随恋人自尽"
+                when "infirm"
+                    "老死"
+                when "gmpunish"
+                    "被GM处死"
+                when "gone-day"
+                    "昼间猝死"
+                when "gone-night"
+                    "夜间猝死"
+                else
+                    "未知原因"
+            log=
+                mode:"system"
+                to:-1
+                comment:"#{x.name} 的死因是 #{situation}"
+            splashlog @id,this,log
             ###
             if x.found=="punish"
                 # 处刑→灵能
