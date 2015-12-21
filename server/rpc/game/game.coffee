@@ -1127,7 +1127,7 @@ class Game
         deads.forEach (x)=>
             situation=switch x.found
                 #死因
-                when "werewolf","werewolf2","poison","hinamizawa","vampire","vampire2","witch","dog","trap","marycurse","psycho"
+                when "werewolf","werewolf2","poison","hinamizawa","vampire","vampire2","witch","dog","trap","bomb","marycurse","psycho"
                     "不成样子的尸体被发现了"
                 when "curse"    # 呪殺
                     if @rule.deadfox=="obvious"
@@ -1175,6 +1175,8 @@ class Game
                     "犬的袭击"
                 when "trap"
                     "陷阱"
+                when "bomb"
+                    "炸弹"
                 when "marycurse"
                     "玛丽的诅咒"
                 when "psycho"
@@ -6527,9 +6529,9 @@ class BombTrapped extends Complex
                 if tr?
                     tr.addGamelog game,"bombTrappedGuard",null,@id
                 # 护卫元が死ぬ
-                gu.die game,"trap"
+                gu.die game,"bomb"
                 # 自己も死ぬ
-                @die game,"trap"
+                @die game,"bomb"
 
 
             pl.uncomplex game   # 罠は消滅
@@ -6548,7 +6550,7 @@ class BombTrapped extends Complex
                     r=Math.floor Math.random()*pls.length
                     pl=pls[r]
                     if pl?
-                        pl.die game,"trap"
+                        pl.die game,"bomb"
                         @addGamelog game,"bombkill",null,pl.id
         else if found in ["werewolf","vampire"]
             # 狼に噛まれた場合は襲撃者を巻き添えにする
@@ -6558,7 +6560,7 @@ class BombTrapped extends Complex
             # 反撃する
             wl=game.getPlayer from
             if wl?
-                wl.die game,"trap"
+                wl.die game,"bomb"
                 @addGamelog game,"bombkill",null,wl.id
         # 自己もちゃんと死ぬ
         @mcall game,@main.die,game,found,from
