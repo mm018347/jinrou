@@ -92,6 +92,8 @@ exports.showUrl=showUrl=(url,nohistory=false)->
             url=result[2]
         else
             location.href=url
+    unless $("div#content div.game").length
+        $("#content").removeAttr "style"
     switch url
         when "/my"
             # 配置とか
@@ -167,8 +169,6 @@ exports.showUrl=showUrl=(url,nohistory=false)->
                         location.replace url
             else
                 page "top",null,Index.top,null
-    unless $("div#content div.game").length
-        $("#content").removeAttr "style"
     unless nohistory
         history.pushState null,null,url
                     
