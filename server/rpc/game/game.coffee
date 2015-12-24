@@ -6888,6 +6888,9 @@ module.exports.actions=(req,res,ss)->
             supporters=[]
             for pl in room.players
                 if pl.mode=="player"
+                    if players.filter((x)->x.realid==pl.realid).length>0
+                        res "#{pl.name} 重复加入游戏。"
+                        return
                     players.push pl
                 else
                     supporters.push pl
