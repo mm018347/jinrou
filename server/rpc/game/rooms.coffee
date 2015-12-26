@@ -241,12 +241,6 @@ module.exports.actions=(req,res,ss)->
                 if req.session.userId in (room.players.map (x)->x.realid)
                     res error:"已经加入"
                     return
-                if opt.name in (room.players.map (x)->x.name)
-                    res error:"昵称 #{opt.name} 已经存在"
-                    return
-                if opt.name == "替身君"
-                    res error:"禁止冒名顶替「替身君」"
-                    return
                 if room.gm && room.owner.userid==req.session.userId
                     res error:"GM不能加入游戏"
                     return
@@ -274,7 +268,14 @@ module.exports.actions=(req,res,ss)->
                     start:false
                     mode:"player"
                     nowprize:su.nowprize
-                
+                #同昵称限制,及禁止使用替身君做昵称
+                if room.players.some((x)->x.name==su.name)
+                    res error:"昵称 #{su.name} 已经存在"
+                    return
+                if su.name=="替身君"
+                    res error:"禁止冒名顶替「替身君」"
+                    return
+
                 # 同IP制限
                 
                 if room.players.some((x)->x.ip==su.ip) && su.ip!="127.0.0.1"
