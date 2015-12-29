@@ -67,7 +67,7 @@ exports.images=(request, response, next)->
     reqHost = request.headers.host.split(":")
     reqHost[0] = "www.werewolf.online"
     response.writeHead 301,
-      Location: "http://" + reqHost.join(":") + req.url
+      Location: "http://" + reqHost.join(":") + request.url
     response.end()
   if r=request.url.match /^\/images\/(.+)$/
     fs.readFile "./public/images/#{r[1]}",(err,data)->
