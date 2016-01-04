@@ -2546,6 +2546,7 @@ class Psychic extends Player
     
     # 处刑で死んだ人を調べる
     beforebury:(game,type)->
+        @setFlag if @flag? then @flag else ""
         game.players.filter((x)->x.dead && x.found=="punish").forEach (x)=>
             @setFlag @flag+"根据 #{@name} 的灵能结论，被处刑的 #{x.name} 是 #{x.psychicResult}。\n"
 
