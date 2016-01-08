@@ -186,7 +186,7 @@ exports.actions =(req,res,ss)->
         unless req.session.maintenance
             res {error:"不是管理员"}
             return
-        M.news.find().limit(query.num).toArray (err,docs)->
+        M.news.find().sort({time:-1}).limit(query.num).toArray (err,docs)->
             res {docs:docs}
     addNews:(query)->
         unless req.session.maintenance
