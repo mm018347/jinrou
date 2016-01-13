@@ -267,7 +267,7 @@ module.exports.actions=(req,res,ss)->
                 user=
                     userid:req.session.userId
                     realid:req.session.userId
-                    name:su.name
+                    name:su.name.trim()
                     ip:su.ip
                     icon:su.icon
                     start:false
@@ -280,7 +280,9 @@ module.exports.actions=(req,res,ss)->
                 if su.name=="替身君"
                     res error:"禁止冒名顶替「替身君」"
                     return
-
+                if user.name.length<1
+                    res error:"昵称不能仅为空格"
+                    return
                 # 同IP制限
                 
                 if room.players.some((x)->x.ip==su.ip) && su.ip!="127.0.0.1"
