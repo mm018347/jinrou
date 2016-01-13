@@ -398,7 +398,7 @@ module.exports.actions=(req,res,ss)->
                 res "这个房间不存在"
                 return
             if room.owner.userid != req.session.userId
-                res "不能将房主踢出游戏"
+                res "你不是房主"
                 console.log room.owner,req.session.userId
                 return
             unless room.mode=="waiting"
@@ -449,7 +449,7 @@ module.exports.actions=(req,res,ss)->
                 res "这个房间不存在"
                 return
             if room.owner.userid != req.session.userId
-                res "不能将房主踢出游戏"
+                res "你不是房主"
                 console.log room.owner,req.session.userId
                 return
             unless room.mode=="waiting"
@@ -586,7 +586,7 @@ module.exports.actions=(req,res,ss)->
                 return
             for banTarget in opt
                 unless banTarget in (room.players.map (x)->x.realid)
-                    res error:"对象非法"
+                    res error:"对象无效"
                     return
                 console.log "目标  id："+banTarget
                 banpl=room.players.filter((pl)->pl.realid==banTarget)

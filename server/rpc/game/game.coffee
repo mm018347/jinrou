@@ -6858,7 +6858,7 @@ module.exports.actions=(req,res,ss)->
                 return
             unless room.mode=="waiting"
                 # すでに开始している
-                res "本场游戏已经开始"
+                res "游戏已经开始"
                 return
             if room.players.some((x)->!x.start)
                 res "全员尚未全部准备好"
@@ -6869,12 +6869,16 @@ module.exports.actions=(req,res,ss)->
                 maxnumber:room.number
                 blind:room.blind
                 gm:room.gm
-                day: parseInt(query.day_minute)*60+parseInt(query.day_second)
-                night: parseInt(query.night_minute)*60+parseInt(query.night_second)
-                remain: parseInt(query.remain_minute)*60+parseInt(query.remain_second)
+                day: parseInt(parseInt(query.day_minute)*60+parseInt(query.day_second))
+                night: parseInt(parseInt(query.night_minute)*60+parseInt(query.night_second))
+                remain: parseInt(parseInt(query.remain_minute)*60+parseInt(query.remain_second))
                 # (n=15)秒规则
                 silentrule: parseInt(query.silentrule) ? 0
             }
+
+            unless ruleobj.day && ruleobj.night && ruleobj.remain
+                res "时间长度不是有效数字，或总时长为零。"
+                return
             
             options={}  # 选项ズ
             for opt in ["decider","authority"]
@@ -6890,7 +6894,7 @@ module.exports.actions=(req,res,ss)->
             for pl in room.players
                 if pl.mode=="player"
                     if players.filter((x)->x.realid==pl.realid).length>0
-                        res "#{pl.name} 重复加入游戏。"
+                        res "#{pl.name} 重复加入，游戏无法开始。"
                         return
                     players.push pl
                 else
