@@ -584,16 +584,15 @@ module.exports.actions=(req,res,ss)->
             unless req.session.userId in (room.players.map (x)->x.realid)
                 res error:"没有加入游戏"
                 return
-            for banTarget in opt
-                unless banTarget in (room.players.map (x)->x.realid)
+            for banrealid in opt
+                unless banrealid in (room.players.map (x)->x.realid)
                     res error:"对象无效"
                     return
-                console.log "目标  id："+banTarget
-                banpl=room.players.filter((pl)->pl.realid==banTarget)
-                banTargetName = banpl.name
+                console.log "目标  id："+banrealid
+                banpl=room.players.filter((pl)->pl.realid==banrealid)
                 banMinutes = parseInt(60/room.players.length)
-                console.log "目标name："+banTargetName
-                M.users.findOne {userid:banTarget},(err,doc)->
+                console.log "目标name："+banpl.name
+                M.users.findOne {userid:banpl.realid},(err,doc)->
                     unless doc?
                         res error:"此用户不存在"
                         return
@@ -601,22 +600,22 @@ module.exports.actions=(req,res,ss)->
                         userid:doc.userid
                         ip:doc.ip #卿本佳人奈何做贼？非逼我banIP
                         timestamp:Date.now()
-                    M.blacklist.findOne {userid:banTarget},(err,doc)->
+                    M.blacklist.findOne {userid:banpl.realid},(err,doc)->
                         unless doc?
                             d=new Date()
                             d.setMinutes d.getMinutes()+banMinutes
                             addquery.expires=d
                             M.blacklist.insert addquery,{safe:true},(err,doc)->
-                                ss.publish.channel "room#{roomid}", "punishresult", {id:roomid,name:banTargetName}
+                                ss.publish.channel "room#{roomid}", "punishresult", {id:roomid,userid:addquery.userid}
                                 res null
                             return
                         if doc.expires? then d=doc.expires else d=new Date()
                         d.setMinutes d.getMinutes()+banMinutes
                         addquery.expires=d
-                        M.blacklist.update {userid:banTarget},{$set:{expires:addquery.expires}},{safe:true},(err,doc)->
-                            ss.publish.channel "room#{roomid}", "punishresult", {id:roomid,userid:banTarget,name:banTargetName}
+                        M.blacklist.update {userid:banpl.realid},{$set:{expires:addquery.expires}},{safe:true},(err,doc)->
+                            ss.publish.channel "room#{roomid}", "punishresult", {id:roomid,userid:addquery.userid}
                             res null
-            
+                        return
 
 #res: (err)->
 setRoom=(roomid,room)->
