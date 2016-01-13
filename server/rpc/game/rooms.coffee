@@ -137,14 +137,13 @@ module.exports.actions=(req,res,ss)->
             
             #在一定时间间隔内，同一用户不能连续建房
             minTimeInterval = 60*1000
-            unless id>1
-                if doc.owner.userid==req.session.user.userid
-                    if (Date.now()-doc.made)<minTimeInterval
-                        res {error: "您在#{((minTimeInterval-(Date.now()-doc.made))/1000).toFixed(0)}秒内不能连续建房。"}
-                        return
+            if id>1 and doc.owner.userid==req.session.user.userid
+                if (Date.now()-doc.made)<minTimeInterval
+                    res {error: "您在#{((minTimeInterval-(Date.now()-doc.made))/1000).toFixed(0)}秒内不能连续建房。"}
+                    return
             room=
                 id:id   #ID連番
-                name: query.name
+                name: query.name.trim()
                 number:parseInt query.number
                 mode:"waiting"
                 players:[]
@@ -153,13 +152,19 @@ module.exports.actions=(req,res,ss)->
             if room.number>40
                 res {error: "拒绝40人以上超大房，从你我做起。"}
                 return
+            if room.name.length<1
+                res {error: "请勿使用空格作为房间名。"}
+                return
+            if room.name.length>64
+                res {error: "你是在开车吗？如果不是，请换一个更短的房间名；如果是，本服务器将拨打110。"}
+                return
             room.password=query.password ? null
             room.blind=query.blind
             room.comment=query.comment ? ""
             #unless room.blind
             #   room.players.push req.session.user
             unless room.number
-                res {error: "invalid players number"}
+                res {error: "玩家人数无效"}
                 return
             room.owner=
                 userid:req.session.user.userid
