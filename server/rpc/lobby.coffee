@@ -1,6 +1,6 @@
 # Server-side Code
 
-players=[]	# ロビーにいる人たち
+players=[]  # ロビーにいる人たち
 heartbeat_time=10
 
 deleteuser=(userid,ss)->
@@ -8,7 +8,7 @@ deleteuser=(userid,ss)->
 		userid:userid
 		name:null
 		heartbeat:0
-	players=players.filter (x)->x.userid!=userid	# 抜ける
+    players=players.filter (x)->x.userid!=userid    # 抜ける
 	ss.publish.channel "lobby","bye",plobj
 	
 
@@ -31,6 +31,7 @@ heartbeat=(userid,ss)->
 	),heartbeat_time*1000
 
 exports.actions =(req,res,ss)->
+    req.use 'user.fire.wall'
 	req.use 'session'
 
 	enter:->
@@ -39,7 +40,7 @@ exports.actions =(req,res,ss)->
 				plobj=
 					userid:req.session.userId
 					name:req.session.user.name
-					heartbeat:Date.now()	# 最終heartbeatタイム
+                    heartbeat:Date.now()    # 最終heartbeatタイム
 				players.push plobj
 
 				ss.publish.channel "lobby","enter",plobj
