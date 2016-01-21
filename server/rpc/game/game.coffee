@@ -2645,7 +2645,7 @@ class Poisoner extends Player
                 # 襲撃者を道連れにする
                 canbedead = canbedead.filter (x)->x.id==from
             else
-            canbedead=canbedead.filter (x)->x.isWerewolf()
+                canbedead=canbedead.filter (x)->x.isWerewolf()
         else if found=="vampire"
             canbedead=canbedead.filter (x)->x.id==from
         return if canbedead.length==0
@@ -6843,6 +6843,7 @@ jobStrength=
     Ushinotokimairi:19
 
 module.exports.actions=(req,res,ss)->
+    req.use 'user.fire.wall'
     req.use 'session'
 
 #游戏开始処理
@@ -6875,7 +6876,7 @@ module.exports.actions=(req,res,ss)->
                 # (n=15)秒规则
                 silentrule: parseInt(query.silentrule) ? 0
             }
-
+            
             unless ruleobj.day && ruleobj.night && ruleobj.remain
                 res "时间长度不是有效数字，或总时长为零。"
                 return
