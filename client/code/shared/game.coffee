@@ -958,7 +958,7 @@ exports.jobinfo=
             name:"小偷"
             color:"#a4a4a4"
         Hoodlum:
-            name:"流氓"
+            name:"无赖"
             color:"#88002d"
         QuantumPlayer:
             name:"量子人类"

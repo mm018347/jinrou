@@ -4436,7 +4436,7 @@ class WolfBoy extends Madman
         null
 class Hoodlum extends Player
     type:"Hoodlum"
-    jobname:"流氓"
+    jobname:"无赖"
     team:""
     constructor:->
         super
