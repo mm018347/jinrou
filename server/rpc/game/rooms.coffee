@@ -251,7 +251,7 @@ module.exports.actions=(req,res,ss)->
                     res error:"GM不能加入游戏"
                     return
                 unless room.mode=="waiting" || (room.mode=="playing" && room.jobrule=="特殊规则.Endless黑暗火锅")
-                    res error:"放弃加入游戏"
+                    res error:"无法加入游戏"
                     return
                 if room.mode=="waiting" && room.players.length >= room.number
                     # 満員
@@ -274,16 +274,6 @@ module.exports.actions=(req,res,ss)->
                     start:false
                     mode:"player"
                     nowprize:su.nowprize
-                #同昵称限制,及禁止使用替身君做昵称
-                if room.players.some((x)->x.name==su.name)
-                    res error:"昵称 #{su.name} 已经存在"
-                    return
-                if su.name=="替身君"
-                    res error:"禁止冒名顶替「替身君」"
-                    return
-                if user.name.length<1
-                    res error:"昵称不能仅为空格"
-                    return
                 # 同IP制限
                 
                 if room.players.some((x)->x.ip==su.ip) && su.ip!="127.0.0.1"
@@ -306,9 +296,24 @@ module.exports.actions=(req,res,ss)->
                             if room.players.some((x)->x.userid==re)
                                 re=""
                         re
-                    user.name=opt.name
+                    user.name=opt.name.trim()
                     user.userid=makeid()
                     user.icon= opt.icon ? null
+                    
+                #同昵称限制,及禁止使用替身君做昵称
+                if room.players.some((x)->x.name==user.name)
+                    res error:"昵称 #{user.name} 已经存在"
+                    return
+                if user.name=="替身君"
+                    res error:"禁止冒名顶替「替身君」"
+                    return
+                if user.name.length<1
+                    res error:"昵称不能仅为空格"
+                    return
+                if room.players.some((x)->x.realid==user.realid)
+                    res error:"#{user.realid} 正在尝试重复加入游戏，请检查您的网络连接是否正常稳定。"
+                    return
+
                 M.rooms.update {id:roomid},{$push: {players:user}},(err)=>
                     if err?
                         res error:"错误:#{err}"
