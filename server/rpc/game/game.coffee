@@ -3138,7 +3138,7 @@ class Spy2 extends Player
     publishdocument:(game)->
         str=game.players.map (x)->
             "#{x.name}:#{x.jobname}"
-        .join " "
+        .join " \n"
         log=
             mode:"system"
             comment:"发现了 #{@name} 的调查报告书。"
