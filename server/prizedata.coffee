@@ -144,6 +144,7 @@ makeOtherPrize=(result)->
                 5:"千里眼/せんりがん"
                 10:"心眼/しんがん"
                 30:"必中/必中"
+                50:"吃惊/吃惊"
             func:(game,pl)->
                 game.gamelogs.filter((x)->x.id==pl.id && x.event=="divine" && x.flag in Shared.game.blacks).length
             
@@ -156,6 +157,7 @@ makeOtherPrize=(result)->
                 10:"铁壁/てっぺき"
                 15:"救世主/きゅうせいしゅ"
                 30:"Guardian/がーでぃあん"
+                50:"卫士/卫士"
             func:(game,pl)->
                 game.gamelogs.filter((x)->x.id==pl.id && x.event=="GJ").length
         # 恋人の胜利回数
@@ -190,6 +192,7 @@ makeOtherPrize=(result)->
                 1:"收件人/うけとり"
                 5:"顾客/とりひきさき"
                 10:"老主顾/おとくいさま"
+                30:"大客户/大客户"
             func:(game,pl)->
                 game.gamelogs.filter((x)->x.target==pl.id && x.event=="sendkit").length
         # 商品を人狼侧に送った回数
@@ -197,6 +200,8 @@ makeOtherPrize=(result)->
             names:
                 1:"误送/ごそう"
                 10:"订单错误/はっちゅうみす"
+                25:"走私/走私"
+                40:"通敌/通敌"
             func:(game,pl)->
                 game.gamelogs.filter((x)->x.id==pl.id && x.event=="sendkit" && getTeamByType(getTypeAtTime(game,x.target,x.day))=="Werewolf").length
         # 模仿者せずに终了
@@ -218,6 +223,7 @@ makeOtherPrize=(result)->
                 10:"联络失败/おはすて"
                 15:"可疑的人/あやしいひと"
                 30:"壁/かべ"
+                50:"短命/短命"
             func:(game,pl)->
                 game.gamelogs.filter((x)->
                     x.id==pl.id && x.event=="found" && x.flag=="punish" && x.day==2
@@ -253,6 +259,8 @@ makeOtherPrize=(result)->
                 1:"生存/せいぞん"
                 5:"苟活/いきのこり"
                 30:"最终兵器/さいしゅうへいき"
+                50:"长命/长命"
+                150:"+1s/+1s"
             func:(game,pl)->
                 if pl.dead
                     0
