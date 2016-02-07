@@ -5151,7 +5151,8 @@ class FrankensteinsMonster extends Player
             game.votingbox.addPunishedNumber 1
     beforebury:(game)->
         # 新しく死んだひとたちで村人阵营ひとたち
-        founds=game.players.filter (x)->x.dead && x.found && x.team=="Human"
+        # 不吸收弗兰肯斯坦
+        founds=game.players.filter (x)->x.dead && x.found && x.team=="Human" && x.type!="FrankensteinsMonster"
         # 吸収する
         thispl=this
         for pl in founds
