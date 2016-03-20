@@ -5932,7 +5932,7 @@ class Ushinotokimairi extends Madman
 
 class Patissiere extends Player
     type: "Patissiere"
-    jobname: "パティシエール"
+    jobname: "女糕点师"
     team:"Friend"
     midnightSort:100
     sunset:(game)->
@@ -5948,21 +5948,21 @@ class Patissiere extends Player
     sleeping:(game)->@flag || @target?
     job:(game,playerid,query)->
         if @target?
-            return "既に対象を決定しています"
+            return "已经决定了对象"
         if @flag
-            return "もうチョコを配れません"
+            return "已经不能送出巧克力"
         pl=game.getPlayer playerid
         unless pl?
-            return "対象が不正です"
+            return "对象无效"
         if playerid==@id
-            return "自分以外を選択して下さい"
+            return "请选择自己以外的人"
         pl.touched game,@id
         @setTarget playerid
         @setFlag true
         log=
             mode: "skill"
             to: @id
-            comment: "#{@name}は#{pl.name}を本命に選びました。"
+            comment: "#{@name} 将 #{pl.name} 选为本命。"
         splashlog game.id, game, log
         null
     midnight:(game)->
@@ -5987,7 +5987,7 @@ class Patissiere extends Player
                 log=
                     mode:"skill"
                     to: p.id
-                    comment: "#{p.name}にチョコレートが届きました。"
+                    comment: "#{p.name} 收到了巧克力。"
                 splashlog game.id,game,log
             else if p.id != @id
                 # 義理
@@ -6002,7 +6002,7 @@ class Patissiere extends Player
                 log=
                     mode:"skill"
                     to: p.id
-                    comment: "#{p.name}にチョコレートが届きました。"
+                    comment: "#{p.name} 收到了巧克力。"
                 splashlog game.id,game,log
         # 自分は本命と恋人になる
         top = game.getPlayer @id
@@ -6015,7 +6015,7 @@ class Patissiere extends Player
         log=
             mode: "skill"
             to: @id
-            comment: "#{@name}は#{pl.name}と恋人になりました。"
+            comment: "#{@name} 与 #{pl.name} 结为恋人。"
         splashlog game.id, game, log
         null
 
@@ -6042,13 +6042,13 @@ class GotChocolate extends Player
             @setFlag "unselected"
     job:(game,playerid)->
         unless @flag == "unselected"
-            return "能力を使用できません"
+            return "无法使用能力"
         # 食べると本命か義理か判明する
         flag = false
         top = game.getPlayer @id
         unless top?
             # ?????
-            return "対象が不正です"
+            return "对象无效"
         while top?.isComplex()
             if top.cmplType=="GotChocolateTrue" && top.sub==this
                 # 本命だ
@@ -6057,7 +6057,7 @@ class GotChocolate extends Player
                     log=
                         mode:"skill"
                         to: @id
-                        comment: "#{@name}が食べたチョコレートは本命でした。#{@name}は#{t.name}と恋人になりました。"
+                        comment: "#{@name} 吃下的巧克力是本命巧克力。#{@name} 与 #{t.name} 结为恋人。"
                     splashlog game.id, game, log
                     @setFlag "done"
                     # 本命を消す
@@ -6079,7 +6079,7 @@ class GotChocolate extends Player
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name}が食べたチョコレートは義理でした。"
+                    comment: "#{@name} 吃下的巧克力是义理巧克力。"
                 splashlog game.id, game, log
                 break
             top = top.main
@@ -6088,7 +6088,7 @@ class GotChocolate extends Player
             log=
                 mode:"skill"
                 to: @id
-                comment: "#{@name}はチョコレートを食べましたが、何も起こりませんでした。"
+                comment: "#{@name} 吃下了巧克力，什么都没有发生。"
             splashlog game.id, game, log
         null
     midnight:(game)->
@@ -6104,7 +6104,7 @@ class GotChocolate extends Player
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name}が食べたチョコレートは呪いのチョコレートでした。次の昼は発言できません。"
+                    comment: "#{@name} 吃下的巧克力是被诅咒的巧克力，下一天白天不能发言。"
                 splashlog game.id, game, log
                 newpl = Player.factory null, top, null, Muted
                 top.transProfile newpl
@@ -6114,7 +6114,7 @@ class GotChocolate extends Player
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name}が食べたチョコレートはブラックチョコレートでした。占い・霊能結果が人狼になりました。"
+                    comment: "#{@name} 吃下的巧克力是黑巧克力，占卜·灵能结果将变为「人狼」。"
                 splashlog game.id, game, log
                 newpl = Player.factory null, top, null, Blacked
                 top.transProfile newpl
@@ -6124,7 +6124,7 @@ class GotChocolate extends Player
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name}が食べたチョコレートはホワイトチョコレートでした。占い・霊能結果が村人になりました。"
+                    comment: "#{@name} 吃下的巧克力是白巧克力，占卜·灵能结果将变为「村人」。"
                 splashlog game.id, game, log
                 newpl = Player.factory null, top, null, Whited
                 top.transProfile newpl
@@ -6134,7 +6134,7 @@ class GotChocolate extends Player
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name}が食べたチョコレートは毒入りチョコでした。"
+                    comment: "#{@name} 吃下的巧克力是毒巧克力，将被毒死。"
                 splashlog game.id, game, log
                 @die game, "poison", @id
             else if r < 0.57
@@ -6150,14 +6150,14 @@ class GotChocolate extends Player
                     log=
                         mode:"skill"
                         to: @id
-                        comment: "#{@name}は執念でチョコレートの差出人を探し出しました。#{@name}は#{topl.name}のストーカーになりました。"
+                        comment: "#{@name} 凭借执念找到了巧克力的送出人，#{@name} 成为了 #{topl.name} 的跟踪狂。"
                     splashlog game.id, game, log
             else if r < 0.65
                 # 血入りの……
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name}が食べたチョコレートはなんだか鉄の味がしました。占い結果がヴァンパイアになりました。"
+                    comment: "#{@name} 吃下的巧克力不知为何有铁锈的味道，占卜结果将变为「吸血鬼」。"
                 splashlog game.id, game, log
                 newpl = Player.factory null, top, null, VampireBlooded
                 top.transProfile newpl
@@ -6167,7 +6167,7 @@ class GotChocolate extends Player
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name}が食べたチョコレートは聖なるチョコでした。聖職者の能力を1度使えます。"
+                    comment: "#{@name} 吃下的巧克力蕴含着神圣的力量，#{@name} 可以使用一次「圣职者」的力量。"
                 splashlog game.id, game, log
                 sub = Player.factory "Priest"
                 top.transProfile sub
@@ -6193,19 +6193,19 @@ class MadDog extends Madman
             @setTarget null
     job:(game,playerid)->
         if @flag || @target?
-            return "もう能力を発動できません"
+            return "已经无法发动能力"
         @setTarget playerid
         pl=game.getPlayer playerid
         unless pl?
-            return "その対象は存在しません"
+            return "对象不存在"
         if pl.dead
-            return "対象は既に死亡しています"
+            return "对象已经死亡"
         pl.touched game,@id
 
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name}が#{pl.name}を襲撃しました。"
+            comment:"#{@name} 袭击了 #{pl.name}。"
         splashlog game.id,game,log
         return null
     midnight:(game)->
@@ -6221,7 +6221,7 @@ class MadDog extends Madman
 
 class Hypnotist extends Madman
     type:"Hypnotist"
-    jobname:"催眠術師"
+    jobname:"催眠师"
     midnightSort:50
     jobdone:(game)->@target? || @flag
     sleeping:->true
@@ -6235,19 +6235,19 @@ class Hypnotist extends Madman
             @setTarget null
     job:(game,playerid)->
         if @flag || @target?
-            return "もう能力を発動できません"
+            return "已经无法发动能力"
         @setTarget playerid
         pl=game.getPlayer playerid
         unless pl?
-            return "その対象は存在しません"
+            return "对象不存在"
         if pl.dead
-            return "対象は既に死亡しています"
+            return "对象已经死亡"
         pl.touched game,@id
 
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name}が#{pl.name}に催眠術をかけました。"
+            comment:"#{@name} 催眠了 #{pl.name}。"
         splashlog game.id,game,log
 
         @setFlag true
