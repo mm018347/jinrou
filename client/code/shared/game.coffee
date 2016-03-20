@@ -899,7 +899,7 @@ exports.jobinfo=
             name:"狂犬"
             color:"#c21f1f"
         Hypnotist:
-            name:"催眠術師"
+            name:"催眠师"
             color:"#e01bs9"
         
         
@@ -939,7 +939,7 @@ exports.jobinfo=
             name:"恶女"
             color:"#cf0085"
         Patissiere:
-            name:"パティシエール"
+            name:"女糕点师"
             color:"#ab5f30"
     Vampire:
         name:"吸血鬼阵营"
