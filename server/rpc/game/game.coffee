@@ -6022,7 +6022,7 @@ class Patissiere extends Player
 # 内部処理用：チョコレートもらった
 class GotChocolate extends Player
     type: "GotChocolate"
-    jobname: "チョコレート"
+    jobname: "巧克力"
     midnightSort:100
     sleeping:->true
     jobdone:(game)-> @flag!="unselected"
