@@ -27,13 +27,15 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 "BadLady", # 苍汁天国、人狼天国
 "Bomber","Blasphemy","Ushinotokimairi",  # ねじれ天国
 # 其他
-"RedHood","Baker",
+"RedHood","Baker","MadDog",
 # アプリ的职业
 "PsychoKiller",
 # わんないと人狼
 "Phantom",
 # 月夜の人狼
 "DrawGirl","CautiousWolf",
+# 人狼HOUSE
+"Hypnotist"
 ]
 # ここには入らない职业
 # Light, Neet, MinionSelector,QuantumPlayer, HolyProtected, BloodyMary
@@ -48,20 +50,27 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
     if month==6 && d>=26 || month==7 && d<=16
         # 7/26〜8/16
         exports.jobs.push "Pyrotechnist"
+    if month==1 && 13<=d<=14
+        # 2/13〜2/14
+        exports.jobs.push "Patissiere"
+    # 糕点师试玩
+    if month==2 && 20<=d<=31
+        # 2/13〜2/14
+        exports.jobs.push "Patissiere"
 )(new Date)
 # 人外
 exports.nonhumans=["Werewolf","Fox","BigWolf","TinyFox","WolfDiviner","MadWolf","Devil","Vampire","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf"]
 
 # 黒が出る人
-exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub","Dog","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf"]
+exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub","Dog","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","MadDog"]
 
 # チームたち
 exports.teams=teams=
     Human:["Human","Diviner","Psychic","Guard","Couple","Poisoner","ToughGuy","Noble","Slave","Magician","Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Light","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Cat","Witch","Oldman","OccultMania","Dog","Dictator","SeersMama","Trapper","RedHood","Counselor","Miko","HolyMarked","WanderingGuard","TroubleMaker","FrankensteinsMonster","BloodyMary","King","SantaClaus","Phantom","DrawGirl","Pyrotechnist","Baker"]
-    Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi"]
+    Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist"]
     Fox:["Fox","TinyFox","Immoral","Blasphemy"]
     Devil:["Devil"]
-    Friend:["Cupid","Lover","BadLady"]
+    Friend:["Cupid","Lover","BadLady","Patissiere"]
     Vampire:["Vampire"]
     Others:["Bat","Stalker","Doppleganger","CultLeader","Copier","Tanner","Thief","Hoodlum","QuantumPlayer"],
     Neet:["Neet"]
@@ -71,10 +80,10 @@ exports.categories=
     Human:teams.Human
     Werewolf:["Werewolf","BigWolf","WolfDiviner","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf"]
     Fox:["Fox","TinyFox"]
-    Madman:["Madman","Fanatic","Spy","Spy2","Sorcerer","WhisperingMad","WolfBoy","ObstructiveMad","PsychoKiller","Bomber","Ushinotokimairi"]
+    Madman:["Madman","Fanatic","Spy","Spy2","Sorcerer","WhisperingMad","WolfBoy","ObstructiveMad","PsychoKiller","Bomber","Ushinotokimairi","MadDog","Hypnotist"]
     Immoral:["Immoral","Blasphemy"]
     Switching:["Stalker","OccultMania","Copier","Cursed","Doppleganger","BloodyMary","Phantom"]
-    Others:["Devil","Cupid","Bat","CultLeader","Vampire","Tanner","Lover","Hoodlum","BadLady"]
+    Others:["Devil","Cupid","Bat","CultLeader","Vampire","Tanner","Lover","Hoodlum","BadLady","Patissiere"]
 
 exports.categoryNames=
     Human:"村人系"
@@ -890,6 +899,12 @@ exports.jobinfo=
         Ushinotokimairi:
             name:"丑刻参"
             color:"#c9563c"
+        MadDog:
+            name:"狂犬"
+            color:"#c21f1f"
+        Hypnotist:
+            name:"催眠师"
+            color:"#e01bs9"
         
         
     Fox:
@@ -927,6 +942,9 @@ exports.jobinfo=
         BadLady:
             name:"恶女"
             color:"#cf0085"
+        Patissiere:
+            name:"女糕点师"
+            color:"#ab5f30"
     Vampire:
         name:"吸血鬼阵营"
         color:"#8f00bf"
