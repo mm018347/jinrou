@@ -2242,7 +2242,7 @@ class Player
         if type?
             obj.desc.push {
                 name:@getJobDisp()
-                    type:type
+                type:type
             }
 
         obj.job_target=@getjob_target()
