@@ -4856,10 +4856,10 @@ class Miko extends Player
     midnight:(game)->
         # 複合させる
         if @flag=="using"
-        pl = game.getPlayer @id
-        newpl=Player.factory null,pl,null,MikoProtected # 守られた人
-        pl.transProfile newpl
-        pl.transform game,newpl,true
+            pl = game.getPlayer @id
+            newpl=Player.factory null,pl,null,MikoProtected # 守られた人
+            pl.transProfile newpl
+            pl.transform game,newpl,true
             @setFlag "done"
         null
     makeJobSelection:(game)->
