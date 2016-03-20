@@ -2240,10 +2240,10 @@ class Player
         obj.desc ?= []
         type = @getTypeDisp()
         if type?
-        obj.desc.push {
-            name:@getJobDisp()
-                type:type
-        }
+            obj.desc.push {
+                name:@getJobDisp()
+                    type:type
+            }
 
         obj.job_target=@getjob_target()
         # 选择肢を教える {name:"名字",value:"値"}
