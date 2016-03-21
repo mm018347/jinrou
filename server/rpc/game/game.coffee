@@ -174,33 +174,33 @@ module.exports=
     # 状況に応じたチャンネルを割り当てる
     playerchannel:(ss,roomid,session)->
         loadGame roomid, ss, (err,game)->
-        unless game?
-            return
-        player=game.getPlayerReal session.userId
-        unless player?
-            session.channel.subscribe "room#{roomid}_audience"
-            # session.channel.subscribe "room#{roomid}_notwerewolf"
-            # session.channel.subscribe "room#{roomid}_notcouple"
-            return
-        if player.isJobType "GameMaster"
-            session.channel.subscribe "room#{roomid}_gamemaster"
-            return
-        ###
-        if player.dead
-            session.channel.subscribe "room#{roomid}_heaven"
-        if game.rule.heavenview!="view" || !player.dead
-            if player.isWerewolf()
-                session.channel.subscribe "room#{roomid}_werewolf"
-            else
-                session.channel.subscribe "room#{roomid}_notwerewolf"
-        if game.rule.heavenview!="view" || !player.dead
-            if player.type=="Couple"
-                session.channel.subscribe "room#{roomid}_couple"
-            else
-                session.channel.subscribe "room#{roomid}_notcouple"
-        if player.type=="Fox"
-            session.channel.subscribe "room#{roomid}_fox"
-        ###
+            unless game?
+                return
+            player=game.getPlayerReal session.userId
+            unless player?
+                session.channel.subscribe "room#{roomid}_audience"
+                # session.channel.subscribe "room#{roomid}_notwerewolf"
+                # session.channel.subscribe "room#{roomid}_notcouple"
+                return
+            if player.isJobType "GameMaster"
+                session.channel.subscribe "room#{roomid}_gamemaster"
+                return
+            ###
+            if player.dead
+                session.channel.subscribe "room#{roomid}_heaven"
+            if game.rule.heavenview!="view" || !player.dead
+                if player.isWerewolf()
+                    session.channel.subscribe "room#{roomid}_werewolf"
+                else
+                    session.channel.subscribe "room#{roomid}_notwerewolf"
+            if game.rule.heavenview!="view" || !player.dead
+                if player.type=="Couple"
+                    session.channel.subscribe "room#{roomid}_couple"
+                else
+                    session.channel.subscribe "room#{roomid}_notcouple"
+            if player.type=="Fox"
+                session.channel.subscribe "room#{roomid}_fox"
+            ###
 Server=
     game:
         game:module.exports
