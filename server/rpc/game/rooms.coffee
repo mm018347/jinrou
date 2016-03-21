@@ -529,7 +529,7 @@ module.exports.actions=(req,res,ss)->
                     res "错误:#{err}"
                 else
                     res null
-                    Server.game.game.deletedlog room
+                    Server.game.game.deletedlog ss,room
                     
     # 部屋探し
     find:(query,page)->
