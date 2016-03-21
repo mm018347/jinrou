@@ -22,7 +22,7 @@ loadGame = (roomid, ss, callback)->
                 console.error err
                 callback err,null
             else if !doc?
-                callback "そのゲームは存在しません",null
+                callback "游戏不存在",null
             else
                 games[roomid] = Game.unserialize doc,ss
                 callback null, games[roomid]
