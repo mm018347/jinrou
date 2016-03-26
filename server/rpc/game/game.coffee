@@ -921,7 +921,7 @@ class Game
                         else
                             x
             # エンドレス闇鍋用途中参加処理
-            if @rule.jobrule=="特殊ルール.エンドレス闇鍋"
+            if @rule.jobrule=="特殊规则.Endless黑暗火锅"
                 exceptions=["MinionSelector","Thief","GameMaster","Helper","QuantumPlayer","Waiting","Watching","GotChocolate"]
                 jobnames=Object.keys(jobs).filter (name)->!(name in exceptions)
                 pcs=@participants.concat []
