@@ -169,7 +169,7 @@ makeOtherPrize=(result)->
                 15:"结婚/けっこん"
                 30:"比翼连理/ひよくれんり"
             func:(game,pl)->
-                if pl.winner && chkCmplType pl,"Friend"
+                if pl.isWinner && chkCmplType pl,"Friend"
                     1
                 else
                     0
@@ -182,7 +182,7 @@ makeOtherPrize=(result)->
                 15:"离婚/りこん"
                 30:"爱憎剧/あいぞうげき"
             func:(game,pl)->
-                if !pl.winner && chkCmplType pl,"Friend"
+                if !pl.isWinner && chkCmplType pl,"Friend"
                     1
                 else
                     0
@@ -309,12 +309,10 @@ getplreal=(game,userid)->
 # Complexのtype一致を確かめる
 chkCmplType=(obj,cmpltype)->
     # plがPlayerかただのobjか
-    ###只有一个返回false的默认值，没有重写过，是原作者遗忘了吗？
     if obj.isCmplType?
         return obj.isCmplType cmpltype
-    ###
     if obj.type=="Complex"
-        return obj.Complex_type==cmpltype || chkCmplType obj.Complex_main,cmpltype
+        obj.Complex_type==cmpltype || chkCmplType obj.Complex_main,cmpltype
     else
         false
 # プレイヤー的职业を調べる
