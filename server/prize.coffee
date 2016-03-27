@@ -8,7 +8,7 @@ prizedata.makePrize (r)->
     prize=r
 
 # 内部用
-module.exports=
+module.exports=exports=
     checkPrize:(game,cb)->
         # 評価対象のプレイヤーをアレする
         pls=game.players.filter (x)->x.realid!="替身君"
