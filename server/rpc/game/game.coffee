@@ -3654,7 +3654,7 @@ class PI extends Diviner
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 调查了 #{pl.name} 的周边。"
+            comment:"#{@name} 调查了 #{pl.name} 和他的左右邻居。"
         splashlog game.id,game,log
         if game.rule.divineresult=="immediate"
             @dodivine game
@@ -3695,7 +3695,7 @@ class PI extends Diviner
                 "发现全员都是村人"
             @results.push {
                 player:game.getPlayer(@target).publicinfo()
-                result:"#{@name} 调查了 #{tpl.name} 的周边，#{resultstring}。"
+                result:"#{@name} 调查了 #{tpl.name} 和他的左右邻居，#{resultstring}。"
             }
     showdivineresult:(game)->
         r=@results[@results.length-1]
@@ -8055,20 +8055,20 @@ module.exports.actions=(req,res,ss)->
                     games[roomid] = Game.unserialize doc,ss
                 game = games[roomid]
                 # ゲーム後の行動
-            player=game.getPlayerReal req.session.userId
-            result=
-                #logs:game.logs.filter (x)-> islogOK game,player,x
+                player=game.getPlayerReal req.session.userId
+                result=
+                    #logs:game.logs.filter (x)-> islogOK game,player,x
                     logs:game.makelogs (doc.logs ? []), player
-            result=makejobinfo game,player,result
-            result.timer=if game.timerid?
-                game.timer_remain-(Date.now()/1000-game.timer_start)    # 全体 - 経過时间
-            else
-                null
-            result.timer_mode=game.timer_mode
-            if game.day==0
-                # 开始前はプレイヤー情報配信しない
-                delete result.game.players
-            res result
+                result=makejobinfo game,player,result
+                result.timer=if game.timerid?
+                    game.timer_remain-(Date.now()/1000-game.timer_start)    # 全体 - 経過时间
+                else
+                    null
+                result.timer_mode=game.timer_mode
+                if game.day==0
+                    # 开始前はプレイヤー情報配信しない
+                    delete result.game.players
+                res result
         
     speak: (roomid,query)->
         game=games[roomid]
