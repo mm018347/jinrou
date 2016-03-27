@@ -2624,13 +2624,13 @@ class Guard extends Player
         pl = game.getPlayer @target
         unless pl?
             return
-            # 複合させる
-            newpl=Player.factory null,pl,null,Guarded   # 守られた人
-            pl.transProfile newpl
-            newpl.cmplFlag=@id  # 护卫元cmplFlag
-            pl.transform game,newpl,true
-            newpl.touched game,@id
-            null
+        # 複合させる
+        newpl=Player.factory null,pl,null,Guarded   # 守られた人
+        pl.transProfile newpl
+        newpl.cmplFlag=@id  # 护卫元cmplFlag
+        pl.transform game,newpl,true
+        newpl.touched game,@id
+        null
 class Couple extends Player
     type:"Couple"
     jobname:"共有者"
@@ -4467,15 +4467,15 @@ class Trapper extends Player
         else
             "不能守护自己"
     midnight:(game)->
-            # 複合させる
         pl = game.getPlayer @target
         unless pl?
             return
-            newpl=Player.factory null,pl,null,TrapGuarded   # 守られた人
-            pl.transProfile newpl
-            newpl.cmplFlag=@id  # 护卫元cmplFlag
-            pl.transform game,newpl,true
-            null
+        # 複合させる
+        newpl=Player.factory null,pl,null,TrapGuarded   # 守られた人
+        pl.transProfile newpl
+        newpl.cmplFlag=@id  # 护卫元cmplFlag
+        pl.transform game,newpl,true
+        null
 class WolfBoy extends Madman
     type:"WolfBoy"
     jobname:"狼少年"
