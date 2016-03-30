@@ -4425,9 +4425,9 @@ class SeersMama extends Player
             # 占卜师を探す
             divs = game.players.filter (pl)->pl.isJobType "Diviner"
             divsstr=if divs.length>0
-                "#{divs.map((x)->x.name).join ','} 是占卜师。"
+                "#{divs.map((x)->x.name).join ','} 是占卜师"
             else
-                "没有占卜师。"
+                "没有占卜师"
             log=
                 mode:"skill"
                 to:@id
