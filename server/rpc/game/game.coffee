@@ -7079,7 +7079,7 @@ class Whited extends Complex
 # 占い結果ヴァンパイア化
 class VampireBlooded extends Complex
     cmplType:"VampireBlooded"
-    fortuneResult: "ヴァンパイア"
+    fortuneResult: "吸血鬼"
 
 # 催眠術をかけられた
 class UnderHypnosis extends Complex
