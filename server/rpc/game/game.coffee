@@ -6508,6 +6508,18 @@ class Complex
     revive:(game)->
         @mcall game,@main.revive,game
         @sub?.revive game
+        isRevived = if @sub? then !(@main.dead || @sub.dead) else !@main.dead
+        if isRevived
+            @setDead false,null
+        else
+            #血腥玛丽
+            @setDead true,null
+            log=
+                mode:"system"
+                comment:"#{@name} 的复活失败了。"
+            splashlog game.id,game,log
+            # @addGamelog game,"revive",null,null
+            # game.ss.publish.user @id,"refresh",{id:game.id}
     makeJobSelection:(game)->
         result=@mcall game,@main.makeJobSelection,game
         if @sub?
