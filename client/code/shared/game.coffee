@@ -53,10 +53,6 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
     if month==1 && 13<=d<=14
         # 2/13〜2/14
         exports.jobs.push "Patissiere"
-    # 糕点师试玩
-    if month==2 && 20<=d<=31
-        # 2/13〜2/14
-        exports.jobs.push "Patissiere"
 )(new Date)
 # 人外
 exports.nonhumans=["Werewolf","Fox","BigWolf","TinyFox","WolfDiviner","MadWolf","Devil","Vampire","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf"]
