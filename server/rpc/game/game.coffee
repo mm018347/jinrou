@@ -6508,20 +6508,20 @@ class Complex
         @mcall game,@main.dying,game,found,from
         @sub?.dying game,found,from
     revive:(game)->
+        # まずsubを蘇生
+        if @sub?
+            @sub.revive game
+            if @sub.dead
+                # 蘇生できない類だ
+                return
+        # 次にmainを蘇生
         @mcall game,@main.revive,game
-        @sub?.revive game
-        isRevived = if @sub? then !(@main.dead || @sub.dead) else !@main.dead
-        if isRevived
-            @setDead false,null
+        if @main.dead
+            # 蘇生できなかった
+            @setDead true, @main.found
         else
-            #血腥玛丽
-            @setDead true,null
-            log=
-                mode:"system"
-                comment:"#{@name} 的复活失败了。"
-            splashlog game.id,game,log
-            # @addGamelog game,"revive",null,null
-            # game.ss.publish.user @id,"refresh",{id:game.id}
+            # 蘇生できた
+            @setDead false, null
     makeJobSelection:(game)->
         result=@mcall game,@main.makeJobSelection,game
         if @sub?
@@ -8078,7 +8078,7 @@ module.exports.actions=(req,res,ss)->
                     game.timer_remain-(Date.now()/1000-game.timer_start)    # 全体 - 経過时间
                 else
                     null
-                result.timer_mode=game.timer_mode
+                    result.timer_mode=game.timer_mode
                 if game.day==0
                     # 开始前はプレイヤー情報配信しない
                     delete result.game.players
