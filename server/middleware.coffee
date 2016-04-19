@@ -63,7 +63,7 @@ exports.manualxhr=(request, response, next)->
 
 # public image serving
 exports.images=(request, response, next)->
-  if !/www\.werewolf\.online/.test(request.headers.host)
+  if !/www\.werewolf\.online/.test(request.headers.host) && request.headers.host
     reqHost = request.headers.host.split(":")
     reqHost[0] = "www.werewolf.online"
     response.writeHead 301,
