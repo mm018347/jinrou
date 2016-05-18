@@ -493,7 +493,7 @@ exports.start=(roomid)->
             form=t.form
             pl=room.players.filter((x)->x.mode=="player").length
             if t.name=="jobrule"
-                # 规则変更があった
+                # 规则变更があった
                 setplayersbyjobrule room,form,pl
                 return
             jobsformvalidate room,form

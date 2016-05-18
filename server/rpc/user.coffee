@@ -58,20 +58,20 @@ exports.actions =(req,res,ss)->
         unless /^\w+$/.test(query.userid)
             res {
                 login:false
-                error:"ユーザーIDが不正です"
+                error:"ID包含了非法字符"
             }
             return
         unless /^\w+$/.test(query.password)
             res {
                 login:false
-                error:"密码が不正です"
+                error:"密码包含了非法字符"
             }
             return
         M.users.find({"userid":query.userid}).count (err,count)->
             if count>0
                 res {
                     login:false
-                    error:"そのユーザーIDは既に使用されています"
+                    error:"这个ID已被使用"
                 }
                 return
             userobj = makeuserdata(query)
@@ -130,18 +130,18 @@ exports.actions =(req,res,ss)->
             res url
         
                 
-# 配置変更 返り値=変更後 {"error":"message"}
+# 配置变更 返り値=变更後 {"error":"message"}
     changeProfile: (query)->
         M.users.findOne {"userid":req.session.userId,"password":Server.user.crpassword(query.password)},(err,record)=>
             if err?
                 res {error:"DB err:#{err}"}
                 return
             if !record?
-                res {error:"ユーザー認証に失敗しました"}
+                res {error:"用户认证失败"}
                 return
             if query.name?
                 if query.name==""
-                    res {error:"ニックネームを入力して下さい"}
+                    res {error:"请输入昵称"}
                     return
                 record.name=query.name
 
@@ -163,7 +163,7 @@ exports.actions =(req,res,ss)->
                 record.icon=query.icon
             M.users.update {"userid":req.session.userId}, record, {safe:true},(err,count)=>
                 if err?
-                    res {error:"配置変更に失敗しました"}
+                    res {error:"配置变更失败"}
                     return
                 delete record.password
                 req.session.user=record
@@ -175,14 +175,14 @@ exports.actions =(req,res,ss)->
                 res {error:"DB err:#{err}"}
                 return
             if !record?
-                res {error:"ユーザー認証に失敗しました"}
+                res {error:"用户认证失败"}
                 return
             if query.newpass!=query.newpass2
-                res {error:"密码が一致しません"}
+                res {error:"密码不一致"}
                 return
             M.users.update {"userid":req.session.userId}, {$set:{password:Server.user.crpassword(query.newpass)}},{safe:true},(err,count)=>
                 if err?
-                    res {error:"配置変更に失敗しました"}
+                    res {error:"配置变更失败"}
                     return
                 res null
     usePrize: (query)->
@@ -192,7 +192,7 @@ exports.actions =(req,res,ss)->
                 res {error:"DB err:#{err}"}
                 return
             if !record?
-                res {error:"ユーザー認証に失敗しました"}
+                res {error:"用户认证失败"}
                 return
             if typeof query.prize?.every=="function"
                 # 称号構成を得る
@@ -212,13 +212,13 @@ exports.actions =(req,res,ss)->
                                 res null
                     else
                         console.log "invalid1 ",query.prize,record.prize
-                        res {error:"肩書きが不正です"}
+                        res {error:"称号无效"}
                 else
                     console.log "invalid2",query.prize,comp
-                    res {error:"肩書きが不正です"}
+                    res {error:"称号无效"}
             else
                 console.log "invalid3",query.prize
-                res {error:"肩書きが不正です"}
+                res {error:"称号无效"}
         
 # 成績をくわしく見る
     getMyuserlog:->

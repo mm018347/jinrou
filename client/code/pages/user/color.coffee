@@ -28,7 +28,7 @@ exports.start=->
 exports.end=->
 
 makeColorSet=(cp,editable=false,callback)->
-    #editableがtrueの場合はcpを変更するかも(callbackが呼ばれる）
+    #editableがtrueの場合はcpを变更するかも(callbackが呼ばれる）
 
     $("<div>").append("昼：").append(makeColorBox cp.day,editable,callback)
     .append("夜：").append(makeColorBox cp.night,editable,callback)

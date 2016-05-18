@@ -1831,7 +1831,7 @@ class VotingBox
     # その人の投票オブジェクトを得る
     getHisVote:(player)->
         @votes.filter((x)->x.player.id==player.id)[0]
-    # 票のパワーを変更する
+    # 票のパワーを变更する
     votePower:(player,value,absolute=false)->
         v=@getHisVote player
         if v?

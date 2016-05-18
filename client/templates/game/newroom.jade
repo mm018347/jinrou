@@ -25,9 +25,9 @@ section.rooms
         label(title="匿名模式下，游戏中各个玩家的ID不会公开。")
           | 匿名模式
           select(name="blind")
-            option(value="") 否
-            option(value="yes",selected) 是（结束后公开）
-            option(value="complete") 是（结束后不公开）
+            option(value="",selected) 不匿名
+            option(value="yes") 匿名（结束后公开ID）
+            option(value="complete") 严格匿名（结束后不公开ID）
       p
         label(title="选中时，房间的建造人将成为房间的GM")
           | GM
