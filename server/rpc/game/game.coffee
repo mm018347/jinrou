@@ -7135,15 +7135,28 @@ class Authority extends Complex
 games={}
 
 # 游戏のGC
-new cron.CronJob '0 0 * * * *',()->
+new cron.CronJob '30 * * * * *',()->
     # いらないGameを消す
     tm=Date.now()-3600000   # 1时间前
+
+    games_length_b = 0
+    for id,game of games
+        games_length_b++
+
     for id,game of games
         if game.finished
             # 終わっているやつが消す候補
             if (!game.last_time?) || (game.last_time<tm)
                 # 十分古い
+                console.log "delete game:"+id
                 delete games[id]
+
+    games_length_a = 0
+    for id,game of games
+        games_length_a++
+    console.log "length of games before:"+games_length_b
+    console.log "length of games after :"+games_length_a
+
 
 
 # 游戏を得る
