@@ -370,7 +370,7 @@ module.exports.actions=(req,res,ss)->
 
     ready:(roomid)->
         # 準備ができたか？
-        console.log req.session.userId
+        console.log "ready:"+req.session.userId
         unless req.session.userId
             res "请登陆"
             return
