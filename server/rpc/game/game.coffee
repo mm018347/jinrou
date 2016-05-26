@@ -7927,13 +7927,6 @@ module.exports.actions=(req,res,ss)->
                     # 安全性超
                     joblist=best_list
 
-                if (joblist.WolfBoy>0 || joblist.ObstructiveMad>0) && query.divineresult=="immediate"
-                    query.divineresult="sunrise"
-                    log=
-                        mode:"system"
-                        comment:"由于存在能够左右占卜结果的职业，占卜结果从「立刻知道」变更为「天亮才知道」。"
-                    splashlog game.id,game,log
-
 
 
             else if query.jobrule=="特殊规则.量子人狼"
@@ -7983,6 +7976,13 @@ module.exports.actions=(req,res,ss)->
                         sum-=parseInt joblist["category_#{type}"]
                 joblist.Human=frees-sum # 残りは村人だ!
                 ruleinfo_str=Shared.game.getrulestr query.jobrule,joblist
+
+            if (joblist.WolfBoy>0 || joblist.ObstructiveMad>0) && query.divineresult=="immediate"
+                query.divineresult="sunrise"
+                log=
+                    mode:"system"
+                    comment:"由于存在能够左右占卜结果的职业，占卜结果从「立刻知道」变更为「天亮才知道」。"
+                splashlog game.id,game,log
                 
             log=
                 mode:"system"
