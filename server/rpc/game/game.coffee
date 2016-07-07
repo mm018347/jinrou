@@ -1530,11 +1530,11 @@ class Game
                 when "Friend"
                     if friends_count>1
                         # みんなで胜利（珍しい）
-                        ["村子从此处于恋人的支配之下。","恋人胜利"]
+                        ["村子被恋人们支配了。","恋人胜利"]
                     else
                         friends=@players.filter (x)->x.isFriend()
                         if friends.length==2 && friends.some((x)->x.isJobType "Noble") && friends.some((x)->x.isJobType "Slave")
-                            ["在两人跨越世俗禁忌的爱情面前，所有阻碍都无法与之匹敌。","恋人胜利"]
+                            ["在主仆两人跨越世俗禁忌的爱情面前，所有阻碍都无法与之匹敌。","恋人胜利"]
                         else
                             ["在#{@players.filter((x)->x.isFriend() && !x.dead).length}人爱的力量面前，所有阻碍都无法与之匹敌。","恋人胜利"]
                 when "Cult"
