@@ -119,8 +119,10 @@ module.exports.actions=(req,res,ss)->
                 res {error:err}
                 return
             # クライアントからの問い合わせの場合
+            pl = result.players.filter((x)-> x.realid==req.session.userId)[0]
             result.players.forEach (p)->
-                delete p.realid
+                unless result.blind == "" || pl?.mode == "gm"
+                    delete p.realid
                 delete p.ip
             # ふるいかどうか
             if result.made < Date.now()-Config.rooms.fresh*3600000
@@ -228,7 +230,7 @@ module.exports.actions=(req,res,ss)->
                     expires.seconds =
                       name: "秒"
                       value: Math.floor(milliseconds / (1000))
-
+            
                     for item of expires
                       item = expires[item]
                       if item.value >0
@@ -322,6 +324,8 @@ module.exports.actions=(req,res,ss)->
                         # 入室通知
                         delete user.ip
                         Server.game.game.inlog room,user
+                        if room.blind
+                            delete user.realid
                         if room.mode!="playing"
                             ss.publish.channel "room#{roomid}", "join", user
     # 部屋から出る
@@ -429,8 +433,8 @@ module.exports.actions=(req,res,ss)->
                     if user?
                         Server.game.game.kicklog room,user
                         ss.publish.channel "room#{roomid}", "unjoin",id
-                        ss.publish.user id,"refresh",{id:roomid}
-                        # 帮手さがす
+                        ss.publish.user user.realid,"kicked",{id:roomid}
+                        # ヘルパーさがす
                         query={$set:{}}
                         for pl,i in room.players
                             if pl.mode=="helper_#{user.userid}"
@@ -558,7 +562,6 @@ module.exports.actions=(req,res,ss)->
         if query.rule
             q["rule.jobrule"]=query.rule
         # 日付新しい
-        console.log q
         M.games.find(q).sort({_id:-1}).limit(page_number).skip(page_number*page).toArray (err,results)->
             if err?
                 throw err

@@ -242,6 +242,8 @@ exports.start=(roomid)->
         ss.rpc "game.game.getlog", roomid,sentlog
         # 新しい游戏
         newgamebutton = (je)->
+            unless $("#gamestartsec").attr("hidden") == "hidden"
+                return
             form=$("#gamestart").get 0
             # 规则设定保存を参照する
             # 规则画面を構築するぞーーー(idx: グループのアレ)
@@ -376,12 +378,14 @@ exports.start=(roomid)->
                     if e?
                         e.value=jobs[job]?.number ? 0
 
+            $("#gamestartsec").removeAttr "hidden"
+
             forminfo()
 
-            $("#gamestartsec").removeAttr "hidden"
         $("#roomname").text room.name
         if room.mode=="waiting"
-            # 开始前のユーザー一览は roomから取得する
+            # 開始前のユーザー一覧は roomから取得する
+            console.log room.players
             room.players.forEach (x)->
                 li=makeplayerbox x,room.blind
                 $("#players").append li
@@ -464,10 +468,10 @@ exports.start=(roomid)->
                 $("#playersinfo").append b
                 $(b).click (je)->
                     Index.util.selectprompt "踢出","请选择要被踢出的人",room.players.map((x)->{name:x.name,value:x.userid}),(id)->
-                    # Index.util.prompt "踢出","踢出人のidを入力して下さい:",null,(id)->
-                        ss.rpc "game.rooms.kick", roomid,id,(result)->
-                            if result?
-                                Index.util.message "错误",result
+                        if id
+                            ss.rpc "game.rooms.kick", roomid,id,(result)->
+                                if result?
+                                    Index.util.message "错误",result
                 b=makebutton "重置[ready]状态"
                 $("#playersinfo").append b
                 $(b).click (je)->
@@ -492,10 +496,9 @@ exports.start=(roomid)->
             t=e.target
             form=t.form
             pl=room.players.filter((x)->x.mode=="player").length
-            if t.name=="jobrule"
-                # 规则变更があった
+            if t.name=="jobrule" || t.name=="chemical"
+                # ルール変更があった
                 setplayersbyjobrule room,form,pl
-                return
             jobsformvalidate room,form
         form.addEventListener "input",jobsforminput,false
         form.addEventListener "change",jobsforminput,false
@@ -532,7 +535,6 @@ exports.start=(roomid)->
             # 相違がないか探す
             diff=null
             for key,value of (ruleobj.suggestedOption ? {})
-                console.log key,value,query[key], je.target.elements[key]
                 if query[key]!=value
                     diff=
                         key:key
@@ -661,7 +663,6 @@ exports.start=(roomid)->
                                     unless flg
                                         continue
                                 when "time"
-                                    console.log ruleobj
                                     val+="#{ruleobj[obj.name.minute]}分#{ruleobj[obj.name.second]}秒"
                                 when "second"
                                     val+="#{ruleobj[obj.name]}秒"
@@ -706,15 +707,12 @@ exports.start=(roomid)->
         $("#speakform").get(0).elements["norevivebutton"].addEventListener "click",(e)->
             Index.util.ask "拒绝复活","一旦拒绝复活将不能撤销。确定要这样做吗？",(result)->
                 if result
-                    if room.mode=="playing"
-                        ss.rpc "game.game.norevive", roomid, (result)->
-                            if result?
-                                # 错误
-                                Index.util.message "错误",result
-                            else
-                                Index.util.message "拒绝复活","成功拒绝复活。"
-                    else 
-                        Index.util.message "错误","本场游戏已经结束"
+                    ss.rpc "game.game.norevive", roomid, (result)->
+                        if result?
+                            # 错误
+                            Index.util.message "错误",result
+                        else
+                            Index.util.message "拒绝复活","成功拒绝复活。"
         ,false
         #========================================
             
@@ -741,6 +739,10 @@ exports.start=(roomid)->
             
             $("#players li").filter((idx)-> this.dataset.id==msg).remove()
             forminfo()
+        # kickされた
+        socket_ids.push Index.socket.on "kicked",null,(msg,channel)->
+            if msg.id==roomid
+                Index.app.refresh()
         # 準備
         socket_ids.push Index.socket.on "ready","room#{roomid}",(msg,channel)->
             for pl in room.players
@@ -888,8 +890,8 @@ exports.start=(roomid)->
                 rule:null
             }
             {
-                name:"半份黑暗火锅"
-                title:"固定一部分角色，其他角色随机分配。"
+                name:"手调黑暗火锅"
+                title:"一部分角色由房主分配，其他角色随机分配。"
                 rule:null
             }
             {
@@ -914,18 +916,18 @@ exports.start=(roomid)->
     
         
     setplayersnumber=(room,form,number)->
-        
         form.elements["number"].value=number
-        setplayersbyjobrule room,form,number
-        jobsformvalidate room,form
+        unless $("#gamestartsec").attr("hidden") == "hidden"
+            setplayersbyjobrule room,form,number
+            jobsformvalidate room,form
     # 配置一览をアレする
     setplayersbyjobrule=(room,form,number)->
         jobrulename=form.elements["jobrule"].value
-        if form.elements["scapegoat"].value=="on"
+        if form.elements["scapegoat"]?.value=="on"
             number++    # 替身君
-        if jobrulename in ["特殊规则.自由配置","特殊规则.半份黑暗火锅"]
+        if jobrulename in ["特殊规则.自由配置","特殊规则.手调黑暗火锅"]
             $("#jobsfield").get(0).hidden=false
-            $("#catesfield").get(0).hidden= jobrulename!="特殊规则.半份黑暗火锅"
+            $("#catesfield").get(0).hidden= jobrulename!="特殊规则.手调黑暗火锅"
             #$("#yaminabe_opt_nums").get(0).hidden=true
         else if jobrulename in ["特殊规则.黑暗火锅","特殊规则.Endless黑暗火锅"]
             $("#jobsfield").get(0).hidden=true
@@ -938,7 +940,6 @@ exports.start=(roomid)->
             jobrulename="内部利用.量子人狼"
         obj= Shared.game.getrulefunc jobrulename
         if obj?
-
             form.elements["number"].value=number
             for x in Shared.game.jobs
                 form.elements[x].value=0
@@ -950,7 +951,13 @@ exports.start=(roomid)->
             # カテゴリ別
             for type of Shared.game.categoryNames
                 count+= parseInt(form.elements["category_#{type}"].value ? 0)
-            form.elements["Human"].value=number-count   # 村人
+            # 残りが村人の人数
+            if form.elements["chemical"]?.checked
+                # chemical人狼では村人を足す
+                form.elements["Human"].value = number*2 - count
+            else
+                form.elements["Human"].value = number-count
+
         setjobsmonitor form,number
     jobsformvalidate=(room,form)->
         # 村人の人数を調節する
@@ -964,7 +971,10 @@ exports.start=(roomid)->
         # カテゴリ別
         for type of Shared.game.categoryNames
             sum+= parseInt(form.elements["category_#{type}"].value ? 0)
-        form.elements["Human"].value=pl-sum
+        if form.elements["chemical"].checked
+            form.elements["Human"].value=pl*2-sum
+        else
+            form.elements["Human"].value=pl-sum
         form.elements["number"].value=pl
         setjobsmonitor form,pl
     # 规则の表示具合をチェックする
@@ -997,7 +1007,7 @@ exports.start=(roomid)->
         jobprops.children(".prop").prop "hidden",true
         for job in Shared.game.jobs
             jobpr=jobprops.children(".prop.#{job}")
-            if jobrule in ["特殊规则.黑暗火锅","特殊规则.半份黑暗火锅"] || form.elements[job].value>0
+            if jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅"] || form.elements[job].value>0
                 jobpr.prop "hidden",false
         # 规则による设定
         ruleprops=$("#ruleprops")
@@ -1318,9 +1328,9 @@ makeplayerbox=(obj,blindflg,tagname="li")->#obj:game.playersのアレ
     p=document.createElement "p"
     p.classList.add "name"
     
-    if !blindflg || !obj.realid
+    if obj.realid
         a=document.createElement "a"
-        a.href="/user/#{obj.realid ? obj.userid}"
+        a.href="/user/#{obj.realid}"
         a.textContent=obj.name
         p.appendChild a
     else
