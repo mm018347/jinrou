@@ -324,6 +324,8 @@ module.exports.actions=(req,res,ss)->
                         # 入室通知
                         delete user.ip
                         Server.game.game.inlog room,user
+                        if room.blind
+                            delete user.realid
                         if room.mode!="playing"
                             ss.publish.channel "room#{roomid}", "join", user
     # 部屋から出る
@@ -431,8 +433,8 @@ module.exports.actions=(req,res,ss)->
                     if user?
                         Server.game.game.kicklog room,user
                         ss.publish.channel "room#{roomid}", "unjoin",id
-                        ss.publish.user id,"refresh",{id:roomid}
-                        # 帮手さがす
+                        ss.publish.user user.realid,"kicked",{id:roomid}
+                        # ヘルパーさがす
                         query={$set:{}}
                         for pl,i in room.players
                             if pl.mode=="helper_#{user.userid}"

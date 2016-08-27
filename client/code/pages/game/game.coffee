@@ -468,10 +468,10 @@ exports.start=(roomid)->
                 $("#playersinfo").append b
                 $(b).click (je)->
                     Index.util.selectprompt "踢出","请选择要被踢出的人",room.players.map((x)->{name:x.name,value:x.userid}),(id)->
-                    # Index.util.prompt "踢出","踢出人のidを入力して下さい:",null,(id)->
-                        ss.rpc "game.rooms.kick", roomid,id,(result)->
-                            if result?
-                                Index.util.message "错误",result
+                        if id
+                            ss.rpc "game.rooms.kick", roomid,id,(result)->
+                                if result?
+                                    Index.util.message "错误",result
                 b=makebutton "重置[ready]状态"
                 $("#playersinfo").append b
                 $(b).click (je)->
@@ -739,6 +739,10 @@ exports.start=(roomid)->
             
             $("#players li").filter((idx)-> this.dataset.id==msg).remove()
             forminfo()
+        # kickされた
+        socket_ids.push Index.socket.on "kicked",null,(msg,channel)->
+            if msg.id==roomid
+                Index.app.refresh()
         # 準備
         socket_ids.push Index.socket.on "ready","room#{roomid}",(msg,channel)->
             for pl in room.players

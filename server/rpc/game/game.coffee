@@ -143,7 +143,7 @@ module.exports=
         if games[room.id]
             splashlog room.id,games[room.id], log
             games[room.id].players=games[room.id].players.filter (pl)->pl.realid!=player.realid
-            games[room.id].participants=games[room.id].participants.filter (pl)->pl.playerid!=player.realid
+            games[room.id].participants=games[room.id].participants.filter (pl)->pl.realid!=player.realid
     helperlog:(ss,room,player,topl)->
         loadGame room.id, ss, (err,game)->
             log=null
@@ -178,6 +178,7 @@ module.exports=
                 return
             player=game.getPlayerReal session.userId
             unless player?
+                console.log session.channel.list()
                 session.channel.subscribe "room#{roomid}_audience"
                 # session.channel.subscribe "room#{roomid}_notwerewolf"
                 # session.channel.subscribe "room#{roomid}_notcouple"
@@ -501,7 +502,7 @@ class Game
                 id:"替身君"
                 realid:"替身君"
                 name:"替身君"
-                }
+            }
             if @rule.chemical == "on"
                 # 炼成人狼なので合体职业にする
                 pl1 = Player.factory gotjs[0]
@@ -8569,6 +8570,7 @@ splashlog=(roomid,game,log)->
         #   game.ss.publish.channel "room#{roomid}_gamemaster","log",log
         # 其他
         game.participants.forEach (pl)->
+            console.log "AIU", pl.realid
             p=islogOK game,pl,log
             if (p&&!rev) || (!p&&rev)
                 game.ss.publish.user pl.realid,"log",log
