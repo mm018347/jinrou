@@ -914,8 +914,8 @@ exports.start=(roomid)->
     setplayersnumber=(room,form,number)->
         form.elements["number"].value=number
         unless $("#gamestartsec").attr("hidden") == "hidden"
-        setplayersbyjobrule room,form,number
-        jobsformvalidate room,form
+            setplayersbyjobrule room,form,number
+            jobsformvalidate room,form
     # 配置一览をアレする
     setplayersbyjobrule=(room,form,number)->
         jobrulename=form.elements["jobrule"].value
