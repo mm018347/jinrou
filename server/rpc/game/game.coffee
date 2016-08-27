@@ -7642,7 +7642,7 @@ module.exports.actions=(req,res,ss)->
             playersnumber=frees
             # 人数の確認
             if frees<6
-                res "人数不足，不能开始。含替身君最少要有6人"
+                res "人数不足，不能开始。含替身君最少要有6人。"
                 return
             if query.jobrule=="特殊规则.量子人狼" && frees>=20
                 # 多すぎてたえられない

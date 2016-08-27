@@ -555,7 +555,7 @@ exports.jobrules=[
       }
       {
         name:"六方混战"
-        title:"共有村人、人狼、妖狐、恶魔、恋人、吸血鬼六个势力。"
+        title:"多个阵营的大乱战。"
         rule:(number)->
           ret={}
           ret.Diviner=1
@@ -1347,7 +1347,7 @@ exports.rules=[
             {
                 name:"rolerequest"
                 label:"希望役职制"
-                title:"所有参加者可以选择希望就职的角色。"
+                title:"所有参加者可以选择希望就职的角色。在黑暗火锅中无效。"
                 type:"checkbox"
                 value:{
                     value:"on"
