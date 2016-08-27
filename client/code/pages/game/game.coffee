@@ -707,15 +707,12 @@ exports.start=(roomid)->
         $("#speakform").get(0).elements["norevivebutton"].addEventListener "click",(e)->
             Index.util.ask "拒绝复活","一旦拒绝复活将不能撤销。确定要这样做吗？",(result)->
                 if result
-                    if room.mode=="playing"
                     ss.rpc "game.game.norevive", roomid, (result)->
                         if result?
-                                # 错误
-                                Index.util.message "错误",result
-                            else
-                                Index.util.message "拒绝复活","成功拒绝复活。"
+                            # 错误
+                            Index.util.message "错误",result
                         else
-                        Index.util.message "错误","本场游戏已经结束"
+                            Index.util.message "拒绝复活","成功拒绝复活。"
         ,false
         #========================================
             
