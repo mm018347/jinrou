@@ -122,7 +122,7 @@ module.exports.actions=(req,res,ss)->
             pl = result.players.filter((x)-> x.realid==req.session.userId)[0]
             result.players.forEach (p)->
                 unless result.blind == "" || pl?.mode == "gm"
-                delete p.realid
+                    delete p.realid
                 delete p.ip
             # ふるいかどうか
             if result.made < Date.now()-Config.rooms.fresh*3600000
