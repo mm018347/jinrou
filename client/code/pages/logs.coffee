@@ -35,8 +35,8 @@ exports.start=->
                 rule:null
             }
             {
-                name:"半份黑暗火锅"
-                title:"一部分角色固定，另一部分随机分配。"
+                name:"手调黑暗火锅"
+                title:"一部分角色由房主分配，另一部分随机分配。"
                 rule:null
             }
             {

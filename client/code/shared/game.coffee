@@ -71,7 +71,7 @@ exports.teams=teams=
     Others:["Bat","Stalker","Doppleganger","CultLeader","Copier","Tanner","Thief","Hoodlum","QuantumPlayer"],
     Neet:["Neet"]
 
-# カテゴリ分け(半份黑暗火锅でつかうぞ!)
+# カテゴリ分け(手调黑暗火锅でつかうぞ!)
 exports.categories=
     Human:teams.Human
     Werewolf:["Werewolf","BigWolf","WolfDiviner","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf"]
@@ -664,7 +664,7 @@ exports.getrulestr=(rule,jobs={})->
     text="#{rule.split('.').pop()} / "
 
     for job in Shared.game.jobs
-        continue if job=="Human" && rule=="特殊规则.半份黑暗火锅" #半份黑暗火锅は村人部分だけ黑暗火锅
+        continue if job=="Human" && rule=="特殊规则.手调黑暗火锅" #手调黑暗火锅は村人部分だけ黑暗火锅
         num=jobs[job]
         continue unless parseInt num
         text+="#{Shared.game.getjobname job}#{num} "
@@ -988,49 +988,49 @@ exports.rules=[
     # 黑暗火锅関係
     {
         label:"黑暗火锅选项"
-        visible:(rule,jobs)->rule.jobrule in ["特殊规则.黑暗火锅","特殊规则.半份黑暗火锅","特殊规则.Endless黑暗火锅"]
+        visible:(rule,jobs)->rule.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
         rules:[
             {
                 name:"yaminabe_safety"
                 label:"黑暗火锅安全性"
-                title:"指定职业分配的谨慎程度"
+                title:"指定职业分配的严谨程度"
                 type:"select"
                 values:[
                     {
                         value:"supersuper"
                         label:"超超（α2）"
-                        title:"強さのバランスを調整するかもしれません。"
+                        title:"姑且算是调整了各阵营的强度平衡。"
                     }
                     {
                         value:"super"
                         label:"超(β2)"
-                        title:"強さのバランスを調整します。"
+                        title:"将会调整各阵营的强度平衡。"
                     }
                     {
                         value:"high"
                         label:"高"
-                        title:"出现职业どうしの兼ね合いも考慮します。"
+                        title:"将会考虑出现的职业间的相互影响（不会出现有背德者却没有妖狐的情况）。"
                     }
                     {
                         value:"middle"
                         label:"中"
-                        title:"各阵营の割合を調整します。"
+                        title:"调整各阵营的人数比例。"
                     }
                     {
                         value:"low"
                         label:"低"
-                        title:"人狼・妖狐の数をちょうどいい数に調整します。"
+                        title:"适当调整人狼・妖狐的数量。"
                         selected:true
                     }
                     {
                         value:"none"
                         label:"无"
-                        title:"まったく気をつけません。人狼系1が保証される以外は全てランダムです。"
+                        title:"完全不调整。除了保证人狼系至少为1以外完全随机。"
                     }
                     {
                         value:"reverse"
                         label:"逆（α）"
-                        title:"クソゲーになりますが、人外数の調整は行われます。"
+                        title:"以搞笑为目标的游戏，适当调整人狼・妖狐的数量。。"
                     }
                 ]
             }
@@ -1054,8 +1054,8 @@ exports.rules=[
                     }
                     {
                         value:"1"
-                        label:"不公开"
-                        title:"不公开将出现的职业一览。"
+                        label:"隐藏"
+                        title:"隐藏将出现的职业一览。"
                     }
                 ]
             }
@@ -1099,7 +1099,7 @@ exports.rules=[
             {
                 name:"wolfminion"
                 label:"狼的仆从"
-                title:"第一天夜里人狼会指定狼的仆从。变成狼的仆从后技能维持不变，但是阵营变为人狼阵营。"
+                title:"第一天夜里人狼会指定狼的仆从。狼的仆从仍持有原职业的技能，但是阵营变为人狼阵营。"
                 type:"checkbox"
                 value:{
                     value:"1"
@@ -1311,6 +1311,30 @@ exports.rules=[
                         }
             }
             {
+                name:"runoff"
+                label:"决胜投票"
+                title:"选中的时候，票数最高的人之间将进行决胜投票。"
+                type:"select"
+                values:[
+                    {
+                        value:"no"
+                        label:"无"
+                        selected:true
+                    }
+                    {
+                        value:"revote"
+                        label:"票数相同时"
+                    }
+                    {
+                        value:"yes"
+                        label:"总是"
+                    }
+                ]
+            }
+            {
+                type: "separator"
+            }
+            {
                 name:"losemode"
                 label:"败北村"
                 title:"以败北为目的的人狼。"
@@ -1331,25 +1355,14 @@ exports.rules=[
                 }
             }
             {
-                name:"runoff"
-                label:"决胜投票"
-                title:"选中的时候，票数最高的人之间将进行决胜投票。"
-                type:"select"
-                values:[
-                    {
-                        value:"no"
-                        label:"无"
-                        selected:true
-                    }
-                    {
-                        value:"revote"
-                        label:"票数相同时"
-                    }
-                    {
-                        value:"yes"
-                        label:"总是"
-                    }
-                ]
+                name:"chemical"
+                label:"炼成人狼"
+                title:"每人分配两个职业的特殊规则。"
+                type:"checkbox"
+                value:{
+                    value:"on"
+                    label:"有"
+                }
             }
         ]
     }
@@ -1742,4 +1755,4 @@ exports.jobinfos=[
 ]
 
 # 判定
-isYaminabe=(rule)->rule.jobrule in ["特殊规则.黑暗火锅","特殊规则.半份黑暗火锅"]
+isYaminabe=(rule)->rule.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅"]
