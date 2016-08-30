@@ -166,13 +166,13 @@ module.exports.actions=(req,res,ss)->
             room.password=query.password ? null
             room.blind=query.blind
             room.theme=query.theme ? ""
-            if room.theme != ""
-                theme = Server.game.themes[room.theme] ? null
+            if room.theme
+                theme = Server.game.themes[room.theme]
                 if theme == null
                     res {error: "不存在该活动"}
                     return
-                if !theme.isAvailable()
-                    res {error: "活动「#{theme.name}」已经结束"}
+                if !theme.isAvailable?()
+                    res {error: "活动「#{theme.name}」当前不可用"}
                     return
                 if !theme.lockable && room.password
                     res {error: "活动「#{theme.name}」不允许房间加锁"}
@@ -303,21 +303,21 @@ module.exports.actions=(req,res,ss)->
                     return
                 ###
 
-                if room.theme? != ""
+                if room.theme
                     theme = Server.game.themes[room.theme]
                     if theme == null
                         res {error: "不存在该活动"}
                         return
-                    if !theme.isAvailable()
-                        res {error: "活动「#{theme.name}」已经结束"}
+                    if !theme.isAvailable?()
+                        res {error: "活动「#{theme.name}」当前不可用"}
                         return
                 
                 if room.blind
-                    unless opt?.name || room.theme != ""
+                    unless opt?.name || room.theme
                         res error:"请输入昵称"
                         return
                     # 分配皮肤
-                    if room.theme != "" && theme? != null
+                    if room.theme && theme != null
                         skins = Object.keys theme.skins
                         skins.filter((x)->room.players.some((pl)->x==pl.userid))
                         skin = skins[Math.floor(Math.random() * skins.length)]

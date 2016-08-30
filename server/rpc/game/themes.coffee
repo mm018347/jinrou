@@ -1,5 +1,4 @@
 ﻿###
-themes=
     danganronpa:
         name:String
         opening:String
@@ -263,7 +262,7 @@ module.exports =
             date=new Date
             month=date.getMonth()
             d=date.getDate()
-            if month==8 && 1<=d<=15 #9月1日~15日
+            if month==8 && d<=15 #9月1日~15日
                 true
             else
                 false

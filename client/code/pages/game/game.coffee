@@ -408,7 +408,7 @@ exports.start=(roomid)->
                         Index.app.refresh()
 
 
-            if room.blind && room.theme? ==""
+            if room.blind && room.theme
                 # 参加者名
                 ###
                 Index.util.prompt "加入游戏","请输入昵称",null,(name)->

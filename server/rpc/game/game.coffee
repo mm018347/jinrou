@@ -68,8 +68,8 @@ module.exports=
                 else
                     # 接続
                     pr+=x.value
-        if  room.blind in ["complete","yes"] && room.theme? != ""
-            theme = Server.game.themes[room.theme] ? null
+        if  room.blind in ["complete","yes"] && room.theme
+            theme = Server.game.themes[room.theme]
             if theme != null
                 pr = theme.skins[player.userid].prize
         if pr
