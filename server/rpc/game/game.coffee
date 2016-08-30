@@ -178,7 +178,6 @@ module.exports=
                 return
             player=game.getPlayerReal session.userId
             unless player?
-                console.log session.channel.list()
                 session.channel.subscribe "room#{roomid}_audience"
                 # session.channel.subscribe "room#{roomid}_notwerewolf"
                 # session.channel.subscribe "room#{roomid}_notcouple"
@@ -1429,10 +1428,6 @@ class Game
         humans=aliveps.map((x)->x.humanCount()).reduce(((a,b)->a+b), 0)
         wolves=aliveps.map((x)->x.werewolfCount()).reduce(((a,b)->a+b), 0)
         vampires=aliveps.map((x)->x.vampireCount()).reduce(((a,b)->a+b), 0)
-        console.log humans, wolves, vampires
-        console.log aliveps.map((x)->x.humanCount())
-        console.log aliveps.map((x)->x.werewolfCount())
-        console.log aliveps.map((x)->x.vampireCount())
 
         team=null
         friends_count=null
@@ -2340,7 +2335,7 @@ class Player
 
         # 女王观战者が見える
         if @team=="Human"
-            obj.queens=game.players.filter((x)->x.type=="QueenSpectator").map (x)->
+            obj.queens=game.players.filter((x)->x.isJobType "QueenSpectator").map (x)->
                 x.publicinfo()
         else
             # セットなどによる漏洩を防止
@@ -3468,9 +3463,9 @@ class Cupid extends Player
         
             pl.touched game,@id
             newpl=Player.factory null,pl,null,Friend    # 恋人だ！
+            newpl.cmplFlag=plpls[1-i].id
             pl.transProfile newpl
             pl.transform game,newpl,true # 入れ替え
-            newpl.cmplFlag=plpls[1-i].id
             log=
                 mode:"skill"
                 to:@id
@@ -5727,19 +5722,19 @@ class BadLady extends Player
                     splashlog game.id,game,log
             # 自己恋人
             newpl=Player.factory null,this,null,Friend # 恋人だ！
+            newpl.cmplFlag=fl.main
             @transProfile newpl
             @transform game,newpl,true  # 入れ替え
-            newpl.cmplFlag=fl.main
             # 相手恋人
             newpl=Player.factory null,plm,null,Friend # 恋人だ！
+            newpl.cmplFlag=@id
             plm.transProfile newpl
             plm.transform game,newpl,true  # 入れ替え
-            newpl.cmplFlag=@id
             # キープ
             newpl=Player.factory null,pl,null,KeepedLover # 恋人か？
+            newpl.cmplFlag=@id
             pl.transProfile newpl
             pl.transform game,newpl,true  # 入れ替え
-            newpl.cmplFlag=@id
             game.splashjobinfo [@id,plm.id,pl.id].map (id)->game.getPlayer id
             @addGamelog game,"badlady_keep",pl.type,playerid
         null
@@ -6549,7 +6544,7 @@ class Complex
             query={}
         unless query.jobtype?
             query.jobtype=@main.type
-        if @mcall(game,@main.isJobType,query.jobtype) && !@mcall(game,@main.jobdone,game)
+        if @main.isJobType(query.jobtype) && !@main.jobdone(game)
             @mcall game,@main.job,game,playerid,query
         else if @sub?.isJobType?(query.jobtype) && !@sub?.jobdone?(game)
             @sub.job? game,playerid,query
@@ -6653,6 +6648,7 @@ class Complex
     isFox:->@main.isFox()
     isVampire:->@main.isVampire()
     isWinner:(game,team)->@main.isWinner game, team
+    getMyChemicalTeam:->@main.getMyChemicalTeam?()
 
 #superがつかえないので注意
 class Friend extends Complex    # 恋人
@@ -7301,7 +7297,7 @@ class Chemical extends Complex
             "人狼"
         else
             "村人"
-    isWinner:(game,team)->
+    getMyChemicalTeam:->
         myt = null
         if @main.team=="Friend" || @sub?.team=="Friend"
             myt = "Friend"
@@ -7313,16 +7309,49 @@ class Chemical extends Complex
             myt = "Werewolf"
         else
             myt = "Human"
-        return team == myt
+        return myt
+    isWinner:(game,team)->
+        return team == @getMyChemicalTeam()
     die:(game, found, from)->
         return if @dead
         if found=="werewolf" && (!@main.willDieWerewolf || (@sub? && !@sub.willDieWerewolf))
             # 人狼に対する襲撃耐性
             return
+        # main, subに対してdieをsimulateする（ただしdyingはdummyにする）
+        d = Object.getOwnPropertyDescriptor(this, "dying")
+        @dying = ()-> null
+
+        # どちらかが耐えたら耐える
+        @main.die game, found, from
+        isdead = @dead
+        @setDead false, null
+        if @sub?
+            @sub.die game, found, from
+            isdead = isdead && @dead
+        if d?
+            Object.defineProperty this, "dying", d
+        else
+            delete @dying
+
         # XXX duplicate
         pl=game.getPlayer @id
+        if isdead
         pl.setDead true, found
         pl.dying game, found, from
+        else
+            pl.setDead false, null
+    touched:(game, from)->
+        @main.touched game, from
+        @sub?.touched game, from
+    makejobinfo:(game,result)->
+        @main.makejobinfo game,result
+        @sub?.makejobinfo? game,result
+        # 女王観戦者は村人陣営×村人陣営じゃないと見えない
+        if result.queens? && (@main.team != "Human" || @sub?.team != "Human")
+            delete result.queens
+        # 陣営情報
+        result.myteam = @getMyChemicalTeam()
+
 
 
 
@@ -8571,7 +8600,6 @@ splashlog=(roomid,game,log)->
         #   game.ss.publish.channel "room#{roomid}_gamemaster","log",log
         # 其他
         game.participants.forEach (pl)->
-            console.log "AIU", pl.realid
             p=islogOK game,pl,log
             if (p&&!rev) || (!p&&rev)
                 game.ss.publish.user pl.realid,"log",log
