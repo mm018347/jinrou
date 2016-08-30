@@ -104,7 +104,7 @@ exports.start=(roomid)->
             if obj.myteam?
                 # ケミカル人狼用の陣営情報
                 teamstring = Shared.game.jobinfo[obj.myteam]?.name
-                $("#jobinfo").append pp "你隶属于#{teamstring}阵营"
+                $("#jobinfo").append pp "你隶属于#{teamstring}"
             if obj.wolves?
                 $("#jobinfo").append pp "同伴的人狼是 #{obj.wolves.map((x)->x.name).join(",")}"
             if obj.peers?
