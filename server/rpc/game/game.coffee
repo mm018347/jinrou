@@ -7336,8 +7336,8 @@ class Chemical extends Complex
         # XXX duplicate
         pl=game.getPlayer @id
         if isdead
-        pl.setDead true, found
-        pl.dying game, found, from
+            pl.setDead true, found
+            pl.dying game, found, from
         else
             pl.setDead false, null
     touched:(game, from)->
