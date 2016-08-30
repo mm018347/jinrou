@@ -1,6 +1,32 @@
-﻿exports.themes=themes
-
+﻿###
 themes=
+    danganronpa:
+        name:String
+        opening:String
+        vote:String
+        sunrise:String
+        sunset:String
+        icon:String(URL)
+        background_color:"black"
+        color:"rgb(255,0,166)"
+        skins:
+            (some id):
+                avatar:String(URL)
+                name:String
+                prize:String
+        skin_length:55
+        lockable:false
+        isAvailable:->
+            date=new Date
+            month=date.getMonth()
+            d=date.getDate()
+            if month==8 && 1<=d<=15 #9月1日~15日
+                true
+            else
+                false
+###
+
+module.exports = 
     danganronpa:
         name:"弹丸论破"
         opening:"呜噗噗噗噗，我是校长黑白熊kuma"

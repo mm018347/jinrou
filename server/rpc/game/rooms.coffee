@@ -304,7 +304,7 @@ module.exports.actions=(req,res,ss)->
                 ###
 
                 if room.theme? != ""
-                    theme = Server.game.themes[room.theme] ? null
+                    theme = Server.game.themes[room.theme]
                     if theme == null
                         res {error: "不存在该活动"}
                         return
@@ -313,7 +313,7 @@ module.exports.actions=(req,res,ss)->
                         return
                 
                 if room.blind
-                    if !opt?.name && room.theme == ""
+                    unless opt?.name || room.theme != ""
                         res error:"请输入昵称"
                         return
                     # 分配皮肤

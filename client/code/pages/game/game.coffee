@@ -408,7 +408,7 @@ exports.start=(roomid)->
                         Index.app.refresh()
 
 
-            if room.blind
+            if room.blind && room.theme? ==""
                 # 参加者名
                 ###
                 Index.util.prompt "加入游戏","请输入昵称",null,(name)->
@@ -1327,7 +1327,7 @@ makeplayerbox=(obj,blindflg,tagname="li")->#obj:game.playersのアレ
         img2=document.createElement "img"
         img2.src="/images/dead.png"
         img2.width=img2.height=48
-        img2.alt=obj.name
+        img2.alt="已死亡"
         img2.classList.add "dead_mark"
         figure.appendChild img2
         df.appendChild figure
