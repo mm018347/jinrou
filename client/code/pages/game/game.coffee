@@ -1325,11 +1325,20 @@ makeplayerbox=(obj,blindflg,tagname="li")->#obj:game.playersのアレ
     if obj.icon
         figure=document.createElement "figure"
         figure.classList.add "icon"
+        div=document.createElement "div"
+        div.classList.add "avatar"
         img=document.createElement "img"
         img.src=obj.icon
         img.width=img.height=48
         img.alt=obj.name
-        figure.appendChild img
+        div.appendChild img
+        figure.appendChild div
+        img2=document.createElement "img"
+        img2.src="/images/dead.png"
+        img2.width=img2.height=48
+        img2.alt="已死亡"
+        img2.classList.add "dead_mark"
+        figure.appendChild img2
         df.appendChild figure
         df.classList.add "icon"
     p=document.createElement "p"
