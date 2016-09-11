@@ -50,7 +50,7 @@ exports.actions =(req,res,ss)->
                         addquery.timestamp=d.getTime()
                         d.setMonth d.getMonth()+parseInt query.month
                         d.setDate d.getDate()+parseInt query.day
-                        d.setHour d.getHour()+parseInt query.hour
+                        d.setHours d.getHours()+parseInt query.hour
                         addquery.expires=d
                     M.blacklist.insert addquery,{safe:true},(err,doc)->
                         res null
@@ -59,7 +59,7 @@ exports.actions =(req,res,ss)->
                     addquery.timestamp=d.getTime()
                     d.setMonth d.getMonth()+parseInt query.month
                     d.setDate d.getDate()+parseInt query.day
-                    d.setHour d.getHour()+parseInt query.hour
+                    d.setHours d.getHours()+parseInt query.hour
                     addquery.expires=d
                 M.blacklist.update {userid:query.userid},{$set:{expires:addquery.expires}},{safe:true},(err,doc)->
                     res null
