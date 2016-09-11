@@ -55,6 +55,8 @@ exports.actions =(req,res,ss)->
                     M.blacklist.insert addquery,{safe:true},(err,doc)->
                         res null
                 if query.expire=="some"
+                    unless doc.expires
+                        doc.expires=new Date()
                     d=doc.expires
                     addquery.timestamp=d.getTime()
                     d.setMonth d.getMonth()+parseInt query.month
