@@ -362,7 +362,7 @@ module.exports.actions=(req,res,ss)->
                         # 啊啦，为什么身上有一张身份证，这就是我吗？
                         if room.theme && theme != null
                             # 指明玩家的皮肤
-                            res {tip: "#{theme.skin_tip}:「#{theme.skins[user.userid].prize}」#{user.name}"}
+                            res {tip: "#{theme.skin_tip}:\n<b>「#{theme.skins[user.userid].prize}」</b>\n#{user.name}"}
                         else
                             res null
                         # 入室通知
