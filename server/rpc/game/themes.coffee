@@ -9,11 +9,12 @@
         background_color:"black"
         color:"rgb(255,0,166)"
         skins:
-            (some id):
+            some_id:
                 avatar:String(URL)
                 name:String
                 prize:String
         skin_length:55
+        skin_tip:String
         lockable:false
         isAvailable:->
             date=new Date
@@ -257,8 +258,10 @@ module.exports =
                 name:'神代优兔'
                 prize:'超高校级的谍报员'
         skin_length:55
+        skin_tip:"发现了一份电子学生证"
         lockable:false
         isAvailable:->
+            return true
             date=new Date
             month=date.getMonth()
             d=date.getDate()

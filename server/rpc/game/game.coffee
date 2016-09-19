@@ -68,7 +68,7 @@ module.exports=
                 else
                     # 接続
                     pr+=x.value
-        if  room.blind in ["complete","yes"] && room.theme
+        if room.blind in ["complete","yes"] && room.theme #如果房间使用了主题，匿名房间也可以有称号
             theme = Server.game.themes[room.theme]
             if theme != null
                 pr = theme.skins[player.userid].prize

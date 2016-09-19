@@ -359,7 +359,12 @@ module.exports.actions=(req,res,ss)->
                     if err?
                         res error:"错误:#{err}"
                     else
-                        res null
+                        # 啊啦，为什么身上有一张身份证，这就是我吗？
+                        if room.theme && theme != null
+                            # 指明玩家的皮肤
+                            res {tip: "#{theme.skin_tip}:「#{theme.skins[user.userid].prize}」#{user.name}"}
+                        else
+                            res null
                         # 入室通知
                         delete user.ip
                         Server.game.game.inlog room,user
