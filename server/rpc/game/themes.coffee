@@ -258,7 +258,7 @@ module.exports =
                 name:'神代优兔'
                 prize:'超高校级的谍报员'
         skin_length:55
-        skin_tip:"你发现了一份电子学生证"
+        skin_tip:"电子学生证"
         lockable:false
         isAvailable:->
             return true
