@@ -2174,6 +2174,8 @@ class Player
     isDrunk:->false
     # 蘇生可能性を秘めているか
     isReviver:->false
+    # Am I Dead?
+    isDead:->{dead:@dead,found:@found}
     # 終了時の人間カウント
     humanCount:->
         if !@isFox() && @isHuman()
@@ -6557,7 +6559,19 @@ class Complex
             @mcall game,@main.job,game,playerid,query
         else if @sub?.isJobType?(query.jobtype) && !@sub?.jobdone?(game)
             @sub.job? game,playerid,query
-        
+    # Am I Walking Dead?
+    isDead:->
+        isMainDead = @main.isDead()
+        if isMainDead.dead && isMainDead.found
+            # Dead!
+            return isMainDead
+        if @sub?
+            isSubDead = @sub.isDead()
+            if isSubDead.dead && isSubDead.found
+                # Dead!
+                return isSubDead
+        # seems to be alive, who knows?
+        return {dead:@dead,found:@found}
     isJobType:(type)->
         @main.isJobType(type) || @sub?.isJobType?(type)
     sunset:(game)->
@@ -6590,6 +6604,11 @@ class Complex
     beforebury:(game,type)->
         @mcall game,@main.beforebury,game,type
         @sub?.beforebury? game,type
+        # deal with Walking Dead
+        unless @dead && @found
+            isPlDead = @isDead()
+            if isPlDead.dead && isPlDead.found
+                @setDead isPlDead.dead,isPlDead.found
     divined:(game,player)->
         @mcall game,@main.divined,game,player
         @sub?.divined? game,player
