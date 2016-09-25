@@ -411,11 +411,14 @@ exports.start=(roomid)->
                                 into()
                     else if result?.error?
                         Index.util.message "房间",result.error
+                    else if result?.tip?
+                        Index.util.message result.title,result.tip # 如果房间有特殊提示
+                        Index.app.refresh()
                     else
                         Index.app.refresh()
 
 
-            if room.blind
+            if room.blind && !room.theme
                 # 参加者名
                 ###
                 Index.util.prompt "加入游戏","请输入昵称",null,(name)->

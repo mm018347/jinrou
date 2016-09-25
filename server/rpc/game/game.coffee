@@ -68,8 +68,12 @@ module.exports=
                 else
                     # 接続
                     pr+=x.value
-            if pr
-                name="#{Server.prize.prizeQuote pr}#{name}"
+        if room.blind in ["complete","yes"] && room.theme #如果房间使用了主题，匿名房间也可以有称号
+            theme = Server.game.themes[room.theme]
+            if theme != null
+                pr = theme.skins[player.userid].prize
+        if pr
+            name="#{Server.prize.prizeQuote pr}#{name}"
         if room.mode=="waiting"
             # 开始前（ふつう）
             log=
@@ -205,6 +209,7 @@ Server=
     game:
         game:module.exports
         rooms:require './rooms.coffee'
+        themes:require './themes.coffee'
     prize:require '../../prize.coffee'
     oauth:require '../../oauth.coffee'
 class Game

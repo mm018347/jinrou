@@ -11,6 +11,7 @@ room: {
   mode: "waiting"/"playing"/"end"
   made: Time(Number)(作成された日時）
   blind:""/"hide"/"complete"
+  theme: String(主题房间，用于各种套皮活动)
   number: Number(プレイヤー数)
   players:[PlayerObject,PlayerObject,...]
   gm: Booelan(trueならオーナーGM)
@@ -39,6 +40,7 @@ Server=
     game:
         game:require './game.coffee'
         rooms:module.exports
+        themes:require './themes.coffee'
     oauth:require '../../oauth.coffee'
 # 帮手セット処理
 sethelper=(ss,roomid,userid,id,res)->
@@ -163,6 +165,24 @@ module.exports.actions=(req,res,ss)->
                 return
             room.password=query.password ? null
             room.blind=query.blind
+            room.theme=query.theme ? ""
+            if room.theme
+                theme = Server.game.themes[room.theme]
+                if theme == null
+                    res {error: "不存在该活动"}
+                    return
+                if !theme.isAvailable?()
+                    res {error: "活动「#{theme.name}」当前不可用"}
+                    return
+                if !theme.lockable && room.password
+                    res {error: "活动「#{theme.name}」不允许房间加锁"}
+                    return
+                if room.blind == ""
+                    res {error: "活动房间必须为匿名"}
+                    return
+                if room.number > theme.skin_length
+                    res {error: "活动「#{theme.name}」的房间人数不能多于「#{theme.skin_length}」"}
+                    return
             room.comment=query.comment ? ""
             #unless room.blind
             #   room.players.push req.session.user
@@ -277,30 +297,49 @@ module.exports.actions=(req,res,ss)->
                     mode:"player"
                     nowprize:su.nowprize
                 # 同IP制限
-                
+                ###
                 if room.players.some((x)->x.ip==su.ip) && su.ip!="127.0.0.1"
                     res error:"禁止多开 #{su.ip}"
                     return
-                
+                ###
+
+                if room.theme
+                    theme = Server.game.themes[room.theme]
+                    if theme == null
+                        res {error: "不存在该活动"}
+                        return
+                    if !theme.isAvailable?()
+                        res {error: "活动「#{theme.name}」当前不可用"}
+                        return
                 
                 if room.blind
-                    unless opt?.name
+                    unless opt?.name || room.theme
                         res error:"请输入昵称"
                         return
+                    # 分配皮肤
+                    if room.theme && theme != null
+                        skins = Object.keys theme.skins
+                        skins.filter((x)->room.players.some((pl)->x==pl.userid))
+                        skin = skins[Math.floor(Math.random() * skins.length)]
+                        
+                        user.name=theme.skins[skin].name
+                        user.userid=skin
+                        user.icon= theme.skins[skin].avatar ? null
                     # 匿名模式
-                    makeid=->   # ID生成
-                        re=""
-                        while !re
-                            i=0
-                            while i<20
-                                re+="0123456789abcdef"[Math.floor Math.random()*16]
-                                i++
-                            if room.players.some((x)->x.userid==re)
-                                re=""
-                        re
-                    user.name=opt.name.trim()
-                    user.userid=makeid()
-                    user.icon= opt.icon ? null
+                    else
+                        makeid=->   # ID生成
+                            re=""
+                            while !re
+                                i=0
+                                while i<20
+                                    re+="0123456789abcdef"[Math.floor Math.random()*16]
+                                    i++
+                                if room.players.some((x)->x.userid==re)
+                                    re=""
+                            re
+                        user.name=opt.name.trim()
+                        user.userid=makeid()
+                        user.icon= opt.icon ? null
                     
                 #同昵称限制,及禁止使用替身君做昵称
                 if room.players.some((x)->x.name==user.name)
@@ -320,7 +359,18 @@ module.exports.actions=(req,res,ss)->
                     if err?
                         res error:"错误:#{err}"
                     else
-                        res null
+                        # 啊啦，为什么身上有一张身份证，这就是我吗？
+                        if room.theme && theme != null
+                            # 指明玩家的皮肤
+                            if theme.skins[user.userid].prize
+                                name = "「#{theme.skins[user.userid].prize}」#{user.name}"
+                            else
+                                name = "#{user.name}"
+                            res 
+                                tip: "#{name}"
+                                title:"#{theme.skin_tip}"
+                        else
+                            res null
                         # 入室通知
                         delete user.ip
                         Server.game.game.inlog room,user

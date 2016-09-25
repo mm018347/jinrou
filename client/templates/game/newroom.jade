@@ -27,12 +27,18 @@ section.rooms
           select(name="blind")
             option(value="",selected) 不匿名
             option(value="yes") 匿名（结束后公开ID）
-            option(value="complete") 严格匿名（结束后不公开ID）
+            option(value="complete") 强匿名（结束后不公开ID）
+      p
+        label(title="匿名模式下，玩家的昵称将由系统随机分配。")
+          | 主题房间
+          select(name="theme")
+            option(value="",selected) 无
+            option(value="danganronpa") 弹丸论破
       p
         label(title="选中时，房间的建造人将成为房间的GM")
           | GM
           select(name="ownerGM")
-            option(value="",selected) 否
-            option(value="yes") 是
+            option(value="",selected) 无
+            option(value="yes") 有
     p
       input(type="submit",value="新建房间")
