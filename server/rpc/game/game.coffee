@@ -8362,8 +8362,6 @@ module.exports.actions=(req,res,ss)->
             if query.yaminabe_hidejobs!="" && query.jobrule!="特殊规则.黑暗火锅" && query.jobrule!="特殊规则.Endless黑暗火锅"
                 # 黑暗火锅以外で配役情報を公開しないときはアレする
                 ruleinfo_str = ""
-            if query.yaminabe_hidejobs!="" && query.jobrule=="特殊规则.手调黑暗火锅"
-                ruleinfo_str = "手调黑暗火锅"
             if query.chemical == "on"
                 # ケミカル人狼の場合は表示
                 ruleinfo_str = "炼成人狼　" + (ruleinfo_str ? "")
