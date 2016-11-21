@@ -1,14 +1,16 @@
 section.window
   h1
     | 头像选择
-    input.closer(type="button",value="×",name="cancel")
+    button.closer(type="button",name="cancel")
+      i.fa.fa-times
   form(aciton="/")#iconform
-    p （URL留空的时候不显示头像）
-    figure(style="float:left"): img#selecticondisp(width="48",height="48",alt="头像")
-    p
-      input(type="button",name="urliconbutton",value="输入URL")
-    p
-      input(type="button",name="twittericonbutton",value="从twitter导入",disabled="disabled")
+    div.window-content
+      p （URL留空的时候不显示头像）
+      figure(style="float:left"): img#selecticondisp(width="48",height="48",alt="头像")
+      p
+        input(type="button",name="urliconbutton",value="输入URL")
+      p
+        input(type="button",name="twittericonbutton",value="从twitter导入",disabled="disabled")
     p: input(type="submit",value="OK")
 
 

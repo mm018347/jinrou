@@ -26,9 +26,9 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 "WanderingGuard", # 錠前天国
 "BadLady", # 苍汁天国、人狼天国
 "Bomber","Blasphemy","Ushinotokimairi",  # ねじれ天国
-# 其他
-"RedHood","Baker","MadDog",
-# アプリ的职业
+# その他
+"RedHood","Baker","MadDog","CraftyWolf",
+# アプリの役職
 "PsychoKiller",
 # わんないと人狼
 "Phantom",
@@ -55,15 +55,15 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
         exports.jobs.push "Patissiere"
 )(new Date)
 # 人外
-exports.nonhumans=["Werewolf","Fox","BigWolf","TinyFox","WolfDiviner","MadWolf","Devil","Vampire","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf"]
+exports.nonhumans=["Werewolf","Fox","BigWolf","TinyFox","WolfDiviner","MadWolf","Devil","Vampire","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf"]
 
 # 黒が出る人
-exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub","Dog","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","MadDog"]
+exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub","Dog","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","MadDog","CraftyWolf"]
 
 # チームたち
 exports.teams=teams=
     Human:["Human","Diviner","Psychic","Guard","Couple","Poisoner","ToughGuy","Noble","Slave","Magician","Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Light","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Cat","Witch","Oldman","OccultMania","Dog","Dictator","SeersMama","Trapper","RedHood","Counselor","Miko","HolyMarked","WanderingGuard","TroubleMaker","FrankensteinsMonster","BloodyMary","King","SantaClaus","Phantom","DrawGirl","Pyrotechnist","Baker"]
-    Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist"]
+    Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist","CraftyWolf"]
     Fox:["Fox","TinyFox","Immoral","Blasphemy"]
     Devil:["Devil"]
     Friend:["Cupid","Lover","BadLady","Patissiere"]
@@ -74,11 +74,11 @@ exports.teams=teams=
 # カテゴリ分け(手调黑暗火锅でつかうぞ!)
 exports.categories=
     Human:teams.Human
-    Werewolf:["Werewolf","BigWolf","WolfDiviner","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf"]
+    Werewolf:["Werewolf","BigWolf","WolfDiviner","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf"]
     Fox:["Fox","TinyFox"]
     Madman:["Madman","Fanatic","Spy","Spy2","Sorcerer","WhisperingMad","WolfBoy","ObstructiveMad","PsychoKiller","Bomber","Ushinotokimairi","MadDog","Hypnotist"]
     Immoral:["Immoral","Blasphemy"]
-    Switching:["Stalker","OccultMania","Copier","Cursed","Doppleganger","BloodyMary","Phantom"]
+    Switching:["Stalker","OccultMania","Copier","Cursed","Doppleganger","BloodyMary","Phantom","Thief"]
     Others:["Devil","Cupid","Bat","CultLeader","Vampire","Tanner","Lover","Hoodlum","BadLady","Patissiere"]
 
 exports.categoryNames=
@@ -901,6 +901,9 @@ exports.jobinfo=
         Hypnotist:
             name:"催眠师"
             color:"#e01bs9"
+        CraftyWolf:
+            name:"狡猾的狼"
+            color:"#4a03ad"
         
         
     Fox:
@@ -1031,31 +1034,6 @@ exports.rules=[
                         value:"reverse"
                         label:"逆（α）"
                         title:"以搞笑为目标的游戏，适当调整人狼・妖狐的数量。。"
-                    }
-                ]
-            }
-            {
-                name:"yaminabe_hidejobs"
-                label:"配置公开"
-                title:"指定配置的公开方式。"
-                type:"select"
-                values:[
-                    {
-                        # ""なのは歴史的経緯
-                        value:""
-                        label:"公开职业一览"
-                        title:"配置结束后，公开将会出现的职业。"
-                        selected:true
-                    }
-                    {
-                        value:"team"
-                        label:"只公开阵营数"
-                        title:"只会公开将有几个阵营出现。"
-                    }
-                    {
-                        value:"1"
-                        label:"隐藏"
-                        title:"隐藏将出现的职业一览。"
                     }
                 ]
             }
@@ -1333,6 +1311,32 @@ exports.rules=[
             }
             {
                 type: "separator"
+            }
+            {
+                # 名前がyaminabeなのは歴史的経緯
+                name:"yaminabe_hidejobs"
+                label:"配置公开"
+                title:"指定配置的公开方式。"
+                type:"select"
+                values:[
+                    {
+                        # ""なのは歴史的経緯
+                        value:""
+                        label:"公开职业一览"
+                        title:"配置结束后，公开将会出现的职业。"
+                        selected:true
+                    }
+                    {
+                        value:"team"
+                        label:"只公开阵营人数"
+                        title:"只会公开各个阵营的人数。"
+                    }
+                    {
+                        value:"1"
+                        label:"隐藏"
+                        title:"隐藏将出现的职业一览。"
+                    }
+                ]
             }
             {
                 name:"losemode"

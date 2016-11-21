@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 !!! 5
 html(xmlns:wb="http://open.weibo.com/wb")
   head
@@ -42,3 +43,45 @@ html(xmlns:wb="http://open.weibo.com/wb")
         location.replace("/noIE.html");
       }
     #content
+=======
+!!! 5
+html
+  head
+    meta(charset="utf-8")
+    title 月下人狼
+    meta(name="application-name",content="月下人狼")
+    meta(name="description",content="リアルタイムチャットが可能な人狼サーバーです。70種以上の役職が使用可能。")
+    script(src="https://use.fontawesome.com/e0e7afd227.js")
+    != SocketStream
+  body
+    header
+      h1 月下人狼
+      #userinfo
+        span#username
+      nav
+        ul
+          li
+            a(href="/") トップ
+          li
+            a(href="/my") マイページ
+          li
+            a(href="/lobby") ロビー
+          li
+            a(href="/logout") ログアウト
+          li
+            a(href="/rooms") ルーム一覧
+          li
+            a(href="/logs") ログ検索
+          li
+            a(href="/manual") マニュアル
+          li
+            a(href="/backdoor/home") ホームに戻る
+          li
+            a(href="/manual/about") 月下人狼について
+    script(type="text/javascript")
+      if((("unknown"===typeof localStorage)||("undefined"===typeof localStorage)||(!document.body.classList)||(!document.body.dataset))&&(navigator.userAgent.indexOf("Googlebot")<0)){
+        //要件を満たさない
+        location.replace("/noIE.html");
+      }
+    #content
+>>>>>>> ed5149c32ab4c3723a850c3a0fd6cc5753dcf6b5

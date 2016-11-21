@@ -72,8 +72,8 @@ module.exports=
             theme = Server.game.themes[room.theme]
             if theme != null
                 pr = theme.skins[player.userid].prize
-        if pr
-            name="#{Server.prize.prizeQuote pr}#{name}"
+            if pr
+                name="#{Server.prize.prizeQuote pr}#{name}"
         if room.mode=="waiting"
             # 开始前（ふつう）
             log=
@@ -416,7 +416,6 @@ class Game
         @players=[]
         @iconcollection={}
         for job,num of joblist
-            #console.log "#{job}:#{num}"
             unless isNaN num
                 jnumber+=parseInt num
             if parseInt(num)<0
@@ -988,7 +987,7 @@ class Game
                             @players[i]=newpl
                         else
                             x
-            # エンドレス闇鍋用途中参加処理
+            # Endless黑暗火锅用途中参加処理
             if @rule.jobrule=="特殊规则.Endless黑暗火锅"
                 exceptions=["MinionSelector","Thief","GameMaster","Helper","QuantumPlayer","Waiting","Watching","GotChocolate"]
                 jobnames=Object.keys(jobs).filter (name)->!(name in exceptions)
@@ -1200,7 +1199,6 @@ class Game
     # type: "day": 夜が明けたタイミング "night": 处刑後 "other":其他(ターン変わり時の能力で死んだやつなど）
     bury:(type)->
 
-        @votingbox.candidates = @votingbox.candidates.filter (x)->!x.dead
         deads=[]
         loop
             deads=@players.filter (x)->x.dead && x.found
@@ -1224,7 +1222,7 @@ class Game
         deads.forEach (x)=>
             situation=switch x.found
                 #死因
-                when "werewolf","werewolf2","poison","hinamizawa","vampire","vampire2","witch","dog","trap","bomb","marycurse","psycho"
+                when "werewolf","werewolf2","poison","hinamizawa","vampire","vampire2","witch","dog","trap","bomb","marycurse","psycho","crafty"
                     "不成样子的尸体被发现了"
                 when "curse"    # 呪殺
                     if @rule.deadfox=="obvious"
@@ -1328,6 +1326,8 @@ class Game
                     name:x.name
                     comment:x.will
                 splashlog @id,this,log
+        # 死者应该立刻从投票候选人中去除
+        @votingbox.candidates = @votingbox.candidates.filter (x)->!x.dead
         deads.length
                 
     # 投票終わりチェック
@@ -1803,7 +1803,6 @@ class Game
             query={userid:{$in:pls.map (x)->x.realid}}
             M.users.find(query).each (err,doc)=>
                 return unless doc?
-                # 奇怪的return
                 oldprize=doc.prize  # いままでの賞の一览
                 # 差分をとる
                 newprize=obj[doc.userid].filter (x)->!(x in oldprize)
@@ -6372,7 +6371,86 @@ class Hypnotist extends Madman
 
         return null
 
+class CraftyWolf extends Werewolf
+    type:"CraftyWolf"
+    jobname:"狡猾的狼"
+    jobdone:(game)->super && @flag == "going"
+    deadJobdone:(game)->@flag != "revivable"
+    midnightSort:100
+    isReviver:->!@dead || (@flag in ["reviving","revivable"])
+    sunset:(game)->
+        super
+        # 生存状態で昼になったら死んだふり能力初期化
+        @setFlag ""
+    job:(game,playerid,query)->
+        if query.jobtype!="CraftyWolf"
+            return super
+        if @dead
+            # 死亡時
+            if @flag != "revivable"
+                return "不能使用能力"
+            @setFlag "reviving"
+            log=
+                mode:"skill"
+                to:@id
+                comment:"#{@name} 取消假死了。"
+            splashlog game.id,game,log
+            return null
+        else
+            # 生存時
+            if @flag != ""
+                return "已经使用过能力"
+            # 生存フラグを残しつつ死ぬ
+            @setFlag "going"
+            log=
+                mode:"skill"
+                to:@id
+                comment:"#{@name} 假死了。"
+            splashlog game.id,game,log
+            return null
+    midnight:(game)->
+        if @flag=="going"
+            @die game, "crafty"
+            @addGamelog game,"craftydie"
+            @setFlag "revivable"
+    deadnight:(game)->
+        if @flag=="reviving"
+            # 生存していた
+            pl = game.getPlayer @id
+            if pl?
+                pl.setFlag ""
+                pl.revive game
+                pl.addGamelog game,"craftyrevive"
+        else
+            # 生存フラグが消えた
+            @setFlag ""
+    makejobinfo:(game,result)->
+        super
+        result.open ?= []
+        if @dead && @flag=="revivable"
+            # 死に戻り
+            result.open = result.open.filter (x)->!(x in ["CraftyWolf","_Werewolf"])
+            result.open.push "CraftyWolf2"
+        return result
+    makeJobSelection:(game)->
+        if game.night && @dead && @flag=="revivable"
+            # 死んだふりやめるときは選択肢がない
+            []
+        else if game.night && game.werewolf_target_remain==0
+            # もう襲撃対象を選択しない
+            []
+        else super
+    checkJobValidity:(game,query)->
+        if query.jobtype in ["CraftyWolf","CraftyWolf2"]
+            # 対象選択は不要
+            return true
+        return super
 
+
+
+
+
+# ============================
 # 処理上便宜的に使用
 class GameMaster extends Player
     type:"GameMaster"
@@ -7524,6 +7602,7 @@ jobs=
     GotChocolate:GotChocolate
     MadDog:MadDog
     Hypnotist:Hypnotist
+    CraftyWolf:CraftyWolf
     # 特殊
     GameMaster:GameMaster
     Helper:Helper
@@ -7675,7 +7754,12 @@ module.exports.actions=(req,res,ss)->
             if room.players.some((x)->!x.start)
                 res "全员尚未全部准备好"
                 return
-            # 规则オブジェクト用意
+            if room.gm!=true && query.yaminabe_hidejobs!="" && !(query.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"])
+                res "「配置公开」选项在黑暗火锅模式下，只有在有GM的房间才能使用"
+                return
+
+
+            # ルールオブジェクト用意
             ruleobj={
                 number: room.players.length
                 maxnumber:room.number
@@ -7693,7 +7777,7 @@ module.exports.actions=(req,res,ss)->
                 return
             
             options={}  # 选项ズ
-            for opt in ["decider","authority"]
+            for opt in ["decider","authority","yaminabe_hidejobs"]
                 options[opt]=query[opt] ? null
 
             joblist={}
@@ -7725,7 +7809,7 @@ module.exports.actions=(req,res,ss)->
                 return
             # 炼成人狼の場合
             if query.chemical=="on"
-                # 闇鍋と量子人狼は無理
+                # 黑暗火锅と量子人狼は無理
                 if query.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅","特殊规则.量子人狼"]
                     res "本规则「#{query.jobrule}」无法使用炼成人狼。"
                     return
@@ -7786,9 +7870,18 @@ module.exports.actions=(req,res,ss)->
                         safety.reverse=true
 
 
-                # 闇鍋のときは入れないのがある
+                # 黑暗火锅のときは入れないのがある
                 exceptions=["MinionSelector","Thief","GameMaster","Helper","QuantumPlayer","Waiting","Watching","GotChocolate"]
-                options.yaminabe_hidejobs=query.yaminabe_hidejobs ? null
+                # ユーザーが指定した入れないの
+                excluded_exceptions=[]
+                # チェックボックスが外れてるやつは登場しない
+                if query.jobrule=="特殊规则.手调黑暗火锅"
+                    for job in Shared.game.jobs
+                        if query["job_use_#{job}"] != "on"
+                            # これは出してはいけない指定になっている
+                            exceptions.push job
+                            excluded_exceptions.push job
+                # メアリーの特殊処理（セーフティ高じゃないとでない）
                 if query.yaminabe_hidejobs=="" || !safety.jobs
                     exceptions.push "BloodyMary"
                 unless query.jobrule=="特殊规则.手调黑暗火锅" && countCategory("Werewolf")>0
@@ -8009,7 +8102,9 @@ module.exports.actions=(req,res,ss)->
                 )(new Date)
                 
                 possibility=Object.keys(jobs).filter (x)->!(x in exceptions)
-                
+                if possibility.length == 0
+                    # 0はまずい
+                    possibility.push "Human"
             
                 # 強制的に入れる関数
                 init=(jobname,categoryname)->
@@ -8059,10 +8154,16 @@ module.exports.actions=(req,res,ss)->
                         #カテゴリ职业がまだあるか探す
                         for type,arr of Shared.game.categories
                             if joblist["category_#{type}"]>0
-                                r=Math.floor Math.random()*arr.length
-                                job=arr[r]
-                                category="category_#{type}"
-                                break
+                                # カテゴリの中から候補をしぼる
+                                arr2 = arr.filter (x)->!(x in excluded_exceptions)
+                                if arr2.length > 0
+                                    r=Math.floor Math.random()*arr2.length
+                                    job=arr2[r]
+                                    category="category_#{type}"
+                                    break
+                                else
+                                    # これもう無理だわ
+                                    joblist["category_#{type}"] = 0
                         unless job?
                             # もうカテゴリがない
                             if frees<=0
@@ -8256,9 +8357,14 @@ module.exports.actions=(req,res,ss)->
                 else
                     joblist.Human=frees-sum
                 ruleinfo_str=Shared.game.getrulestr query.jobrule,joblist
+            if query.yaminabe_hidejobs!="" && query.jobrule!="特殊规则.黑暗火锅" && query.jobrule!="特殊规则.Endless黑暗火锅"
+                # 黑暗火锅以外で配役情報を公開しないときはアレする
+                ruleinfo_str = ""
+            if query.yaminabe_hidejobs!="" && query.jobrule=="特殊规则.手调黑暗火锅"
+                ruleinfo_str = "手调黑暗火锅"
             if query.chemical == "on"
-                # 炼成人狼の場合は表示
-                ruleinfo_str = "炼成人狼　" + ruleinfo_str
+                # ケミカル人狼の場合は表示
+                ruleinfo_str = "炼成人狼　" + (ruleinfo_str ? "")
                 
             if (joblist.WolfBoy>0 || joblist.ObstructiveMad>0) && query.divineresult=="immediate"
                 query.divineresult="sunrise"
@@ -8267,14 +8373,43 @@ module.exports.actions=(req,res,ss)->
                     comment:"由于存在能够左右占卜结果的职业，占卜结果从「立刻知道」变更为「天亮才知道」。"
                 splashlog game.id,game,log
                 
-            log=
-                mode:"system"
-                comment:"配置: #{ruleinfo_str}"
-            splashlog game.id,game,log
+            if ruleinfo_str != ""
+                # 表示すべき情報がない場合は表示しない
+                log=
+                    mode:"system"
+                    comment:"配置: #{ruleinfo_str}"
+                splashlog game.id,game,log
+            if query.jobrule == "特殊规则.手调黑暗火锅" && excluded_exceptions.length > 0
+                # 除外职业の情報を表示する
+                exclude_str = excluded_exceptions.map((job)-> Shared.game.getjobname job).join ", "
+                log=
+                    mode:"system"
+                    comment:"除外职业：#{exclude_str}"
+                splashlog game.id,game,log
+
             
+            if query.yaminabe_hidejobs=="team"
+                # 陣営のみ公開モード
+                # 各陣営
+                teaminfos=[]
+                for team,obj of Shared.game.jobinfo
+                    teamcount=0
+                    for job,num of joblist
+                        #出现职业チェック
+                        continue if num==0
+                        if obj[job]?
+                            # この阵营だ
+                            teamcount+=num
+                    if teamcount>0
+                        teaminfos.push "#{obj.name}#{teamcount}"    #阵营名
+
+                log=
+                    mode:"system"
+                    comment:"出场阵营信息: "+teaminfos.join(" ")
+                splashlog game.id,game,log
             if query.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
                 if query.yaminabe_hidejobs==""
-                    # 职业は公開される
+                    # 黑暗火锅用の职业公開ログ
                     jobinfos=[]
                     for job,num of joblist
                         continue if num==0
@@ -8282,25 +8417,6 @@ module.exports.actions=(req,res,ss)->
                     log=
                         mode:"system"
                         comment:"出场职业: "+jobinfos.join(" ")
-                    splashlog game.id,game,log
-                else if query.yaminabe_hidejobs=="team"
-                    # 阵营のみ公開
-                    # 各阵营
-                    teaminfos=[]
-                    for team,obj of Shared.game.jobinfo
-                        teamcount=0
-                        for job,num of joblist
-                            #出现职业チェック
-                            continue if num==0
-                            if obj[job]?
-                                # この阵营だ
-                                teamcount+=num
-                        if teamcount>0
-                            teaminfos.push "#{obj.name}#{teamcount}"    #阵营名
-
-                    log=
-                        mode:"system"
-                        comment:"出场阵营信息: "+teaminfos.join(" ")
                     splashlog game.id,game,log
 
             
