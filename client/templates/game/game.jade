@@ -9,16 +9,15 @@
     h1 游戏开始
     form#gamestart
       p
-        | 现在的人数 : 
+        | 现在的人数 ： 
         output(name="number")
         | 人 - 
         span#jobsmonitor
       fieldset
         legend 职业
-        p: select#jobruleselect(name="jobrule")
+        p
+          select#jobruleselect(name="jobrule")
         dl.jobs#jobsfield(hidden)
-          dt 村人
-          dd: output(name="Human",data-jobname="村人")
         dl.jobs#catesfield(hidden)
       fieldset#rules
         //- dd(name="category_Foobar")
@@ -38,11 +37,11 @@
             input(type="submit",value="投票",data-job="_day")
         #form_Waiting(hidden).jobformarea
           p
-            | 请选择希望就职的角色:
+            | 请选择希望就职的角色：
             input(type="submit",value="选择",data-job="Waiting")
         #form_GameMaster(hidden).jobformarea
           p
-            | 请选择要处死的人:
+            | 请选择要处死的人：
             input(type="submit",value="杀死（GM）",data-job="GameMaster")
         #form__Werewolf(hidden).jobformarea
           p
@@ -54,7 +53,7 @@
             input(type="submit",value="占卜（人狼占卜师）",data-job="WolfDiviner")
         #form_GreedyWolf(hidden).jobformarea
           p
-            | 在希望满足自身贪欲的场合下请选择（非强制）:
+            | 在希望满足自身贪欲的场合下请选择（非强制）：
             input(type="submit",value="贪欲满盈（贪婪的狼）",data-job="GreedyWolf")
         #form_Diviner(hidden).jobformarea
           p
@@ -66,22 +65,22 @@
             input(type="submit",value="占卜（小狐）",data-job="TinyFox")
         #form_Guard(hidden).jobformarea
           p
-            | 请选择一个要护卫的人:
+            | 请选择一个要护卫的人：
             input(type="submit",value="护卫（猎人）",data-job="Guard")
         #form_Magician(hidden).jobformarea
           p
-            | 请选择一个要复活的人:
+            | 请选择一个要复活的人：
             input(type="submit",value="复活（魔术师）",data-job="Magician")
         #form_Spy(hidden).jobformarea
           p
             input(type="submit",value="离开村子(间谍)",data-job="Spy")
         #form_Fugitive(hidden).jobformarea
           p
-            | 请选择要逃亡到谁家里:
+            | 请选择要逃亡到谁家里：
             input(type="submit",value="逃亡（逃亡者）",data-job="Fugitive")
         #form_Merchant(hidden).jobformarea
           p
-            | 请选择商品的收件人:
+            | 请选择商品的收件人：
             select(name="Merchant_kit")
               option(value="Diviner") 占卜套装
               option(value="Psychic") 灵能套装
@@ -101,91 +100,91 @@
             input(type="submit",value="写名字（死亡笔记）",data-job="Light")
         #form_Cupid(hidden).jobformarea
           p
-            | 请选择要成为恋人2人中的1人:
+            | 请选择两名恋人中的一个人：
             input(type="submit",value="射出爱之箭（丘比特）",data-job="Cupid")
         #form_Lover(hidden).jobformarea
           p
-            | 请选择要成为恋人的人:
+            | 请选择要成为恋人的人：
             input(type="submit",value="告白（求爱者）",data-job="Lover")
         #form_Stalker(hidden).jobformarea
           p
-            | 请选择要跟踪的对象:
+            | 请选择要跟踪的对象：
             input(type="submit",value="跟踪（跟踪狂）",data-job="Stalker")
         #form_Spellcaster(hidden).jobformarea
           p
-            | 请选择咒言对象（非强制）:
+            | 请选择咒言对象（非强制）：
             input(type="submit",value="夺去他的声音（咒言师）",data-job="Spellcaster")
         #form_Priest(hidden).jobformarea
           p
-            | 请选择一个要守护的人（非强制）:
+            | 请选择一个要守护的人（非强制）：
             input(type="submit",value="用神圣的力量守护（圣职者）",data-job="Priest")
         #form_PI(hidden).jobformarea
           p
-            | 请选择要调查的人（非强制）:
+            | 请选择要调查的人（非强制）：
             input(type="submit",value="调查（超常现象研究者）",data-job="PI")
         #form_Sorcerer(hidden).jobformarea
           p
-            | 请选择要调查的人:
+            | 请选择要调查的人：
             input(type="submit",value="调查（妖术师）",data-job="Sorcerer")
         #form_Doppleganger(hidden).jobformarea
           p
-            | 请选择一个人作为二重身的对象:
+            | 请选择一个人作为二重身的对象：
             input(type="submit",value="选择（二重身）",data-job="Doppleganger")
         #form_CultLeader(hidden).jobformarea
           p
-            | 请选择一个人使他成为信者:
+            | 请选择一个人使他成为信者：
             input(type="submit",value="传教（邪教主）",data-job="CultLeader")
         #form_Vampire(hidden).jobformarea
           p
-            | 请选择一个要袭击的人:
+            | 请选择一个要袭击的人：
             input(type="submit",value="杀死（吸血鬼）",data-job="Vampire")
         #form_Cat(hidden).jobformarea
           p
-            | 请选择一个要复活的人（非强制）:
+            | 请选择一个要复活的人（非强制）：
             input(type="submit",value="复活（猫又）",data-job="Cat")
         #form_Witch(hidden).jobformarea
           p
-            | 请选择使用魔药的对象（非强制）:
+            | 请选择使用魔药的对象（非强制）：
             select(name="Witch_drug")
               option(value="revive") 复活药
               option(value="kill") 毒药
             input(type="submit",value="用药（魔女）",data-job="Witch")
         #form_OccultMania(hidden).jobformarea
           p
-            | 请指定一个对象:
+            | 请指定一个对象：
             input(type="submit",value="指定（怪诞狂热者）",data-job="OccultMania")
         #form_Dog(hidden).jobformarea
         #form_Dog1(hidden).jobformarea
           p
-            | 袭击你的饲主（非强制）:
+            | 袭击你的饲主（非强制）：
             input(type="submit",value="袭击饲主（犬）",data-job="Dog")
         #form_Dog2(hidden).jobformarea
           p
-            | 请选择你的饲主:
+            | 请选择你的饲主：
             input(type="submit",value="选为饲主（犬）",data-job="Dog")
         #form_Dictator(hidden).jobformarea
           p
-            | 终止讨论，指定处刑对象（只限一次）:
+            | 终止讨论，指定处刑对象（只限一次）：
             input(type="submit",value="处刑（独裁者）",data-job="Dictator")
         #form_Trapper(hidden).jobformarea
           p
-            | 请选择要护卫的对象:
+            | 请选择要护卫的对象：
             input(type="submit",value="护卫（陷阱师）",data-job="Trapper")
         #form_WolfBoy(hidden).jobformarea
           p
-            | 想要让谁看起来像人狼（非强制）:
+            | 想要让谁看起来像人狼（非强制）：
             input(type="submit",value="选择（狼少年）",data-job="WolfBoy")
         #form_MinionSelector(hidden).jobformarea
           p
-            | 请指定狼的仆从:
+            | 请指定狼的仆从：
             input(type="submit",value="指定（仆从选择者）",data-job="MinionSelector")
         #form_Thief(hidden).jobformarea
           p
-            | 请选择一个职业:
+            | 请选择一个职业：
             input(type="submit",value="选择（小偷）",data-job="Thief")
         #form_Hoodlum(hidden).jobformarea
           p
-            | 请选择你憎恨的人:
+            | 请选择你憎恨的人：
             input(type="submit",value="憎恨（无赖）",data-job="Hoodlum")
         #form__Quantum_Diviner(hidden).jobformarea
           p
@@ -197,76 +196,76 @@
             input(type="submit",value="杀死（量子人狼）",data-job="_Quantum_Werewolf")
         #form_Counselor(hidden).jobformarea
           p
-            | 请选择你要策反的人（非强制）:
+            | 请选择你要策反的人（非强制）：
             input(type="submit",value="选择（策士）",data-job="Counselor")
         #form_Miko(hidden).jobformarea
           p
-            | 用神圣的力量守护自己（只限一次）:
+            | 用神圣的力量守护自己（只限一次）
             input(type="submit",value="守护自己（巫女）",data-job="Miko")
         #form_FascinatingWolf(hidden).jobformarea
           p
-            | 请选择要诱惑的人:
+            | 请选择要诱惑的人：
             input(type="submit",value="诱惑（魅惑的女狼）",data-job="FascinatingWolf")
         #form_ToughWolf(hidden).jobformarea
           p
-            | 想要使用能力的时候请点此处（非强制）:
+            | 想要使用能力的时候请点此处（非强制）：
             input(type="submit",value="抱着觉悟杀了他（硬汉人狼）",data-job="ToughWolf")
         #form_ThreateningWolf(hidden).jobformarea
           p
-            | 请选择要威吓的人（非强制）:
+            | 请选择要威吓的人（非强制）：
             input(type="submit",value="威吓（威吓的狼）",data-job="ThreateningWolf")
         #form_WanderingGuard(hidden).jobformarea
           p
-            | 请选择一个要护卫的人:
+            | 请选择一个要护卫的人：
             input(type="submit",value="护卫（游荡猎人）",data-job="WanderingGuard")
         #form_ObstructiveMad(hidden).jobformarea
           p
-            | 请选择要妨碍的人:
+            | 请选择要妨碍的人：
             input(type="submit",value="妨碍（碍事的狂人）",data-job="ObstructiveMad")
         #form_TroubleMaker(hidden).jobformarea
           p
-            | 白天将有两人被处刑（只限一次）:
+            | 白天将有两人被处刑（只限一次）：
             input(type="submit",value="引起混乱（闹事者）",data-job="TroubleMaker")
         #form_BloodyMary(hidden).jobformarea
           p
-            | 请选择要诅咒死的人:
+            | 请选择要诅咒死的人：
             input(type="submit",value="杀死（血腥玛丽）",data-job="BloodyMary")
         #form_SantaClaus(hidden).jobformarea
           p
-            | 请选择要送礼物的对象:
+            | 请选择要送礼物的对象：
             input(type="submit",value="赠送（圣诞老人）",data-job="SantaClaus")
         #form_Phantom(hidden).jobformarea
           p
-            | 请选择要盗走职业能力的对象:
+            | 请选择要盗走职业能力的对象：
             input(type="submit",value="选择（怪盗）",data-job="Phantom")
         #form_BadLady(hidden).jobformarea
         #form_BadLady1(hidden).jobformarea
           p
-            | 首先请选择你的本命对象:
+            | 首先请选择你的本命对象：
             input(type="submit",value="求爱（恶女）",data-job="BadLady")
         #form_BadLady2(hidden).jobformarea
           p
-            | 请选择要玩弄的对象:
+            | 请选择要玩弄的对象：
             input(type="submit",value="玩弄（恶女）",data-job="BadLady")
         #form_Pyrotechnist(hidden).jobformarea
           p
-            | 准备放烟火的时候请点（只限一次）:
+            | 准备放烟火的时候请点（只限一次）：
             input(type="submit",value="放烟花（烟火师）",data-job="Pyrotechnist")
         #form_Helper(hidden).jobformarea
           p
-            | 请选择要帮助的对象:
+            | 请选择要帮助的对象：
             input(type="submit",value="帮助（帮手）",data-job="Helper")
         #form_Bomber(hidden).jobformarea
           p
-            | 请选择要送炸弹的人（非强制）:
+            | 请选择要送炸弹的人（非强制）：
             input(type="submit",value="寄送（炸弹魔）",data-job="Bomber")
         #form_Blasphemy(hidden).jobformarea
           p
-            | 请选择要亵渎的人:
+            | 请选择要亵渎的人：
             input(type="submit",value="亵渎（亵渎者）",data-job="Blasphemy")
         #form_Ushinotokimairi(hidden).jobformarea
           p
-            | 请选择要诅咒的人:
+            | 请选择要诅咒的人：
             input(type="submit",value="选择（丑刻参）",data-job="Ushinotokimairi")
         #form_Patissiere(hidden).jobformarea
           p
@@ -280,6 +279,14 @@
           p
             | 请选择要使用催眠术的对象（非强制）：
             input(type="submit",value="催眠（催眠师）",data-job="Hypnotist")
+        #form_CraftyWolf(hidden).jobformarea
+          p
+            | 在想要假死的时候请选择（非强制）：
+            input(type="submit",value="假死（狡猾的狼）",data-job="CraftyWolf")
+        #form_CraftyWolf2(hidden).jobformarea
+          p
+            | 在想要取消假死的时候请选择（非强制）：
+            input(type="submit",value="诈尸（狡猾的狼）",data-job="CraftyWolf")
         #form_GotChocolate(hidden).jobformarea
           p
             input(type="submit",value="吃下巧克力",data-job="GotChocolate")
@@ -293,14 +300,14 @@
           input(type="submit",value="发言")
           span#gmsayopt
           small
-            字号:
+            字号
           select(name="size")
             option(value="small") 小字号
             option(value="",selected) 普通
             option(value="big") 大字号
           select(name="mode")
           small
-            按日期:
+            按日期
           select#chooseviewselect
             option(value="all",selected) 全部
             option(value="today") 今日
@@ -321,4 +328,3 @@
           textarea(name="will",cols="50",rows="3",maxlength="1000")
           input(type="submit",value="决定")
   #logs
-  

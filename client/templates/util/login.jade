@@ -1,8 +1,8 @@
 section.window
   h1
-    | 您尚未登陆
-    input.closer(type="button",value="×",name="cancel")
-  h2 登陆
+    | 登陆
+    button.closer(type="button",name="cancel")
+      i.fa.fa-times
   form(aciton="/")#loginform
     p
       label
@@ -32,6 +32,3 @@ section.window
       input(type="submit",value="注册")
     p#newentryerror.error
     p: a(href="/manual/login",target="_blank") 帮助
-
-
-
