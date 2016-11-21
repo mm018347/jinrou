@@ -1,4 +1,4 @@
-﻿###
+###
     danganronpa:
         name:String
         opening:String

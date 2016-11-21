@@ -72,8 +72,8 @@ module.exports=
             theme = Server.game.themes[room.theme]
             if theme != null
                 pr = theme.skins[player.userid].prize
-            if pr
-                name="#{Server.prize.prizeQuote pr}#{name}"
+        if pr
+            name="#{Server.prize.prizeQuote pr}#{name}"
         if room.mode=="waiting"
             # 开始前（ふつう）
             log=
