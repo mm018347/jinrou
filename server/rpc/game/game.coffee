@@ -1294,6 +1294,8 @@ class Game
                     "被GM处死"
                 when "gone-day"
                     "昼间猝死"
+                when "crafty"
+                    "假死"
                 when "gone-night"
                     "夜间猝死"
                 else
