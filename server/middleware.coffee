@@ -63,13 +63,7 @@ exports.manualxhr=(request, response, next)->
 
 # public image serving
 exports.images=(request, response, next)->
-  if !/www\.werewolf\.online/.test(request.headers.host) && request.headers.host
-    reqHost = request.headers.host.split(":")
-    reqHost[0] = "www.werewolf.online"
-    response.writeHead 301,
-      Location: "http://" + reqHost.join(":") + request.url
-    response.end()
-  else if r=request.url.match /^\/images\/(.+)$/
+  if r=request.url.match /^\/images\/(.+)$/
     fs.readFile "./public/images/#{r[1]}",(err,data)->
       if err?
         response.writeHead 404,{'Content-Type':'text/plain; charset=UTF-8'}
