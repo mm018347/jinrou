@@ -4,7 +4,7 @@ section.admin#admin
   ul
     li(data-opener="blacklist") 黑名单管理
     li(data-opener="grandalert") 全体告知
-    li(data-opener="dataexport") 信息导出
+    li(data-opener="dataexport") 数据库导出
     li(data-opener="update") 更新
     li(data-opener="news") 通知管理
   section#blacklist(hidden)
@@ -56,7 +56,7 @@ section.admin#admin
         
       p: input(type="submit",value="发送")
   section#dataexport(hidden)
-    h1 信息导出
+    h1 数据库导出
     form#dataexportform
       p
         | 密码

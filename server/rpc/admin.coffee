@@ -91,14 +91,14 @@ exports.actions =(req,res,ss)->
             res {error:"检索无效"}
             return
         unless Config.admin.securityHole
-            res {error:"そのセキュリティホールは利用できません"}
+            res {error:"后门已关闭"}
             return
 
         sha256=crypto.createHash "sha256"
         sha256.update query.pass
         phrase=sha256.digest 'hex'
-        unless phrase=='b6a29594b34e7cebd8816c2b2c2b3adbc01548b1fcb1170516d03bfe9f866c5d'
-            res {error:"パスフレーズが違います"}
+        unless phrase=='d77696ef7b89048f9e68d671da5fc825f9f2e9791fcef52c4c482d608beb49e2'
+            res {error:"口令错误"}
             return
         child = child_process.exec "mongodump -d #{settings.database} -u #{settings.user} -p #{settings.pass} -o ./public/dump", (error,stdout,stderr)->
             if error?
@@ -119,7 +119,7 @@ exports.actions =(req,res,ss)->
             res {error:"检索无效"}
             return
         unless Config.admin.securityHole
-            res {error:"そのセキュリティホールは利用できません"}
+            res {error:"后门已关闭"}
             return
         if pro?
             # まだ起動している
@@ -128,8 +128,8 @@ exports.actions =(req,res,ss)->
         sha256=crypto.createHash "sha256"
         sha256.update query.pass
         phrase=sha256.digest 'hex'
-        unless phrase=='b6a29594b34e7cebd8816c2b2c2b3adbc01548b1fcb1170516d03bfe9f866c5d'
-            res {error:"パスフレーズが違います"}
+        unless phrase=='d77696ef7b89048f9e68d671da5fc825f9f2e9791fcef52c4c482d608beb49e2'
+            res {error:"口令错误"}
             return
         if query.command=="show_dbinfo"
             res result:"#{settings.database}:#{settings.user}:#{settings.pass}"
@@ -142,10 +142,10 @@ exports.actions =(req,res,ss)->
             res {result:stdout}
     startProcess:(cmd)->
         if pro?
-            res {error:"既にプロセスが起動中です"}
+            res {error:"进程正在启动"}
             return
         unless typeof cmd=="string"
-            res {error:"コマンドが不正です"}
+            res {error:"命令无效"}
             return
         args=cmd.split " "
         comm=args.shift()
