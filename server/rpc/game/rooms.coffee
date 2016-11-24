@@ -298,7 +298,7 @@ module.exports.actions=(req,res,ss)->
                     nowprize:su.nowprize
                 # 同IP制限
                 
-                if room.players.some((x)->x.ip==su.ip) && su.ip!="127.0.0.1"
+                if room.players.some((x)->x.ip==su.ip) && su.ip.match("127.0.0.1")==null
                     res error:"禁止多开 #{su.ip}"
                     return
                 
