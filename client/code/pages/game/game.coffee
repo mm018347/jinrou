@@ -1097,7 +1097,7 @@ exports.start=(roomid)->
         jobrulename=form.elements["jobrule"].value
         if form.elements["scapegoat"]?.value=="on"
             number++    # 身代わりくん
-        if jobrulename in ["特殊规则.自由配役","特殊规则.手调黑暗火锅"]
+        if jobrulename in ["特殊规则.自由配置","特殊规则.手调黑暗火锅"]
             j = $("#jobsfield").get 0
             j.hidden=false
             j.dataset.checkboxes = (if jobrulename!="特殊规则.手调黑暗火锅" then "no" else "")
