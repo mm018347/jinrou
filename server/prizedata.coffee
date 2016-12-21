@@ -169,7 +169,7 @@ makeOtherPrize=(result)->
                 15:"结婚/けっこん"
                 30:"比翼连理/ひよくれんり"
             func:(game,pl)->
-                if pl.winner && chkCmplType pl,"Friend"
+                if pl.winner && pl.isFriend()
                     1
                 else
                     0
@@ -182,7 +182,7 @@ makeOtherPrize=(result)->
                 15:"离婚/りこん"
                 30:"爱憎剧/あいぞうげき"
             func:(game,pl)->
-                if !pl.winner && chkCmplType pl,"Friend"
+                if !pl.winner && pl.isFriend()
                     1
                 else
                     0
