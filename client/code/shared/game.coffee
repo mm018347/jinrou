@@ -893,7 +893,7 @@ exports.jobinfo=
             name:"炸弹魔"
             color:"#cda764"
         Ushinotokimairi:
-            name:"丑刻参"
+            name:"丑时之女"
             color:"#c9563c"
         MadDog:
             name:"狂犬"

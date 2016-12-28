@@ -5996,7 +5996,7 @@ class Blasphemy extends Player
 
 class Ushinotokimairi extends Madman
     type:"Ushinotokimairi"
-    jobname:"丑刻参"
+    jobname:"丑时之女"
     midnightSort:90
     sleeping:->true
     jobdone:->@target?
@@ -7279,7 +7279,7 @@ class FoxMinion extends Complex
         @die game,"curse"
         player.addGamelog game,"cursekill",null,@id # 呪殺した
 
-# 丑刻参に呪いをかけられた
+# 丑时之女に呪いをかけられた
 class DivineCursed extends Complex
     cmplType:"DivineCursed"
     sunset:(game)->
