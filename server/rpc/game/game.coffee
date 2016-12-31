@@ -260,6 +260,10 @@ class Game
         
         # 投票箱を用意しておく
         @votingbox=new VotingBox this
+
+        # New Year Messageのためだけの変数
+        @currentyear = null
+
         ###
         さまざまな出来事
         id: 動作した人
@@ -792,20 +796,35 @@ class Game
             # はじまる前
             @day=1
             @night=true
+            # ゲーム開始時の年を記録
+            @currentyear = (new Date).getFullYear()
         else if @night==true
             @day++
             @night=false
         else
             @night=true
 
-        log=
-            mode:"nextturn"
-            day:@day
-            night:@night
-            userid:-1
-            name:null
-            comment:"第#{@day}天的#{if @night then '夜晚' else '白天'}到来了。"
-        splashlog @id,this,log
+        if @night==false && @currentyear+1 == (new Date).getFullYear()
+            # 新年メッセージ
+            @currentyear++
+            log=
+                mode:"nextturn"
+                day:@day
+                night:@night
+                userid:-1
+                name:null
+                comment:"现在是 #{@currentyear} 年了。"
+            splashlog @id,this,log
+        else
+            # 普通メッセージ
+            log=
+                mode:"nextturn"
+                day:@day
+                night:@night
+                userid:-1
+                name:null
+                comment:"第#{@day}天的#{if @night then '夜晚' else '白天'}到来了。"
+            splashlog @id,this,log
 
         #死体処理
         @bury(if @night then "night" else "day")
