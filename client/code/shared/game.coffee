@@ -1227,21 +1227,21 @@ exports.rules=[
             {
                 name:"safety"
                 label:"替身安全性"
-                title:"「无」和「自由」的时候替身君可以变成人狼。"
+                title:"仅在首次分配职业时生效，对转生无效。"
                 type:"select"
                 values:[
                     {
                         value:"full"
-                        label:"有"
+                        label:"替身君除去所有人外，除去女王观战者、间谍Ⅱ、埋毒者、猫又、玛丽、贵族"
                         selected:true
                     }
                     {
                         value:"no"
-                        label:"无"
+                        label:"替身君除去所有人外"
                     }
                     {
                         value:"free"
-                        label:"自由"
+                        label:"替身君可以成为任何职业"
                     }
                 ]
             }
