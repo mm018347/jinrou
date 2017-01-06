@@ -1,9 +1,9 @@
-== 吾之所问，汝为狼否? ==
+== 汝等是人是狼? ==
 Are you a werewolf?
 
-[http://jinrou.sunevsvc.com:/ 月下人狼服务器]运行中!
+[http://www.werewolf.online:/ 月下人狼服务器]运行中!
 == version ==
-1.11.7
+1.11.8
 
 == requirements ==
 * SocketStream
@@ -20,7 +20,7 @@ and others...
 # SS_ENV=production SS_PACK=1 node app.js
 
 == jobs ==
-全80種くらい?
+全80种以上?
 
 === 基本 ===
 * 村人
@@ -62,7 +62,7 @@ and others...
 * 看板娘
 * 慎重的狼
 
-などなど
+等等
 
 === options ===
 * 决定者
