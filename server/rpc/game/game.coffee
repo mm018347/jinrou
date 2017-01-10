@@ -2568,14 +2568,21 @@ class Werewolf extends Player
                 hus=game.players.filter (x)->!x.dead && !x.isWerewolf()
                 while hus.length>0 && game.werewolf_target_remain>0
                     r=Math.floor Math.random()*hus.length
-                    @job game,hus[r].id,{}
+                    @job game,hus[r].id,{
+                        jobtype: "_Werewolf"
+                    }
                     hus.splice r,1
                 if game.werewolf_target_remain>0
                     # 襲撃したい人全员襲撃したけどまだ襲撃できるときは重複襲撃
                     hus=game.players.filter (x)->!x.dead && !x.isWerewolf()
-                    while hus.length>0 && game.werewolf_target_remain>0
+                    # safety counter
+                    i = 100
+                    while hus.length>0 && game.werewolf_target_remain>0 && i > 0
                         r=Math.floor Math.random()*hus.length
-                        @job game,hus[r].id,{}
+                        @job game,hus[r].id,{
+                            jobtype: "_Werewolf"
+                        }
+                        i--
 
 
     sleeping:(game)->game.werewolf_target_remain<=0 || !game.night
