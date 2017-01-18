@@ -4136,7 +4136,7 @@ class Cat extends Poisoner
     deadnight:(game,midnightSort)->
         if midnightSort != @midnightSort then return
         @setTarget @id
-        @midnight game
+        @midnight game, midnightSort
         
     job_target:Player.JOB_T_DEAD
     makejobinfo:(game,result)->
@@ -5588,7 +5588,7 @@ class PsychoKiller extends Madman
                 pl.die game,"psycho",@id
         @setFlag "[]"
     deadnight:(game,midnightSort)->
-        @midnight game,midnightSort
+        @midnight game, midnightSort
 class SantaClaus extends Player
     type:"SantaClaus"
     jobname:"圣诞老人"
@@ -6845,8 +6845,8 @@ class Complex
         if @sub?.isComplex() || @sub?.midnightSort == midnightSort
             @sub?.midnight? game,midnightSort
     deadnight:(game,midnightSort)->
-        @mcall game,@main.deadnight,game
-        @sub?.deadnight? game
+        @mcall game,@main.deadnight,game,midnightSort
+        @sub?.deadnight? game,midnightSort
     deadsunset:(game)->
         @mcall game,@main.deadsunset,game
         @sub?.deadsunset? game
