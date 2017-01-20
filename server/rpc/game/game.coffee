@@ -5981,7 +5981,7 @@ class Baker extends Player
 class Bomber extends Madman
     type:"Bomber"
     jobname:"炸弹魔"
-    midnightSort:100
+    midnightSort:81
     sleeping:->true
     jobdone:->@flag?
     sunset:(game)->
