@@ -229,6 +229,7 @@ makeOtherPrize=(result)->
                 15:"可疑的人/あやしいひと"
                 30:"壁/かべ"
                 50:"短命/短命"
+                150:"左一/左一"
             func:(game,pl)->
                 game.gamelogs.filter((x)->
                     x.id==pl.id && x.event=="found" && x.flag=="punish" && x.day==2
@@ -266,6 +267,7 @@ makeOtherPrize=(result)->
                 30:"最终兵器/さいしゅうへいき"
                 50:"长命/长命"
                 150:"+1s/+1s"
+                1000:"不老不死/不老不死"
             func:(game,pl)->
                 if pl.dead
                     0
@@ -318,6 +320,25 @@ makeOtherPrize=(result)->
                 10:"压岁钱/おとしだま"
             func:(game,pl)->
                 game.gamelogs.filter((x)->x.target==pl.id && x.event=="shishimaibit").length
+        # 春节特别称号
+        happychinesenewyear:
+            names:
+                1:[
+                    "丁酉年/丁酉年"
+                    "大年初一/大年初一"
+                    "谨贺新春/谨贺新春"
+                ]
+                5:"鸡年大吉/鸡年大吉"
+                10:"认真过年少玩人狼/认真过年少玩人狼"
+            func:(game,pl)->
+                date = new Date()
+                month=date.getMonth()
+                year=date.getFullYear()
+                d=date.getDate()
+                if month==0 && d==28 && year==2017
+                    1
+                else
+                    0
     result.ownprizesprize=
         prizecount:
             names:
