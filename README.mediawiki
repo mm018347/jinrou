@@ -1,9 +1,9 @@
-== 汝等是人是狼? ==
+== 月下人狼 ==
 Are you a werewolf?
 
 [http://www.werewolf.online:/ 月下人狼服务器]运行中!
 == version ==
-1.11.8
+1.11.9
 
 == requirements ==
 * SocketStream
