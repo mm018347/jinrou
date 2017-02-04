@@ -720,7 +720,7 @@ exports.start=(roomid)->
                 #console.log ruleobj,night,minNight,maxNight
                 if night<minNight || maxNight<night
                     # 範囲オーバー
-                    Index.util.ask "选项","这个配置推荐的夜间时间在#{if isFinite(minNight) then minNight+'秒以上' else ''}#{if isFinite(maxNight) then maxNight+'秒以下' else ''}，可以这样开始游戏吗？",(res)->
+                    Index.util.ask "选项","这个配置推荐的夜间时间在#{if isFinite(minNight) then minNight+'秒以上' else ''}#{if isFinite(maxNight) then maxNight+'秒以下' else ''}，确认要开始游戏吗？",(res)->
                         if res
                             #OKだってよ...
                             starting()

@@ -1207,6 +1207,7 @@ exports.rules=[
                     value:"ok"
                     label:"有"
                     nolabel:"无"
+                    checked:true
                 }
                 getstr:(value)->
                     {
@@ -1302,11 +1303,11 @@ exports.rules=[
                     {
                         value:"no"
                         label:"无"
-                        selected:true
                     }
                     {
                         value:"revote"
                         label:"票数相同时"
+                        selected:true
                     }
                     {
                         value:"yes"
@@ -1490,6 +1491,7 @@ exports.rules=[
                     value:"aloud"
                     label:"有"
                     nolabel:"无"
+                    checked:true
                 }
                 getstr:(value)->
                     {
