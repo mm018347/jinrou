@@ -3551,7 +3551,7 @@ class Cupid extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 向 #{newpl.name}射出了爱之箭。"
+                comment:"#{@name} 向 #{newpl.name} 射出了爱之箭。"
             splashlog game.id,game,log
             log=
                 mode:"skill"
