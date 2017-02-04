@@ -1201,7 +1201,7 @@ exports.rules=[
             }
             {
                 name:"votemyself"
-                label:"白天向自己投票"
+                label:"允许向自己投票"
                 type:"checkbox"
                 value:{
                     value:"ok"
