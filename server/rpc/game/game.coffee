@@ -1666,7 +1666,15 @@ class Game
                     ["平局。",""]
             log.comment="#{if teamstring then "【#{teamstring}】" else ""}#{resultstring}"
             splashlog @id,this,log
-            
+
+            # 替身君单独胜利
+            winpl = @players.filter (x)->x.winner
+            if(winpl.length==1 && winpl[0].realid=="替身君")
+                log=
+                    mode:"nextturn"
+                    finished:true
+                    comment:"【替身君单独胜利】村子成了替身君的玩物。"
+                splashlog @id,this,log
             
             # 房间を终了状态にする
             M.rooms.update {id:@id},{$set:{mode:"end"}}
