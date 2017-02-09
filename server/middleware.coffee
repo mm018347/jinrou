@@ -10,6 +10,7 @@ exports.jsonapi=(request, response, next)->
       response.writeHead 301,
         Location: "http://" + reqHost.join(":") + request.url
       response.end()
+      return
     else
   if request.url=="/json/rooms"
     M.rooms.find({mode:{$ne:"end"}}).sort({made:-1}).limit(10).toArray (err,results)->
