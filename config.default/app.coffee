@@ -47,7 +47,13 @@ module.exports =
       # botアカウントのアクセストークン
       accessToken:"******"
       accessTokenSecret:"******"
-  
+  smtpConfig:
+    host: "smtp.yourserver.com"
+    port: 465 # use SSL, port without SSL is often 25
+    secure: true # use SSL
+    auth:
+      user: "noreply@yourserver.com"
+      pass: "yourpass"
   # 房间管理について
   rooms:
     # 古い部屋に入るまでの时间(hours)

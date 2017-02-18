@@ -8,13 +8,19 @@ section.profile
     p.edit(data-pname="name",data-type="text",data-maxlength="20",data-required="required")=name
     h2 简介
     p.edit(data-pname="comment",data-type="text",data-maxlength="100")=comment
+    h2 绑定邮箱
+    p.edit(data-pname="mail",data-type="text",data-maxlength="50")=mail.address
+      if mail.verified
+        p 已经认证
+      else
+        p 尚未认证
     h2 头像
     p
       input(type="hidden",name="icon",value="")
       img#myicon(width="48",height="48",alt="头像")
       input(type="button",value="头像选择",name="twittericonbutton")
     p
-      input(type="submit",value="变更保存",title="名字・简介・头像变更后请点击保存")
+      input(type="submit",value="变更保存",title="名字・简介・头像・邮箱变更后请点击保存")
       input(type="button",name="changepasswordbutton",value="密码变更")
       input(type="button",name="colorsettingbutton",value="配色设定")
   form#changepassword(hidden)

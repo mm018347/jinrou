@@ -6,7 +6,9 @@ Server=
     user:module.exports
     prize:require '../prize.coffee'
     oauth:require '../oauth.coffee'
-crypto=require('crypto')
+mailer=require '../mailer.coffee'
+crypto=require 'crypto'
+url=require 'url'
 
 # 内部関数的なログイン
 login= (query,req,cb,ss)->
@@ -114,6 +116,15 @@ exports.actions =(req,res,ss)->
             u.prize ?= []
             u.prizenames=u.prize.map (x)->{id:x,name:Server.prize.prizeName(x),phonetic:Server.prize.prizePhonetic(x) ? "undefined"}
             delete u.prize
+            if !u.mail?
+                u.mail=
+                    address:""
+                    verified:false
+            else 
+                mail=
+                    address:u.mail.address
+                    verified:u.mail.verified
+                u.mail = mail
             res u
         else
             res null
@@ -155,8 +166,6 @@ exports.actions =(req,res,ss)->
                 res {error:"昵称不能超过"+maxLength+"个字节。"}
                 return
 
-            if query.email?
-                record.email=query.email
             if query.comment? && query.comment.length<=200
                 record.comment=query.comment
             if query.icon? && query.icon.length<=300
@@ -169,6 +178,72 @@ exports.actions =(req,res,ss)->
                 req.session.user=record
                 req.session.save ->
                 res record
+    sendConfirmMail:(query)->
+        mailer.sendConfirmMail(query,req,res,ss)
+    confirmMail:(query)->
+        if query.match /\/my\?token\=(\w){128}\&timestamp\=(\d){13}$/
+            query = url.parse(query,true).query
+            # console.log query
+            M.users.findOne {"mail.token":query.token,"mail.timestamp":Number(query.timestamp)},(err,doc)->
+                # 有效时间：1小时
+                if err?
+                    res {error:"验证链接无效或已经过期"}
+                    return
+                unless doc?.mail? && Date.now() < Number(doc.mail.timestamp) + 3600*1000
+                    res {error:"验证链接无效或已经过期"}
+                    return
+                strfor=doc.mail.for
+                switch doc.mail.for
+                    when "confirm"
+                        doc.mail=
+                            address:doc.mail.address
+                            verified:true
+                    when "change"
+                        doc.mail=
+                            address:doc.mail.new
+                            verified:true
+                    when "remove"
+                        delete doc.mail
+                    when "reset"
+                        doc.password = doc.mail.newpass
+                        doc.mail=
+                            address:doc.mail.address
+                            verified:true
+                M.users.update {"userid":doc.userid}, doc, {safe:true},(err,count)=>
+                    if err?
+                        res {error:"邮箱绑定失败"}
+                        return
+                    if strfor in ["confirm","change"]
+                        doc.info="邮箱「#{doc.mail.address}」绑定成功"
+                    else if strfor == "remove"
+                        doc.mail=
+                            address:""
+                            verified:false
+                        doc.info="邮箱解除绑定成功"
+                    else if strfor == "reset"
+                        doc.info="密码重置成功，请重新登陆"
+                        doc.reset=true
+                    res doc
+            return
+        res null
+    resetPassword:(query)->
+        unless /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/.test query.mail
+            res {info:"邮箱格式不正确"}
+        query.userid = query.userid.trim()
+        query.mail = query.mail.trim()
+        if query.newpass!=query.newpass2
+            res {error:"两次输入的密码不一致"}
+            return
+        M.users.findOne {"userid":query.userid,"mail.address":query.mail,"mail.verified":true},(err,record)=>
+            if err?
+                res {error:"DB err:#{err}"}
+                return
+            if !record?
+                res {error:"账号或邮箱不正确，或邮箱没有绑定"}
+                return
+            else
+                mailer.sendResetMail(query,req,res,ss)
+                return
     changePassword:(query)->
         M.users.findOne {"userid":req.session.userId,"password":Server.user.crpassword(query.password)},(err,record)=>
             if err?
@@ -178,7 +253,7 @@ exports.actions =(req,res,ss)->
                 res {error:"用户认证失败"}
                 return
             if query.newpass!=query.newpass2
-                res {error:"密码不一致"}
+                res {error:"两次输入的密码不一致"}
                 return
             M.users.update {"userid":req.session.userId}, {$set:{password:Server.user.crpassword(query.newpass)}},{safe:true},(err,count)=>
                 if err?
