@@ -100,23 +100,29 @@ exports.showUrl=showUrl=(url,nohistory=false)->
         $("#content").removeAttr "style"
     switch url
         when "/my"
-            # 配置とか
-            ss.rpc "user.myProfile", (user)->
-                unless user?
-                    # ログインしていない
-                    showUrl "/",nohistory
-                    return
-                user[x]?="" for x in ["userid","name","comment"]
-                page "user-profile",user,Index.user.profile,user
+            # プロフィールとか
+            pf = ()=>
+                ss.rpc "user.myProfile", (user)->
+                    unless user?
+                        # ログインしていない
+                        showUrl "/",nohistory
+                        return
+                    user[x]?="" for x in ["userid","name","comment"]
+                    page "user-profile",user,Index.user.profile,user
+
             if location.href.match /\/my\?token\=(\w){128}\&timestamp\=(\d){13}$/
                 ss.rpc "user.confirmMail",location.href, (result)->
                     if result?.error?
                         Index.util.message "错误",result.error
+                        return
                     if result?.info?
                         Index.util.message "通知",result.info
-                        app.page "user-profile",result,Index.user.profile,result
                     if result?.reset
                         showUrl "/",nohistory
+                    else
+                        pf()
+            else
+                pf()
         when "/reset"
             # 重置密码
             page "reset",null,Index.reset, null

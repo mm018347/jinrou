@@ -41,12 +41,12 @@ sendConfirmMail=(query,req,res,ss)->
 
         # mail address
         if record.mail.address == query.mail
-            res {error:"邮箱地址没有变化。"}
+            res {nochange: true}
             return
         # new
         # when the last mail was not confirmed, take it as new
         else if (!record.mail.address || !record.mail.verified) && query.mail
-            mail.address = query.mail
+            mail.new = query.mail
             mail.verified = false
             mail.for="confirm"
             mailOptions.subject = "月下人狼：确认您的邮箱"
@@ -72,15 +72,13 @@ sendConfirmMail=(query,req,res,ss)->
             mailOptions.to = Config.smtpConfig.auth.user
             mailOptions.text = "query:\n#{JSON.stringify(query)}\n\nrecord.mail:\n#{JSON.stringify(record.mail)}\n"
             mailOptions.html = mailOptions.text
-            console.log mailOptions
             transporter.sendMail mailOptions, (error, info) ->
                 return console.error("nodemailer:",error) if error
                 console.log "Message sent: " + info.response
             res {error:"邮箱变更失败。"}
             return
             
-        # 限制邮箱绑定数
-        M.users.find({"mail.address":mail.address}).toArray (err,count)->
+        dochange = (err,count)->
             if err?
                 res {error:"配置变更失败"}
                 return
@@ -88,7 +86,10 @@ sendConfirmMail=(query,req,res,ss)->
                 res {error:"一个邮箱最多允许绑定三个账号"}
                 return
             # write a mail
-            mailOptions.to = mail.address
+            if mail.for in ['remove','change']
+                mailOptions.to = mail.address
+            else
+                mailOptions.to = mail.new
             console.log mail
             mailOptions.text = """您好 #{req.session.userId}，
 您正在「月下人狼」为您的账号#{if mail.for=='remove' then '解除认证' else '认证邮箱'}「#{if mail.for=='change' then mail.new else mail.address}」，用于在重置密码时证实您的身份。
@@ -108,6 +109,7 @@ sendConfirmMail=(query,req,res,ss)->
 <p>本条邮件由系统自动发出，请勿回复。</p>
 """
             
+            console.log mailOptions
             transporter.sendMail mailOptions, (error, info) ->
                 return console.error("nodemailer:",error) if error
                 console.log "Message sent: " + info.response
@@ -118,12 +120,21 @@ sendConfirmMail=(query,req,res,ss)->
                     res {error:"配置变更失败"}
                     return
                 delete record.password
-                record.info="认证邮件已经发送至您的邮箱「#{mail.address}」，该邮件将在一小时内有效，请尽快查看。"
                 record.mail=
                     address:mail.address
+                    new:mail.new
                     verified:mail.verified
-                res record
+                req.session.user = record
+                req.session.save ->
+                    record.info="认证邮件已经发送至您的邮箱「#{mail.address}」，该邮件将在一小时内有效，请尽快查看。"
+                    res record
             return
+
+        if mail.new?
+            # 限制邮箱绑定数
+            M.users.find({"mail.address": mail.new}).toArray dochange
+        else
+            dochange null, []
         return
     return
 

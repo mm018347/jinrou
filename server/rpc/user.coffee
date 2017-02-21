@@ -106,26 +106,7 @@ exports.actions =(req,res,ss)->
             return
         u=JSON.parse JSON.stringify req.session.user
         if u
-            u.wp = unless u.win? && u.lose?
-                "???"
-            else if u.win.length+u.lose.length==0
-                "???"
-            else
-                "#{(u.win.length/(u.win.length+u.lose.length)*100).toPrecision(2)}%"
-            # 称号の処理をしてあげる
-            u.prize ?= []
-            u.prizenames=u.prize.map (x)->{id:x,name:Server.prize.prizeName(x),phonetic:Server.prize.prizePhonetic(x) ? "undefined"}
-            delete u.prize
-            if !u.mail?
-                u.mail=
-                    address:""
-                    verified:false
-            else
-                mail=
-                    address:u.mail.address
-                    verified:u.mail.verified
-                u.mail = mail
-            res u
+            res userProfile(u)
         else
             res null
 # お知らせをとってきてもらう
@@ -177,7 +158,7 @@ exports.actions =(req,res,ss)->
                 delete record.password
                 req.session.user=record
                 req.session.save ->
-                res record
+                res userProfile(record)
     sendConfirmMail:(query)->
         mailer.sendConfirmMail(query,req,res,ss)
     confirmMail:(query)->
@@ -196,7 +177,7 @@ exports.actions =(req,res,ss)->
                 switch doc.mail.for
                     when "confirm"
                         doc.mail=
-                            address:doc.mail.address
+                            address:doc.mail.new
                             verified:true
                     when "change"
                         doc.mail=
@@ -213,17 +194,20 @@ exports.actions =(req,res,ss)->
                     if err?
                         res {error:"邮箱绑定失败"}
                         return
-                    if strfor in ["confirm","change"]
-                        doc.info="邮箱「#{doc.mail.address}」认证成功"
-                    else if strfor == "remove"
-                        doc.mail=
-                            address:""
-                            verified:false
-                        doc.info="邮箱解除绑定成功"
-                    else if strfor == "reset"
-                        doc.info="密码重置成功，请重新登陆"
-                        doc.reset=true
-                    res doc
+                    delete doc.password
+                    req.session.user = doc
+                    req.session.save ->
+                        if strfor in ["confirm","change"]
+                            doc.info="邮箱「#{doc.mail.address}」认证成功。"
+                        else if strfor == "remove"
+                            doc.mail=
+                                address:""
+                                verified:false
+                            doc.info="邮箱解除认证成功。"
+                        else if strfor == "reset"
+                            doc.info="密码重置成功，请重新登陆。"
+                            doc.reset=true
+                        res doc
             return
         res null
     resetPassword:(query)->
@@ -342,3 +326,27 @@ makeuserdata=(query)->
         nowprize:null   # 现在设定している肩書き
                 # [{type:"prize",value:(prizeid)},{type:"conjunction",value:"が"},...]
     }
+
+# profileに表示する用のユーザーデータをdocから作る
+userProfile = (doc)->
+    doc.wp = unless doc.win? && doc.lose?
+        "???"
+    else if doc.win.length+doc.lose.length==0
+        "???"
+    else
+        "#{(doc.win.length/(doc.win.length+doc.lose.length)*100).toPrecision(2)}%"
+    # 称号の処理をしてあげる
+    doc.prize ?= []
+    doc.prizenames = doc.prize.map (x)->{id:x,name:Server.prize.prizeName(x),phonetic:Server.prize.prizePhonetic(x) ? null}
+    delete doc.prize
+    if !doc.mail?
+        doc.mail =
+            address:""
+            new:""
+            verified:false
+    else
+        doc.mail =
+            address:doc.mail.address
+            new:doc.mail.new
+            verified:doc.mail.verified
+    return doc

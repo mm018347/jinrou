@@ -10,7 +10,13 @@ section.profile
     p.edit(data-pname="comment",data-type="text",data-maxlength="100")=comment
     h2 绑定邮箱
     p.edit(data-pname="mail",data-type="text",data-maxlength="50")=mail.address
-    if !mail.address
+    if mail.new
+      p
+        | 正在变更 (
+        = mail.new
+        | )
+        i.fa.fa-question-circle-o(data-helpicon, title="请在您输入的邮箱中按照邮件的指示操作，以完成邮箱认证·邮箱变更操作。")
+    else if !mail.address
       p
         | 没有认证
         i.fa.fa-question-circle-o(data-helpicon, title="建议您在此处登记您的邮箱地址，用于您在遗忘密码时重置密码。您在此处登记的邮箱不会被用作其他用途。")

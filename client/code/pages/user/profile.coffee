@@ -33,17 +33,18 @@ exports.start=(user)->
         Index.util.prompt "配置","请输入密码",{type:"password"},(result)->
             if result
                 q.password=result
-                ss.rpc "user.changeProfile", q,(result)->
-                    if result.error?
-                        Index.util.message "错误",result.error
-                    else
-                        app.page "user-profile",result,Index.user.profile,result
+                pf = ()=>
+                    ss.rpc "user.changeProfile", q,(result)->
+                        if result.error?
+                            Index.util.message "错误",result.error
+                        else
+                            app.page "user-profile",result,Index.user.profile,result
                 if q.mail?
                     ss.rpc "user.sendConfirmMail", q,(result)->
                         if result.error?
                             Index.util.message "错误",result.error
                         else
-                            app.page "user-profile",result,Index.user.profile,result
+                            pf()
                         if result.info?
                             Index.util.message "通知",result.info
                     
