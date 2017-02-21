@@ -26,7 +26,7 @@ sendConfirmMail=(query,req,res,ss)->
             res {error:"请输入有效的邮箱地址"}
             return
         if record.mail?.timestamp? && Date.now() < record.mail.timestamp + 5*60*1000
-            res {error:"两次获取认证邮件请至少间隔五分钟"}
+            res {error:"获取认证邮件失败，请于5分钟后再试。"}
             return
         # defaults
         mail=
@@ -35,7 +35,7 @@ sendConfirmMail=(query,req,res,ss)->
 
         # to avoid TypeError: Cannot read property 'address' of undefined
         if !record.mail?
-            record.mail = 
+            record.mail =
                 address : ""
                 verified : false
 
@@ -72,6 +72,7 @@ sendConfirmMail=(query,req,res,ss)->
             mailOptions.to = Config.smtpConfig.auth.user
             mailOptions.text = "query:\n#{JSON.stringify(query)}\n\nrecord.mail:\n#{JSON.stringify(record.mail)}\n"
             mailOptions.html = mailOptions.text
+            console.log mailOptions
             transporter.sendMail mailOptions, (error, info) ->
                 return console.error("nodemailer:",error) if error
                 console.log "Message sent: " + info.response
@@ -83,14 +84,29 @@ sendConfirmMail=(query,req,res,ss)->
             if err?
                 res {error:"配置变更失败"}
                 return
-            console.log count.length
             if count.length>=3 && mail.for in ["confirm","change"]
                 res {error:"一个邮箱最多允许绑定三个账号"}
                 return
             # write a mail
             mailOptions.to = mail.address
-            mailOptions.text = "您正在「月下人狼」为您的账号「#{req.session.userId}」#{if mail.for=='remove' then '解除绑定' else '绑定邮箱'}「#{if mail.new? then mail.new else mail.address}」，用于在找回密码时证实您的身份。\n请访问以下链接以完成绑定，此链接有效时间为1小时：\n#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}\n\n如果这不是您的操作，请无视本条邮件。\n本条邮件由系统自动发出，请勿回复。"
-            mailOptions.html = "<h1>月下人狼：确认您的邮箱</h1><p>您正在「月下人狼」为您的账号「#{req.session.userId}」#{if mail.for=='remove' then '解除绑定' else '绑定邮箱'}「#{if mail.new? then mail.new else mail.address}」，用于在找回密码时证实您的身份。</p><p>请访问以下链接以完成绑定，此链接有效时间为1小时：</p><p><a href=\"#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}\">#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}</a></p><p></p><p>如果这不是您的操作，请无视本条邮件。</p><p>本条邮件由系统自动发出，请勿回复。</p>"
+            console.log mail
+            mailOptions.text = """您好 #{req.session.userId}，
+您正在「月下人狼」为您的账号#{if mail.for=='remove' then '解除认证' else '认证邮箱'}「#{if mail.for=='change' then mail.new else mail.address}」，用于在重置密码时证实您的身份。
+请访问以下链接以完成#{if mail.for=='remove' then '解除认证' else '认证邮箱'}操作，此链接有效时间为1小时：
+#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}
+
+如果这不是您的操作，请无视本条邮件，并务必不要访问此链接。
+本条邮件由系统自动发出，请勿回复。
+"""
+            mailOptions.html = """<p>您好 #{req.session.userId}，</p>
+<p>您正在「月下人狼」为您的账号#{if mail.for=='remove' then '解除认证' else '认证邮箱'}「#{if mail.for=='change' then mail.new else mail.address}」，用于在重置密码时证实您的身份。</p>
+<p>请访问以下链接以完成#{if mail.for=='remove' then '解除认证' else '认证邮箱'}操作，此链接有效时间为1小时：</p>
+<p><a href='#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}'>#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}</a></p>
+
+<p>如果这不是您的操作，请无视本条邮件，并务必不要访问此链接。</p>
+<hr>
+<p>本条邮件由系统自动发出，请勿回复。</p>
+"""
             
             transporter.sendMail mailOptions, (error, info) ->
                 return console.error("nodemailer:",error) if error
@@ -112,7 +128,7 @@ sendConfirmMail=(query,req,res,ss)->
     return
 
 sendResetMail=(query,req,res,ss)->
-    console.log "找回密码"
+    console.log "重置密码"
     M.users.findOne {"userid":query.userid,"mail.address":query.mail,"mail.verified":true},(err,record)=>
         if err?
             res {error:"DB err:#{err}"}
@@ -126,7 +142,7 @@ sendResetMail=(query,req,res,ss)->
             res {error:"请输入有效的邮箱地址"}
             return
         if record.mail?.timestamp? && Date.now() < record.mail.timestamp + 5*60*1000
-            res {error:"两次获取认证邮件请至少间隔五分钟"}
+            res {error:"现在不能为您重设密码。请于5分钟后再试。"}
             return
         # defaults
         mail=
@@ -141,9 +157,31 @@ sendResetMail=(query,req,res,ss)->
         mailOptions.subject = "月下人狼：重设密码"
         # write a mail
         mailOptions.to = mail.address
-        mailOptions.text = "您正在「月下人狼」为您的账号「#{query.userid}」（#{query.mail}）重设密码。\n请访问以下链接以完成重设，此链接有效时间为1小时：\n#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}\n\n如果这不是您的操作，请无视本条邮件。\n本条邮件由系统自动发出，请勿回复。"
-        mailOptions.html = "<h1>月下人狼：重设密码</h1><p>您正在「月下人狼」为您的账号「#{query.userid}」（#{query.mail}）重设密码。</p><p>请访问以下链接以完成重设，此链接有效时间为1小时：</p><p><a href=\"#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}\">#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}</a></p><p></p><p>如果这不是您的操作，请无视本条邮件。</p><p>本条邮件由系统自动发出，请勿回复。</p>"
+        mailOptions.text = """您好 #{req.session.userId}，
+
+您正在「月下人狼」为您的账号重设密码。
+请访问以下链接以完成密码重置操作，此链接有效时间为1小时：
+#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}
+
+如果这不是您的操作，请无视本条邮件，并务必不要访问此链接。
+不访问此链接，您的密码就不会被重置。
+
+本条邮件由系统自动发出，请勿回复。
+"""
+
+        mailOptions.html = """<p>您好 #{req.session.userId}，</p>
+
+<p>「月下人狼」のアカウントのパスワード再設定がリクエストされました。</p>
+<p>您正在「月下人狼」为您的账号重设密码。</p>
+<p><a href='#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}'>#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}</a></p>
+
+<p>如果这不是您的操作，请无视本条邮件，并务必不要访问此链接。</p>
+<p>不访问此链接，您的密码就不会被重置。</p>
+<hr>
+<p>本条邮件由系统自动发出，请勿回复。</p>
+"""
             
+        console.log mailOptions
         transporter.sendMail mailOptions, (error, info) ->
             return console.error(error) if error
             console.log "Message sent: " + info.response

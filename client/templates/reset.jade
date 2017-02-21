@@ -1,7 +1,6 @@
 section
-  h1 月下人狼
-  p 一个<strong>实时</strong>的<strong>高自由度</strong>的人狼服务器。<a href="/manual/features">游戏简介</a>
-  h2 找回密码
+  h1 重置密码
+  p 如果您已经为账号绑定了邮箱，可以通过此途径重置您的密码。
   form(aciton="/")#resetform
     p
       label
@@ -22,9 +21,3 @@ section
     p
       input(type="submit",value="下一步")
     p#resetinfo.error
-  <div id="wb_connect_btn"></div>
-  footer
-    p: small
-      | &copy; 2011-2012 うひょ (
-      a(href="http://github.com/uhyo/jinrou",target="_blank") Github
-      | )

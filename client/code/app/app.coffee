@@ -26,6 +26,10 @@ exports.init = ->
 
         app.showUrl t.href
         return
+    # ヘルプアイコン
+    $("i[data-helpicon]").live "click", (je)->
+        t = je.currentTarget
+        util.message "帮助", t.title
 
     if localStorage.userid && localStorage.password
         login localStorage.userid, localStorage.password,(result)->
@@ -114,7 +118,7 @@ exports.showUrl=showUrl=(url,nohistory=false)->
                     if result?.reset
                         showUrl "/",nohistory
         when "/reset"
-            # 找回密码
+            # 重置密码
             page "reset",null,Index.reset, null
         when "/rooms"
             # 部屋一览

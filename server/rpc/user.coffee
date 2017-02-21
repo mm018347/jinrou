@@ -120,7 +120,7 @@ exports.actions =(req,res,ss)->
                 u.mail=
                     address:""
                     verified:false
-            else 
+            else
                 mail=
                     address:u.mail.address
                     verified:u.mail.verified
@@ -214,7 +214,7 @@ exports.actions =(req,res,ss)->
                         res {error:"邮箱绑定失败"}
                         return
                     if strfor in ["confirm","change"]
-                        doc.info="邮箱「#{doc.mail.address}」绑定成功"
+                        doc.info="邮箱「#{doc.mail.address}」认证成功"
                     else if strfor == "remove"
                         doc.mail=
                             address:""
@@ -239,7 +239,7 @@ exports.actions =(req,res,ss)->
                 res {error:"DB err:#{err}"}
                 return
             if !record?
-                res {error:"账号或邮箱不正确，或邮箱没有绑定"}
+                res {error:"账号或邮箱不正确"}
                 return
             else
                 mailer.sendResetMail(query,req,res,ss)
