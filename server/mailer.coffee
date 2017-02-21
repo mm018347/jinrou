@@ -65,6 +65,18 @@ sendConfirmMail=(query,req,res,ss)->
             mail.verified = record.mail.verified
             mail.for="change"
             mailOptions.subject = "月下人狼：修改绑定邮箱"
+        # why didn't stop? what happened?
+        # report bug automatically
+        else
+            mailOptions.subject = "月下人狼：Bug report"
+            mailOptions.to = Config.smtpConfig.auth.user
+            mailOptions.text = "query:\n#{JSON.stringify(query)}\n\nrecord.mail:\n#{JSON.stringify(record.mail)}\n"
+            mailOptions.html = mailOptions.text
+            transporter.sendMail mailOptions, (error, info) ->
+                return console.error("nodemailer:",error) if error
+                console.log "Message sent: " + info.response
+            res {error:"邮箱变更失败。"}
+            return
             
         # 限制邮箱绑定数
         M.users.find({"mail.address":mail.address}).toArray (err,count)->
@@ -81,7 +93,7 @@ sendConfirmMail=(query,req,res,ss)->
             mailOptions.html = "<h1>月下人狼：确认您的邮箱</h1><p>您正在「月下人狼」为您的账号「#{req.session.userId}」#{if mail.for=='remove' then '解除绑定' else '绑定邮箱'}「#{if mail.new? then mail.new else mail.address}」，用于在找回密码时证实您的身份。</p><p>请访问以下链接以完成绑定，此链接有效时间为1小时：</p><p><a href=\"#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}\">#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}</a></p><p></p><p>如果这不是您的操作，请无视本条邮件。</p><p>本条邮件由系统自动发出，请勿回复。</p>"
             
             transporter.sendMail mailOptions, (error, info) ->
-                return console.error(error) if error
+                return console.error("nodemailer:",error) if error
                 console.log "Message sent: " + info.response
 
             # save to database
