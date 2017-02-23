@@ -126,7 +126,7 @@ sendConfirmMail=(query,req,res,ss)->
                     verified:mail.verified
                 req.session.user = record
                 req.session.save ->
-                    record.info="认证邮件已经发送至您的邮箱「#{mail.address}」，该邮件将在一小时内有效，请尽快查看。"
+                    record.info="认证邮件已经发送至您的邮箱「#{if mail.for in ['remove','change'] then mail.address else mail.new}」，该邮件将在一小时内有效，请尽快查看。"
                     res record
             return
 
