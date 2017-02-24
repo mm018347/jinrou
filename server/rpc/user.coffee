@@ -212,7 +212,7 @@ exports.actions =(req,res,ss)->
         res null
     resetPassword:(query)->
         unless /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/.test query.mail
-            res {info:"邮箱格式不正确"}
+            res {info:"请输入有效的邮箱地址"}
         query.userid = query.userid.trim()
         query.mail = query.mail.trim()
         if query.newpass!=query.newpass2
@@ -337,7 +337,7 @@ userProfile = (doc)->
         "#{(doc.win.length/(doc.win.length+doc.lose.length)*100).toPrecision(2)}%"
     # 称号の処理をしてあげる
     doc.prize ?= []
-    doc.prizenames = doc.prize.map (x)->{id:x,name:Server.prize.prizeName(x),phonetic:Server.prize.prizePhonetic(x) ? null}
+    doc.prizenames = doc.prize.map (x)->{id:x,name:Server.prize.prizeName(x),phonetic:Server.prize.prizePhonetic(x) ? "undefined"}
     delete doc.prize
     if !doc.mail?
         doc.mail =

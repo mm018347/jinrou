@@ -145,7 +145,7 @@ sendResetMail=(query,req,res,ss)->
             res {error:"DB err:#{err}"}
             return
         if !record?
-            res {error:"账号或邮箱不正确，或邮箱没有绑定"}
+            res {error:"账号或邮箱不正确"}
             return
         if /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/.test(query.mail) || query.mail == ""
             mailOptions.to = query.mail
