@@ -8672,7 +8672,7 @@ module.exports.actions=(req,res,ss)->
                 # ケミカル人狼の場合は表示
                 ruleinfo_str = "炼成人狼　" + (ruleinfo_str ? "")
                 
-            if (joblist.WolfBoy>0 || joblist.ObstructiveMad>0) && query.divineresult=="immediate"
+            if (joblist.WolfBoy>0 || joblist.ObstructiveMad>0 || joblist.Pumpkin>0) && query.divineresult=="immediate"
                 query.divineresult="sunrise"
                 log=
                     mode:"system"
