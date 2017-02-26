@@ -294,6 +294,14 @@
           p
             | 请选择狮子舞咀嚼的对象（非强制）：
             input(type="submit",value="咀嚼（狮子舞）",data-job="Shishimai")
+        #form_Pumpkin(hidden).jobformarea
+          p
+            | 请选择变成南瓜的对象：
+            input(type="submit",value="选择（南瓜魔）",data-job="Pumpkin")
+        #form_MadScientist(hidden).jobformarea
+          p
+            | 请选择一个要复活的人（非强制/只限一次）：
+            input(type="submit",value="复活（疯狂科学家）",data-job="MadScientist")
       form#speakform
         p
           input(size="50",name="comment",required,autocomplete="off")

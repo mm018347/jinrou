@@ -1818,28 +1818,11 @@ class Game
         timeout()
     # プレイヤーごとに　見せてもよいログをリストにする
     makelogs:(logs,player)->
-        logs.map (x)=>
-            if islogOK this,player,x
-                x
-            else
-                # 見られなかったけど見たい人用
-                if x.mode=="werewolf" && @rule.wolfsound=="aloud"
-                    {
-                        mode: "werewolf"
-                        name: "狼的远吠"
-                        comment: "嗷呜・・・"
-                        time: x.time
-                    }
-                else if x.mode=="couple" && @rule.couplesound=="aloud"
-                    {
-                        mode: "couple"
-                        name: "共有者的低语"
-                        comment: "沙沙声・・・"
-                        time: x.time
-                    }
-                else
-                    null
-        .filter (x)->x?
+        result = []
+        for x in logs
+            ls = makelogsFor this, player, x
+            result.push ls...
+        return result
     prize_check:->
         Server.prize.checkPrize @,(obj)=>
             # obj: {(userid):[prize]}
@@ -6548,6 +6531,100 @@ class Shishimai extends Player
         @addGamelog game, "shishimaibit", newpl.type, newpl.id
         null
 
+class Pumpkin extends Madman
+    type: "Pumpkin"
+    jobname: "南瓜魔"
+    midnightSort: 90
+    sleeping:->@target?
+    sunset:(game)->
+        super
+        @setTarget null
+        if @scapegoat
+            alives = game.players.filter (x)->!x.dead
+            if alives.length == 0
+                @setTarget ""
+            else
+                r=Math.floor Math.random()*alives.length
+                @job game,alives[r].id ,{}
+    job:(game,playerid)->
+        @setTarget playerid
+        pl=game.getPlayer playerid
+        return unless pl?
+
+        pl.touched game,@id
+        log=
+            mode:"skill"
+            to:@id
+            comment:"#{@name} 把 #{pl.name} 变成了南瓜。"
+        splashlog game.id,game,log
+        @addGamelog game,"pumpkin",null,playerid
+        null
+    midnight:(game,midnightSort)->
+        t=game.getPlayer @target
+        return unless t?
+        return if t.dead
+
+        newpl=Player.factory null, t,null, PumpkinCostumed
+        t.transProfile newpl
+        t.transform game,newpl,true
+class MadScientist extends Madman
+    type:"MadScientist"
+    jobname:"疯狂科学家"
+    midnightSort:100
+    isReviver:->!@dead && @flag!="done"
+    sleeping:->true
+    jobdone:->@flag=="done" || @target?
+    job_target: Player.JOB_T_DEAD
+    subset:(game)->
+        @setTarget (if game.day<2 then "" else null)
+        if game.players.every((x)->!x.dead)
+            @setTarget ""  # 誰も死んでいないなら能力発動しない
+    job:(game,playerid)->
+        if game.day<2
+            return "现在还不能发动技能"
+        if @flag == "done"
+            return "已经不能发动技能"
+
+        pl=game.getPlayer playerid
+        unless pl?
+            return "这个玩家不存在"
+        unless pl.dead
+            return "不能选择这名玩家"
+
+        @setFlag "done"
+        @setTarget playerid
+
+        log=
+            mode:"skill"
+            to:@id
+            comment:"#{@name} 对 #{pl.name} 实施了复活手术。"
+        splashlog game.id,game,log
+        null
+    midnight:(game,midnightSort)->
+        return unless @target?
+        pl=game.getPlayer @target
+        return unless pl?
+        return unless pl.dead
+
+        # 蘇生
+        @addGamelog game,"raise",true,pl.id
+        pl.revive game
+
+        pl = game.getPlayer @target
+        return if pl.dead
+        # 蘇生に成功したら胜利条件を変える
+        newpl=Player.factory null,pl,null,WolfMinion    # WolfMinion
+        pl.transProfile newpl
+        pl.transform game,newpl,true
+        log=
+            mode:"skill"
+            to:newpl.id
+            comment:"#{newpl.name} 变成了狼的仆从。"
+        splashlog game.id,game,log
+class SpiritPossessed extends Player
+    type:"SpiritPossessed"
+    jobname:"恶灵凭依"
+    isReviver:->!@dead
 
 
 
@@ -7474,6 +7551,10 @@ class VoteGuarded extends Complex
             vote.votes--
         vote
 
+# 南瓜魔の呪い
+class PumpkinCostumed extends Complex
+    cmplType:"PumpkinCostumed"
+    fortuneResult: "南瓜"
 
 
 # 决定者
@@ -7762,6 +7843,9 @@ jobs=
     Hypnotist:Hypnotist
     CraftyWolf:CraftyWolf
     Shishimai:Shishimai
+    Pumpkin:Pumpkin
+    MadScientist:MadScientist
+    SpiritPossessed:SpiritPossessed
     # 特殊
     GameMaster:GameMaster
     Helper:Helper
@@ -7800,8 +7884,10 @@ complexes=
     UnderHypnosis:UnderHypnosis
     VoteGuarded:VoteGuarded
     Chemical:Chemical
+    PumpkinCostumed:PumpkinCostumed
 
-    # 职业ごとの強さ
+
+    # 役職ごとの強さ
 jobStrength=
     Human:5
     Werewolf:40
@@ -7896,6 +7982,9 @@ jobStrength=
     Hypnotist:17
     CraftyWolf:48
     Shishimai:10
+    Pumpkin:17
+    MadScientist:20
+    SpiritPossessed:4
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
@@ -8304,6 +8393,16 @@ module.exports.actions=(req,res,ss)->
                         if Math.random()<0.8
                             exceptions.push "Shishimai"
 
+                    if month==9 && 30<=d<=31
+                        # ハロウィンなので南瓜
+                        if Math.random()<0.4 && frees>0 && !nonavs.Pumpkin
+                            joblist.Pumpkin ?= 0
+                            joblist.Pumpkin++
+                            frees--
+                    else
+                        if Math.random()<0.2
+                            exceptions.push "Pumpkin"
+
                 )(new Date)
                 
                 possibility=Object.keys(jobs).filter (x)->!(x in exceptions)
@@ -8455,6 +8554,10 @@ module.exports.actions=(req,res,ss)->
                                         continue
                                     # 女王とは共存できない
                                     if joblist.QueenSpectator>0
+                                        continue
+                                when "SpiritPossessed"
+                                    # 2人いるとうるさい
+                                    if joblist.SpiritPossessed > 0
                                         continue
 
                         joblist[job]++
@@ -8767,6 +8870,17 @@ module.exports.actions=(req,res,ss)->
                 when "monologue","helperwhisper"
                     # helperwhisper:守り先が決まっていない帮手
                     log.to=player.id
+                when "heaven"
+                    # 霊界の発言は恶灵凭依の発言になるかも
+                    if !game.night && !game.voting
+                        possessions = game.players.filter (x)-> !x.dead && x.isJobType "SpiritPossessed"
+                        if possessions.length > 0
+                            # 悪魔憑き
+                            r = Math.floor (Math.random()*possessions.length)
+                            pl = possessions[r]
+                            # 悪魔憑きのプロパティ
+                            log.possess_name = pl.name
+                            log.possess_id = pl.id
                 when "gm"
                     log.name="GM→所有人"
                 when "gmheaven"
@@ -8953,23 +9067,38 @@ splashlog=(roomid,game,log)->
     log.time=Date.now() # 時間を付加
     #DBに追加
     M.games.update {id:roomid},{$push:{logs:log}}
-    flash=(log,rev=false)-> #rev: 逆な感じで配信
-        # まず观战者
-        log.roomid=roomid
-        au=islogOK game,null,log
-        if (au&&!rev) || (!au&&rev)
-            game.ss.publish.channel "room#{roomid}_audience","log",log
+    flash=(log)->
+        # まず観戦者
+        aulogs = makelogsFor game, null, log
+        for x in aulogs
+            x.roomid = roomid
+            game.ss.publish.channel "room#{roomid}_audience","log",x
         # GM
         #if game.gm&&!rev
         #   game.ss.publish.channel "room#{roomid}_gamemaster","log",log
         # 其他
         game.participants.forEach (pl)->
-            p=islogOK game,pl,log
-            if (p&&!rev) || (!p&&rev)
-                game.ss.publish.user pl.realid,"log",log
+            ls = makelogsFor game, pl, log
+            for x in ls
+                x.roomid = roomid
+                game.ss.publish.user pl.realid,"log",x
     flash log
-    
-    # 他の人へ送る
+            
+# ある人に見せたいログ
+makelogsFor=(game,player,log)->
+    if islogOK game, player, log
+        if log.mode=="heaven" && log.possess_name?
+            # 両方見える感じで
+            otherslog=
+                mode:"half-day"
+                comment: log.comment
+                name: log.possess_name
+                time: log.time
+                size: log.size
+            return [log, otherslog]
+
+        return [log]
+
     if log.mode=="werewolf" && game.rule.wolfsound=="aloud"
         # 狼的远吠が能听到
         otherslog=
@@ -8977,20 +9106,26 @@ splashlog=(roomid,game,log)->
             comment:"嗷呜・・・"
             name:"狼的远吠"
             time:log.time
-        flash otherslog,true
-    else if log.mode=="couple" && game.rule.couplesound=="aloud"
-        # 能听到共有者的低语声
+        return [otherslog]
+    if log.mode=="couple" && game.rule.couplesound=="aloud"
+        # 共有者の小声が聞こえる
         otherslog=
             mode:"couple"
             comment:"沙沙・・・"
             name:"共有者的低语声"
             time:log.time
-        flash otherslog,true
+        return [otherslog]
+    if log.mode=="heaven" && log.possess_name?
+        # 昼の霊界発言 with 悪魔憑き
+        otherslog =
+            mode:"day"
+            comment: log.comment
+            name:log.possess_name
+            time:log.time
+            size:log.size
+        return [otherslog]
     
-    
-            
-    
-    
+    return []
 
 # プレイヤーにログを見せてもよいか          
 islogOK=(game,player,log)->
@@ -9010,6 +9145,9 @@ islogOK=(game,player,log)->
         false
     else if player.dead && game.heavenview
         true
+    else if log.mode=="heaven" && log.possess_name?
+        # 恶灵凭依についている霊界発言
+        false
     else if log.to? && log.to!=player.id
         # 個人宛
         if player.isJobType "Helper"
