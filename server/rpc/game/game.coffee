@@ -8849,6 +8849,9 @@ module.exports.actions=(req,res,ss)->
                         # 间谍なら会話に参加できない
                         log.mode="monologue"
                         log.to=player.id
+                    else if query.mode=="monologue"
+                        # 霊界の独り言
+                        log.mode="heavenmonologue"
                     else
                         log.mode="heaven"
                 else if !game.night
@@ -8867,12 +8870,12 @@ module.exports.actions=(req,res,ss)->
                     log.mode=query.mode
 
             switch log.mode
-                when "monologue","helperwhisper"
-                    # helperwhisper:守り先が決まっていない帮手
+                when "monologue","heavenmonologue","helperwhisper"
+                    # helperwhisper:守り先が決まっていないヘルパー
                     log.to=player.id
                 when "heaven"
-                    # 霊界の発言は恶灵凭依の発言になるかも
-                    if !game.night && !game.voting
+                    # 霊界の発言は悪霊憑きの発言になるかも
+                    if !game.night && !game.voting && !(game.silentexpires && game.silentexpires >= Date.now())
                         possessions = game.players.filter (x)-> !x.dead && x.isJobType "SpiritPossessed"
                         if possessions.length > 0
                             # 悪魔憑き
