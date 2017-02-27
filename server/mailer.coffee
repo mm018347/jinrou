@@ -92,7 +92,7 @@ sendConfirmMail=(query,req,res,ss)->
                 mailOptions.to = mail.new
             console.log mail
             mailOptions.text = """您好 #{req.session.userId}，
-您正在「月下人狼」为您的账号#{if mail.for=='remove' then '解除认证' else '认证邮箱'}「#{if mail.for=='change' then mail.new else mail.address}」，用于在重置密码时证实您的身份。
+您正在「月下人狼」为您的账号#{if mail.for=='remove' then '解除认证' else '认证邮箱'}「#{if mail.for in ['confirm','change'] then mail.new else mail.address}」，用于在重置密码时证实您的身份。
 请访问以下链接以完成#{if mail.for=='remove' then '解除认证' else '认证邮箱'}操作，此链接有效时间为1小时：
 #{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}
 
@@ -100,7 +100,7 @@ sendConfirmMail=(query,req,res,ss)->
 本条邮件由系统自动发出，请勿回复。
 """
             mailOptions.html = """<p>您好 #{req.session.userId}，</p>
-<p>您正在「月下人狼」为您的账号#{if mail.for=='remove' then '解除认证' else '认证邮箱'}「#{if mail.for=='change' then mail.new else mail.address}」，用于在重置密码时证实您的身份。</p>
+<p>您正在「月下人狼」为您的账号#{if mail.for=='remove' then '解除认证' else '认证邮箱'}「#{if mail.for in ['confirm','change'] then mail.new else mail.address}」，用于在重置密码时证实您的身份。</p>
 <p>请访问以下链接以完成#{if mail.for=='remove' then '解除认证' else '认证邮箱'}操作，此链接有效时间为1小时：</p>
 <p><a href='#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}'>#{Config.application.url}my?token=#{mail.token}&timestamp=#{mail.timestamp}</a></p>
 
