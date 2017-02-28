@@ -1330,7 +1330,7 @@ exports.start=(roomid)->
             
             if log.name?
                 div.textContent=switch log.mode
-                    when "monologue"
+                    when "monologue", "heavenmonologue"
                         "#{log.name}自言自语:"
                     when "will"
                         "#{log.name}遗言:"

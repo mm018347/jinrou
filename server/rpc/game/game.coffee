@@ -2175,8 +2175,8 @@ class Player
         
     # ログが見えるかどうか（通常の游戏中、個人宛は除外）
     isListener:(game,log)->
-        if log.mode in ["day","system","nextturn","prepare","monologue","skill","will","voteto","gm","gmreply","helperwhisper","probability_table","userinfo"]
-            # 全员に見える
+        if log.mode in ["day","system","nextturn","prepare","monologue","heavenmonologue","skill","will","voteto","gm","gmreply","helperwhisper","probability_table","userinfo"]
+            # 全員に見える
             true
         else if log.mode in ["heaven","gmheaven"]
             # 死んでたら見える
