@@ -4320,7 +4320,7 @@ class Lover extends Player
         log=
             mode:"skill"
             to:newpl.id
-            comment:"#{pl.name} 被告白成为了恋人。"
+            comment:"#{pl.name} 受到求爱变成了恋人。"
         splashlog game.id,game,log
         # 2人とも更新する
         for pl in [this, pl]
