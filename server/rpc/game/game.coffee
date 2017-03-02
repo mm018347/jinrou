@@ -683,7 +683,7 @@ class Game
                     name:pl.name
                 }
                 @participants.push gm
-            else if result=pl.mode.match /^helper_(.+)$/
+            else if result=pl.mode?.match /^helper_(.+)$/
                 # 帮手だ
                 ppl=@players.filter((x)->x.id==result[1])[0]
                 unless ppl?

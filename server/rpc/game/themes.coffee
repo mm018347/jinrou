@@ -171,7 +171,7 @@ module.exports =
                 prize:'超高校级的保健委员'
             monaka:
                 avatar:'http://i68.tinypic.com/9ptgzs.jpg'
-                name:'最中'
+                name:'塔和最中'
                 prize:'超小学级的学活时间'
             owada_mondo:
                 avatar:'http://i64.tinypic.com/hw0tae.jpg'
