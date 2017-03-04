@@ -5375,7 +5375,7 @@ class TroubleMaker extends Player
 
 class FrankensteinsMonster extends Player
     type:"FrankensteinsMonster"
-    jobname:"弗兰肯斯坦"
+    jobname:"弗兰肯斯坦的怪物"
     die:(game,found)->
         super
         if found=="punish"
@@ -5383,7 +5383,7 @@ class FrankensteinsMonster extends Player
             game.votingbox.addPunishedNumber 1
     beforebury:(game)->
         # 新しく死んだひとたちで村人阵营ひとたち
-        # 不吸收弗兰肯斯坦
+        # 不吸收弗兰肯斯坦的怪物
         founds=game.players.filter (x)->x.dead && x.found && x.getTeam=="Human" && !x.isJobType("FrankensteinsMonster")
         # 吸収する
         thispl=this

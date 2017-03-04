@@ -801,7 +801,7 @@ exports.jobinfo=
             name:"闹事者"
             color:"#64b82c"
         FrankensteinsMonster:
-            name:"弗兰肯斯坦"
+            name:"弗兰肯斯坦的怪物"
             color:"#4d3a03"
         BloodyMary:
             name:"血腥玛丽"
