@@ -5384,7 +5384,7 @@ class FrankensteinsMonster extends Player
     beforebury:(game)->
         # 新しく死んだひとたちで村人阵营ひとたち
         # 不吸收弗兰肯斯坦的怪物
-        founds=game.players.filter (x)->x.dead && x.found && x.getTeam=="Human" && !x.isJobType("FrankensteinsMonster")
+        founds=game.players.filter (x)->x.dead && x.found && x.getTeam()=="Human" && !x.isJobType("FrankensteinsMonster")
         # 吸収する
         thispl=this
         for pl in founds
