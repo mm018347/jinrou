@@ -1585,8 +1585,8 @@ class Game
                             # 恋人バトル
                             team=null
             # カルト判定
-            if alives>0 && aliveps.every((x)->x.isCult() || x.isJobType("CultLeader") && x.team=="Cult" )
-                # 全员信者
+            if alives>0 && aliveps.every((x)->x.isCult() || x.isJobType("CultLeader") && x.getTeam()=="Cult" )
+                # 全員信者
                 team="Cult"
             # 悪魔くん判定
             isDevilWinner = (pl)->
@@ -1594,7 +1594,7 @@ class Game
                 return false unless pl?
                 return false unless pl.isJobType "Devil"
                 if pl.isComplex()
-                    return isDevilWinner(pl.sub) || (pl.team == "Devil" && isDevilWinner(pl.main))
+                    return isDevilWinner(pl.sub) || (pl.getTeam() == "Devil" && isDevilWinner(pl.main))
                 else
                     return pl.flag == "winner"
             if @players.some(isDevilWinner)
@@ -2216,6 +2216,8 @@ class Player
     isReviver:->false
     # Am I Dead?
     isDead:->{dead:@dead,found:@found}
+    # get my team
+    getTeam:-> @team
     # 終了時の人間カウント
     humanCount:->
         if !@isFox() && @isHuman()
@@ -3033,7 +3035,7 @@ class WolfDiviner extends Werewolf
         unless pl?
             return "这个玩家不存在。"
         @setFlag playerid
-        unless pl.team=="Werewolf" && pl.isHuman()
+        unless pl.getTeam()=="Werewolf" && pl.isHuman()
             # 狂人は変化するので
             pl.touched game,@id
         log=
@@ -3078,7 +3080,7 @@ class WolfDiviner extends Werewolf
                 result: "人狼占卜师 #{@name} 占卜了 #{p.name} 的身份，他是 #{p.jobname}。"
             }
             @addGamelog game,"wolfdivine",null,@flag  # 占った
-            if p.team=="Werewolf" && p.isHuman()
+            if p.getTeam()=="Werewolf" && p.isHuman()
                 # 狂人変化
                 #避免狂人成为某些职业，"GameMaster"保留
                 jobnames=Object.keys jobs
@@ -3158,9 +3160,9 @@ class Fugitive extends Player
         # 人狼の家に逃げていたら即死
         pl=game.getPlayer @target
         return unless pl?
-        if !pl.dead && pl.isWerewolf() && pl.team in ["Werewolf","LoneWolf"]
+        if !pl.dead && pl.isWerewolf() && pl.getTeam() in ["Werewolf","LoneWolf"]
             @die game,"werewolf2"
-        else if !pl.dead && pl.isVampire() && pl.team=="Vampire"
+        else if !pl.dead && pl.isVampire() && pl.getTeam()=="Vampire"
             @die game,"vampire2"
         
     isWinner:(game,team)->
@@ -3567,7 +3569,7 @@ class Stalker extends Player
             return false
         pl=game.getPlayer @flag
         return false unless pl?
-        if team==pl.team
+        if team==pl.getTeam()
             return true
         if pl.isJobType "Stalker"
             # 跟踪狂を追跡
@@ -4940,7 +4942,7 @@ class Counselor extends Player
         t=game.getPlayer @target
         return unless t?
         return if t.dead
-        tteam = if t.getMyChemicalTeam then t.getMyChemicalTeam() else t.team
+        tteam = t.getTeam()
         if t.isWerewolf() && tteam in ["Werewolf","LoneWolf"]
             # 人狼とかヴァンパイアを襲ったら殺される
             @die game,"werewolf2"
@@ -5082,7 +5084,7 @@ class FascinatingWolf extends Werewolf
         if pl.dead
             # 既に死んでいた
             return
-        unless pl.isHuman() && pl.team!="Werewolf"
+        unless pl.isHuman() && pl.getTeam()!="Werewolf"
             # 誘惑できない
             return
 
@@ -5382,7 +5384,7 @@ class FrankensteinsMonster extends Player
     beforebury:(game)->
         # 新しく死んだひとたちで村人阵营ひとたち
         # 不吸收弗兰肯斯坦
-        founds=game.players.filter (x)->x.dead && x.found && x.team=="Human" && x.type!="FrankensteinsMonster"
+        founds=game.players.filter (x)->x.dead && x.found && x.getTeam=="Human" && !x.isJobType("FrankensteinsMonster")
         # 吸収する
         thispl=this
         for pl in founds
@@ -5419,10 +5421,10 @@ class BloodyMary extends Player
         if @target?
             true
         else if @flag=="punish"
-            !(game.players.some (x)->!x.dead && x.team=="Human")
+            !(game.players.some (x)->!x.dead && x.getTeam()=="Human")
         else if @flag=="werewolf"
             if game.players.filter((x)->!x.dead && x.isWerewolf()).length>1
-                !(game.players.some (x)->!x.dead && x.team in ["Werewolf","LoneWolf"])
+                !(game.players.some (x)->!x.dead && x.getTeam() in ["Werewolf","LoneWolf"])
             else
                 # 狼が残り1匹だと何もない
                 true
@@ -5473,10 +5475,10 @@ class BloodyMary extends Player
             pls=[]
             if @flag=="punish"
                 # 村人を……
-                pls=game.players.filter (x)->!x.dead && x.team=="Human"
+                pls=game.players.filter (x)->!x.dead && x.getTeam()=="Human"
             else if @flag=="werewolf"
                 # 人狼を……
-                pls=game.players.filter (x)->!x.dead && x.team in ["Werewolf","LoneWolf"]
+                pls=game.players.filter (x)->!x.dead && x.getTeam() in ["Werewolf","LoneWolf"]
             return (for pl in pls
                 {
                     name:pl.name
@@ -6836,6 +6838,7 @@ class Complex
         return {dead:@dead,found:@found}
     isJobType:(type)->
         @main.isJobType(type) || @sub?.isJobType?(type)
+    getTeam:-> @main.getTeam()
     #An access to @main.flag, etc.
     accessByJobType:(type)->
         unless type
@@ -6968,7 +6971,6 @@ class Complex
     isFox:->@main.isFox()
     isVampire:->@main.isVampire()
     isWinner:(game,team)->@main.isWinner game, team
-    getMyChemicalTeam:->@main.getMyChemicalTeam?()
 
 #superがつかえないので注意
 class Friend extends Complex    # 恋人
@@ -7140,12 +7142,13 @@ class TrapGuarded extends Complex
 
         # 狩人とかぶったら狩人が死んでしまう!!!!!
         # midnight: 狼の襲撃よりも前に行われることが保証されている処理
-        if midnightSort != @midnightSort then return
+        return if midnightSort != @midnightSort
         wholepl=game.getPlayer @id  # 一番表から見る
         result=@checkGuard game,wholepl
         if result
-            # 猎人がいた!（罠も無効）
-            @uncomplex game
+            # 狩人がいた!（罠も無効）
+            wholepl = game.getPlayer @id
+            @checkTrap game, wholepl
     # midnight処理用
     checkGuard:(game,pl)->
         return false unless pl.isComplex()
@@ -7172,6 +7175,16 @@ class TrapGuarded extends Complex
             # 子の調査を継続
             @checkGuard game,pl.main
             return true
+    checkTrap:(game,pl)->
+        # TrapGuardedも消す
+        return unless pl.isComplex()
+        if pl.cmplType=="TrapGuarded"
+            pl.uncomplex game
+            @checkTrap game, pl.main
+        else
+            @checkTrap game, pl.main
+            if pl.sub?
+                @checkTrap game, pl.sub
 
     die:(game,found,from)->
         unless found in ["werewolf","vampire"]
@@ -7647,31 +7660,35 @@ class Chemical extends Complex
             "人狼"
         else
             "村人"
-    getMyChemicalTeam:->
+    getTeam:->
         myt = null
-        if @main.team=="Cult" || @sub?.team=="Cult"
+        maint = @main.getTeam()
+        subt = @sub?.getTeam()
+        if maint=="Cult" || subt=="Cult"
             myt = "Cult"
-        else if @main.team=="Friend" || @sub?.team=="Friend"
+        else if maint=="Friend" || subt=="Friend"
             myt = "Friend"
-        else if @main.team=="Fox" || @sub?.team=="Fox"
+        else if maint=="Fox" || subt=="Fox"
             myt = "Fox"
-        else if @main.team=="Vampire" || @sub?.team=="Vampire"
+        else if maint=="Vampire" || subt=="Vampire"
             myt = "Vampire"
-        else if @main.team=="Werewolf" || @sub?.team=="Werewolf"
+        else if maint=="Werewolf" || subt=="Werewolf"
             myt = "Werewolf"
-        else if @main.team=="LoneWolf" || @sub?.team=="LoneWolf"
+        else if maint=="LoneWolf" || subt=="LoneWolf"
             myt = "LoneWolf"
-        else if @main.team=="Human" || @sub?.team=="Human"
+        else if maint=="Human" || subt=="Human"
             myt = "Human"
         else
             myt = ""
         return myt
     isWinner:(game,team)->
-        myt = @getMyChemicalTeam()
+        myt = @getTeam()
         win = false
-        if @main.team == myt || @main.team == "" || @main.team == "Devil"
+        maint = @main.getTeam()
+        sunt = @sub?.getTeam()
+        if maint == myt || maint == "" || maint == "Devil"
             win = win || @main.isWinner(game,team)
-        if @sub?.team == myt || @sub?.team == "" || @sub?.team == "Devil"
+        if subt == myt || subt == "" || subt == "Devil"
             win = win || @sub.isWinner(game,team)
         return win
     die:(game, found, from)->
@@ -7709,10 +7726,10 @@ class Chemical extends Complex
         @main.makejobinfo game,result
         @sub?.makejobinfo? game,result
         # 女王観戦者は村人陣営×村人陣営じゃないと見えない
-        if result.queens? && (@main.team != "Human" || @sub?.team != "Human")
+        if result.queens? && (@main.getTeam() != "Human" || @sub?.getTeam() != "Human")
             delete result.queens
         # 陣営情報
-        result.myteam = @getMyChemicalTeam()
+        result.myteam = @getTeam()
 
 
 
