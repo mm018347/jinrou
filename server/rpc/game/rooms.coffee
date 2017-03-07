@@ -302,6 +302,10 @@ module.exports.actions=(req,res,ss)->
                     res error:"禁止多开 #{su.ip}"
                     return
                 
+                # please no, link of data:image/jpeg;base64 would be a disaster
+                if user.icon?.length>512
+                    res error:"头像链接超长（#{user.icon.length}）"
+                    return
 
                 if room.theme
                     theme = Server.game.themes[room.theme]
