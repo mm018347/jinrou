@@ -1685,7 +1685,7 @@ class Game
                 message = 
                     id:@id
                     userlist:[]
-                    time:parseInt(60/@players.length)
+                    time:parseInt(Config.rooms.suddenDeathBAN/@players.length)
                 for x in norevivers
                     pl = @getPlayer x
                     message.userlist.push {"userid":pl.realid,"name":pl.name}

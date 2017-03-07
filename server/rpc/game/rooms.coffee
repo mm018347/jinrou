@@ -656,7 +656,7 @@ module.exports.actions=(req,res,ss)->
                 console.log "目标  id："+banTarget
                 banpl=room.players.filter((pl)->pl.realid==banTarget)
                 banTargetName = banpl.name
-                banMinutes = parseInt(60/room.players.length)
+                banMinutes = parseInt(Config.rooms.suddenDeathBAN/room.players.length)
                 console.log "目标name："+banTargetName
                 M.users.findOne {userid:banTarget},(err,doc)->
                     unless doc?

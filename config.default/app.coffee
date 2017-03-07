@@ -59,4 +59,5 @@ module.exports =
   rooms:
     # 古い部屋に入るまでの时间(hours)
     fresh:24*3
+    suddenDeathBAN:360
 	
