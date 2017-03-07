@@ -6838,7 +6838,7 @@ class Complex
         return {dead:@dead,found:@found}
     isJobType:(type)->
         @main.isJobType(type) || @sub?.isJobType?(type)
-    getTeam:-> @main.getTeam()
+    getTeam:-> if @team then @team else @main.getTeam()
     #An access to @main.flag, etc.
     accessByJobType:(type)->
         unless type
