@@ -33,10 +33,21 @@ section.profile
       input(type="button",value="头像选择",name="twittericonbutton")
     p
       input(type="submit",value="变更保存",title="名字・简介・头像・邮箱变更后请点击保存")
-      input(type="button",name="changepasswordbutton",value="密码变更")
       input(type="button",name="colorsettingbutton",value="配色设定")
+  h2 安全性设置
+  form
+    p
+      label
+        | 锁定密码·邮箱地址
+        input(type="checkbox",name="mailconfirmsecurity", value="on", checked=mailconfirmsecurity)
+      i.fa.fa-question-circle-o(data-helpicon, title="如果锁定了密码与邮箱地址，将必须通过邮件认证的方式才能恢复解锁。")
+    p
+      input#mailconfirmsecuritybutton(type="button",value="变更保存")
+  hr
+  p
+    input#changepasswordbutton(type="button",name="changepasswordbutton",value="密码变更")
   form#changepassword(hidden)
-    h2 密码变更
+    h3 密码变更
     p: label
       | 新密码
       input(name="newpass",type="password",size="20",required)

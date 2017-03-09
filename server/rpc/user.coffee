@@ -185,11 +185,18 @@ exports.actions =(req,res,ss)->
                             verified:true
                     when "remove"
                         delete doc.mail
+                        # 事故をふせぐ
+                        doc.mailconfirmsecurity = false
                     when "reset"
                         doc.password = doc.mail.newpass
                         doc.mail=
                             address:doc.mail.address
                             verified:true
+                    when "mailconfirmsecurity-off"
+                        doc.mail=
+                            address:doc.mail.address
+                            verified:doc.mail.verified
+                        doc.mailconfirmsecurity = false
                 M.users.update {"userid":doc.userid}, doc, {safe:true},(err,count)=>
                     if err?
                         res {error:"邮箱绑定失败"}
@@ -207,6 +214,8 @@ exports.actions =(req,res,ss)->
                         else if strfor == "reset"
                             doc.info="密码重置成功，请重新登陆。"
                             doc.reset=true
+                        else if strfor == "mailconfirmsecurity-off"
+                            doc.info="密码·邮箱地址已经解除锁定。"
                         res doc
             return
         res null
@@ -229,6 +238,9 @@ exports.actions =(req,res,ss)->
                 mailer.sendResetMail(query,req,res,ss)
                 return
     changePassword:(query)->
+        if query.newpass!=query.newpass2
+            res {error:"两次输入的密码不一致"}
+            return
         M.users.findOne {"userid":req.session.userId,"password":Server.user.crpassword(query.password)},(err,record)=>
             if err?
                 res {error:"DB err:#{err}"}
@@ -236,14 +248,52 @@ exports.actions =(req,res,ss)->
             if !record?
                 res {error:"用户认证失败"}
                 return
-            if query.newpass!=query.newpass2
-                res {error:"两次输入的密码不一致"}
-                return
+            if record.mailconfirmsecurity
+                res {error:"当前密码被锁定，变更失败。"}
             M.users.update {"userid":req.session.userId}, {$set:{password:Server.user.crpassword(query.newpass)}},{safe:true},(err,count)=>
                 if err?
                     res {error:"配置变更失败"}
                     return
-                res null
+                res userProfile(record)
+    changeMailconfirmsecurity:(query)->
+        M.users.findOne {"userid":req.session.userId}, (err, record)->
+            if err?
+                res {error:"DB err:#{err}"}
+                return
+            if !record?
+                res {error:"用户认证失败"}
+                return
+            if query.mailconfirmsecurity == record.mailconfirmsecurity
+                record.info = "保存成功。"
+                res userProfile(record)
+                return
+            if query.mailconfirmsecurity == true
+                # 厳しい
+                if record.mail?.verified == true
+                    M.users.update {"userid":req.session.userId}, {
+                        $set: {mailconfirmsecurity: true}
+                    }, {safe: true}, (err,count)->
+                        if err?
+                            res {error:"DB err:#{err}"}
+                            return
+                        delete record.password
+                        req.session.user=record
+                        req.session.save ->
+                        record.mailconfirmsecurity = true
+                        record.info = "保存成功。"
+                        res userProfile(record)
+                else
+                    # メールアドレスの登録が必要
+                    res {error: "必须先认证一个邮箱才能使用此功能。"}
+
+            else
+                # メール確認が必要
+                res2 = (record) -> res userProfile(record)
+                mailer.sendMailconfirmsecurityMail {
+                    userid: req.session.userId
+                }, req, res2, ss
+
+
     usePrize: (query)->
         # 表示する称号を変える query.prize
         M.users.findOne {"userid":req.session.userId,"password":Server.user.crpassword(query.password)},(err,record)=>
@@ -317,6 +367,7 @@ makeuserdata=(query)->
         name: query.userid
         icon:"" # iconのURL
         comment: ""
+        mailconfirmsecurity: false
         win:[]  # 勝ち試合
         lose:[] # 負け試合
         gone:[] # 行方不明試合
@@ -349,4 +400,6 @@ userProfile = (doc)->
             address:doc.mail.address
             new:doc.mail.new
             verified:doc.mail.verified
+    # backward compatibility
+    doc.mailconfirmsecurity = !!doc.mailconfirmsecurity
     return doc
