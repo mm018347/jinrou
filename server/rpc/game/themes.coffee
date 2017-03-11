@@ -27,6 +27,213 @@
 ###
 
 module.exports = 
+    touhou:
+        name:"东方Project"
+        opening:"异变发生！！"
+        vote:""
+        sunrise:""
+        sunset:""
+        icon:""
+        background_color:"black"
+        color:"rgb(255,0,166)"
+        skins:
+            alice_margatroid:
+                avatar:"http://i66.tinypic.com/2zxunp5.jpg"
+                name:"爱丽丝·玛格特罗依德"
+                prize:["雹之人偶使","光凭外表是十分爽朗的妖怪","七色的人偶师","七色的人偶使"]
+            yasaka_kanako:
+                avatar:"http://i65.tinypic.com/hs13eo.jpg"
+                name:"八坂神奈子"
+                prize:["山坂与湖水的化身","喜欢坂道的神明","屹立不挠的神明"]
+            yagokoro_eirin:
+                avatar:"http://i63.tinypic.com/28as2u1.jpg"
+                name:"八意永琳"
+                prize:["月之头脑","街中的药贩","蓬莱的药贩"]
+            yakumo_ran:
+                avatar:"http://i68.tinypic.com/21mb70l.jpg"
+                name:"八云蓝"
+                prize:["隙间妖怪的式神","稀有的动物","策士的九尾"]
+            yakumo_yukari:
+                avatar:"http://i65.tinypic.com/f1w2o8.jpg"
+                name:"八云紫"
+                prize:["幻想的狐嫁雨","幻想的境界","幻想乡的守门人","境界的妖怪","令人不快的微笑","潜藏于境界内的妖怪","神出鬼没的妖怪","神隐的主犯"]
+            hieda_no_akyuu:
+                avatar:"http://i68.tinypic.com/2qtdbev.jpg"
+                name:"稗田阿求"
+                prize:["幻想乡的记忆"]
+            hinanawi_tenshi:
+                avatar:"http://i64.tinypic.com/a4vdzm.jpg"
+                name:"比那名居天子"
+                prize:["有顶天的大小姐","非想非非想天之女"]
+            hakurei_reimu:
+                avatar:"http://i65.tinypic.com/acsina.jpg"
+                name:"博丽灵梦"
+                prize:["八百万神的代言人","博丽神社的巫女小姐","飞翔于天空的不可思议的巫女","快晴的巫女","乐园的可爱巫女","乐园的巫女","神秘！结界的巫女","五欲的巫女","永远之巫女","追逐怪奇！终结异变的巫女"]
+            chen:
+                avatar:"http://i64.tinypic.com/ngt3f5.jpg"
+                name:"橙"
+                prize:["凶兆的黑猫","隙间妖怪的式神的式神","用眼也捕捉不到的妖怪猫"]
+            captain_murasa_minamitsu:
+                avatar:"http://i68.tinypic.com/5xiscp.jpg"
+                name:"村纱水蜜"
+                prize:["水难事故的念缚灵","凄惨的汪洋大海"]
+            oo_namazu:
+                avatar:"http://i64.tinypic.com/28ml8y.jpg"
+                name:"大鲶鱼"
+                prize:[""]
+            kotiya_sanae:
+                avatar:"http://i68.tinypic.com/6o2buo.jpg"
+                name:"东风谷早苗"
+                prize:["风与湖的通神者","孤陋浅薄的人类","祭祀风的人类","山上的新人神明","我欲的巫女","现代人的现人神","住在山里的奇迹的现人神"]
+            toyosatomimi_no_miko:
+                avatar:"http://i63.tinypic.com/x28e89.jpg"
+                name:"丰聪耳神子"
+                prize:["怪奇！二色披风魔人","圣德道士","司掌宇宙的全能道士","天资英迈的仙人"]
+            kazami_yuuka:
+                avatar:"http://i67.tinypic.com/14v19w4.jpg"
+                name:"风见幽香"
+                prize:["四季的鲜花之主"]
+            flandre_scarlet:
+                avatar:"http://i65.tinypic.com/15z4k89.jpg"
+                name:"芙兰朵露·斯卡蕾特"
+                prize:["恶魔之妹","可怕的波动"]
+            komeiji_satori:
+                avatar:"http://i68.tinypic.com/35i3vpc.jpg"
+                name:"古明地觉"
+                prize:["大家的心病","孤影悄然的妖怪","怨灵也为之惧怯的少女"]
+            komeiji_koishi:
+                avatar:"http://i64.tinypic.com/2h7iej4.jpg"
+                name:"古明地恋"
+                prize:["本怖！就在你的身后","紧闭的恋之瞳","空想上的人格保持者","什么都没在想的人"]
+            kawashiro_nitori:
+                avatar:"http://i68.tinypic.com/5nm2wk.jpg"
+                name:"河城荷取"
+                prize:["超妖怪弹头","河中的便利屋","水平思考的河童","水中的工程师","水中的技师","太古！三叠纪的河童"]
+            hon_meirin:
+                avatar:"http://i65.tinypic.com/sya4g7.jpg"
+                name:"红美铃"
+                prize:["红魔馆门卫·华人小姑娘","华人小姑娘","色彩艳丽的门卫"]
+            konpaku_youmu:
+                avatar:"http://i63.tinypic.com/dlow7k.jpg"
+                name:"魂魄妖梦"
+                prize:["半分虚幻的庭师","半人半灵","半人半灵的半吊子","半人半灵的庭师","苍天的庭师","切舍御免","生命的二刀流","死欲的半灵","幽人的庭师"]
+            kagiyama_hina:
+                avatar:"http://i63.tinypic.com/viebkn.jpg"
+                name:"键山雏"
+                prize:["秘神流雏","转嫁游戏大师"]
+            letty_whiterock:
+                avatar:"http://i66.tinypic.com/10oi5qt.jpg"
+                name:"蕾蒂·霍瓦特洛克"
+                prize:["冬天的遗忘之物","局部性的大寒潮","冬之妖怪"]
+            remilia_scarlet:
+                avatar:"http://i68.tinypic.com/30sdh5d.jpg"
+                name:"蕾米莉亚·斯卡蕾特"
+                prize:["红色的世界","红色恶魔","浓雾的吸血鬼","深红的夜行性恶魔","永远幼小的红月"]
+            lily_white:
+                avatar:"http://i66.tinypic.com/24m9k4i.jpg"
+                name:"莉莉怀特"
+                prize:["运送春天的妖精"]
+            reiuji_utsuho:
+                avatar:"http://i68.tinypic.com/2yz0qr8.jpg"
+                name:"灵乌路空"
+                prize:["难以驾驭的神之火","地底的太阳"]
+            reisen_udongein_inaba:
+                avatar:"http://i68.tinypic.com/14bkoyw.jpg"
+                name:"铃仙·优昙华院·因幡"
+                prize:["地上的月兔","禁视！狂气的扭扭兔","狂气的赤瞳","狂气的月兔","令视界摇晃的妖怪兔","晴岚的赤眼"]
+            rumia:
+                avatar:"http://i64.tinypic.com/30crjhz.jpg"
+                name:"露米娅"
+                prize:["宵暗的妖怪","潜伏在宵暗中的妖怪"]
+            medicine_melancholy:
+                avatar:"http://i63.tinypic.com/2mr74uo.jpg"
+                name:"梅蒂欣·梅兰可莉"
+                prize:["小小的甜蜜毒药","不会对身体温婉的人偶"]
+            mystia_lorelei:
+                avatar:"http://i67.tinypic.com/dqp24i.jpg"
+                name:"米斯蒂娅·萝蕾拉"
+                prize:["夜雀妖怪","歌唱的夜雀"]
+            patchouli_knowledge:
+                avatar:"http://i63.tinypic.com/23rk3du.jpg"
+                name:"帕秋莉·诺蕾姬"
+                prize:["不动的大图书馆","不明的魔法之元","花昙的魔女","知识与避世的少女"]
+            houraisan_kaguya:
+                avatar:"http://i68.tinypic.com/2zq7ivt.jpg"
+                name:"蓬莱山辉夜"
+                prize:["永远和须臾的罪人","永远的公主","不像人类的公主殿下"]
+            cirno:
+                avatar:"http://i67.tinypic.com/11w8xv4.jpg"
+                name:"琪露诺"
+                prize:["冰之小妖精","冰之妖怪","冰之妖精","不自然的冷气","湖的冰精","湖上的冰精"]
+            inubashiri_momizi:
+                avatar:"http://i68.tinypic.com/33z4epv.jpg"
+                name:"犬走椛"
+                prize:["山中的千里眼","下端哨戒天狗"]
+            kamishirasawa_keine:
+                avatar:"http://i63.tinypic.com/4uw604.jpg"
+                name:"上白泽慧音"
+                prize:["知识与历史的半兽","一本正经的历史家"]
+            shameimaru_aya:
+                avatar:"http://i65.tinypic.com/apicyf.jpg"
+                name:"射命丸文"
+                prize:["传统的幻想书屋","风雨之鸦","捏造新闻记者","鸦天狗新闻工作者","最接近村落的天狗"]
+            hijiri_byakuren:
+                avatar:"http://i66.tinypic.com/xql3cy.jpg"
+                name:"圣白莲"
+                prize:["被封印的大魔法师","超越了灵长类的阿阇梨","极速！骑手僧侣","念佛三昧的大阿阇梨","妖怪寺的魔住持","妖怪寺的住持僧","勇往直前僧侣"]
+            izayoi_akuya:
+                avatar:"http://i64.tinypic.com/34y37.jpg"
+                name:"十六夜咲夜"
+                prize:["电光石火的女仆","红魔馆的女仆","红色恶魔的女仆","完美潇洒的从者","完全潇洒的女仆","危险的戏法家","吸血鬼的女仆","小夜岚的女仆"]
+            shikieiki_yamaxanadu:
+                avatar:"http://i63.tinypic.com/96eqfb.jpg"
+                name:"四季映姬·亚玛萨那度"
+                prize:["乐园的最高裁判长","敬畏的话语","地狱的最高裁判长"]
+            fujiwara_no_mokou:
+                avatar:"http://i67.tinypic.com/2hcnj2r.jpg"
+                name:"藤原妹红"
+                prize:["蓬莱人的外形","烧不死的人类","激热！人类地狱火","红之自警队"]
+            kirisame_marisa:
+                avatar:"http://i65.tinypic.com/14aj1c2.jpg"
+                name:"雾雨魔理沙"
+                prize:["大胆小心的人类","代表人类的魔法使","东洋的西洋魔术师","极其普通的魔法师","恐怖！学校的魔法使","路过的魔法使","魔法使","普通的黑魔术少女","普通的黑魔术师","普通的魔法使","普通的魔法使小姐","奇妙的魔法使","强欲的魔法使","雾雨的魔法使","像个人类的魔法使"]
+            saigyouji_yuyuko:
+                avatar:"http://i67.tinypic.com/anrci.jpg"
+                name:"西行寺幽幽子"
+                prize:["从不困惑的亡灵","华胥的亡灵","天衣无缝的亡灵","心无彷徨的亡灵","雪的亡灵","幽冥楼阁的亡灵少女","幽雅的心灵照片"]
+            little_devil:
+                avatar:"http://i68.tinypic.com/104qpv9.jpg"
+                name:"小恶魔"
+                prize:[""]
+            onozuka_komachi:
+                avatar:"http://i63.tinypic.com/2ce6zbq.jpg"
+                name:"小野冢小町"
+                prize:["川雾里的摆渡人","江户时代气质的死神","困窘零落的死神","三途河畔的摆渡人"]
+            moriya_suwako:
+                avatar:"http://i68.tinypic.com/2aglutv.jpg"
+                name:"洩矢诹访子"
+                prize:["两栖类的神明","名存实亡的神明","土著神的顶点"]
+            hoshigumayugi:
+                avatar:"http://i65.tinypic.com/ftn6a0.jpg"
+                name:"星熊勇仪"
+                prize:["人所谈论的怪力乱神","破灭的金刚力"]
+            ibuki_suika:
+                avatar:"http://i68.tinypic.com/csxsi.jpg"
+                name:"伊吹萃香"
+                prize:["不羁奔放的古豪","不羁奔放的鬼","萃集梦想、虚幻、以及百鬼夜行","太古的时代","细雨的百鬼夜行","小小的百鬼夜行"]
+            tewi_inaba:
+                avatar:"http://i64.tinypic.com/14sk5e1.jpg"
+                name:"因幡帝"
+                prize:["蹦跳的兔群","地上兔","巧言令色的白兔","幸运的白兔"]
+            nagae_iku:
+                avatar:"http://i68.tinypic.com/28a3o9c.jpg"
+                name:"永江衣玖"
+                prize:["美丽的绯之衣","飞天的稀有道具"]
+        skin_length:48
+        skin_tip:"你的身份"
+        lockable:false
+        isAvailable:->
+            return true
     danganronpa:
         name:"弹丸论破"
         opening:"呜噗噗噗噗，我是校长黑白熊kuma"
@@ -38,225 +245,225 @@ module.exports =
         color:"rgb(255,0,166)"
         skins:
             owari_akane:
-                avatar:'http://i63.tinypic.com/e64rag.jpg'
-                name:'终里赤音'
-                prize:'超高校级的体操选手'
+                avatar:"http://i63.tinypic.com/e64rag.jpg"
+                name:"终里赤音"
+                prize:"超高校级的体操选手"
             asahina_aoi:
-                avatar:'http://i63.tinypic.com/28lfjts.jpg'
-                name:'朝日奈葵'
-                prize:'超高校级的游泳选手'
+                avatar:"http://i63.tinypic.com/28lfjts.jpg"
+                name:"朝日奈葵"
+                prize:"超高校级的游泳选手"
             togami_byakuya:
-                avatar:'http://i64.tinypic.com/2rcmiy8.jpg'
-                name:'十神白夜'
-                prize:'超高校级的贵公子'
+                avatar:"http://i64.tinypic.com/2rcmiy8.jpg"
+                name:"十神白夜"
+                prize:"超高校级的贵公子"
             celestia_ludenberck:
-                avatar:'http://i63.tinypic.com/ixusyd.jpg'
-                name:'赛蕾丝媞亚·鲁丁贝鲁格'
-                prize:'超高校级的赌徒'
+                avatar:"http://i63.tinypic.com/ixusyd.jpg"
+                name:"赛蕾丝媞亚·鲁丁贝鲁格"
+                prize:"超高校级的赌徒"
             nanami_chiaki:
-                avatar:'http://i67.tinypic.com/sc5dmr.jpg'
-                name:'七海千秋'
-                prize:'超高校级的游戏玩家'
+                avatar:"http://i67.tinypic.com/sc5dmr.jpg"
+                name:"七海千秋"
+                prize:"超高校级的游戏玩家"
             fujisaki_chihiro:
-                avatar:'http://i66.tinypic.com/2qk1guv.jpg'
-                name:'不二咲千寻'
-                prize:'超高校级的程序员'
+                avatar:"http://i66.tinypic.com/2qk1guv.jpg"
+                name:"不二咲千寻"
+                prize:"超高校级的程序员"
             yukizome_chisa:
-                avatar:'http://i64.tinypic.com/rvk5r7.jpg'
-                name:'雪染千纱'
-                prize:'元·超高校级的家政妇'
+                avatar:"http://i64.tinypic.com/rvk5r7.jpg"
+                name:"雪染千纱"
+                prize:"元·超高校级的家政妇"
             hagakure_yasuhiro:
-                avatar:'http://i65.tinypic.com/63wza1.jpg'
-                name:'叶隐康比吕'
-                prize:'超高校级的占卜师'
+                avatar:"http://i65.tinypic.com/63wza1.jpg"
+                name:"叶隐康比吕"
+                prize:"超高校级的占卜师"
             bandai_daisaku:
-                avatar:'http://i66.tinypic.com/tag9l3.jpg'
-                name:'万代大作'
-                prize:'元·超高校级的农民'
+                avatar:"http://i66.tinypic.com/tag9l3.jpg"
+                name:"万代大作"
+                prize:"元·超高校级的农民"
             kuzuryu_fuyuhiko:
-                avatar:'http://i63.tinypic.com/ifa6pz.jpg'
-                name:'九头龙冬彦'
-                prize:'超高校级的黑道'
+                avatar:"http://i63.tinypic.com/ifa6pz.jpg"
+                name:"九头龙冬彦"
+                prize:"超高校级的黑道"
             gureto_gozu:
-                avatar:'http://i64.tinypic.com/24q6a86.jpg'
-                name:'格雷特·戈兹'
-                prize:'元·超高校级的摔跤手'
+                avatar:"http://i64.tinypic.com/24q6a86.jpg"
+                name:"格雷特·戈兹"
+                prize:"元·超高校级的摔跤手"
             tanaka_gundam:
-                avatar:'http://i67.tinypic.com/svh2ww.jpg'
-                name:'田中眼蛇梦'
-                prize:'超高校级的饲育委员'
+                avatar:"http://i67.tinypic.com/svh2ww.jpg"
+                name:"田中眼蛇梦"
+                prize:"超高校级的饲育委员"
             hinata_hajime:
-                avatar:'http://i66.tinypic.com/2v0jybs.jpg'
-                name:'日向创'
-                prize:'超高校级的？？？'
+                avatar:"http://i66.tinypic.com/2v0jybs.jpg"
+                name:"日向创"
+                prize:"超高校级的？？？"
             yamada_hifumi:
-                avatar:'http://i65.tinypic.com/30crlhv.jpg'
-                name:'山田一二三'
-                prize:'超高校级的同人作家'
+                avatar:"http://i65.tinypic.com/30crlhv.jpg"
+                name:"山田一二三"
+                prize:"超高校级的同人作家"
             saionji_hiyoko:
-                avatar:'http://i67.tinypic.com/2ly0c9t.jpg'
-                name:'西园寺日寄子'
-                prize:'超高校级的日本舞蹈家'
+                avatar:"http://i67.tinypic.com/2ly0c9t.jpg"
+                name:"西园寺日寄子"
+                prize:"超高校级的日本舞蹈家"
             mioda_ibuki:
-                avatar:'http://i66.tinypic.com/2mg7c6v.jpg'
-                name:'澪田唯吹'
-                prize:'超高校级的轻音部'
+                avatar:"http://i66.tinypic.com/2mg7c6v.jpg"
+                name:"澪田唯吹"
+                prize:"超高校级的轻音部"
             madarai_isshiki:
-                avatar:'http://i67.tinypic.com/25fn0jo.jpg'
-                name:'斑井一式'
-                prize:'超高校级的保镖'
+                avatar:"http://i67.tinypic.com/25fn0jo.jpg"
+                name:"斑井一式"
+                prize:"超高校级的保镖"
             kemuri_jataro:
-                avatar:'http://i65.tinypic.com/34g1r7m.jpg'
-                name:'烟蛇太郎'
-                prize:'超小学级的美工时间'
+                avatar:"http://i65.tinypic.com/34g1r7m.jpg"
+                name:"烟蛇太郎"
+                prize:"超小学级的美工时间"
             enoshima_junko:
-                avatar:'http://i67.tinypic.com/wl3u3s.jpg'
-                name:'江之岛盾子'
-                prize:'超高校级的辣妹'
+                avatar:"http://i67.tinypic.com/wl3u3s.jpg"
+                name:"江之岛盾子"
+                prize:"超高校级的辣妹"
             sakakura_juzo:
-                avatar:'http://i63.tinypic.com/30jsgwp.jpg'
-                name:'逆藏十三'
-                prize:'元·超高校级的拳击手'
+                avatar:"http://i63.tinypic.com/30jsgwp.jpg"
+                name:"逆藏十三"
+                prize:"元·超高校级的拳击手"
             kamukura_izuru:
-                avatar:'http://i66.tinypic.com/odbpj.jpg'
-                name:'神座出流'
-                prize:'超高校级的希望'
+                avatar:"http://i66.tinypic.com/odbpj.jpg"
+                name:"神座出流"
+                prize:"超高校级的希望"
             soda_kazuichi:
-                avatar:'http://i65.tinypic.com/2rght14.jpg'
-                name:'左右田和一'
-                prize:'超高校级的机械师'
+                avatar:"http://i65.tinypic.com/2rght14.jpg"
+                name:"左右田和一"
+                prize:"超高校级的机械师"
             ishimaru_kiyotaka:
-                avatar:'http://i64.tinypic.com/t9uxza.jpg'
-                name:'石丸清多夏'
-                prize:'超高校级的风纪委员'
+                avatar:"http://i64.tinypic.com/t9uxza.jpg"
+                name:"石丸清多夏"
+                prize:"超高校级的风纪委员"
             naegi_komaru:
-                avatar:'http://i65.tinypic.com/hsnxis.jpg'
-                name:'苗木困'
-                prize:''
+                avatar:"http://i65.tinypic.com/hsnxis.jpg"
+                name:"苗木困"
+                prize:""
             utugi_kotoko:
-                avatar:'http://i63.tinypic.com/24fidrq.jpg'
-                name:'空木言子'
-                prize:'超小学级的学艺时间'
+                avatar:"http://i63.tinypic.com/24fidrq.jpg"
+                name:"空木言子"
+                prize:"超小学级的学艺时间"
             kirigiri_kyoko:
-                avatar:'http://i66.tinypic.com/2r4l8xi.jpg'
-                name:'雾切响子'
-                prize:'超高校级的？？？'
+                avatar:"http://i66.tinypic.com/2r4l8xi.jpg"
+                name:"雾切响子"
+                prize:"超高校级的？？？"
             munakata_kyosuke:
-                avatar:'http://i64.tinypic.com/5ues6c.jpg'
-                name:'宗方京助'
-                prize:'元·超高校级的学生会长'
+                avatar:"http://i64.tinypic.com/5ues6c.jpg"
+                name:"宗方京助"
+                prize:"元·超高校级的学生会长"
             kuwata_leon:
-                avatar:'http://i68.tinypic.com/adkn85.jpg'
-                name:'桑田怜恩'
-                prize:'超高校级的棒球选手'
+                avatar:"http://i68.tinypic.com/adkn85.jpg"
+                name:"桑田怜恩"
+                prize:"超高校级的棒球选手"
             koizumi_mahiru:
-                avatar:'http://i68.tinypic.com/1tahhy.jpg'
-                name:'小泉真昼'
-                prize:'超高校级的摄影师'
+                avatar:"http://i68.tinypic.com/1tahhy.jpg"
+                name:"小泉真昼"
+                prize:"超高校级的摄影师"
             naegi_makoto:
-                avatar:'http://i68.tinypic.com/34spbhv.jpg'
-                name:'苗木诚'
-                prize:'超高校级的幸运'
+                avatar:"http://i68.tinypic.com/34spbhv.jpg"
+                name:"苗木诚"
+                prize:"超高校级的幸运"
             daimon_masaru:
-                avatar:'http://i67.tinypic.com/1zqrbds.jpg'
-                name:'大门大'
-                prize:'超小学级的体育时间'
+                avatar:"http://i67.tinypic.com/1zqrbds.jpg"
+                name:"大门大"
+                prize:"超小学级的体育时间"
             gekkogahara_miaya:
-                avatar:'http://i67.tinypic.com/24y9x5d.jpg'
-                name:'月光原美彩'
-                prize:'元·超高校级的治疗师'
+                avatar:"http://i67.tinypic.com/24y9x5d.jpg"
+                name:"月光原美彩"
+                prize:"元·超高校级的治疗师"
             tsumiki_mikan:
-                avatar:'http://i64.tinypic.com/2i1li06.jpg'
-                name:'罪木蜜柑'
-                prize:'超高校级的保健委员'
+                avatar:"http://i64.tinypic.com/2i1li06.jpg"
+                name:"罪木蜜柑"
+                prize:"超高校级的保健委员"
             monaka:
-                avatar:'http://i68.tinypic.com/9ptgzs.jpg'
-                name:'塔和最中'
-                prize:'超小学级的学活时间'
+                avatar:"http://i68.tinypic.com/9ptgzs.jpg"
+                name:"塔和最中"
+                prize:"超小学级的学活时间"
             owada_mondo:
-                avatar:'http://i64.tinypic.com/hw0tae.jpg'
-                name:'大和田纹土'
-                prize:'超高校级的暴走族'
+                avatar:"http://i64.tinypic.com/hw0tae.jpg"
+                name:"大和田纹土"
+                prize:"超高校级的暴走族"
             ikusaba_mukuro:
-                avatar:'http://i66.tinypic.com/2qiwpjd.jpg'
-                name:'战刃骸'
-                prize:'超高校级的军人'
+                avatar:"http://i66.tinypic.com/2qiwpjd.jpg"
+                name:"战刃骸"
+                prize:"超高校级的军人"
             shingetsu_nagisa:
-                avatar:'http://i66.tinypic.com/2afirnd.jpg'
-                name:'新月渚'
-                prize:'超小学级的社会时间'
+                avatar:"http://i66.tinypic.com/2afirnd.jpg"
+                name:"新月渚"
+                prize:"超小学级的社会时间"
             komaeda_nagito:
-                avatar:'http://i68.tinypic.com/i1zm9s.jpg'
-                name:'狛枝凪斗'
-                prize:'超高校级的幸运'
+                avatar:"http://i68.tinypic.com/i1zm9s.jpg"
+                name:"狛枝凪斗"
+                prize:"超高校级的幸运"
             nidai_nekomaru:
-                avatar:'http://i67.tinypic.com/2rep9fs.jpg'
-                name:'弍大猫丸'
-                prize:'超高校级的经理人'
+                avatar:"http://i67.tinypic.com/2rep9fs.jpg"
+                name:"弍大猫丸"
+                prize:"超高校级的经理人"
             pekoyama_peko:
-                avatar:'http://i67.tinypic.com/2ex0ho2.jpg'
-                name:'边古山佩子'
-                prize:'超高校级的剑道家'
+                avatar:"http://i67.tinypic.com/2ex0ho2.jpg"
+                name:"边古山佩子"
+                prize:"超高校级的剑道家"
             ando_ruruka:
-                avatar:'http://i68.tinypic.com/qzpu6o.jpg'
-                name:'安藤流流歌'
-                prize:'元·超高校级的点心师'
+                avatar:"http://i68.tinypic.com/qzpu6o.jpg"
+                name:"安藤流流歌"
+                prize:"元·超高校级的点心师"
             otonashi_ryoko:
-                avatar:'http://i66.tinypic.com/c42vp.jpg'
-                name:'音无凉子'
-                prize:''
+                avatar:"http://i66.tinypic.com/c42vp.jpg"
+                name:"音无凉子"
+                prize:""
             otearai_ryota:
-                avatar:'http://i67.tinypic.com/24zhbm9.jpg'
-                name:'御手洗亮太'
-                prize:'元·超高校级的动画师'
+                avatar:"http://i67.tinypic.com/24zhbm9.jpg"
+                name:"御手洗亮太"
+                prize:"元·超高校级的动画师"
             unknown_person:
-                avatar:'http://i67.tinypic.com/1y32hu.jpg'
-                name:'???'
-                prize:'超高校级的诈欺师'
+                avatar:"http://i67.tinypic.com/1y32hu.jpg"
+                name:"???"
+                prize:"超高校级的诈欺师"
             okami_sakura:
-                avatar:'http://i66.tinypic.com/28r1lzo.jpg'
-                name:'大神樱'
-                prize:'超高校级的格斗家'
+                avatar:"http://i66.tinypic.com/28r1lzo.jpg"
+                name:"大神樱"
+                prize:"超高校级的格斗家"
             maizono_sayaka:
-                avatar:'http://i63.tinypic.com/dcu1qb.jpg'
-                name:'舞园沙耶香'
-                prize:'超高校级的偶像'
+                avatar:"http://i63.tinypic.com/dcu1qb.jpg"
+                name:"舞园沙耶香"
+                prize:"超高校级的偶像"
             kimura_seko:
-                avatar:'http://i64.tinypic.com/15dw211.jpg'
-                name:'忌村静子'
-                prize:'元·超高校级的药剂师'
+                avatar:"http://i64.tinypic.com/15dw211.jpg"
+                name:"忌村静子"
+                prize:"元·超高校级的药剂师"
             genocider_sho:
-                avatar:'http://i65.tinypic.com/3310dp3.jpg'
-                name:'灭族者翔'
-                prize:'超高校级的杀人鬼'
+                avatar:"http://i65.tinypic.com/3310dp3.jpg"
+                name:"灭族者翔"
+                prize:"超高校级的杀人鬼"
             sonia_nevermind:
-                avatar:'http://i67.tinypic.com/znx3x1.jpg'
-                name:'索尼娅·内瓦曼德'
-                prize:'超高校级的王女'
+                avatar:"http://i67.tinypic.com/znx3x1.jpg"
+                name:"索尼娅·内瓦曼德"
+                prize:"超高校级的王女"
             izayoi_sonosuke:
-                avatar:'http://i68.tinypic.com/2872iwl.jpg'
-                name:'十六夜惣之助'
-                prize:'元·超高校级的铁匠'
+                avatar:"http://i68.tinypic.com/2872iwl.jpg"
+                name:"十六夜惣之助"
+                prize:"元·超高校级的铁匠"
             murasame_soshun:
-                avatar:'http://i67.tinypic.com/2rmqbu9.jpg'
-                name:'村雨早春'
-                prize:'超高校级的学生会长'
+                avatar:"http://i67.tinypic.com/2rmqbu9.jpg"
+                name:"村雨早春"
+                prize:"超高校级的学生会长"
             hanamura_teruteru:
-                avatar:'http://i64.tinypic.com/110cdom.jpg'
-                name:'花村辉辉'
-                prize:'超高校级的厨师'
+                avatar:"http://i64.tinypic.com/110cdom.jpg"
+                name:"花村辉辉"
+                prize:"超高校级的厨师"
             fukawa_toko:
-                avatar:'http://i65.tinypic.com/35a6n0n.jpg'
-                name:'腐川冬子'
-                prize:'超高校级的文学少女'
+                avatar:"http://i65.tinypic.com/35a6n0n.jpg"
+                name:"腐川冬子"
+                prize:"超高校级的文学少女"
             matsuda_yasuke:
-                avatar:'http://i64.tinypic.com/2usv8cy.jpg'
-                name:'松田夜助'
-                prize:'超高校级的神经学者'
+                avatar:"http://i64.tinypic.com/2usv8cy.jpg"
+                name:"松田夜助"
+                prize:"超高校级的神经学者"
             kamishiro_yuto:
-                avatar:'http://i66.tinypic.com/2z7ljma.jpg'
-                name:'神代优兔'
-                prize:'超高校级的谍报员'
+                avatar:"http://i66.tinypic.com/2z7ljma.jpg"
+                name:"神代优兔"
+                prize:"超高校级的谍报员"
         skin_length:55
         skin_tip:"电子学生证"
         lockable:false

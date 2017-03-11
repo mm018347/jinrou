@@ -366,8 +366,14 @@ module.exports.actions=(req,res,ss)->
                         # 啊啦，为什么身上有一张身份证，这就是我吗？
                         if room.theme && theme != null
                             # 指明玩家的皮肤
-                            if theme.skins[user.userid].prize
-                                name = "「#{theme.skins[user.userid].prize}」#{user.name}"
+                            pr = theme.skins[user.userid].prize
+                            # 也可能是 Array
+                            if Array.isArray pr
+                                pr = pr[Math.floor(Math.random() * pr.length)]
+                            # 传递称号
+                            if pr
+                                user.tpr = pr
+                                name = "「#{user.tpr}」#{user.name}"
                             else
                                 name = "#{user.name}"
                             res 
@@ -378,6 +384,7 @@ module.exports.actions=(req,res,ss)->
                         # 入室通知
                         delete user.ip
                         Server.game.game.inlog room,user
+                        delete user.tpr
                         if room.blind
                             delete user.realid
                         if room.mode!="playing"
