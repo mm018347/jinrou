@@ -125,7 +125,8 @@ sendConfirmMail=(query, req, res, ss)->
             }
         if record.mail.address == query.mail
             return {
-                error: "邮箱地址没有改变。"
+                mail: null
+                options: null
             }
         else if (!record.mail.address || !record.mail.verified) && query.mail
             mail.new = query.mail
