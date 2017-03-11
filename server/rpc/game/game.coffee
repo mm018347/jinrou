@@ -8793,6 +8793,14 @@ module.exports.actions=(req,res,ss)->
                         ss.publish.channel "room#{roomid}","refresh",{id:roomid}
                     else
                         res result
+            #如果房间使用了主题
+            if room.blind in ["complete","yes"] && room.theme
+                theme = Server.game.themes[room.theme]
+                if theme != null && theme.opening
+                    log=
+                        mode:"system"
+                        comment:theme.opening
+                    splashlog game.id,game,log
     # 情報を開示
     getlog:(roomid)->
         M.games.findOne {id:roomid}, (err,doc)=>
