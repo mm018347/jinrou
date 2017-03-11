@@ -27,6 +27,8 @@
 ###
 fs=require 'fs'
 themeFiles = fs.readdirSync "server/themes/"
+# not the example
+themeFiles=themeFiles.filter (n)->n!="example.coffee"
 themes={}
 for themeFile in themeFiles
     unless themeFile.match(/\.coffee$/) == null
