@@ -328,7 +328,11 @@ module.exports.actions=(req,res,ss)->
                         
                         user.name=theme.skins[skin].name
                         user.userid=skin
-                        user.icon= theme.skins[skin].avatar ? null
+                        avatar = theme.skins[skin].avatar
+                        # 也可能是 Array
+                        if Array.isArray avatar
+                            avatar = avatar[Math.floor(Math.random() * avatar.length)]
+                        user.icon= avatar ? null
                     # 匿名模式
                     else
                         makeid=->   # ID生成
