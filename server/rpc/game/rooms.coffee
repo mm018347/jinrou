@@ -167,7 +167,7 @@ module.exports.actions=(req,res,ss)->
             room.blind=query.blind
             room.theme=query.theme ? ""
             if room.theme
-                theme = Server.game.themes[room.theme]
+                theme = Server.game.themes.getTheme room.theme
                 if theme == null
                     res {error: "不存在该活动"}
                     return
@@ -308,7 +308,7 @@ module.exports.actions=(req,res,ss)->
                     return
 
                 if room.theme
-                    theme = Server.game.themes[room.theme]
+                    theme = Server.game.themes.getTheme room.theme
                     if theme == null
                         res {error: "不存在该活动"}
                         return
