@@ -165,10 +165,10 @@ module.exports.actions=(req,res,ss)->
                 return
             room.password=query.password ? null
             room.blind=query.blind
-            room.theme=query.theme ? ""
+            room.theme=query.theme
             if room.theme
                 theme = Server.game.themes.getTheme room.theme
-                if theme == null
+                unless theme
                     res {error: "不存在该活动"}
                     return
                 if !theme.isAvailable?()
