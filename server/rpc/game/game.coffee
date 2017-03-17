@@ -1076,7 +1076,6 @@ class Game
 
             # 投票リセット処理
             @votingbox.init()
-            @votingbox.setCandidates @players.filter (x)->!x.dead
             alives=[]
             deads=[]
             for player in @players
@@ -1084,16 +1083,20 @@ class Game
                     deads.push player.id
                 else
                     alives.push player.id
+
             for i in (shuffle [0...(@players.length)])
                 player=@players[i]
                 if player.id in alives
                     player.sunrise this
                 else
                     player.deadsunrise this
-            for pl in @players
-                if !pl.dead
-                    pl.votestart this
-            @revote_num=0   # 重新投票の回数は0にリセット
+
+            alives = @players.filter (x)->!x.dead
+
+            @votingbox.setCandidates alives
+            for pl in alives
+                pl.votestart this
+            @revote_num=0   # 再投票の回数は0にリセット
 
         #死体処理
         @bury "other"
@@ -1242,13 +1245,16 @@ class Game
 
         deads=[]
         loop
-            deads=@players.filter (x)->x.dead && x.found
-            deadsl=deads.length
+            newdeads=@players.filter (x)->
+                x.dead && x.found && deads.every((y)-> x.id != y.id)
+            deads.push newdeads...
+
             alives=@players.filter (x)->!x.dead
             alives.forEach (x)=>
-                x.beforebury this,type
-            deads=@players.filter (x)->x.dead && x.found
-            if deadsl>=deads.length
+                x.beforebury this,type,newdeads
+            newdeads=@players.filter (x)->
+                x.dead && x.found && deads.every((y)-> x.id != y.id)
+            if newdeads.length == 0
                 # もう新しく死んだ人はいない
                 break
         # 灵界で职业表示してよいかどうか更新
@@ -1369,15 +1375,13 @@ class Game
                     name:x.name
                     comment:x.will
                 splashlog @id,this,log
-        # 死者应该立刻从投票候选人中去除
-        @votingbox.candidates = @votingbox.candidates.filter (x)->!x.dead
         deads.length
                 
     # 投票終わりチェック
     # 返り値意味ないんじゃないの?
     execute:->
         return false unless @votingbox.isVoteAllFinished()
-        [mode,player,tos,table]=@votingbox.check()
+        [mode,players,tos,table]=@votingbox.check()
         if mode=="novote"
             # 誰も投票していない・・・
             @revote_num=Infinity
@@ -1398,19 +1402,28 @@ class Game
             # 重新投票になった
             @dorevote "revote"
             return false
+        else if mode=="none"
+            # 処刑しない
+            log=
+                mode:"system"
+                comment:"没有人被处刑。"
+            splashlog @id,this,log
+            @nextturn()
+            return true
         else if mode=="punish"
             # 投票
             # 结果が出た 死んだ!
             # だれが投票したか調べる
-            follower=table.filter((obj)-> obj.voteto==player.id).map (obj)->obj.id
-            player.die this,"punish",follower
-            
-            if player.dead && @rule.GMpsychic=="on"
-                # GM灵能
-                log=
-                    mode:"system"
-                    comment:"根据灵能的结论，被处刑的 #{player.name} 是 #{player.getPsychicResult()}。"
-                splashlog @id,this,log
+            for player in players
+                follower=table.filter((obj)-> obj.voteto==player.id).map (obj)->obj.id
+                player.die this,"punish",follower
+                
+                if player.dead && @rule.GMpsychic=="on"
+                    # GM霊能
+                    log=
+                        mode:"system"
+                        comment:"根据灵能的结论，被处刑的 #{player.name} 是 #{player.getPsychicResult()}。"
+                    splashlog @id,this,log
                 
             @votingbox.remains--
             if @votingbox.remains>0
@@ -1424,6 +1437,7 @@ class Game
                 splashlog @id,this,log
 
                 # 再び投票する処理(下と同じ… なんとかならないか?)
+                @votingbox.setCandidates @players.filter (x)-> !x.dead
                 @votingbox.start()
                 @players.forEach (player)=>
                     return if player.dead
@@ -1457,6 +1471,10 @@ class Game
             if isFinite remains
                 log.comment += "如果在接下来的#{remains}轮投票中无法达成一致，本场游戏将以平局处理。"
         splashlog @id,this,log
+        # 必要がある場合は候補者を再設定
+        if @votingbox.candidates.some((x)=> @getPlayer(x.id).dead)
+            @votingbox.setCandidates @players.filter ((x)->!x.dead)
+            
         @votingbox.start()
         @players.forEach (player)=>
             return if player.dead
@@ -1700,7 +1718,7 @@ class Game
             return true
         else
             return false
-    timer:->
+    timer:(settime)->
         return if @finished
         func=null
         time=null
@@ -1815,6 +1833,9 @@ class Game
                         @execute()
                 else
                     return
+        if settime?
+            # 時間を強制設定
+            time = settime
         timeout()
     # プレイヤーごとに　見せてもよいログをリストにする
     makelogs:(logs,player)->
@@ -1974,7 +1995,7 @@ class VotingBox
         else
             return 0
     check:->
-        # return [mode,result,tos,table]
+        # return [mode,results,tos,table]
         # 投票が終わったのでアレする
         # 投票表を作る
         tos={}
@@ -2021,13 +2042,33 @@ class VotingBox
             # 誰も投票していない
             return ["novote",null,tos,table]
         if tops.length>1
-            # 決まらない! 重新投票になった
-            if @game.rule.runoff!="no" && !@runoffmode
-                @setCandidates @game.players.filter (x)->x.id in tops
-                @runoffmode=true
-                return ["runoff",null,tos,table]
-            else
-                return ["revote",null,tos,table]
+            # 決まらない
+            if @game.rule.runoff!="yes" || @runoffmode
+                # 投票同数時の処理
+                switch @game.rule.drawvote
+                    when "random"
+                        # ランダムに1人処刑
+                        r = Math.floor Math.random()*tops.length
+                        return ["punish", [@game.getPlayer(tops[r])], tos, table]
+                    when "none"
+                        # 処刑しない
+                        return ["none",null,tos,table]
+                    when "all"
+                        # 全員処刑
+                        return [
+                            "punish",
+                            tops.map((id)=> @game.getPlayer id),
+                            tos,
+                            table
+                        ]
+                    else
+                        # デフォルト（再投票）
+                        if @game.rule.runoff!="no" && !@runoffmode
+                            @setCandidates @game.players.filter (x)->x.id in tops
+                            @runoffmode=true
+                            return ["runoff",null,tos,table]
+                        else
+                            return ["revote",null,tos,table]
         if @game.rule.runoff=="yes" && !@runoffmode
             # 候補は1人だけど决胜投票をしないといけない
             if tops.length<=1
@@ -2054,8 +2095,8 @@ class VotingBox
                     @setCandidates @game.players.filter (x)->x.id in tops
                     @runoffmode=true
                     return ["runoff",null,tos,table]
-        # 结果を教える
-        return ["punish",@game.getPlayer(tops[0]),tos,table]
+        # 結果を教える
+        return ["punish",[@game.getPlayer(tops[0])],tos,table]
 
 class Player
     constructor:->
@@ -2337,9 +2378,9 @@ class Player
             @addGamelog game,"revive",null,null
             game.ss.publish.user @id,"refresh",{id:game.id}
 
-    # 埋葬するまえに全员呼ばれる（foundが見られる状況で）
-    beforebury: (game,type)->
-    # 占われたとき（结果は別にとられる player:占い元）
+    # 埋葬するまえに全員呼ばれる（foundが見られる状況で）
+    beforebury: (game,type,deads)->
+    # 占われたとき（結果は別にとられる player:占い元）
     divined:(game,player)->
     # ちょっかいを出されたとき(jobのとき)
     touched:(game,from)->
@@ -2411,6 +2452,9 @@ class Player
     # 夜の发言の选择肢を得る
     getSpeakChoice:(game)->
         ["monologue"]
+    # 霊界発言
+    getSpeakChoiceHeaven:(game)->
+        ["day","monologue"]
     # 自分宛の投票を書き換えられる
     modifyMyVote:(game, vote)-> vote
     # Complexから抜ける
@@ -2654,16 +2698,36 @@ class Diviner extends Player
     sunset:(game)->
         super
         @setTarget null
+        # 占い対象
+        targets = game.players.filter (x)->!x.dead
+
+        if @type == "Diviner" && game.day == 1 && game.rule.firstnightdivine == "auto"
+            # 自動白通知
+            targets2 = targets.filter (x)=> x.id != @id && x.fortuneResult == "村人"
+            if targets2.length > 0
+                # ランダムに決定
+                log=
+                    mode:"skill"
+                    to:@id
+                    comment:"#{@name}今天将会随机占卜一个人。"
+                splashlog game.id,game,log
+
+
+                r=Math.floor Math.random()*targets2.length
+                @job game,targets2[r].id,{}
+                return
+
         if @scapegoat
             # 身代わり君の自動占い
-            r=Math.floor Math.random()*game.players.length
-            @job game,game.players[r].id,{}
+            r=Math.floor Math.random()*targets.length
+            @job game,targets[r].id,{}
     sleeping:->@target?
     job:(game,playerid)->
-        super
         pl=game.getPlayer playerid
         unless pl?
             return "这个玩家不存在。"
+
+        @setTarget playerid
         pl.touched game,@id
         log=
             mode:"skill"
@@ -2731,10 +2795,10 @@ class Psychic extends Player
             splashlog game.id,game,log
         @setFlag ""
     
-    # 处刑で死んだ人を調べる
-    beforebury:(game,type)->
+    # 処刑で死んだ人を調べる
+    beforebury:(game,type,deads)->
         @setFlag if @flag? then @flag else ""
-        game.players.filter((x)->x.dead && x.found=="punish").forEach (x)=>
+        deads.filter((x)-> x.found=="punish").forEach (x)=>
             @setFlag @flag+"根据 #{@name} 的灵能结论，被处刑的 #{x.name} 是 #{x.getPsychicResult()}。\n"
 
 class Madman extends Player
@@ -2751,20 +2815,38 @@ class Guard extends Player
     sleeping:->@target?
     sunset:(game)->
         @setTarget null
+
         if game.day==1
             # 猎人は一日目护卫しない
             @setTarget ""  # 誰も守らない
-        else if @scapegoat
+            return
+        # 護衛可能対象
+        pls = game.players.filter (pl)=>
+            if game.rule.guardmyself!="ok" && pl.id == @id
+                return false
+            if game.rule.consecutiveguard=="no" && pl.id == @flag
+                return false
+            return true
+
+        if pls.length == 0
+            @setTarget ""
+            return
+
+        if @scapegoat
             # 身代わり君の自動占い
-            r=Math.floor Math.random()*game.players.length
-            if @job game,game.players[r].id,{}
+            r=Math.floor Math.random()*pls.length
+            if @job game,pls[r].id,{}
                 # 失敗した
                 @setTarget ""
     job:(game,playerid)->
         if playerid==@id && game.rule.guardmyself!="ok"
             return "不能守护自己"
+        else if playerid==@flag && game.rule.consecutiveguard=="no"
+            return "不能连续守护同一个人"
         else
             @setTarget playerid
+            @setFlag playerid
+
             pl=game.getPlayer(playerid)
             log=
                 mode:"skill"
@@ -3406,7 +3488,7 @@ class Immoral extends Player
     type:"Immoral"
     jobname:"背德者"
     team:"Fox"
-    beforebury:(game,type)->
+    beforebury:(game)->
         # 狐が全員死んでいたら自殺
         unless game.players.some((x)->!x.dead && x.isFox())
             @die game,"foxsuicide"
@@ -3639,8 +3721,8 @@ class Cursed extends Player
 class ApprenticeSeer extends Player
     type:"ApprenticeSeer"
     jobname:"见习占卜师"
-    beforebury:(game,type)->
-        # 占卜师が誰か死んでいたら占卜师に進化
+    beforebury:(game)->
+        # 占い師が誰か死んでいたら占い師に進化
         if game.players.some((x)->x.dead && x.isJobType("Diviner")) || game.players.every((x)->!x.isJobType("Diviner"))
             newpl=Player.factory "Diviner"
             @transProfile newpl
@@ -3896,10 +3978,9 @@ class Doppleganger extends Player
         splashlog game.id,game,log
         @setFlag playerid  # 二重身先
         null
-    beforebury:(game,type)->
-        founds=game.players.filter (x)->x.dead && x.found
+    beforebury:(game,type,deads)->
         # 対象が死んだら移る
-        if founds.some((x)=>x.id==@flag)
+        if deads.some((x)=>x.id==@flag)
             p=game.getPlayer @flag  # その人
 
             newplmain=Player.factory p.type
@@ -5235,26 +5316,40 @@ class WanderingGuard extends Player
         if game.day==1
             # 猎人は一日目护卫しない
             @setTarget ""  # 誰も守らない
-        else
-            fl=JSON.parse(@flag ? "[]")
-            alives=game.players.filter (x)->!x.dead
-            if alives.every((pl)=>(pl.id in fl) || (game.rule.guardmyself!="ok" && pl.id==@id))
-                # もう护卫対象がいない
+            return
+
+        fl=JSON.parse(@flag ? "[null]")
+        # 前回の護衛
+        alives=game.players.filter (x)=>
+            if x.dead
+                return false
+            if x.id == @id && game.rule.guardmyself!="ok"
+                return false
+            if x.id in fl
+                return false
+            return true
+        if alives.length == 0
+            # もう護衛対象がいない
+            @setTarget ""
+            return
+
+        if @scapegoat
+            # 身代わり君の自動占い
+            r=Math.floor Math.random()*alives.length
+            if @job game,alives[r].id,{}
                 @setTarget ""
-            else if @scapegoat
-                # 身代わり君の自動占い
-                r=Math.floor Math.random()*game.players.length
-                if @job game,game.players[r].id,{}
-                    @sunset game
     job:(game,playerid)->
-        fl=JSON.parse(@flag ? "[]")
+        fl=JSON.parse(@flag ? "[null]")
         if playerid==@id && game.rule.guardmyself!="ok"
             return "不能守护自己"
         
-        fl=JSON.parse(@flag ? "[]")
         if playerid in fl
-            return "这个人已经不能守护了"
+            return "不能守护这个人"
         @setTarget playerid
+        if game.rule.consecutiveguard == "no"
+            fl[0] = playerid
+            @setFlag JSON.stringify fl
+
         # OK!
         pl=game.getPlayer(playerid)
         pl.touched game,@id
@@ -5286,12 +5381,12 @@ class WanderingGuard extends Player
                         to:@id
                         comment:"#{@name} 不能护卫 #{pl.name}。"
                     splashlog game.id,game,log
-                    fl=JSON.parse(@flag ? "[]")
+                    fl=JSON.parse(@flag ? "[null]")
                     fl.push pl.id
                     @setFlag JSON.stringify fl
     makeJobSelection:(game)->
         if game.night
-            fl=JSON.parse(@flag ? "[]")
+            fl=JSON.parse(@flag ? "[null]")
             a=super
             return a.filter (obj)->!(obj.value in fl)
         else
@@ -5381,10 +5476,9 @@ class FrankensteinsMonster extends Player
         if found=="punish"
             # 处刑で死んだらもうひとり处刑できる
             game.votingbox.addPunishedNumber 1
-    beforebury:(game)->
-        # 新しく死んだひとたちで村人阵营ひとたち
-        # 不吸收弗兰肯斯坦的怪物
-        founds=game.players.filter (x)->x.dead && x.found && x.getTeam()=="Human" && !x.isJobType("FrankensteinsMonster")
+    beforebury:(game,type,deads)->
+        # 新しく死んだひとたちで村人陣営ひとたち
+        founds=deads.filter (x)->x.getTeam()=="Human" && !x.isJobType("FrankensteinsMonster")
         # 吸収する
         thispl=this
         for pl in founds
@@ -5968,7 +6062,7 @@ class Blasphemy extends Player
                 r=Math.floor Math.random()*alives.length
                 if @job game,alives[r].id,{}
                     @setTarget ""
-    beforebury:(game,type)->
+    beforebury:(game)->
         if @flag
             # まだ狐を作ってないときは耐える
             # 狐が全员死んでいたら自殺
@@ -6638,22 +6732,75 @@ class GameMaster extends Player
     team:""
     jobdone:->false
     sleeping:->true
+    job_target: Player.JOB_T_ALIVE | Player.JOB_T_DEAD
     isWinner:(game,team)->null
     # 例外的に昼でも発動する可能性がある
     job:(game,playerid,query)->
-        pl=game.getPlayer playerid
-        unless pl?
-            return "对象无效"
-        pl.die game,"gmpunish"
-        game.bury("other")
-        null
+        switch query?.commandname
+            when "kill"
+                # 死亡させる
+                pl=game.getPlayer playerid
+                unless pl?
+                    return "对象无效"
+                if pl.dead
+                    return "这名玩家已经死亡"
+                pl.die game,"gmpunish"
+                game.bury("other")
+                return null
+            when "revive"
+                # 蘇生させる
+                pl=game.getPlayer playerid
+                unless pl?
+                    return "对象无效"
+                if !pl.dead
+                    return "这名玩家没有死亡"
+                pl.revive game
+                if !pl.dead
+                    if game.night
+                        # 夜のときは夜開始時の処理をしてあげる
+                        pl.sunset game
+                    else
+                        # 昼のときは投票可能に
+                        pl.votestart game
+                else
+                    return "这名玩家无法复活"
+                return null
+            when "longer"
+                # 時間延長
+                remains = game.timer_start + game.timer_remain - Date.now()/1000
+                clearTimeout game.timerid
+                game.timer remains+30
+                return null
+            when "shorter"
+                # 時間短縮
+                remains = game.timer_start + game.timer_remain - Date.now()/1000
+                if remains <= 30
+                    return "无法继续缩短剩余时间"
+                clearTimeout game.timerid
+                game.timer remains-30
+                return null
+        return null
     isListener:(game,log)->true # 全て見える
     getSpeakChoice:(game)->
         pls=for pl in game.players
             "gmreply_#{pl.id}"
         ["gm","gmheaven","gmaudience","gmmonologue"].concat pls
     getSpeakChoiceDay:(game)->@getSpeakChoice game
-    chooseJobDay:(game)->true   # 昼でも対象选择
+    chooseJobDay:(game)->true   # 昼でも対象選択
+    makeJobSelection:(game)->
+        # 常に全員
+        return game.players.map((pl)-> {
+            name: pl.name
+            value: pl.id
+        })
+    checkJobValidity:(game,query)->
+        switch query?.commandname
+            when "longer", "shorter"
+                return true
+            when "kill", "revive"
+                return super
+            else
+                return false
 
 # 帮手
 class Helper extends Player
@@ -6896,9 +7043,9 @@ class Complex
     makejobinfo:(game,result)->
         @sub?.makejobinfo? game,result
         @mcall game,@main.makejobinfo,game,result,@main.getJobDisp()
-    beforebury:(game,type)->
-        @mcall game,@main.beforebury,game,type
-        @sub?.beforebury? game,type
+    beforebury:(game,type,deads)->
+        @mcall game,@main.beforebury,game,type,deads
+        @sub?.beforebury? game,type,deads
         # deal with Walking Dead
         unless @dead
             isPlDead = @isDead()
@@ -6981,9 +7128,9 @@ class Friend extends Complex    # 恋人
     getJobname:->"恋人（#{@main.getJobname()}）"
     getJobDisp:->"恋人（#{@main.getJobDisp()}）"
     
-    beforebury:(game,type)->
-        @mcall game,@main.beforebury,game,type
-        @sub?.beforebury? game,type
+    beforebury:(game,type,deads)->
+        @mcall game,@main.beforebury,game,type,deads
+        @sub?.beforebury? game,type,deads
         ato=false
         if game.rule.friendssplit=="split"
             # 独立
@@ -7140,13 +7287,13 @@ class TrapGuarded extends Complex
         if @sub?.isComplex() || @sub?.midnightSort == midnightSort
             @sub?.midnight? game,midnightSort
 
-        # 狩人とかぶったら狩人が死んでしまう!!!!!
+        # 猎人とかぶったら猎人が死んでしまう!!!!!
         # midnight: 狼の襲撃よりも前に行われることが保証されている処理
         return if midnightSort != @midnightSort
         wholepl=game.getPlayer @id  # 一番表から見る
         result=@checkGuard game,wholepl
         if result
-            # 狩人がいた!（罠も無効）
+            # 猎人がいた!（罠も無効）
             wholepl = game.getPlayer @id
             @checkTrap game, wholepl
     # midnight処理用
@@ -7404,7 +7551,7 @@ class BombTrapped extends Complex
         if @sub?.isComplex() || @sub?.midnightSort == midnightSort
             @sub?.midnight? game,midnightSort
 
-        # 狩人とかぶったら狩人が死んでしまう!!!!!
+        # 猎人とかぶったら猎人が死んでしまう!!!!!
         # midnight: 狼の襲撃よりも前に行われることが保証されている処理
         if midnightSort != @midnightSort then return
         wholepl=game.getPlayer @id  # 一番表から見る
@@ -8749,7 +8896,8 @@ module.exports.actions=(req,res,ss)->
             for x in ["jobrule",
             "decider","authority","scapegoat","will","wolfsound","couplesound","heavenview",
             "wolfattack","guardmyself","votemyself","deadfox","deathnote","divineresult","psychicresult","waitingnight",
-            "safety","friendsjudge","noticebitten","voteresult","GMpsychic","wolfminion","drunk","losemode","gjmessage","rolerequest","runoff","chemical",
+            "safety","friendsjudge","noticebitten","voteresult","GMpsychic","wolfminion","drunk","losemode","gjmessage","rolerequest","runoff","drawvote","chemical",
+            "firstnightdivine","consecutiveguard",
             "poisonwolf",
             "friendssplit",
             "quantumwerewolf_table","quantumwerewolf_dead","quantumwerewolf_diviner","quantumwerewolf_firstattack","yaminabe_hidejobs","yaminabe_safety"]
@@ -8806,9 +8954,9 @@ module.exports.actions=(req,res,ss)->
         M.games.findOne {id:roomid}, (err,doc)=>
             if err?
                 console.error err
-                callback err,null
+                res {error: err}
             else if !doc?
-                callback "游戏不存在",null
+                res {error: "游戏不存在"}
             else
                 unless games[roomid]?
                     games[roomid] = Game.unserialize doc,ss
@@ -8823,7 +8971,7 @@ module.exports.actions=(req,res,ss)->
                     game.timer_remain-(Date.now()/1000-game.timer_start)    # 全体 - 経過时间
                 else
                     null
-                    result.timer_mode=game.timer_mode
+                result.timer_mode=game.timer_mode
                 if game.day==0
                     # 开始前はプレイヤー情報配信しない
                     delete result.game.players
@@ -9235,10 +9383,12 @@ makejobinfo = (game,player,result={})->
                     result.sleeping &&= player.jobdone game
         else
             # それ以外（participants）
-            result.sleeping=if game.night then player.jobdone(game) else true
+            result.sleeping=if game.night || player.chooseJobDay(game) then player.jobdone(game) else true
         result.jobname=player.getJobDisp()
         result.winner=player.winner
-        if game.night || game.day==0
+        if player.dead
+            result.speak =player.getSpeakChoiceHeaven game
+        else if game.night || game.day==0
             result.speak =player.getSpeakChoice game
         else
             result.speak =player.getSpeakChoiceDay game

@@ -1325,6 +1325,31 @@ exports.rules=[
                 ]
             }
             {
+                name:"drawvote"
+                label:"投票数相同时的处理"
+                title:"设定投票数相同时的处理方法。"
+                type:"select"
+                values:[
+                    {
+                        value:"revote"
+                        label:"重新投票"
+                        selected:true
+                    }
+                    {
+                        value:"random"
+                        label:"随机处刑"
+                    }
+                    {
+                        value:"none"
+                        label:"谁也不被处刑"
+                    }
+                    {
+                        value:"all"
+                        label:"全员处刑"
+                    }
+                ]
+            }
+            {
                 type: "separator"
             }
             {
@@ -1347,7 +1372,7 @@ exports.rules=[
                         title:"只会公开各个阵营的人数。"
                     }
                     {
-                        value:"1"
+                        value:"2"
                         label:"隐藏"
                         title:"隐藏将出现的职业一览。"
                     }
@@ -1435,7 +1460,7 @@ exports.rules=[
         label:null
         visible:(rule,jobs)->
             return true if isYaminabe rule
-            for job in ["Diviner","WolfDiviner","TinyFox"]
+            for job in ["Diviner","ApprenticeSeer","WolfDiviner","TinyFox"]
                 if jobs[job]>0
                     return true
             return false
@@ -1454,6 +1479,23 @@ exports.rules=[
                     {
                         value:"sunrise"
                         label:"天亮才知道"
+                    }
+                ]
+            }
+            {
+                name:"firstnightdivine"
+                label:"占卜初日白通知"
+                title:"如果设为「是」的话，占卜师首天晚上将自动从占卜结果为「村人」的人中随机选择一个人进行占卜。"
+                type:"select"
+                values:[
+                    {
+                        value:"auto"
+                        label:"是"
+                    }
+                    {
+                        value:"manual"
+                        label:"否"
+                        selected:true
                     }
                 ]
             }
@@ -1538,7 +1580,7 @@ exports.rules=[
             {
                 name:"gjmessage"
                 label:"护卫成功能够知道"
-                title:"选中后，在猎人成功保护他人时，猎人会收到通知。"
+                title:"选中后，在猎人·游荡猎人成功保护他人时，该猎人会收到通知。"
                 type:"checkbox"
                 value:{
                     value:"on"
@@ -1549,6 +1591,23 @@ exports.rules=[
                         label:"护卫成功通知"
                         value:if value=="on" then "有" else "无"
                     }
+            }
+            {
+                name:"consecutiveguard"
+                label:"连续护卫"
+                title:"设定猎人・游荡猎人是否可以连续守护同一个人。"
+                type:"select"
+                values:[
+                    {
+                        value:"yes"
+                        label:"是"
+                        selected:true
+                    }
+                    {
+                        value:"no"
+                        label:"否"
+                    }
+                ]
             }
         ]
     }

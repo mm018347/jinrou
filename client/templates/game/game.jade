@@ -40,9 +40,16 @@
             | 请选择希望就职的角色：
             input(type="submit",value="选择",data-job="Waiting")
         #form_GameMaster(hidden).jobformarea
-          p
-            | 请选择要处死的人：
-            input(type="submit",value="杀死（GM）",data-job="GameMaster")
+          fieldset
+            legend GM指令
+            p
+              | 死亡/复活：
+              input(name="kill",type="submit",value="杀死",data-job="GameMaster")
+              input(name="revive",type="submit",value="复活",data-job="GameMaster")
+            p
+              | 时间延长/缩短:
+              input(name="longer",type="submit",value="30秒延长",data-job="GameMaster")
+              input(name="shorter",type="submit",value="30秒缩短",data-job="GameMaster")
         #form__Werewolf(hidden).jobformarea
           p
             | 请选择要杀死的人：
