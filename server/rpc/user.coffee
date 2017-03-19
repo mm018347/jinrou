@@ -166,63 +166,61 @@ exports.actions =(req,res,ss)->
     sendConfirmMail:(query)->
         mailer.sendConfirmMail(query,req,res,ss)
     confirmMail:(query)->
-        if query.match /\/my\?token\=(\w){128}\&timestamp\=(\d){13}$/
-            query = url.parse(query,true).query
-            # console.log query
-            M.users.findOne {"mail.token":query.token,"mail.timestamp":Number(query.timestamp)},(err,doc)->
-                # 有效时间：1小时
+        token = query.token
+        timestamp = Number query.timestamp
+        # console.log query
+        M.users.findOne {"mail.token":token,"mail.timestamp":timestamp},(err,doc)->
+            # 有效时间：1小时
+            if err?
+                res {error:"验证链接无效或已经过期。"}
+                return
+            unless doc?.mail? && Date.now() < Number(doc.mail.timestamp) + 3600*1000
+                res {error:"验证链接无效或已经过期。"}
+                return
+            strfor=doc.mail.for
+            switch doc.mail.for
+                when "confirm"
+                    doc.mail=
+                        address:doc.mail.new
+                        verified:true
+                when "change"
+                    doc.mail=
+                        address:doc.mail.new
+                        verified:true
+                when "remove"
+                    delete doc.mail
+                    # 事故をふせぐ
+                    doc.mailconfirmsecurity = false
+                when "reset"
+                    doc.password = doc.mail.newpass
+                    doc.mail=
+                        address:doc.mail.address
+                        verified:true
+                when "mailconfirmsecurity-off"
+                    doc.mail=
+                        address:doc.mail.address
+                        verified:doc.mail.verified
+                    doc.mailconfirmsecurity = false
+            M.users.update {"userid":doc.userid}, doc, {safe:true},(err,count)=>
                 if err?
-                    res {error:"验证链接无效或已经过期"}
+                    res {error:"邮箱绑定失败。"}
                     return
-                unless doc?.mail? && Date.now() < Number(doc.mail.timestamp) + 3600*1000
-                    res {error:"验证链接无效或已经过期"}
-                    return
-                strfor=doc.mail.for
-                switch doc.mail.for
-                    when "confirm"
+                delete doc.password
+                req.session.user = doc
+                req.session.save ->
+                    if strfor in ["confirm","change"]
+                        doc.info="邮箱「#{doc.mail.address}」认证成功。"
+                    else if strfor == "remove"
                         doc.mail=
-                            address:doc.mail.new
-                            verified:true
-                    when "change"
-                        doc.mail=
-                            address:doc.mail.new
-                            verified:true
-                    when "remove"
-                        delete doc.mail
-                        # 事故をふせぐ
-                        doc.mailconfirmsecurity = false
-                    when "reset"
-                        doc.password = doc.mail.newpass
-                        doc.mail=
-                            address:doc.mail.address
-                            verified:true
-                    when "mailconfirmsecurity-off"
-                        doc.mail=
-                            address:doc.mail.address
-                            verified:doc.mail.verified
-                        doc.mailconfirmsecurity = false
-                M.users.update {"userid":doc.userid}, doc, {safe:true},(err,count)=>
-                    if err?
-                        res {error:"邮箱绑定失败"}
-                        return
-                    delete doc.password
-                    req.session.user = doc
-                    req.session.save ->
-                        if strfor in ["confirm","change"]
-                            doc.info="邮箱「#{doc.mail.address}」认证成功。"
-                        else if strfor == "remove"
-                            doc.mail=
-                                address:""
-                                verified:false
-                            doc.info="邮箱解除认证成功。"
-                        else if strfor == "reset"
-                            doc.info="密码重置成功，请重新登陆。"
-                            doc.reset=true
-                        else if strfor == "mailconfirmsecurity-off"
-                            doc.info="密码·邮箱地址已经解除锁定。"
-                        res doc
-            return
-        res null
+                            address:""
+                            verified:false
+                        doc.info="邮箱解除认证成功。"
+                    else if strfor == "reset"
+                        doc.info="密码重置成功，请重新登陆。"
+                        doc.reset=true
+                    else if strfor == "mailconfirmsecurity-off"
+                        doc.info="密码·邮箱地址已经解除锁定。"
+                    res doc
     resetPassword:(query)->
         unless /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/.test query.mail
             res {info:"请输入有效的邮箱地址"}
