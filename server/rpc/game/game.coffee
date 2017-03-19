@@ -212,6 +212,8 @@ Server=
         themes:require './themes.coffee'
     prize:require '../../prize.coffee'
     oauth:require '../../oauth.coffee'
+    log:require '../../log.coffee'
+
 class Game
     constructor:(@ss,room)->
         # @ss: ss
@@ -9083,6 +9085,10 @@ module.exports.actions=(req,res,ss)->
                         log.to=result[1]
 
             splashlog roomid,game,log
+
+            # log
+            Server.log.speakInRoom roomid, log, req.session.user
+
             res null
         if player?
             log.name=player.name

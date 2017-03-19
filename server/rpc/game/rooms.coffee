@@ -42,7 +42,8 @@ Server=
         rooms:module.exports
         themes:require './themes.coffee'
     oauth:require '../../oauth.coffee'
-# 帮手セット処理
+    log:require '../../log.coffee'
+# ヘルパーセット処理
 sethelper=(ss,roomid,userid,id,res)->
     Server.game.rooms.oneRoomS roomid,(room)->
         if !room || room.error?
@@ -210,6 +211,8 @@ module.exports.actions=(req,res,ss)->
             Server.game.game.newGame room,ss
             res {id: room.id}
             Server.oauth.template room.id,"「#{room.name}」（房间号：#{room.id} #{if room.password then '・有密码' else ''}#{if room.blind then '・匿名模式' else ''}#{if room.gm then '・有GM' else ''}）建成了。 #月下人狼",Config.admin.password
+
+            Server.log.makeroom req.session.user, room
 
     # 部屋に入る
     # 成功ならnull 失敗なら错误メッセージ

@@ -60,4 +60,6 @@ module.exports =
     # 古い部屋に入るまでの时间(hours)
     fresh:24*3
     suddenDeathBAN:360
+  # Experimental feature: logging (boolean)
+  logging: false
 	
