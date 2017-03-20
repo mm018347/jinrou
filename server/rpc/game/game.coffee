@@ -6802,6 +6802,10 @@ class GameMaster extends Player
             when "kill", "revive"
                 return super
             else
+                if query?.jobtype == "_day"
+                    pl = game.getPlayer query.target
+                    if pl?.dead == false
+                        return true
                 return false
 
 # 帮手
