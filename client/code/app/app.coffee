@@ -230,7 +230,8 @@ exports.showUrl=showUrl=(url,query={},nohistory=false)->
                 page "top",null,Index.top,null
     unless nohistory
         pushState url, query
-
+    unless $("div#content div.game").length
+        $("#content").removeAttr "style"
 exports.pushState=pushState=(url, query)->
     history.pushState null, null, "#{url}#{util.hashSearch query}"
                     
