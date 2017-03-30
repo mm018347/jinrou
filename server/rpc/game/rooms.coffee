@@ -181,8 +181,10 @@ module.exports.actions=(req,res,ss)->
                 if room.blind == ""
                     res {error: "活动房间必须为匿名"}
                     return
-                if room.number > theme.skin_length
-                    res {error: "活动「#{theme.name}」的房间人数不能多于「#{theme.skin_length}」"}
+
+                skins = Object.keys theme.skins
+                if room.number > skins.length
+                    res {error: "活动「#{theme.name}」的房间人数不能多于「#{skins.length}」"}
                     return
             room.comment=query.comment ? ""
             #unless room.blind
@@ -326,11 +328,18 @@ module.exports.actions=(req,res,ss)->
                     # 分配皮肤
                     if room.theme && theme != null
                         skins = Object.keys theme.skins
-                        skins.filter((x)->room.players.some((pl)->x==pl.userid))
+                        skins = skins.filter((x)->!room.players.some((pl)->x==pl.userid))
                         skin = skins[Math.floor(Math.random() * skins.length)]
+
+                        unless skin
+                            res error:"由于未知错误加入游戏失败，请重试。"
+                            return
                         
                         user.name=theme.skins[skin].name
                         user.userid=skin
+                        unless user.name? && user.name && user.userid? && user.userid
+                            res error:"由于未知错误加入游戏失败，请重试。"
+                            return
                         avatar = theme.skins[skin].avatar
                         # 也可能是 Array
                         if Array.isArray avatar
