@@ -17,7 +17,8 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 "Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Sorcerer",
 "Doppleganger","CultLeader","Vampire","LoneWolf","Witch","Oldman","Tanner","WolfCub","Thief",
 "Hoodlum","TroubleMaker","FrankensteinsMonster",
-# うそつき人狼的职业
+"BloodyMary",
+# うそつき人狼の役職
 "Dictator","SeersMama","Trapper","WolfBoy","King",
 # Twitter人狼的职业
 "Counselor","Miko","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf",
@@ -37,25 +38,13 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 # 月夜の人狼
 "DrawGirl","CautiousWolf",
 # 人狼HOUSE
-"Hypnotist"
+"Hypnotist",
+# オリジナル
+"SantaClaus","Pyrotechnist","Patissiere","Shishimai",
 ]
-# ここには入らない职业
-# Light, Neet, MinionSelector,QuantumPlayer, HolyProtected, BloodyMary
+# ここには入らない役職
+# Light, Neet, MinionSelector,QuantumPlayer, HolyProtected
 
-# 期間限定职业
-((date)->
-    month=date.getMonth()
-    d=date.getDate()
-    if month==11 && d>=24
-        # 12/24〜12/31
-        exports.jobs.push "SantaClaus"
-    if month==6 && d>=26 || month==7 && d<=16
-        # 7/26〜8/16
-        exports.jobs.push "Pyrotechnist"
-    if month==1 && 13<=d<=14
-        # 2/13〜2/14
-        exports.jobs.push "Patissiere"
-)(new Date)
 # 人外
 exports.nonhumans=["Werewolf","Fox","BigWolf","TinyFox","WolfDiviner","MadWolf","Devil","Vampire","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf"]
 
