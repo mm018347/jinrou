@@ -8213,7 +8213,7 @@ module.exports.actions=(req,res,ss)->
             supporters=[]
             for pl in room.players
                 if pl.mode=="player"
-                    if players.filter((x)->x.realid==pl.realid).length>0
+                    if players.filter((x)->x.realid==pl.realid||x.userid==pl.userid||x.name==pl.name).length>0
                         res "#{pl.name} 重复加入，游戏无法开始。"
                         return
                     players.push pl

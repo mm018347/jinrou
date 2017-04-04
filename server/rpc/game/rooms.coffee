@@ -43,6 +43,7 @@ Server=
         themes:require './themes.coffee'
     oauth:require '../../oauth.coffee'
     log:require '../../log.coffee'
+crypto=require 'crypto'
 # ヘルパーセット処理
 sethelper=(ss,roomid,userid,id,res)->
     Server.game.rooms.oneRoomS roomid,(room)->
@@ -328,15 +329,18 @@ module.exports.actions=(req,res,ss)->
                     # 分配皮肤
                     if room.theme && theme != null
                         skins = Object.keys theme.skins
-                        skins = skins.filter((x)->!room.players.some((pl)->x==pl.userid))
+                        skins = skins.filter((x)->!room.players.some((pl)->theme.skins[x].name==pl.name))
                         skin = skins[Math.floor(Math.random() * skins.length)]
 
                         unless skin
                             res error:"由于未知错误加入游戏失败，请重试。"
                             return
                         
-                        user.name=theme.skins[skin].name
-                        user.userid=skin
+                        user.name=theme.skins[skin].name.trim()
+                        loop
+                            user.userid=crypto.randomBytes(10).toString('hex')
+                            if user.userid? && room.players.every((pl)->user.userid!=pl.userid)
+                                break
                         unless user.name? && user.name && user.userid? && user.userid
                             res error:"由于未知错误加入游戏失败，请重试。"
                             return
@@ -382,7 +386,7 @@ module.exports.actions=(req,res,ss)->
                         # 啊啦，为什么身上有一张身份证，这就是我吗？
                         if room.theme && theme != null
                             # 指明玩家的皮肤
-                            pr = theme.skins[user.userid].prize
+                            pr = theme.skins[skin].prize
                             # 也可能是 Array
                             if Array.isArray pr
                                 pr = pr[Math.floor(Math.random() * pr.length)]
