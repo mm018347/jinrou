@@ -1,63 +1,70 @@
 section.profile
   h1 个人页面
   form#changeprofile(action="/")
-    h2 账号
-    p.userid=userid
-    h2 名字
-    p 显示的名字。
-    p.edit(data-pname="name",data-type="text",data-maxlength="20",data-required="required")=name
-    h2 简介
-    p.edit(data-pname="comment",data-type="text",data-maxlength="100")=comment
-    h2 绑定邮箱
-    p.edit(data-pname="mail",data-type="text",data-maxlength="50")=mail.address
-    if mail.new
+    fieldset
+      h2 账号
+      p.userid=userid
+      h2
+        | 名字
+        i.fa.fa-question-circle-o(data-helpicon, title="加入游戏时显示的名字。")
+      p.edit(data-pname="name",data-type="text",data-maxlength="20",data-required="required")=name
+      h2
+        | 简介
+        i.fa.fa-question-circle-o(data-helpicon, title="在其他人访问自己的个人页面时显示。")
+      p.edit(data-pname="comment",data-type="text",data-maxlength="100")=comment
+      h2 邮箱地址
+      p.edit(data-pname="mail",data-type="text",data-maxlength="50")=mail.address
+      if mail.new
+        p
+          | 正在变更 (
+          = mail.new
+          | )
+          i.fa.fa-question-circle-o(data-helpicon, title="请在您输入的邮箱中按照邮件的指示操作，以完成邮箱认证·邮箱变更操作。")
+      else if !mail.address
+        p
+          | 没有认证
+          i.fa.fa-question-circle-o(data-helpicon, title="建议您在此处登记您的邮箱地址，用于您在遗忘密码时重置密码。您在此处登记的邮箱不会被用作其他用途。")
+      else if mail.verified
+        p 已经认证
+      else
+        p
+          | 正在变更
+          i.fa.fa-question-circle-o(data-helpicon, title="请在您输入的邮箱中按照邮件的指示完成认证。")
+      h2 头像
       p
-        | 正在变更 (
-        = mail.new
-        | )
-        i.fa.fa-question-circle-o(data-helpicon, title="请在您输入的邮箱中按照邮件的指示操作，以完成邮箱认证·邮箱变更操作。")
-    else if !mail.address
+        input(type="hidden",name="icon",value="")
+        img#myicon(width="48",height="48",alt="头像")
+        input(type="button",value="头像选择",name="twittericonbutton")
+      hr
       p
-        | 没有认证
-        i.fa.fa-question-circle-o(data-helpicon, title="建议您在此处登记您的邮箱地址，用于您在遗忘密码时重置密码。您在此处登记的邮箱不会被用作其他用途。")
-    else if mail.verified
-      p 已经认证
-    else
+        input(type="submit",value="保存变更",title="名字・简介・头像·邮箱地址 变更后请点击保存")
+        = "｜"
+        input(type="button",name="colorsettingbutton",value="配色设定")
+  fieldset
+    h2 安全性设置
+    form
       p
-        | 正在变更
-        i.fa.fa-question-circle-o(data-helpicon, title="请在您输入的邮箱中按照邮件的指示完成认证。")
-    h2 头像
+        label
+          | 锁定密码·邮箱地址
+          input(type="checkbox",name="mailconfirmsecurity", value="on", checked=mailconfirmsecurity)
+        i.fa.fa-question-circle-o(data-helpicon, title="如果锁定了密码与邮箱地址，将必须通过邮件认证的方式才能恢复解锁。")
+      p
+        input#mailconfirmsecuritybutton(type="button",value="保存变更")
+  fieldset
     p
-      input(type="hidden",name="icon",value="")
-      img#myicon(width="48",height="48",alt="头像")
-      input(type="button",value="头像选择",name="twittericonbutton")
-    p
-      input(type="submit",value="变更保存",title="名字・简介・头像・邮箱变更后请点击保存")
-      input(type="button",name="colorsettingbutton",value="配色设定")
-  h2 安全性设置
-  form
-    p
-      label
-        | 锁定密码·邮箱地址
-        input(type="checkbox",name="mailconfirmsecurity", value="on", checked=mailconfirmsecurity)
-      i.fa.fa-question-circle-o(data-helpicon, title="如果锁定了密码与邮箱地址，将必须通过邮件认证的方式才能恢复解锁。")
-    p
-      input#mailconfirmsecuritybutton(type="button",value="变更保存")
-  hr
-  p
-    input#changepasswordbutton(type="button",name="changepasswordbutton",value="密码变更")
-  form#changepassword(hidden)
-    h3 密码变更
-    p: label
-      | 新密码
-      input(name="newpass",type="password",size="20",required)
-    p: label
-      | 再输入一次
-      input(name="newpass2",type="password",size="20",required)
-    p: label
-      | 现在的密码
-      input(name="password",type="password",size="20",required)
-    p: input(type="submit",value="变更")
+      input#changepasswordbutton(type="button",name="changepasswordbutton",value="密码变更")
+    form#changepassword(hidden)
+      h3 密码变更
+      p: label
+        | 现在的密码
+        input(name="password",type="password",size="20",required)
+      p: label
+        | 新密码
+        input(name="newpass",type="password",size="20",required)
+      p: label
+        | 再输入一次
+        input(name="newpass2",type="password",size="20",required)
+      p: input(type="submit",value="变更")
   h1 通知
   table.newstable
     thead
