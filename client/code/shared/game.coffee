@@ -1823,4 +1823,4 @@ exports.jobinfos=[
 ]
 
 # 判定
-isYaminabe=(rule)->rule.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅"]
+isYaminabe=(rule)->rule.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
