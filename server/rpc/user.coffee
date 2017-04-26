@@ -140,21 +140,22 @@ exports.actions =(req,res,ss)->
                 if query.name==""
                     res {error:"请输入昵称"}
                     return
+                if query.name.length > Config.maxlength.user.name
+                    res {error:"昵称过长"}
+                    return
+                    
                 record.name=query.name
+            if query.comment?
+                if query.comment.length > Config.maxlength.user.comment
+                    res {error:"简介过长"}
+                    return
 
-            #max bytes of nick name
-            maxLength=20
-            record.name = record.name.trim()
-            if record.name == ''
-                res {error:"昵称不能仅为空格"}
-                return
-            else if record.name.replace(/[^\x00-\xFF]/g,'**').length > maxLength
-                res {error:"昵称不能超过"+maxLength+"个字节。"}
-                return
-
-            if query.comment? && query.comment.length<=200
                 record.comment=query.comment
-            if query.icon? && query.icon.length<=300
+            if query.icon?
+                if query.icon.length > Config.maxlength.user.icon
+                    res {error:"头像URL过长"}
+                    return
+
                 record.icon=query.icon
             M.users.update {"userid":req.session.userId}, record, {safe:true},(err,count)=>
                 if err?
@@ -165,6 +166,9 @@ exports.actions =(req,res,ss)->
                 req.session.save ->
                 res userProfile(record)
     sendConfirmMail:(query)->
+        if query.mail && query.mail.length > Config.maxlength.user.mail
+            res {error:"邮箱地址过长"}
+            return
         mailer.sendConfirmMail(query,req,res,ss)
     confirmMail:(query)->
         token = query.token

@@ -9002,6 +9002,9 @@ module.exports.actions=(req,res,ss)->
         unless comment
             res "没有简介"
             return
+        if comment.length > Config.maxlength.game.comment
+            res "发言过长"
+            return
         player=game.getPlayerReal req.session.userId
         #console.log query,player
         log =

@@ -139,6 +139,16 @@ module.exports.actions=(req,res,ss)->
         unless req.session.userId
             res {error: "没有登陆"}
             return
+        unless query.name
+            res {error: "房间名不能为空"}
+            return
+        if query.name.length > Config.maxlength.room.name
+            res {error: "房间名过长"}
+            return
+        if query.comment && query.comment.length > Config.maxlength.room.comment
+            res {error: "简介过长"}
+            return
+
         M.rooms.find().sort({id:-1}).limit(1).nextObject (err,doc)=>
             id=if doc? then doc.id+1 else 1
             
@@ -310,8 +320,8 @@ module.exports.actions=(req,res,ss)->
                     return
                 
                 # please no, link of data:image/jpeg;base64 would be a disaster
-                if user.icon?.length>512
-                    res error:"头像链接超长（#{user.icon.length}）"
+                if user.icon?.length > Config.maxlength.user.icon
+                    res error:"头像链接过长（#{user.icon.length}）"
                     return
 
                 if room.theme
@@ -326,6 +336,9 @@ module.exports.actions=(req,res,ss)->
                 if room.blind
                     unless opt?.name || room.theme
                         res error:"请输入昵称"
+                        return
+                    if opt.name.length > Config.maxlength.user.name
+                        res {error: "昵称过长"}
                         return
                     # 分配皮肤
                     if room.theme && theme != null

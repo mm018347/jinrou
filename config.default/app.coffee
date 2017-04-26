@@ -60,6 +60,25 @@ module.exports =
     # 古い部屋に入るまでの时间(hours)
     fresh:24*3
     suddenDeathBAN:360
+  # maximum length of data that mey be saved in DB
+  maxlength:
+    user:
+      # user name
+      name: 10
+      # user comment
+      comment: 1024
+      # user icon url
+      icon: 300
+      # mail address
+      mail: 300
+    room:
+      # room name
+      name: 100
+      # room comment
+      comment: 300
+    game:
+      # game speak comment
+      comment: 4096
   # Experimental feature: logging (boolean)
   logging: false
 	
