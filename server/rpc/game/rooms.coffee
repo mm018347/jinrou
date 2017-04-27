@@ -139,7 +139,7 @@ module.exports.actions=(req,res,ss)->
         unless req.session.userId
             res {error: "没有登陆"}
             return
-        unless query.name
+        unless query.name?.trim?()
             res {error: "房间名不能为空"}
             return
         if query.name.length > Config.maxlength.room.name
