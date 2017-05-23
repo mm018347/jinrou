@@ -195,6 +195,8 @@ exports.showUrl=showUrl=(url,query={},nohistory=false)->
                 localStorage.removeItem "userid"
                 localStorage.removeItem "password"
                 $("#username").empty()
+                $("#login").show()
+                $("#logout").hide()
                 showUrl "/", {}, nohistory
         when "/logs"
             # ログ検索
@@ -244,6 +246,8 @@ exports.login=login=(uid,ups,cb)->
             # OK
             my_userid=uid
             $("#username").text uid
+            $("#login").hide()
+            $("#logout").show()
             if result.lastNews && localStorage.latestNews
                 # 最終ニュースを比較
                 last=new Date result.lastNews

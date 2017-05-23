@@ -19,10 +19,10 @@ html(xmlns:wb="http://open.weibo.com/wb")
         span#username
       nav
         ul
-          li
+          li(id="logout",style="display:none;")
             a(href="/logout") 退出
-          li
-            a(href="/") 首页
+          li(id="login")
+            a(href="/") 登陆
           li
             a(href="/my") 个人页面
           li
