@@ -3,15 +3,6 @@ jade=require 'jade'
 
 # JSON APIs
 exports.jsonapi=(request, response, next)->
-  switch request.headers.host
-    when "werewolf.online", "jinrou.sunevsvc.com", "120.25.163.73"
-      reqHost = request.headers.host.split(":")
-      reqHost[0] = "www.werewolf.online"
-      response.writeHead 301,
-        Location: "http://" + reqHost.join(":") + request.url
-      response.end()
-      return
-    else
   if request.url=="/json/rooms"
     M.rooms.find({mode:{$ne:"end"}}).sort({made:-1}).limit(10).toArray (err,results)->
       if err?

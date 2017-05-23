@@ -693,6 +693,9 @@ module.exports.actions=(req,res,ss)->
                         userid:doc.userid
                         ip:doc.ip #卿本佳人奈何做贼？非逼我banIP
                         timestamp:Date.now()
+                    # 空ip？？
+                    if !(addquery.ip)
+                        delete addquery.ip
                     M.blacklist.findOne {userid:banTarget},(err,doc)->
                         unless doc?
                             d=new Date()
