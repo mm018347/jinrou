@@ -227,7 +227,8 @@ module.exports.actions=(req,res,ss)->
             unless doc?
                 res {error:"请注册",require:"login"}    # 需要注册
                 return
-        M.blacklist.findOne {$or:[{userid:req.session.userId},{ip:req.session.user.ip}]},(err,doc)=>
+        # somehow ip could become null
+        M.blacklist.findOne {$or:[{userid:req.session.userId},{ip:req.session.user.ip}],ip:{$ne:null}},(err,doc)=>
             if doc?
                 ###
                 if doc.ip? && doc.timestamp? && doc.timestamp > Date.now() + 1000*60*60
