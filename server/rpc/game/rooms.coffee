@@ -15,7 +15,8 @@ room: {
   number: Number(プレイヤー数)
   players:[PlayerObject,PlayerObject,...]
   gm: Booelan(trueならオーナーGM)
-  jobrule: String   //开始後はなんの配置か（Endless黑暗火锅用）
+  jobrule: String   //開始後はなんの配役か（エンドレス黑暗火锅用）
+  ban: [String]  // kicked userid
 }
 PlayerObject.start=Boolean
 PlayerObject.mode="player" / "gm" / "helper"
@@ -286,6 +287,9 @@ module.exports.actions=(req,res,ss)->
                 if req.session.userId in (room.players.map (x)->x.realid)
                     res error:"已经加入"
                     return
+                if Array.isArray(room.ban) && (req.session.userId in room.ban)
+                    res error:"被禁止加入此房间"
+                    return
                 if room.gm && room.owner.userid==req.session.userId
                     res error:"GM不能加入游戏"
                     return
@@ -496,7 +500,7 @@ module.exports.actions=(req,res,ss)->
                             ss.publish.channel "room#{roomid}", "ready", {userid:x.userid,start:!x.start}
 
     # 部屋から追い出す
-    kick:(roomid,id)->
+    kick:(roomid,id,ban)->
         unless req.session.userId
             res "请登陆"
             return
@@ -518,7 +522,15 @@ module.exports.actions=(req,res,ss)->
             if pl.mode=="gm"
                 res "GM无法被踢出游戏"
                 return
-            M.rooms.update {id:roomid},{$pull: {players:{userid:id}}},(err)=>
+            update =
+                $pull:
+                    players:
+                        userid: id
+            if ban
+                # add to banned list
+                update.$addToSet =
+                    ban: id
+            M.rooms.update {id:roomid}, update, (err)=>
                 if err?
                     res "错误:#{err}"
                 else
@@ -573,6 +585,46 @@ module.exports.actions=(req,res,ss)->
                     res null
                     # readyを初期化する系
                     ss.publish.channel "room#{roomid}", "unreadyall",id
+    # 追い出しリストを取得
+    getbanlist:(roomid)->
+        unless req.session.userId
+            res {error: "请登陆"}
+            return
+        Server.game.rooms.oneRoomS roomid,(room)=>
+            if !room || room.error?
+                res {error: "这个房间不存在"}
+                return
+            if room.owner.userid != req.session.userId
+                res {error:"你不是房主"}
+                return
+            res {result: room.ban}
+    # 追い出しリストを編集
+    cancelban:(roomid, ids)->
+        unless req.session.userId
+            res "请登陆"
+            return
+        unless Array.isArray ids
+            res "输入无效"
+            return
+        Server.game.rooms.oneRoomS roomid, (room)->
+            if !room || room.error?
+                res "这个房间不存在"
+                return
+            if room.owner.userid != req.session.userId
+                res "你不是房主"
+                return
+            M.rooms.update {
+                id: roomid
+            }, {
+                $pullAll: {
+                    ban: ids
+                }
+            }, (err)->
+                if err?
+                    res "错误:#{err}"
+                else
+                    res null
+
     
     
     # 成功ならjoined 失敗なら错误メッセージ

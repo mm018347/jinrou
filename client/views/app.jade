@@ -13,7 +13,8 @@ html(xmlns:wb="http://open.weibo.com/wb")
     != SocketStream
   body
     header
-      h1 月下人狼
+      h1
+        a(href="/") 月下人狼
       br
       #userinfo
         span#username
@@ -37,6 +38,8 @@ html(xmlns:wb="http://open.weibo.com/wb")
             a(href="/backdoor/home") 返回主页
           li
             a(href="/manual/about") 关于月下人狼
+      #toolbar
+
     script(type="text/javascript")
       if((("unknown"===typeof localStorage)||("undefined"===typeof localStorage)||(!document.body.classList)||(!document.body.dataset))&&(navigator.userAgent.indexOf("Googlebot")<0)){
         //要件を満たさない

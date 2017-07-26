@@ -432,13 +432,6 @@ exports.start=(roomid)->
 
             if room.blind && !room.theme
                 # 参加者名
-                ###
-                Index.util.prompt "加入游戏","请输入昵称",null,(name)->
-                    if name
-                        opt.name=name
-                        into()
-                ###
-                # ここ書いてないよ!
                 Index.util.blindName null,(obj)->
                     if obj?
                         opt.name=obj.name
@@ -473,11 +466,17 @@ exports.start=(roomid)->
             b=makebutton "帮手","成为他人的帮手后，将不会直接参与游戏，而是向帮助的对象提供建议。"
             # 帮手になる/やめるボタン
             $(b).click (je)->
-                Index.util.selectprompt "帮手","想要成为谁的帮手?",room.players.map((x)->{name:x.name,value:x.userid}),(id)->
+                Index.util.selectprompt {
+                    title: "帮手"
+                    message: "想要成为谁的帮手?"
+                    options: room.players.map((x)-> {name: x.name, value: x.userid})
+                    icon: 'user'
+                }, (id)->
                     ss.rpc "game.rooms.helper",roomid, id,(result)->
                         if result?
                             Index.util.message "错误",result
             $("#playersinfo").append b
+
 
         userid=Index.app.userid()
         if room.mode=="waiting"
@@ -489,9 +488,18 @@ exports.start=(roomid)->
                 b=makebutton "将参加者踢出游戏"
                 $("#playersinfo").append b
                 $(b).click (je)->
-                    Index.util.selectprompt "踢出","请选择要被踢出的人",room.players.map((x)->{name:x.name,value:x.userid}),(id)->
-                        if id
-                            ss.rpc "game.rooms.kick", roomid,id,(result)->
+                    Index.util.kickprompt {
+                        options: room.players.map((x)->{name:x.name,value:x.userid})
+                    }, (obj)->
+                        if obj?.list
+                            # list 管理
+                            kicklistmanage roomid
+
+                        else if obj?
+                            id = obj.value
+                            ban = obj.ban
+                            console.log id, ban
+                            ss.rpc "game.rooms.kick", roomid,id,ban,(result)->
                                 if result?
                                     Index.util.message "错误",result
                 b=makebutton "重置[ready]状态"
@@ -1709,4 +1717,46 @@ $ ->
             $(".sticky").removeAttr "style"
             $(".sticky").removeAttr "class"
             $("#logs").removeAttr "style"
-        
+
+# オーナーが踢出管理をクリックしたときの処理
+kicklistmanage = (roomid)->
+    ss.rpc "game.rooms.getbanlist", roomid, (result)->
+        if !result? || result.error
+            Index.util.message "错误", result.error
+            return
+        ban = result.result
+        win = Index.util.blankWindow {
+            title: "踢出管理"
+            icon: "user-times"
+        }, ()->
+            inputs = win.find("input[type=\"checkbox\"]")
+
+            query = []
+
+            for input in inputs
+                if input.checked
+                    query.push input.name.slice(4)
+
+            if query.length > 0
+                ss.rpc "game.rooms.cancelban", roomid, query, (result)->
+                    if result?
+                        Index.util.message "错误", result
+                    else
+                        Index.util.message "踢出管理", "重新允许了 #{query.length} 人加入此房间。"
+
+
+        win.append "<p>请在选中想要解除禁止的参与者后点击「OK」。</p>"
+        # kick一覧
+        for id in ban
+            p = document.createElement "p"
+            l = document.createElement "label"
+            input = document.createElement "input"
+            input.type = "checkbox"
+            input.name = "ban-#{id}"
+            l.appendChild input
+
+            txt = document.createTextNode id
+            l.appendChild txt
+            p.appendChild l
+
+            win.append p

@@ -8304,9 +8304,17 @@ module.exports.actions=(req,res,ss)->
 
 
                 # 黑暗火锅のときは入れないのがある
-                exceptions=["MinionSelector","Thief","GameMaster","Helper","QuantumPlayer","Waiting","Watching","GotChocolate"]
+                exceptions=[]
+                # 黑暗火锅で出してはいけない役職
+                special_exceptions=["MinionSelector","Thief","GameMaster","Helper","QuantumPlayer","Waiting","Watching","GotChocolate"]
+                exceptions.push special_exceptions...
                 # ユーザーが指定した入れないの
                 excluded_exceptions=[]
+                # カテゴリをまとめてexceptionに追加する関数
+                addCategoryToExceptions = (category)->
+                    for job in Shared.game.categories[category]
+                        exceptions.push job
+
                 # チェックボックスが外れてるやつは登場しない
                 if query.jobrule=="特殊规则.手调黑暗火锅"
                     for job in Shared.game.jobs
@@ -8314,12 +8322,18 @@ module.exports.actions=(req,res,ss)->
                             # これは出してはいけない指定になっている
                             exceptions.push job
                             excluded_exceptions.push job
-                # メアリーの特殊処理（セーフティ高じゃないとでない）
+                # メアリーの特殊処理（安全性高じゃないとでない）
                 if query.yaminabe_hidejobs=="" || !safety.jobs
                     exceptions.push "BloodyMary"
+                    special_exceptions.push "BloodyMary"
+                # スパイ2（人気がないので出ない）
+                if safety.jingais || safety.jobs
+                    exceptions.push "Spy2"
+                    special_exceptions.push "Spy2"
                 # 悪霊憑き（人気がないので出ない）
                 if safety.jingais || safety.jobs
                     exceptions.push "SpiritPossessed"
+                    special_exceptions.push "SpiritPossessed"
                 unless query.jobrule=="特殊规则.手调黑暗火锅" && countCategory("Werewolf")>0
                     #人外の数
                     if safety.jingais
@@ -8441,67 +8455,122 @@ module.exports.actions=(req,res,ss)->
                     nonavs[job] = true
 
                 if safety.teams
-                    # 阵营調整もする
-                    # 恋人阵营
+                    # 陣営調整もする
+                    # 人狼陣営
                     if frees>0
-                        if 17>=playersnumber>=12
-                            if Math.random()<0.15 && !nonavs.Cupid
-                                joblist.Cupid++
-                                frees--
-                            else if Math.random()<0.12 && !nonavs.Lover
-                                joblist.Lover++
-                                frees--
-                            else if Math.random()<0.1 && !nonavs.BadLady
-                                joblist.BadLady++
-                                frees--
-                        else if playersnumber>=8
-                            if Math.random()<0.15 && !nonavs.Lover
-                                joblist.Lover++
-                                frees--
-                            else if Math.random()<0.1 && !nonavs.Cupid
-                                joblist.Cupid++
-                                frees--
+                        # 望ましい人狼陣営の人数は30〜40%くらい
+                        wolfteam_n = Math.round (playersnumber*(0.3 + Math.random()*0.1))
+                        # ただし半数を超えない
+                        plsh = Math.ceil(playersnumber/2)
+                        if wolfteam_n >= plsh
+                            wolfteam_n = plsh-1
+                        wolf_number = countCategory "Werewolf"
+                        # 残りは狂人系
+                        if wolf_number <= wolfteam_n
+                            joblist.category_Madman = Math.min(frees, wolfteam_n - wolf_number)
+                            frees -= joblist.category_Madman
+                        # 狂人の処理終了
+                        addCategoryToExceptions "Madman"
+                    # 村人陣営
+                    if frees>0
+                        # 50%〜60%くらい
+                        humanteam_n = Math.round (playersnumber*(0.48 + Math.random()*0.12))
+                        joblist.category_Human = Math.min(frees, humanteam_n)
+                        frees -= joblist.category_Human
+
+                        addCategoryToExceptions "Human"
+                        
                     # 妖狐陣営
                     if frees>0 && joblist.Fox>0
                         if joblist.Fox==1
                             if playersnumber>=14
                                 # 1人くらいは…
-                                if Math.random()<0.3 && !nonavs.Immoral
+                                if Math.random()<0.25 && !nonavs.Immoral
                                     joblist.Immoral++
                                     frees--
                             else
                                 # サプライズ的に…
-                                if Math.random()<0.1 && !nonavs.Immoral
+                                if Math.random()<0.06 && !nonavs.Immoral
                                     joblist.Immoral++
                                     frees--
-                            exceptions.push "Immoral"
-                    # 人狼阵营
+                        # 背徳者系
+                        exceptions.push "Immoral"
+                    # 恋人陣営
                     if frees>0
-                        wolf_number = countCategory "Werewolf"
-                        if wolf_number<=playersnumber/8
-                            # 確定狂人サービス
-                            joblist.category_Madman ?= 0
-                            joblist.category_Madman++
-                            frees--
+                        if 17>=playersnumber>=12
+                            if Math.random()<0.1 && !nonavs.Cupid
+                                joblist.Cupid++
+                                frees--
+                            else if Math.random()<0.09 && !nonavs.Lover
+                                joblist.Lover++
+                                frees--
+                            else if Math.random()<0.07 && !nonavs.BadLady
+                                joblist.BadLady++
+                                frees--
+                        else if 12>=playersnumber>=8
+                            if Math.random()<0.085 && !nonavs.Lover
+                                joblist.Lover++
+                                frees--
+                            else if Math.random()<0.03 && !nonavs.Cupid
+                                joblist.Cupid++
+                                frees--
+                        else if playersnumber>=17
+                            rval = 1
+                            while Math.random() < rval
+                                if Math.random()<0.14 && !nonavs.Cupid
+                                    joblist.Cupid++
+                                    frees--
+                                else if Math.random()<0.12 && !nonavs.Lover
+                                    joblist.Lover++
+                                    frees--
+                                else if Math.random()<0.1 && !nonavs.BadLady
+                                    joblist.BadLady++
+                                    frees--
+                                else
+                                    break
+                                rval *= 0.6
+                    exceptions.push "Cupid", "Lover", "BadLady", "Patissiere"
+
                 # 占い確定
                 if safety.teams || safety.jobs
-                    # 村人阵营
-                    if frees>0
-                        # 占い師いてほしい
-                        if Math.random()<0.8 && !nonavs.Diviner
+                    # 村人陣営
+                    # 占い師いてほしい
+                    if joblist.category_Human > 0
+                        if Math.random()<0.75 && !nonavs.Diviner
+                            joblist.Diviner++
+                            joblist.category_Human--
+                        else if !safety.jobs && Math.random()<0.2 && !nonavs.ApprenticeSeer
+                            joblist.ApprenticeSeer++
+                            joblist.category_Human--
+                    else if frees>0
+                        if Math.random()<0.75 && !nonavs.Diviner
                             joblist.Diviner++
                             frees--
-                        else if !safety.jobs && Math.random()<0.3 && !nonavs.ApprenticeSeer
+                        else if !safety.jobs && Math.random()<0.2 && !nonavs.ApprenticeSeer
                             joblist.ApprenticeSeer++
                             frees--
                 if safety.teams
-                    # できれば猎人も
-                    if frees>0
+                    # できれば狩人も
+                    if joblist.category_Human > 0
                         if joblist.Diviner>0
-                            if Math.random()<0.5 && !nonavs.Guard
+                            if Math.random()<0.4 && !nonavs.Guard
+                                joblist.Guard++
+                                joblist.category_Human--
+                            else if Math.random()<0.17 && !nonavs.WanderingGuard
+                                joblist.WanderingGuard++
+                                joblist.category_Human--
+                        else if Math.random()<0.4 && !nonavs.Guard
+                            joblist.Guard++
+                            joblist.category_Human--
+                    else if frees>0
+                        if joblist.Diviner>0
+                            if Math.random()<0.4 && !nonavs.Guard
                                 joblist.Guard++
                                 frees--
-                        else if Math.random()<0.2 && !nonavs.Guard
+                            else if Math.random()<0.17 && !nonavs.WanderingGuard
+                                joblist.WanderingGuard++
+                                frees--
+                        else if Math.random()<0.4 && !nonavs.Guard
                             joblist.Guard++
                             frees--
                 ((date)->
@@ -8641,7 +8710,7 @@ module.exports.actions=(req,res,ss)->
                         for type,arr of Shared.game.categories
                             if joblist["category_#{type}"]>0
                                 # カテゴリの中から候補をしぼる
-                                arr2 = arr.filter (x)->!(x in excluded_exceptions)
+                                arr2 = arr.filter (x)->!(x in excluded_exceptions) && !(x in special_exceptions)
                                 if arr2.length > 0
                                     r=Math.floor Math.random()*arr2.length
                                     job=arr2[r]
@@ -8847,7 +8916,7 @@ module.exports.actions=(req,res,ss)->
                 else
                     joblist.Human=frees-sum
                 ruleinfo_str=Shared.game.getrulestr query.jobrule,joblist
-            if query.yaminabe_hidejobs!="" && query.jobrule!="特殊规则.黑暗火锅" && query.jobrule!="特殊规则.Endless黑暗火锅"
+            if query.yaminabe_hidejobs!="" && query.jobrule!="特殊规则.黑暗火锅" && query.jobrule!="特殊规则.手调黑暗火锅" && query.jobrule!="特殊规则.Endless黑暗火锅"
                 # 黑暗火锅以外で配役情報を公開しないときはアレする
                 ruleinfo_str = ""
             if query.chemical == "on"

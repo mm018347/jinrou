@@ -8,12 +8,35 @@ exports.showWindow=showWindow=(templatename,tmpl)->
     x=Math.max 50,sclf+Math.floor(Math.random()*100-200+document.documentElement.clientWidth/2)
     y=Math.max 50,sctp+Math.floor(Math.random()*100-200+document.documentElement.clientHeight/2)
 
+    # iconはspecialにhandleする
+    unless tmpl?
+        tmpl = {}
+    tmpl.title ?= ""
+    tmpl.icon = makeIconHTML tmpl.icon
+
     win=$(JT["#{templatename}"](tmpl)).hide().css({left:"#{x}px",top:"#{y}px",}).appendTo("body").fadeIn().draggable()
     $(".getfocus",win.get(0)).focus()
     win
+
+makeIconHTML = (icon)->
+    unless icon?
+        return ''
+    if 'string' == typeof icon
+        return "<i class='fa fa-#{icon}'></i>"
+    if icon instanceof Array
+        result = "<span class='fa-stack'>"
+        for name in icon
+            result += "<i class='fa fa-#{name}'></i>"
+        result += "</span>"
+        return result
+    return ''
+
+
+
+
 #編集域を返す
-exports.blankWindow=(title)->
-    win=showWindow "util-blank", {title: title}
+exports.blankWindow=(options, onclose)->
+    win=showWindow "util-blank", options
     div=document.createElement "div"
     div.classList.add "window-content"
     $("form[name='okform']",win).before div
@@ -23,6 +46,7 @@ exports.blankWindow=(title)->
         while t?
             if t.name=="ok"
                 closeWindow t
+                onclose?()
                 break
             t = t.parentNode
     $(div)
@@ -121,8 +145,19 @@ exports.punish=(title,message,cb)->
             closeWindow t
 
 #arr: [{name:"aaa",value:"foo"}, ...]
-exports.selectprompt=(title,message,arr,cb)->
-    win = showWindow "util-selectprompt",{title:title,message:message}
+exports.selectprompt=(options,cb)->
+    {
+        title,
+        message,
+        options: arr,
+        icon,
+    } = options
+
+    win = showWindow "util-selectprompt",{
+        title: title
+        message: message
+        icon: icon
+    }
     sel=win.find("select.prompt").get(0)
     for obj in arr
         opt=document.createElement "option"
@@ -142,8 +177,47 @@ exports.selectprompt=(title,message,arr,cb)->
                 closeWindow t
                 break
             t = t.parentNode
-        
+exports.kickprompt=(options,cb)->
+    {
+        title,
+        message,
+        options: arr,
+        icon,
+    } = options
 
+    win = showWindow "util-kick",{
+        title: title ? "踢出"
+        message: message ? "请选择要被踢出的人"
+        icon: icon ? 'user-times'
+    }
+    sel=win.find("select.prompt").get(0)
+    for obj in arr
+        opt=document.createElement "option"
+        opt.textContent=obj.name
+        opt.value=obj.value
+        sel.add opt
+    win.submit (je)-> je.preventDefault()
+    win.click (je)->
+        t=je.target
+        while t?
+            if t.name=="ok"
+                cb? {
+                    value: sel.value
+                    ban: win.find('input[name="noentry"]').get(0).checked
+                }
+                closeWindow t
+                break
+            else if t.name=="cancel"
+                cb? null
+                closeWindow t
+                break
+            else if t.name=="list"
+                cb? {
+                    list: true
+                }
+                closeWindow t
+                break
+            t = t.parentNode
 
 exports.message=(title,message,cb)->
     win = showWindow "util-wmessage",{title:title,message:message}
@@ -248,7 +322,11 @@ exports.iconSelectWindow=(def,cb)->
         closeWindow win
         cb def  #结果通知
 exports.blindName=(opt={},cb)->
-    win = showWindow "util-blindname",{title:opt.title ? "加入游戏", message:opt.message ? "请输入昵称"}
+    win = showWindow "util-blindname",{
+        title:opt.title ? "加入游戏"
+        message:opt.message ? "请输入昵称"
+        icon: "user-secret"
+    }
     def=null
     win.click (je)->
         t=je.target

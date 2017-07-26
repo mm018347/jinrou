@@ -82,13 +82,20 @@ body > header
   vertical-gradient #565656,#131313
   border-bottom 1px solid #aaaaaa
   color #ffffff
+  display flex
+  flex-flow row wrap
+  align-items center
   h1
     // 月下人狼
+    flex auto 0 0
     display inline-block
     margin 0
     font-family 'Takao明朝',serif
     font-size 2em
     text-shadow  1px 1px 1px rgba(200,200,200,0.4)
+    a
+      text-decoration none
+      color inherit
   #userinfo,nav
     display inline-block
     vertical-align 40%
@@ -96,6 +103,7 @@ body > header
     padding 0 5px
   nav ul li
     display inline-block
+    white-space nowrap
     margin-right 1em
     a
       color #ffffff !important
@@ -103,6 +111,16 @@ body > header
     a:hover
       background-color rgba(0,0,0,.4)
       box-shadow 0 0 5px 5px rgba(0,0,0,.4)
+  #toolbar
+    margin-left auto
+    text-align right
+    span.tool-button
+      display inline-block
+      margin 0 0.7em
+      a
+        color #ffffff !important
+    span.tool-button.tool-disabled
+      color #999999
 //おしらせ
 body > .notice
   margin-left -20px
@@ -136,12 +154,17 @@ body > .notice
   margin 0 -0.6em
   font-size 1.2em
   padding-left 1.6em
+  cursor default
   color #333333
-  text-shadow #ffffff
   vertical-gradient rgba(255,255,255,0.4), rgba(255,255,255,0.6)
+.window > h1 > span.window-icon
+  position relative
+  left -1.3em
+  top 0
 
 .window form p
   text-align center
+  margin 0.4em 0
 .window .closer
   float right
   background none
@@ -149,6 +172,17 @@ body > .notice
   cursor pointer
 .window div.window-content
   margin 1em 0.25em
+
+.window p.window-aside
+  text-align right
+button.link-like
+  background-color transparent
+  border none
+  color #666666
+  text-decoration underline
+  cursor pointer
+  font-size 0.9em
+
 
   
 //user-profile
@@ -167,6 +201,13 @@ section.profile
   table.newstable
     td,th
       border 1px solid currentColor
+  p.toolbar
+    text-align right
+    span.tool-button
+      display inline-block
+      margin 0 0.7em
+    span.tool-button.tool-disabled
+      color #444444
 table.roomstable
   td,th
     border 1px solid currentColor !important
