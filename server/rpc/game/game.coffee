@@ -3,6 +3,8 @@ Shared=
     game:require '../../../client/code/shared/game.coffee'
     prize:require '../../../client/code/shared/prize.coffee'
 
+libblacklist = require '../../libs/blacklist.coffee'
+
 cron=require 'cron'
 
 # 浅いコピー
@@ -403,6 +405,28 @@ class Game
         }
         
     setrule:(rule)->@rule=rule
+    # ゲーム開始時にプレイヤー数が合ってるかチェック
+    checkPlayerNumber:()->
+        joblist = @joblist
+        # number of required jobs
+        jallnum = @startplayers.length
+        # 身代わり君を入れる
+        if @rule.scapegoat == "on"
+            jallnum++
+        # ケミカル人狼は1人2つ
+        if @rule.chemical == "on"
+            jallnum *= 2
+        # sum up all numbers
+        jnumber = 0
+        for job, num of joblist
+            n = parseInt num, 10
+            if Number.isNaN n || n < 0
+                return "玩家数无效（#{job}:#{num}）。多次重试可能解决这个错误。"
+            jnumber += n
+        if jnumber != jallnum
+            return "玩家数无效（#{jnumber}/#{jallnum}/#{@players.length}）。多次重试可能解决这个错误。"
+        return null
+
     #成功:null
     #players: 参加者 supporters: 其他
     setplayers:(res)->
@@ -483,7 +507,7 @@ class Game
                 nogoat=nogoat.concat Shared.game.nonhumans  #人外は除く
             if @rule.safety=="full"
                 # 危ない
-                nogoat=nogoat.concat ["QueenSpectator","Spy2","Poisoner","Cat","BloodyMary","Noble"]
+                nogoat=nogoat.concat ["QueenSpectator","Spy2","Poisoner","Cat","BloodyMary","Noble","Twin"]
             jobss=[]
             for job in Object.keys jobs
                 continue if !joblist[job] || (job in nogoat)
@@ -1003,6 +1027,19 @@ class Game
                     player.sunset this
                 else
                     player.deadsunset this
+            # 忍者のデータを作る
+            ninjadata = {}
+            for player in @players
+                unless player.dead
+                    # 夜に行動していたらtrue
+                    ninjadata[player.id] = !player.jobdone(this)
+
+                    if @rule.scapegoat=="on" && @day==1 && player.isWerewolf() && player.isAttacker()
+                        # 身代わり襲撃は例外的にtrue
+                        ninjadata[player.id] = true
+            # 忍者に配布
+            for player in @players
+                player.accessByJobType("Ninja")?.flag = JSON.stringify ninjadata
         else
             # 誤爆防止
             @werewolf_target_remain=0
@@ -1286,10 +1323,10 @@ class Game
                     "离开了村子"
                 when "deathnote"
                     "的尸体被发现了"
-                when "foxsuicide"
-                    "追随着妖狐自尽了"
+                when "foxsuicide", "friendsuicide", "twinsuicide"
+                    "追随着某个人自尽了"
                 when "friendsuicide"
-                    "追随着恋人自尽了"
+                    "追随着某个人自尽了"
                 when "infirm"
                     "衰老而死了"
                 when "gmpunish"
@@ -1339,6 +1376,8 @@ class Game
                     "追随妖狐自尽"
                 when "friendsuicide"
                     "追随恋人自尽"
+                when "twinsuicide"
+                    "追随双胞胎自尽"
                 when "infirm"
                     "老死"
                 when "gmpunish"
@@ -2248,7 +2287,7 @@ class Player
     isHuman:->!@isWerewolf()
     # 人狼かどうか
     isWerewolf:->false
-    # 洋子かどうか
+    # 妖狐かどうか
     isFox:->false
     # 妖狐の仲間としてみえるか
     isFoxVisible:->false
@@ -2264,6 +2303,10 @@ class Player
     isDrunk:->false
     # 蘇生可能性を秘めているか
     isReviver:->false
+    # ----- 役職判定用
+    hasDeadResistance:->false
+    # -----
+
     # Am I Dead?
     isDead:->{dead:@dead,found:@found}
     # get my team
@@ -2663,6 +2706,7 @@ class Werewolf extends Player
                 
     isHuman:->false
     isWerewolf:->true
+    hasDeadResistance:->true
     # おおかみ専用メソッド：襲撃できるか
     isAttacker:->!@dead
     
@@ -2712,7 +2756,7 @@ class Diviner extends Player
 
         if @type == "Diviner" && game.day == 1 && game.rule.firstnightdivine == "auto"
             # 自動白通知
-            targets2 = targets.filter (x)=> x.id != @id && x.fortuneResult == "村人"
+            targets2 = targets.filter (x)=> x.id != @id && x.fortuneResult == "村人" && x.id != "替身君"
             if targets2.length > 0
                 # ランダムに決定
                 log=
@@ -2821,6 +2865,7 @@ class Guard extends Player
     type:"Guard"
     jobname:"猎人"
     midnightSort: 80
+    hasDeadResistance:->true
     sleeping:->@target?
     sunset:(game)->
         @setTarget null
@@ -2897,6 +2942,7 @@ class Fox extends Player
     isHuman:->false
     isFox:->true
     isFoxVisible:->true
+    hasDeadResistance:->true
     makejobinfo:(game,result)->
         super
         # 妖狐は仲間が分かる
@@ -2951,6 +2997,7 @@ class TinyFox extends Diviner
     midnightSort:100
     isHuman:->false
     isFox:->true
+    hasDeadResistance:->true
     makejobinfo:(game,result)->
         super
         # 子狐は妖狐が分かる
@@ -2986,6 +3033,9 @@ class Bat extends Player
 class Noble extends Player
     type:"Noble"
     jobname:"贵族"
+    hasDeadResistance:(game)->
+        slaves = game.players.filter (x)->!x.dead && x.isJobType "Slave"
+        return slaves.length > 0
     die:(game,found)->
         if found=="werewolf"
             return if @dead
@@ -3035,6 +3085,8 @@ class Magician extends Player
             return "现在还不能发动技能"
         @setTarget playerid
         pl=game.getPlayer playerid
+        unless pl?
+            return "玩家不存在"
         pl.touched game,@id
         
         log=
@@ -3207,6 +3259,7 @@ class Fugitive extends Player
     type:"Fugitive"
     jobname:"逃亡者"
     midnightSort:100
+    hasDeadResistance:->true
     sunset:(game)->
         @setTarget null
         if game.day<=1 #&& game.rule.scapegoat!="off"    # 一日目は逃げない
@@ -3512,6 +3565,7 @@ class Devil extends Player
     jobname:"恶魔"
     team:"Devil"
     psychicResult:"人狼"
+    hasDeadResistance:->true
     die:(game,found)->
         return if @dead
         if found=="werewolf"
@@ -3532,6 +3586,7 @@ class Devil extends Player
 class ToughGuy extends Player
     type:"ToughGuy"
     jobname:"硬汉"
+    hasDeadResistance:->true
     die:(game,found)->
         if found=="werewolf"
             # 狼の襲撃に耐える
@@ -3678,6 +3733,7 @@ class Stalker extends Player
 class Cursed extends Player
     type:"Cursed"
     jobname:"被诅咒者"
+    hasDeadResistance:->true
     die:(game,found)->
         return if @dead
         if found=="werewolf"
@@ -3813,6 +3869,7 @@ class Priest extends Player
     type:"Priest"
     jobname:"圣职者"
     midnightSort:70
+    hasDeadResistance:->true
     sleeping:->true
     jobdone:->@flag?
     sunset:(game)->
@@ -3852,6 +3909,7 @@ class Priest extends Player
 class Prince extends Player
     type:"Prince"
     jobname:"王子"
+    hasDeadResistance:->true
     die:(game,found)->
         if found=="punish" && !@flag?
             # 处刑された
@@ -4080,6 +4138,7 @@ class Vampire extends Player
     sleeping:(game)->@target? || game.day==1
     isHuman:->false
     isVampire:->true
+    hasDeadResistance:->true
     sunset:(game)->
         @setTarget null
         if game.day>1 && @scapegoat
@@ -4522,6 +4581,7 @@ class Dog extends Player
     fortuneResult:"人狼"
     psychicResult:"人狼"
     midnightSort:100
+    hasDeadResistance:->true
     sunset:(game)->
         super
         @setTarget null    # 1日目:飼い主选择 选择後:かみ殺す人选择
@@ -4660,6 +4720,7 @@ class Trapper extends Player
     type:"Trapper"
     jobname:"陷阱师"
     midnightSort:81
+    hasDeadResistance:->true
     sleeping:->@target?
     sunset:(game)->
         @setTarget null
@@ -5064,6 +5125,7 @@ class Miko extends Player
     type:"Miko"
     jobname:"巫女"
     midnightSort:71
+    hasDeadResistance:->true
     sleeping:->true
     jobdone:->!!@flag
     job:(game,playerid,query)->
@@ -5321,6 +5383,7 @@ class WanderingGuard extends Player
     type:"WanderingGuard"
     jobname:"游荡猎人"
     midnightSort:80
+    hasDeadResistance:->true
     sleeping:->@target?
     sunset:(game)->
         @setTarget null
@@ -6735,6 +6798,133 @@ class SpiritPossessed extends Player
     jobname:"恶灵凭依"
     isReviver:->!@dead
 
+class Forensic extends Player
+    type:"Forensic"
+    jobname:"法医学者"
+    mdinightSort:100
+    sleeping:->@target?
+    job_target: Player.JOB_T_DEAD
+    sunset:(game)->
+        if game.day == 1
+            # 1日目
+            @setTarget ""
+            return
+        targets = game.players.filter (pl)-> pl.dead
+        if targets.length == 0
+            @setTarget ""
+            return
+        @setTarget null
+        if @scapegoat
+            # 替身君
+            r = Math.floor Math.random()*targets.length
+            @setTarget ""
+            @job game, targets[r].id, {}
+    job:(game,playerid)->
+        if game.day < 2
+            return "还不能发动能力"
+        pl = game.getPlayer playerid
+        unless pl?
+            return "这个玩家不存在"
+        unless pl.dead
+            return "这个玩家尚未死亡"
+        pl.touched game, @id
+        @setTarget playerid
+        log=
+            mode:"skill"
+            to:@id
+            comment:"#{@name} 调查了 #{pl.name} 的尸体。"
+        splashlog game.id, game, log
+        null
+    midnight:(game)->
+        pl = game.getPlayer @target
+        return unless pl?
+        # 死亡耐性を調べる
+        fl = pl.hasDeadResistance game
+        result = if fl then "持有死亡耐性。" else "没有死亡耐性。"
+
+        @addGamelog game,"forensic", fl, pl.id
+        log=
+            mode:"skill"
+            to:@id
+            comment:"根据 #{@name} 的调查结果，#{pl.name} #{result}"
+        splashlog game.id, game, log
+
+class Cosplayer extends Guard
+    type:"Cosplayer"
+    jobname:"Cosplayer"
+    fortuneResult:"人狼"
+
+class TinyGhost extends Player
+    type:"TinyGhost"
+    jobname:"小妖精"
+    humanCount:-> 0
+
+class Ninja extends Player
+    type:"Ninja"
+    jobname:"忍者"
+    sleeping:->@target?
+    sunset:(game)->
+        @setFlag null
+        targets = game.players.filter (pl)-> !pl.dead && pl.id != "替身君"
+        if targets.length == 0
+            @setTarget ""
+            return
+        @setTarget null
+        if @scapegoat
+            # 替身君
+            r = Math.floor Math.random()*targets.length
+            @setTarget ""
+            @job game, targets[r].id, {}
+    job:(game,playerid)->
+        pl = game.getPlayer playerid
+        unless pl?
+            return "这个玩家不存在"
+        if pl.dead
+            return "这个玩家已经死亡"
+        if pl.id == "替身君"
+            return "不能选择替身君"
+        pl.touched game, @id
+        @setTarget playerid
+        log=
+            mode:"skill"
+            to:@id
+            comment:"#{@name} 侦查了 #{pl.name}。"
+        splashlog game.id, game, log
+        null
+    midnight:(game)->
+        pl = game.getPlayer @target
+        return unless pl?
+        return unless @flag?
+        # flagに忍者用データが入っている
+        obj = JSON.parse @flag
+        result = !!obj?[pl.id]
+        # trueなら夜行動あり
+        if result
+            log=
+                mode:"skill"
+                to:@id
+                comment:"根据 #{@name} 的侦查结果，#{pl.name} 可以在夜间行动。"
+            splashlog game.id, game, log
+        else
+            log=
+                mode:"skill"
+                to:@id
+                comment:"根据 #{@name} 的侦查结果，#{pl.name} 不能在夜间行动。"
+            splashlog game.id, game, log
+        @addGamelog game,"ninjaresult", result, pl.id
+
+class Twin extends Player
+    type:"Twin"
+    jobname:"双胞胎"
+    beforebury:(game)->
+        # 死亡状態の双胞胎がいたら死亡
+        if game.players.some((x)-> x.dead && x.isJobType "Twin")
+            @die game, "twinsuicide"
+    makejobinfo:(game, result)->
+        super
+        # 双胞胎が分かる
+        result.twins = game.players.filter((x)-> x.isJobType "Twin").map (x)-> x.publicinfo()
+
 
 
 # ============================
@@ -7644,6 +7834,7 @@ class FoxMinion extends Complex
     isHuman:->false
     isFox:->true
     isFoxVisible:->true
+    hasDeadResistance:->true
     getJobname:->"狐凭（#{@main.getJobname()}）"
     # 占われたら死ぬ
     divined:(game,player)->
@@ -8027,6 +8218,11 @@ jobs=
     Pumpkin:Pumpkin
     MadScientist:MadScientist
     SpiritPossessed:SpiritPossessed
+    Forensic:Forensic
+    Cosplayer:Cosplayer
+    TinyGhost:TinyGhost
+    Ninja:Ninja
+    Twin:Twin
     # 特殊
     GameMaster:GameMaster
     Helper:Helper
@@ -8166,6 +8362,11 @@ jobStrength=
     Pumpkin:17
     MadScientist:20
     SpiritPossessed:4
+    Forensic:13
+    Cosplayer:20
+    TinyGhost:5
+    Ninja:18
+    Twin:16
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
@@ -8424,21 +8625,25 @@ module.exports.actions=(req,res,ss)->
                                 frees--
                         if joblist.Vampire>0
                             frees+=joblist.Vampire
-                        if vampire_number <= frees
-                            joblist.Vampire = vampire_number
-                            frees -= vampire_number
-                        else
-                            joblist.Vampire = frees
-                            frees = 0
+                        joblist.Vampire = 0
+                        if !nonavs.Vampire
+                            if vampire_number <= frees
+                                joblist.Vampire = vampire_number
+                                frees -= vampire_number
+                            else
+                                joblist.Vampire = frees
+                                frees = 0
 
                         if joblist.Devil>0
                             frees+=joblist.Devil
-                        if devil_number <= frees
-                            joblist.Devil = devil_number
-                            frees -= devil_number
-                        else
-                            joblist.Devil = frees
-                            frees = 0
+                        joblist.Devil = 0
+                        if !nonavs.Devil
+                            if devil_number <= frees
+                                joblist.Devil = devil_number
+                                frees -= devil_number
+                            else
+                                joblist.Devil = frees
+                                frees = 0
                         # 人外は選んだのでもう選ばれなくする
                         exceptions=exceptions.concat Shared.game.nonhumans
                         exceptions.push "Blasphemy"
@@ -8647,10 +8852,14 @@ module.exports.actions=(req,res,ss)->
                             exceptions.push "Shishimai"
 
                     if month==9 && 30<=d<=31
-                        # ハロウィンなので南瓜
-                        if Math.random()<0.4 && frees>0 && !nonavs.Pumpkin
+                        # ハロウィンなのでかぼちゃと小妖精
+                        if Math.random()<0.2 && frees>0 && !nonavs.Pumpkin
                             joblist.Pumpkin ?= 0
                             joblist.Pumpkin++
+                            frees--
+                        else if Math.random()<0.25 && frees>0 && !nonavs.TinyGhost
+                            joblist.TinyGhost ?= 0
+                            joblist.TinyGhost++
                             frees--
                     else
                         if Math.random()<0.2
@@ -8746,6 +8955,11 @@ module.exports.actions=(req,res,ss)->
                                     if joblist.Couple==0
                                         unless init "Couple","Human"
                                             #共有者が入る隙間はない
+                                            continue
+                                when "Twin"
+                                    # 双胞胎も
+                                    if joblist.Twin==0
+                                        unless init "Twin","Human"
                                             continue
                                 when "Noble"
                                     # 贵族は奴隶がほしい
@@ -8996,6 +9210,11 @@ module.exports.actions=(req,res,ss)->
             game.startoptions=options
             game.startplayers=players
             game.startsupporters=supporters
+            # プレイヤー人数をチェック
+            err = game.checkPlayerNumber()
+            if err?
+                res err
+                return
             
             if ruleobj.rolerequest=="on" && !(query.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.量子人狼","特殊规则.Endless黑暗火锅"])
                 # 希望役职制あり
@@ -9082,6 +9301,13 @@ module.exports.actions=(req,res,ss)->
             res "发言过长"
             return
         player=game.getPlayerReal req.session.userId
+
+        unless player?
+            # 観戦発言に対するチェック
+            unless libblacklist.checkPermission "watch_say", req.session.ban
+                res "您的账号受限，不能在此处发言。"
+                return
+
         #console.log query,player
         log =
             comment:comment

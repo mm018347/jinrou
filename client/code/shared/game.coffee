@@ -27,12 +27,14 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 "WanderingGuard", # 錠前天国
 "BadLady", # 苍汁天国、人狼天国
 "Bomber","Blasphemy","Ushinotokimairi",  # ねじれ天国
+# 人狼パーティー
+"TinyGhost","Ninja","Twin",
 # その他
 "RedHood","Baker",
 # 人狼放浪記
-"MadDog","CraftyWolf","Pumpkin","MadScientist","SpiritPossessed"
+"MadDog","CraftyWolf","Pumpkin","MadScientist","SpiritPossessed","Forensic"
 # アプリの役職
-"PsychoKiller",
+"PsychoKiller","Cosplayer",
 # わんないと人狼
 "Phantom",
 # 月夜の人狼
@@ -49,11 +51,11 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 exports.nonhumans=["Werewolf","Fox","BigWolf","TinyFox","WolfDiviner","MadWolf","Devil","Vampire","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf"]
 
 # 黒が出る人
-exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub","Dog","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","MadDog","CraftyWolf"]
+exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub","Dog","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","MadDog","CraftyWolf","Cosplayer"]
 
 # チームたち
 exports.teams=teams=
-    Human:["Human","Diviner","Psychic","Guard","Couple","Poisoner","ToughGuy","Noble","Slave","Magician","Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Light","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Cat","Witch","Oldman","OccultMania","Dog","Dictator","SeersMama","Trapper","RedHood","Counselor","Miko","HolyMarked","WanderingGuard","TroubleMaker","FrankensteinsMonster","BloodyMary","King","SantaClaus","Phantom","DrawGirl","Pyrotechnist","Baker","SpiritPossessed","GotChocolate"]
+    Human:["Human","Diviner","Psychic","Guard","Couple","Poisoner","ToughGuy","Noble","Slave","Magician","Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Light","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Cat","Witch","Oldman","OccultMania","Dog","Dictator","SeersMama","Trapper","RedHood","Counselor","Miko","HolyMarked","WanderingGuard","TroubleMaker","FrankensteinsMonster","BloodyMary","King","SantaClaus","Phantom","DrawGirl","Pyrotechnist","Baker","SpiritPossessed","GotChocolate","Forensic","Cosplayer","TinyGhost","Ninja","Twin"]
     Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist","CraftyWolf","Pumpkin","MadScientist"]
     Fox:["Fox","TinyFox","Immoral","Blasphemy"]
     Devil:["Devil"]
@@ -816,6 +818,21 @@ exports.jobinfo=
         SpiritPossessed:
             name:"恶灵凭依"
             color:"#a196d1"
+        Forensic:
+            name:"法医学者"
+            color:"#d4e9fc"
+        Cosplayer:
+            name:"Cosplayer"
+            color:"#69652b"
+        TinyGhost:
+            name:"小妖精"
+            color:"#999999"
+        Ninja:
+            name:"忍者"
+            color:"#1f136d"
+        Twin:
+            name:"双胞胎"
+            color:"#dbfcff"
         
     Werewolf:
         name:"人狼阵营"
@@ -1211,6 +1228,21 @@ exports.rules=[
                     {
                         label:"向自己投票"
                         value:if value=="ok" then "有" else "无"
+                    }
+            }
+            {
+                name:"voteresult"
+                label:"隐藏投票结果"
+                type:"checkbox"
+                value:{
+                    value:"hide"
+                    label:"隐藏"
+                    nolabel:"显示"
+                }
+                getstr:(value)->
+                    {
+                        label:"投票結果"
+                        value:if value=="hide" then "隐藏" else "显示"
                     }
             }
             {
@@ -1819,6 +1851,11 @@ exports.jobinfos=[
     {
         name:"watchingfireworks",
         type:"hidden"
+    }
+    {
+        name:"twins"
+        prefix:"双胞胎は"
+        type:"pubinfo-array"
     }
 ]
 

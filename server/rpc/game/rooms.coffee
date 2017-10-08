@@ -1,3 +1,4 @@
+libblacklist = require '../../libs/blacklist.coffee'
 ###
 room: {
   id: Number
@@ -65,9 +66,14 @@ sethelper=(ss,roomid,userid,id,res)->
         mode= if topl? then "helper_#{id}" else "player"
         room.players.forEach (x,i)=>
             if x.realid==userid
-                query={$set:{}}
-                query.$set["players.#{i}.mode"]=mode
-                M.rooms.update {id:roomid},query, (err)=>
+                M.rooms.update {
+                    id: roomid
+                    "players.realid": x.realid
+                }, {
+                    $set: {
+                        "players.$.mode": mode
+                    }
+                }, (err)=>
                     if err?
                         res "错误:#{err}"
                     else
@@ -132,6 +138,8 @@ module.exports.actions=(req,res,ss)->
             # ふるいかどうか
             if result.made < Date.now()-Config.rooms.fresh*3600000
                 result.old=true
+            # パスワードをアレする
+            result.password = !!result.password
             res result
 
     # 成功: {id: roomid}
@@ -148,6 +156,9 @@ module.exports.actions=(req,res,ss)->
             return
         if query.comment && query.comment.length > Config.maxlength.room.comment
             res {error: "简介过长"}
+            return
+        unless libblacklist.checkPermission "play", req.session.ban
+            res {error: "您的账号受限，不能创建房间。"}
             return
 
         M.rooms.find().sort({id:-1}).limit(1).nextObject (err,doc)=>
@@ -238,195 +249,159 @@ module.exports.actions=(req,res,ss)->
             unless doc?
                 res {error:"请注册",require:"login"}    # 需要注册
                 return
-        # somehow ip could become null
-        M.blacklist.findOne {$or:[{userid:req.session.userId},{ip:req.session.user.ip}],ip:{$ne:null}},(err,doc)=>
-            if doc?
-                ###
-                if doc.ip? && doc.timestamp? && doc.timestamp > Date.now() + 1000*60*60
-                    res error:"被禁止参与游戏"
-                    return
-                ###
-                if !doc.expires
-                    res error:"被禁止参与游戏"
-                    return
-                if doc.expires.getTime()>=Date.now()
-                    expires = {}
-                    strExpires = []
-                    milliseconds = doc.expires.getTime() - Date.now()
-                    expires.days =
-                      name: "天"
-                      value: Math.floor(milliseconds / (24 * 3600 * 1000))
-                    milliseconds = milliseconds % (24 * 3600 * 1000)
-                    expires.hours =
-                      name: "小时"
-                      value: Math.floor(milliseconds / (3600 * 1000))
-                    milliseconds = milliseconds % (3600 * 1000)
-                    expires.minutes =
-                      name: "分"
-                      value: Math.floor(milliseconds / (60 * 1000))
-                    milliseconds = milliseconds % (60 * 1000)
-                    expires.seconds =
-                      name: "秒"
-                      value: Math.floor(milliseconds / (1000))
-            
-                    for item of expires
-                      item = expires[item]
-                      if item.value >0
-                        strExpires.push item.value+item.name
-                    res error:"被禁止参与游戏，解禁剩余时间：#{strExpires.join("")}"
-                    return
-                if doc.expires? && doc.expires.getTime()<Date.now()
-                    M.blacklist.remove {userid:req.session.userId},(err,doc)->
-                        unless doc?
-                            return
-            
-            Server.game.rooms.oneRoomS roomid,(room)=>
-                if !room || room.error?
-                    res error:"这个房间不存在"
-                    return
-                if req.session.userId in (room.players.map (x)->x.realid)
-                    res error:"已经加入"
-                    return
-                if Array.isArray(room.ban) && (req.session.userId in room.ban)
-                    res error:"被禁止加入此房间"
-                    return
-                if room.gm && room.owner.userid==req.session.userId
-                    res error:"GM不能加入游戏"
-                    return
-                unless room.mode=="waiting" || (room.mode=="playing" && room.jobrule=="特殊规则.Endless黑暗火锅")
-                    res error:"无法加入游戏"
-                    return
-                if room.mode=="waiting" && room.players.length >= room.number
+        unless libblacklist.checkPermission "play", req.session.ban
+            # アクセス制限
+            res {
+                error: "您的账号受限，不能加入房间。"
+            }
+            return
+        Server.game.rooms.oneRoomS roomid,(room)=>
+            if !room || room.error?
+                res error:"这个房间不存在"
+                return
+            if req.session.userId in (room.players.map (x)->x.realid)
+                res error:"已经加入"
+                return
+            if Array.isArray(room.ban) && (req.session.userId in room.ban)
+                res error:"被禁止加入此房间"
+                return
+            if room.gm && room.owner.userid==req.session.userId
+                res error:"GM不能加入游戏"
+                return
+            unless room.mode=="waiting" || (room.mode=="playing" && room.jobrule=="特殊规则.Endless黑暗火锅")
+                res error:"无法加入游戏"
+                return
+            if room.mode=="waiting" && room.players.length >= room.number
+                # 満員
+                res error:"房间已满"
+                return
+            if room.mode=="playing" && room.jobrule=="特殊规则.Endless黑暗火锅"
+                # Endless黑暗火锅の場合は游戏内人数による人数判定を行う
+                if Server.game.game.endlessPlayersNumber(roomid) >= room.number
                     # 満員
                     res error:"房间已满"
                     return
-                if room.mode=="playing" && room.jobrule=="特殊规则.Endless黑暗火锅"
-                    # Endless黑暗火锅の場合は游戏内人数による人数判定を行う
-                    if Server.game.game.endlessPlayersNumber(roomid) >= room.number
-                        # 満員
-                        res error:"房间已满"
-                        return
-                #room.players.push req.session.user
-                su=req.session.user
-                user=
-                    userid:req.session.userId
-                    realid:req.session.userId
-                    name:su.name.trim()
-                    ip:su.ip
-                    icon:su.icon
-                    start:false
-                    mode:"player"
-                    nowprize:su.nowprize
-                # 同IP制限
+            #room.players.push req.session.user
+            su=req.session.user
+            user=
+                userid:req.session.userId
+                realid:req.session.userId
+                name:su.name.trim()
+                ip:su.ip
+                icon:su.icon
+                start:false
+                mode:"player"
+                nowprize:su.nowprize
+            # 同IP制限
                 
-                if room.players.some((x)->x.ip==su.ip) && su.ip?.match("127.0.0.1")==null
-                    res error:"禁止多开 #{su.ip}"
+            if room.players.some((x)->x.ip==su.ip) && su.ip?.match("127.0.0.1")==null
+                res error:"禁止多开 #{su.ip}"
+                return
+                
+            # please no, link of data:image/jpeg;base64 would be a disaster
+            if user.icon?.length > Config.maxlength.user.icon
+                res error:"头像链接过长（#{user.icon.length}）"
+                return
+
+            if room.theme
+                theme = Server.game.themes.getTheme room.theme
+                if theme == null
+                    res {error: "不存在该活动"}
+                    return
+                if !theme.isAvailable?()
+                    res {error: "活动「#{theme.name}」当前不可用"}
                     return
                 
-                # please no, link of data:image/jpeg;base64 would be a disaster
-                if user.icon?.length > Config.maxlength.user.icon
-                    res error:"头像链接过长（#{user.icon.length}）"
+            if room.blind
+                unless opt?.name || room.theme
+                    res error:"请输入昵称"
                     return
+                if opt.name.length > Config.maxlength.user.name
+                    res {error: "昵称过长"}
+                    return
+                # 分配皮肤
+                if room.theme && theme != null
+                    skins = Object.keys theme.skins
+                    skins = skins.filter((x)->!room.players.some((pl)->theme.skins[x].name==pl.name))
+                    skin = skins[Math.floor(Math.random() * skins.length)]
 
-                if room.theme
-                    theme = Server.game.themes.getTheme room.theme
-                    if theme == null
-                        res {error: "不存在该活动"}
+                    unless skin
+                        res error:"由于未知错误加入游戏失败，请重试。"
                         return
-                    if !theme.isAvailable?()
-                        res {error: "活动「#{theme.name}」当前不可用"}
-                        return
-                
-                if room.blind
-                    unless opt?.name || room.theme
-                        res error:"请输入昵称"
-                        return
-                    if opt.name.length > Config.maxlength.user.name
-                        res {error: "昵称过长"}
-                        return
-                    # 分配皮肤
-                    if room.theme && theme != null
-                        skins = Object.keys theme.skins
-                        skins = skins.filter((x)->!room.players.some((pl)->theme.skins[x].name==pl.name))
-                        skin = skins[Math.floor(Math.random() * skins.length)]
-
-                        unless skin
-                            res error:"由于未知错误加入游戏失败，请重试。"
-                            return
                         
-                        user.name=theme.skins[skin].name.trim()
-                        loop
-                            user.userid=crypto.randomBytes(10).toString('hex')
-                            if user.userid? && room.players.every((pl)->user.userid!=pl.userid)
-                                break
-                        unless user.name? && user.name && user.userid? && user.userid
-                            res error:"由于未知错误加入游戏失败，请重试。"
-                            return
-                        avatar = theme.skins[skin].avatar
-                        # 也可能是 Array
-                        if Array.isArray avatar
-                            avatar = avatar[Math.floor(Math.random() * avatar.length)]
-                        user.icon= avatar ? null
-                    # 匿名模式
-                    else
-                        makeid=->   # ID生成
-                            re=""
-                            while !re
-                                i=0
-                                while i<20
-                                    re+="0123456789abcdef"[Math.floor Math.random()*16]
-                                    i++
-                                if room.players.some((x)->x.userid==re)
-                                    re=""
-                            re
-                        user.name=opt.name.trim()
-                        user.userid=makeid()
-                        user.icon= opt.icon ? null
+                    user.name=theme.skins[skin].name.trim()
+                    loop
+                        user.userid=crypto.randomBytes(10).toString('hex')
+                        if user.userid? && room.players.every((pl)->user.userid!=pl.userid)
+                            break
+                    unless user.name? && user.name && user.userid? && user.userid
+                        res error:"由于未知错误加入游戏失败，请重试。"
+                        return
+                    avatar = theme.skins[skin].avatar
+                    # 也可能是 Array
+                    if Array.isArray avatar
+                        avatar = avatar[Math.floor(Math.random() * avatar.length)]
+                    user.icon= avatar ? null
+                # 匿名模式
+                else
+                    makeid=->   # ID生成
+                        re=""
+                        while !re
+                            i=0
+                            while i<20
+                                re+="0123456789abcdef"[Math.floor Math.random()*16]
+                                i++
+                            if room.players.some((x)->x.userid==re)
+                                re=""
+                        re
+                    user.name=opt.name.trim()
+                    user.userid=makeid()
+                    user.icon= opt.icon ? null
                     
-                #同昵称限制,及禁止使用替身君做昵称
-                if room.players.some((x)->x.name==user.name)
-                    res error:"昵称 #{user.name} 已经存在"
-                    return
-                if user.name=="替身君"
-                    res error:"禁止冒名顶替「替身君」"
-                    return
-                if user.name.length<1
-                    res error:"昵称不能仅为空格"
-                    return
-                if room.players.some((x)->x.realid==user.realid)
-                    res error:"#{user.realid} 正在尝试重复加入游戏，请检查您的网络连接是否正常稳定。"
-                    return
+            #同昵称限制,及禁止使用替身君做昵称
+            if room.players.some((x)->x.name==user.name)
+                res error:"昵称 #{user.name} 已经存在"
+                return
+            if user.name=="替身君"
+                res error:"禁止冒名顶替「替身君」"
+                return
+            if user.name.length<1
+                res error:"昵称不能仅为空格"
+                return
+            if room.players.some((x)->x.realid==user.realid)
+                res error:"#{user.realid} 正在尝试重复加入游戏，请检查您的网络连接是否正常稳定。"
+                return
 
-                M.rooms.update {id:roomid},{$push: {players:user}},(err)=>
-                    if err?
-                        res error:"错误:#{err}"
-                    else
-                        # 啊啦，为什么身上有一张身份证，这就是我吗？
-                        if room.theme && theme != null
-                            # 指明玩家的皮肤
-                            pr = theme.skins[skin].prize
-                            # 也可能是 Array
-                            if Array.isArray pr
-                                pr = pr[Math.floor(Math.random() * pr.length)]
-                            # 传递称号
-                            if pr
-                                user.tpr = pr
-                                name = "「#{user.tpr}」#{user.name}"
-                            else
-                                name = "#{user.name}"
-                            res 
-                                tip: "#{name}"
-                                title:"#{theme.skin_tip}"
+            M.rooms.update {id:roomid},{$push: {players:user}},(err)=>
+                if err?
+                    res error:"错误:#{err}"
+                else
+                    # 啊啦，为什么身上有一张身份证，这就是我吗？
+                    if room.theme && theme != null
+                        # 指明玩家的皮肤
+                        pr = theme.skins[skin].prize
+                        # 也可能是 Array
+                        if Array.isArray pr
+                            pr = pr[Math.floor(Math.random() * pr.length)]
+                        # 传递称号
+                        if pr
+                            user.tpr = pr
+                            name = "「#{user.tpr}」#{user.name}"
                         else
-                            res null
-                        # 入室通知
-                        delete user.ip
-                        Server.game.game.inlog room,user
-                        delete user.tpr
-                        if room.blind
-                            delete user.realid
-                        if room.mode!="playing"
-                            ss.publish.channel "room#{roomid}", "join", user
+                            name = "#{user.name}"
+                        res 
+                            tip: "#{name}"
+                            title:"#{theme.skin_tip}"
+                    else
+                        res null
+                    # 入室通知
+                    delete user.ip
+                    Server.game.game.inlog room,user
+                    delete user.tpr
+                    if room.blind
+                        delete user.realid
+                    if room.mode!="playing"
+                        ss.publish.channel "room#{roomid}", "join", user
     # 部屋から出る
     unjoin: (roomid)->
         unless req.session.userId
@@ -446,29 +421,24 @@ module.exports.actions=(req,res,ss)->
             unless room.mode=="waiting"
                 res "游戏已经开始"
                 return
-            #room.players=room.players.filter (x)=>x!=req.session.userId
-            M.rooms.update {id:roomid},{$pull: {players:{realid:req.session.userId}}},(err)=>
+            # consistencyのためにplayersをまるごとアップデートする
+            room.players = room.players.filter (x)=> x.realid != req.session.userId
+            # ヘルパーになっている人は解除
+            for p, i in room.players
+                if p.mode == "helper_#{pl.userid}"
+                    ss.publish.channel "room#{roomid}", "mode", {userid: p.userid, mode: "player"}
+                    p.mode = "player"
+                    if p.start
+                        ss.publish.channel "room#{roomid}", "ready", {userid: p.userid, start: false}
+                        p.start = false
+            M.rooms.update {id:roomid},{$set: {players: room.players}},(err)=>
                 if err?
                     res "错误:#{err}"
                 else
                     res null
                     # 退室通知
-                    user=room.players.filter((x)=>x.realid==req.session.userId)[0]
-                    room.players=room.players.filter (x)->x.realid!=req.session.userId
-                    Server.game.game.outlog room,user ? req.session.user
-                    ss.publish.channel "room#{roomid}", "unjoin", user?.userid
-                    # 帮手さがす
-                    query={$set:{}}
-                    for pl,i in room.players
-                        if pl.mode=="helper_#{user.userid}"
-                            sethelper ss,roomid,pl.realid,null,(->)
-
-                            if pl.start
-                                # unreadyクエリも投げてあげる
-                                query.$set["players.#{i}.start"]=false
-                                ss.publish.channel "room#{roomid}", "ready", {userid:pl.userid,start:false}
-                    if Object.keys(query.$set).length>0
-                        M.rooms.update {id:roomid},query
+                    Server.game.game.outlog room,pl ? req.session.user
+                    ss.publish.channel "room#{roomid}", "unjoin", pl?.userid
 
 
     ready:(roomid)->
@@ -489,9 +459,14 @@ module.exports.actions=(req,res,ss)->
                 return
             room.players.forEach (x,i)=>
                 if x.realid==req.session.userId
-                    query={$set:{}}
-                    query.$set["players.#{i}.start"]=!x.start
-                    M.rooms.update {id:roomid},query, (err)=>
+                    M.rooms.update {
+                        id: roomid
+                        "players.realid": x.realid
+                    }, {
+                        $set: {
+                            "players.$.start": !x.start
+                        }
+                    }, (err)=>
                         if err?
                             res "错误:#{err}"
                         else
@@ -522,10 +497,19 @@ module.exports.actions=(req,res,ss)->
             if pl.mode=="gm"
                 res "GM无法被踢出游戏"
                 return
-            update =
-                $pull:
-                    players:
-                        userid: id
+            room.players = room.players.filter (x)=> x.realid != pl.realid
+            for p, i in room.players
+                if p.mode == "helper_#{pl.userid}"
+                    ss.publish.channel "room#{roomid}", "mode", {userid: p.userid, mode: "player"}
+                    p.mode = "player"
+                    if p.start
+                        ss.publish.channel "room#{roomid}", "ready", {userid: p.userid, start: false}
+                        p.start = false
+            update = {
+                $set: {
+                    players: room.players
+                }
+            }
             if ban
                 # add to banned list
                 update.$addToSet =
@@ -535,24 +519,11 @@ module.exports.actions=(req,res,ss)->
                     res "错误:#{err}"
                 else
                     res null
-                    # 退室通知
-                    user=room.players.filter((x)=>x.userid==id)[0]
-                    if user?
-                        Server.game.game.kicklog room,user
+                    if pl?
+                        Server.game.game.kicklog room, pl
                         ss.publish.channel "room#{roomid}", "unjoin",id
-                        ss.publish.user user.realid,"kicked",{id:roomid}
-                        # ヘルパーさがす
-                        query={$set:{}}
-                        for pl,i in room.players
-                            if pl.mode=="helper_#{user.userid}"
-                                sethelper ss,roomid,pl.realid,null,->
-                                if pl.start
-                                    # unreadyクエリも投げてあげる
-                                    query.$set["players.#{i}.start"]=false
-                                    ss.publish.channel "room#{roomid}", "ready", {userid:pl.userid,start:false}
-                        if Object.keys(query.$set).length>0
-                            M.rooms.update {id:roomid},query
-    # 帮手になる
+                        ss.publish.user pl.realid, "kicked",{id:roomid}
+    # ヘルパーになる
     helper:(roomid,id)->
         unless req.session.userId
             res "请登陆"
@@ -574,11 +545,13 @@ module.exports.actions=(req,res,ss)->
             unless room.mode=="waiting"
                 res "游戏已经开始"
                 return
-            query={$set:{}}
-            for x,i in room.players
-                if x.start
-                    query.$set["players.#{i}.start"]=false
-            M.rooms.update {id:roomid},query,(err)=>
+            for p,i in room.players
+                p.start = false
+            M.rooms.update {id:roomid},{
+                $set: {
+                    players: room.players
+                }
+            },(err)=>
                 if err?
                     res "错误:#{err}"
                 else

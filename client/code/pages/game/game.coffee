@@ -134,6 +134,8 @@ exports.start=(roomid)->
                 $("#jobinfo").append pp "你的饲主是 #{obj.dogOwner.name}"
             if obj.quantumwerewolf_number?
                 $("#jobinfo").append pp "你的玩家编号是第 #{obj.quantumwerewolf_number} 号"
+            if obj.twins?
+                $("#jobinfo").append pp "双胞胎是 #{obj.twins.map((x)->x.name).join(',')}"
             
             if obj.winner?
                 # 勝敗
@@ -402,12 +404,40 @@ exports.start=(roomid)->
             forminfo()
 
         $("#roomname").text room.name
+        iconlist = document.createElement 'span'
+        iconlist.classList.add 'roomname-icons'
+        # ルーム情報
+        if room.password
+            icon = document.createElement 'i'
+            icon.classList.add 'fa'
+            icon.classList.add 'fa-fw'
+            icon.classList.add 'fa-lock'
+            icon.title = '有密码'
+            iconlist.appendChild icon
+        if room.blind
+            icon = document.createElement 'i'
+            icon.classList.add 'fa'
+            icon.classList.add 'fa-fw'
+            icon.classList.add 'fa-user-secret'
+            icon.title = if room.blind == 'hide' then '匿名模式（结束后公开）' else '匿名模式（结束后不公开）'
+            iconlist.appendChild icon
+        if room.comment
+            icon = document.createElement 'i'
+            icon.classList.add 'fa'
+            icon.classList.add 'fa-fw'
+            icon.classList.add 'fa-info-circle'
+            icon.title = room.comment
+            iconlist.appendChild icon
+        $("#roomname").append iconlist
         if room.mode=="waiting"
             # 開始前のユーザー一覧は roomから取得する
-            console.log room.players
             room.players.forEach (x)->
                 li=makeplayerbox x,room.blind
                 $("#players").append li
+
+                # アイコンを取得
+                if x.icon
+                    this_icons[x.name] = x.icon
         # 未参加の場合は参加ボタン
         joinbutton=(je)->
             # 参加
@@ -1352,8 +1382,8 @@ exports.start=(roomid)->
                     img=document.createElement "img"
                     img.style.width="1em"
                     img.style.height="1em"
-                    img.src=this_icons[log.name]
                     img.alt=""  # 飾り
+                    Index.util.setHTTPSicon img, this_icons[log.name]
                     icondiv.appendChild img
             p.appendChild icondiv
             p.appendChild div
@@ -1557,9 +1587,11 @@ makeplayerbox=(obj,blindflg,tagname="li")->#obj:game.playersのアレ
         div=document.createElement "div"
         div.classList.add "avatar"
         img=document.createElement "img"
-        img.src=obj.icon
         img.width=img.height=48
-        img.alt=obj.name
+        img.alt=""
+        img.style.width = "48px"
+        img.style.height = "48px"
+        Index.util.setHTTPSicon img, obj.icon
         div.appendChild img
         figure.appendChild div
         img2=document.createElement "img"
@@ -1577,6 +1609,7 @@ makeplayerbox=(obj,blindflg,tagname="li")->#obj:game.playersのアレ
         a=document.createElement "a"
         a.href="/user/#{obj.realid}"
         a.textContent=obj.name
+        a.classList.add "user-name"
         p.appendChild a
     else
         p.textContent=obj.name

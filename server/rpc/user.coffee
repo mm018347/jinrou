@@ -12,6 +12,8 @@ mailer=require '../mailer.coffee'
 crypto=require 'crypto'
 url=require 'url'
 
+libblacklist = require '../libs/blacklist.coffee'
+
 # 内部関数的なログイン
 login= (query,req,cb,ss)->
     #req.session.authenticate './session_storage/internal.coffee', query, (response)=>
@@ -24,27 +26,78 @@ login= (query,req,cb,ss)->
             req.session.user=response
             #req.session.room=null  # 今入っている部屋
             req.session.channel.reset()
-            req.session.save (err)->
-                # お知らせ情報をとってきてあげる
-                M.news.find().sort({time:-1}).nextObject (err,doc)->
+            # BAN情報を取ってくる
+            libblacklist.handleLogin response.userid, response.ip, (ban)->
+                if ban?.error?
                     cb {
-                        login:true
-                        lastNews:doc?.time
+                        error: ban.error
                     }
-                # IPアドレスを記録してあげる
-                M.users.update {"userid":response.userid},{$set:{ip:response.ip}}
+                    return
+                forgive = false
+                if ban?.forgive
+                    forgive = true
+                    req.session.ban = null
+                else
+                    req.session.ban = ban
+                req.session.save (err)->
+                    # お知らせ情報をとってきてあげる
+                    M.news.find().sort({time:-1}).nextObject (err,doc)->
+                        cb {
+                            login:true
+                            lastNews:doc?.time
+                            banid: ban?.id
+                            forgive: forgive
+                        }
+                    # IPアドレスを記録してあげる
+                    M.users.update {"userid":response.userid},{$set:{ip:response.ip}}
 
-            # log
-            Server.log.login req.session.user
+                # log
+                Server.log.login req.session.user
         else
-            cb {
-                login:false
-            }
+            # ログイン失敗してるじゃん
+            libblacklist.handleHello req.clientIp, (ban)->
+                if ban?.error?
+                    cb {
+                        error: ban.error
+                    }
+                    return
+                forgive = false
+                if ban?.forgive
+                    forgive = true
+                    req.session.ban = null
+                else
+                    req.session.ban = ban
+                req.session.save ()->
+                    cb {
+                        login:false
+                        banid: ban?.id
+                        forgive: forgive
+                    }
 
 exports.actions =(req,res,ss)->
     req.use 'user.fire.wall'
     req.use 'session'
 
+    # 非ログインユーザー
+    hello: ->
+        ip = req.clientIp
+        libblacklist.handleHello ip, (ban)->
+            if ban?.error?
+                res {
+                    error: ban.error
+                }
+                return
+            forgive = false
+            if ban?.forgive
+                forgive = true
+                req.session.ban = null
+            else
+                req.session.ban = ban
+            res {
+                banid: ban?.id
+                forgive: forgive
+            }
+            req.session.save ()->
 # ログイン
 # cb: 失敗なら真
     login: (query)->
@@ -61,6 +114,12 @@ exports.actions =(req,res,ss)->
 # 新規登録
 # cb: 错误メッセージ（成功なら偽）
     newentry: (query)->
+        unless libblacklist.checkPermission "create_account", req.session.ban
+            res {
+                login: false
+                error: "您的连接受限，不允许创建账号。"
+            }
+            return
         unless /^\w+$/.test(query.userid)
             res {
                 login:false
@@ -108,7 +167,7 @@ exports.actions =(req,res,ss)->
             return
         u=JSON.parse JSON.stringify req.session.user
         if u
-            res userProfile(u)
+            res userProfile(req.session.user, req.session.ban)
         else
             res null
 # お知らせをとってきてもらう
@@ -164,7 +223,7 @@ exports.actions =(req,res,ss)->
                 delete record.password
                 req.session.user=record
                 req.session.save ->
-                res userProfile(record)
+                res userProfile(record, req.session.ban)
     sendConfirmMail:(query)->
         if query.mail && query.mail.length > Config.maxlength.user.mail
             res {error:"邮箱地址过长"}
@@ -274,7 +333,7 @@ exports.actions =(req,res,ss)->
                 if err?
                     res {error:"配置变更失败"}
                     return
-                res userProfile(record)
+                res userProfile(record, req.session.ban)
     changeMailconfirmsecurity:(query)->
         M.users.findOne {"userid":req.session.userId}, (err, record)->
             if err?
@@ -285,7 +344,7 @@ exports.actions =(req,res,ss)->
                 return
             if query.mailconfirmsecurity == record.mailconfirmsecurity
                 record.info = "保存成功。"
-                res userProfile(record)
+                res userProfile(record, req.session.ban)
                 return
             if query.mailconfirmsecurity == true
                 # 厳しい
@@ -301,14 +360,14 @@ exports.actions =(req,res,ss)->
                         req.session.save ->
                         record.mailconfirmsecurity = true
                         record.info = "保存成功。"
-                        res userProfile(record)
+                        res userProfile(record, req.session.ban)
                 else
                     # メールアドレスの登録が必要
                     res {error: "必须先认证一个邮箱才能使用此功能。"}
 
             else
                 # メール確認が必要
-                res2 = (record) -> res userProfile(record)
+                res2 = (record) -> res userProfile(record, req.session.ban)
                 mailer.sendMailconfirmsecurityMail {
                     userid: req.session.userId
                 }, req, res2, ss
@@ -368,9 +427,18 @@ exports.actions =(req,res,ss)->
                 res null
                 return
             res doc
-    
-    ######
-            
+    # 私をBANしてください!!!!!!!!
+    requestban:(banid)->
+        libblacklist.handleBanRequest banid, req.session.userId, req.clientIp, (result)->
+            if result.error?
+                res {error: result.error}
+            else if result.forgive
+                # 赦す
+                res {forgive: true}
+            else
+                req.session.ban = result
+                req.session.save ()->
+                    res {banid: result.id}
 
 
 exports.crpassword = Server.auth.crpassword
@@ -396,7 +464,7 @@ makeuserdata=(query)->
     }
 
 # profileに表示する用のユーザーデータをdocから作る
-userProfile = (doc)->
+userProfile = (doc, ban)->
     doc.wp = unless doc.win? && doc.lose?
         "???"
     else if doc.win.length+doc.lose.length==0
@@ -417,6 +485,14 @@ userProfile = (doc)->
             address:doc.mail.address
             new:doc.mail.new
             verified:doc.mail.verified
+    # BAN info
+    if ban?
+        doc.ban =
+            ban: true
+            reason: ban.reason
+    else
+        doc.ban =
+            ban: false
     # backward compatibility
     doc.mailconfirmsecurity = !!doc.mailconfirmsecurity
     return doc

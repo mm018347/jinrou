@@ -3,6 +3,8 @@ crypto=require('crypto')
 child_process=require('child_process')
 settings=Config.mongo
 
+libblacklist = require '../libs/blacklist.coffee'
+
 # twitter系
 oauth=require './../oauth.coffee'
 exports.actions =(req,res,ss)->
@@ -25,52 +27,35 @@ exports.actions =(req,res,ss)->
             req.session.save ->res null
 
     # ------------- blacklist関係
-    # blacklist一览を得る
     getBlacklist:(query)->
+        # blacklist一覧を得る
         unless req.session.administer
             res {error:"不是管理员"}
             return
         M.blacklist.find().limit(100).skip(100*(query.page ? 0)).toArray (err,docs)->
             res {docs:docs}
     addBlacklist:(query)->
+        # blacklistに新しいのを追加
         unless req.session.administer
             res {error:"不是管理员"}
             return
-        M.users.findOne {userid:query.userid},(err,doc)->
-            unless doc?
-                res {error:"没有发现这个用户"}
-                return
-            addquery=
-                userid:doc.userid
-                ip:doc.ip
-            M.blacklist.findOne {userid:query.userid},(err,doc)->
-                unless doc?
-                    if query.expire=="some"
-                        d=new Date()
-                        addquery.timestamp=d.getTime()
-                        d.setMonth d.getMonth()+parseInt query.month
-                        d.setDate d.getDate()+parseInt query.day
-                        d.setHours d.getHours()+parseInt query.hour
-                        addquery.expires=d
-                    M.blacklist.insert addquery,{safe:true},(err,doc)->
-                        res null
-                    return
-                if query.expire=="some"
-                    d=doc.expires
-                    addquery.timestamp=d.getTime()
-                    d.setMonth d.getMonth()+parseInt query.month
-                    d.setDate d.getDate()+parseInt query.day
-                    d.setHours d.getHours()+parseInt query.hour
-                    addquery.expires=d
-                M.blacklist.update {userid:query.userid},{$set:{expires:addquery.expires}},{safe:true},(err,doc)->
-                    res null
+        libblacklist.addBlacklist query, res
+        # 即時反映（居れば）
+        ss.publish.user query.userid, "forcereload"
     removeBlacklist:(query)->
+        # blacklistを1つ解除
         unless req.session.administer
             res {error:"不是管理员"}
             return
-        M.blacklist.remove {userid:query.userid},(err)->
-            res null
-    
+        libblacklist.forgive query.id, (err)->
+            res err
+    restoreBlacklist:(query)->
+        # 解除されたblacklistをもどす
+        unless req.session.administer
+            res {error: "不是管理员"}
+            return
+        libblacklist.restore query.id, (err)->
+            res err
     # -------------- grandalert関係
     spreadGrandalert:(query)->
         unless req.session.administer

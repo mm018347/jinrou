@@ -3,6 +3,8 @@
 Server=
     log:require '../log.coffee'
 
+libblacklist = require '../libs/blacklist.coffee'
+
 players=[]  # ロビーにいる人たち
 heartbeat_time=10
 
@@ -38,7 +40,7 @@ exports.actions =(req,res,ss)->
     req.use 'session'
 
     enter:->
-        if req.session.userId
+        if req.session.userId && libblacklist.checkPermission "lobby_say", req.session.ban
             unless players.some((x)=>x.userid==req.session.userId)
                 plobj=
                     userid:req.session.userId
@@ -53,12 +55,18 @@ exports.actions =(req,res,ss)->
         M.lobby.find({}, {name:1, comment:1, time:1}).sort({time:-1}).limit(100).toArray (err,docs)->
             if err?
                 console.log err
-                throw err
+                res {error: err}
+                return
             res {logs:docs,players:players}
     say:(comment)->
         unless req.session.userId?
+            res {error: "请先登录"}
             return
         unless comment
+            res {error: "请输入发言内容"}
+            return
+        unless libblacklist.checkPermission "lobby_say", req.session.ban
+            res {error: "您的账号受限，不能在此处发言。"}
             return
         log=
             userid:req.session.userId
@@ -67,6 +75,7 @@ exports.actions =(req,res,ss)->
             time:Date.now()
         M.lobby.insert log
         ss.publish.channel "lobby","log",log
+        res null
 
         Server.log.speakInLobby req.session.user, log
     bye:->

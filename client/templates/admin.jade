@@ -15,28 +15,52 @@ section.admin#admin
           th 账号
           th IP地址
           th 期限
+          th 禁止項目
+          th 理由
           th 解除
       tbody#blacklisttable
     h2 新建黑名单
     form#newbanform
-      p
-        | 黑名单账号:
-        input(name="userid",size="20",required)
-      p
-        | 期限:
-        label
-          input(type="radio",name="expire",value="forever",checked)
-          无期限
-        | |
-        input(type="radio",name="expire",value="some")
-        input(name="month",type="number",step="1",value="0",min="0")
-        | 月
-        input(name="day",type="number",step="1",value="0",min="0")
-        | 天
-        input(name="hour",type="number",step="1",value="0",min="0")
-        | 小时
-      p
-        input(type="submit",value="OK")
+      fieldset
+        dl
+          dt 黑名单账号
+          dd
+            input(name="userid",size="20",required)
+          dt 期限
+          dd
+            label
+              input(type="radio",name="expire",value="forever",checked)
+              无期限
+            | |
+            input(type="radio",name="expire",value="some")
+            input(name="month",type="number",step="1",value="0",min="0")
+            | 月
+            input(name="day",type="number",step="1",value="0",min="0")
+            | 天
+          dt 禁止项目
+          dd
+            ul
+              li
+                label
+                  input(type="checkbox",name="create_account",value="on",checked)
+                  | 账号注册
+              li
+                label
+                  input(type="checkbox",name="lobby_say",value="on",checked)
+                  | 聊天室发言
+              li
+                label
+                  input(type="checkbox",name="watch_say",value="on",checked)
+                  | 观战发言
+              li
+                label
+                  input(type="checkbox",name="play",value="on",checked)
+                  | 参加游戏
+          dt 理由
+          dd
+            input(name="reason",type="text")
+        p
+          input(type="submit",value="OK")
   section#grandalert(hidden)
     h1 全体告知
     form#alertform

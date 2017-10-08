@@ -7,10 +7,15 @@ ss.server.on 'disconnect', ->
     util.message "服务器","连接已断开。"
 ss.server.on 'reconnect', ->
     util.message "服务器","连接已恢复，请刷新页面。"
+libban = require '/ban'
     
+
 # 全体告知
 ss.event.on 'grandalert', (msg)->
     util.message msg.title,msg.message
+# 強制リロード
+ss.event.on 'forcereload', ()->
+    location.reload()
 
 # This method is called automatically when the websocket connection is established. Do not rename/delete
 
@@ -65,6 +70,14 @@ exports.init = ->
                 localStorage.removeItem "password"
             showUrl p
     else
+        ss.rpc "user.hello", {}, (e)->
+            if e.banid
+                libban.saveBanData e.banid
+            else if e.forgive
+                libban.removeBanData()
+            else
+                checkBanData()
+
         showUrl location.href
     # ユーザーCSS指定
     cp=useColorProfile getCurrentColorProfile()
@@ -271,6 +284,10 @@ exports.refresh=->showUrl location.pathname, util.searchHash(location.search), t
 
 exports.login=login=(uid,ups,cb)->
     ss.rpc "user.login", {userid:uid,password:ups},(result)->
+        if result.banid
+            libban.saveBanData result.banid
+        else if result.forgive
+            libban.removeBanData()
         if result.login
             # OK
             my_userid=uid
@@ -293,6 +310,9 @@ exports.login=login=(uid,ups,cb)->
             cb? true
         else
             cb? false
+        unless result.banid
+            # banではない?
+            checkBanData()
 exports.userid=->my_userid
 exports.setUserid=(id)->my_userid=id
 
@@ -386,3 +406,13 @@ loadApplicationConfig = ()->
                     span.classList.add "tool-disabled"
                     span.appendChild(document.createTextNode "現在#{m.name}です")
                 ###
+
+checkBanData = ()->
+    libban.loadBanData (data)->
+        if data?
+            console.log "bay", data
+            ss.rpc "user.requestban", data, (result)->
+                if result.banid
+                    libban.saveBanData result.banid
+                else if result.forgive
+                    libban.removeBanData()

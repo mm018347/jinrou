@@ -1,5 +1,12 @@
 section.profile
   h1 个人页面
+  div#alert
+    if ban.ban
+      p 您的账号受到限制，因此将无法完成部分操作。
+      if ban.reason
+        p
+          | 理由：
+          b= ban.reason
   form#changeprofile(action="/")
     fieldset
       h2 账号
