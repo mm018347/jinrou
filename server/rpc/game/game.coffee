@@ -6856,7 +6856,7 @@ class Cosplayer extends Guard
 
 class TinyGhost extends Player
     type:"TinyGhost"
-    jobname:"小妖精"
+    jobname:"妖怪"
     humanCount:-> 0
 
 class Ninja extends Player
@@ -8852,7 +8852,7 @@ module.exports.actions=(req,res,ss)->
                             exceptions.push "Shishimai"
 
                     if month==9 && 30<=d<=31
-                        # ハロウィンなのでかぼちゃと小妖精
+                        # ハロウィンなのでかぼちゃと妖怪
                         if Math.random()<0.2 && frees>0 && !nonavs.Pumpkin
                             joblist.Pumpkin ?= 0
                             joblist.Pumpkin++

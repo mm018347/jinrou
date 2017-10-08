@@ -825,7 +825,7 @@ exports.jobinfo=
             name:"Cosplayer"
             color:"#69652b"
         TinyGhost:
-            name:"小妖精"
+            name:"妖怪"
             color:"#999999"
         Ninja:
             name:"忍者"
