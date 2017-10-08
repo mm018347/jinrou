@@ -1854,7 +1854,7 @@ exports.jobinfos=[
     }
     {
         name:"twins"
-        prefix:"双胞胎は"
+        prefix:"双胞胎是 "
         type:"pubinfo-array"
     }
 ]
