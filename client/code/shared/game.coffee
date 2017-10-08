@@ -1263,7 +1263,7 @@ exports.rules=[
                 values:[
                     {
                         value:"full"
-                        label:"替身君除去所有人外，除去女王观战者、间谍Ⅱ、埋毒者、猫又、玛丽、贵族"
+                        label:"替身君除去所有人外，除去女王观战者、间谍Ⅱ、埋毒者、猫又、玛丽、贵族、双胞胎"
                         selected:true
                     }
                     {
