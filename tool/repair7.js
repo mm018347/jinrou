@@ -22,7 +22,7 @@ function getdb(db,games){
 	console.log("start.");
 	searchRevive();
 	function searchRevive(){
-		games.find({"logs.comment":/は蘇生しました。$/}).each(function(err,game){
+		games.find({"logs.comment":/复活了。$/}).each(function(err,game){
 			if(game==null){
 				console.log("revive searched.");
 				searchCult();
@@ -58,7 +58,7 @@ function getdb(db,games){
 			game.logs.forEach(function(log){
 				if(log.mode==="skill"){
 					var result;
-					result=log.comment.match(/^(.+)は蘇生しました。$/);
+					result=log.comment.match(/^(.+)复活了。$/);
 					if(result){
 						//蘇生
 						var pl = getPlayerN(game,result[1]);

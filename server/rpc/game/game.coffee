@@ -1455,7 +1455,7 @@ class Game
         for n in @revive_log
             log=
                 mode: "system"
-                comment: "#{n}は蘇生しました。"
+                comment: "#{n}复活了。"
             splashlog @id, this, log
         @revive_log = []
         return deads.length
