@@ -3,7 +3,7 @@ Are you a werewolf?
 
 [http://www.werewolf.online:/ 月下人狼服务器]运行中!
 == version ==
-1.11.21
+1.12.2
 
 == requirements ==
 * SocketStream

@@ -29,7 +29,7 @@ module.exports=
     oneRoomS:(roomid,cb)->
         M.rooms.findOne {id:roomid},(err,result)=>
             if err?
-                res {error:err}
+                cb {error:err}
                 return
             unless result?
                 cb result
@@ -156,6 +156,9 @@ module.exports.actions=(req,res,ss)->
             return
         if query.comment && query.comment.length > Config.maxlength.room.comment
             res {error: "简介过长"}
+            return
+        unless query.blind in ['', 'yes', 'complete']
+            res {error: "参数无效"}
             return
         unless libblacklist.checkPermission "play", req.session.ban
             res {error: "您的账号受限，不能创建房间。"}

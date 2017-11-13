@@ -189,6 +189,10 @@ exports.showUrl=showUrl=(url,query={},nohistory=false)->
                         pf()
             else
                 pf()
+        when "/my/log"
+            page "user-mylog", {
+                loggedin: my_userid?
+            }, Index.user.mylog, null
         when "/reset"
             # 重置密码
             page "reset",null,Index.reset, null
@@ -246,9 +250,12 @@ exports.showUrl=showUrl=(url,query={},nohistory=false)->
                 # 房间
                 page "game-game",null,Index.game.game,parseInt result[1]
                 $("#content").css "max-width","95%"
-            else if result=url.match /^\/user\/(\w+)$/
+            else if result=url.match /^\/user\/(\w+|替身君|%E6%9B%BF%E8%BA%AB%E5%90%9B)$/
+                userid = result[1]
+                if userid == "%E6%9B%BF%E8%BA%AB%E5%90%9B"
+                    userid = "替身君"
                 # ユーザー
-                page "user-view",null,Index.user.view,result[1]
+                page "user-view",null,Index.user.view,userid
             else if result=url.match /^\/manual\/job\/(\w+)$/
                 # ジョブ情報
                 win=util.blankWindow {

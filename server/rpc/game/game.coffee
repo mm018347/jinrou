@@ -4,8 +4,31 @@ Shared=
     prize:require '../../../client/code/shared/prize.coffee'
 
 libblacklist = require '../../libs/blacklist.coffee'
+libuserlogs  = require '../../libs/userlogs.coffee'
+libsavelogs  = require '../../libs/savelogs.coffee'
 
 cron=require 'cron'
+
+# フェイズの一覧
+Phase =
+    # 開始前
+    preparing: 'preparing'
+    # 希望役職制
+    rolerequesting: 'rolerequesting'
+    # 昼の議論時間
+    day: 'day'
+    # 昼の猶予
+    day_remain: 'day_remain'
+    # 昼の投票专用时间
+    day_voting: 'day_voting'
+    # 夜の議論時間
+    night: 'night'
+    # 夜の猶予
+    night_remain: 'night_remain'
+    # フェイズ判定メソッド
+    isDay: (phase)-> phase in [Phase.day, Phase.day_remain, Phase.day_voting]
+    isNight: (phase)-> phase in [Phase.night, Phase.night_remain]
+    isRemain: (phase)-> phase in [Phase.day_remain, Phase.night_remain]
 
 # 浅いコピー
 copyObject=(obj)->
@@ -229,13 +252,12 @@ class Game
         @rule=null
         @finished=false #终了したかどうか
         @day=0  #何日目か(0=準備中)
-        @night=false # false:昼 true:夜
+        @phase = Phase.preparing
         
         @winner=null    # 勝ったチーム名
         @quantum_patterns=[]    # 全部の場合を列挙({(id):{jobtype:"Jobname",dead:Boolean},...})
         # DBには現れない
         @timerid=null
-        @voting=false   # 投票猶予時間
         @timer_start=null   # 残り時間のカウント開始時間（秒）
         @timer_remain=null  # 残り時間全体（秒）
         @timer_mode=null    # タイマーの名前
@@ -246,8 +268,10 @@ class Game
         @werewolf_target_remain=0   #襲撃先をあと何人设定できるか
         @werewolf_flag=[] # 人狼襲撃に関するフラグ
 
-        @slientexpires=0    # 静かにしてろ！（この时间まで）
-        @heavenview=false   # 灵界表示がどうなっているか
+        @revive_log = [] # 蘇生した人の記録
+
+        @slientexpires=0    # 静かにしてろ！（この時間まで）
+        @heavenview=false   # 霊界表示がどうなっているか
 
         @gamelogs=[]
         @iconcollection={}  #(id):(url)
@@ -258,15 +282,20 @@ class Game
         @startplayers=null
         @startsupporters=null
 
-        # 希望役职制のときに开始前に职业选择するフェーズ
-        @rolerequestingphase=false
-        @rolerequesttable={}    # 一览{(id):(jobtype)}
+        # 希望役職制の選択一覧
+        @rolerequesttable={}    # 一覧{(id):(jobtype)}
         
         # 投票箱を用意しておく
         @votingbox=new VotingBox this
 
         # New Year Messageのためだけの変数
         @currentyear = null
+
+        # 保存用の時間
+        @finish_time=null
+
+        # ログ保存用のオブジェクト
+        @logsaver = new libsavelogs.LogSaver this
 
         ###
         さまざまな出来事
@@ -286,7 +315,7 @@ class Game
             additionalParticipants: @participants?.filter((x)=>@players.indexOf(x)<0).map (x)->x.serialize()
             finished:@finished
             day:@day
-            night:@night
+            phase:@phase
             winner:@winner
             jobscount:@jobscount
             gamelogs:@gamelogs
@@ -296,6 +325,7 @@ class Game
             werewolf_target:@werewolf_target
             werewolf_target_remain:@werewolf_target_remain
             #quantum_patterns:@quantum_patterns
+            finish_time:@finish_time
         }
     #DB用をもとにコンストラクト
     @unserialize:(obj,ss)->
@@ -313,7 +343,7 @@ class Game
 
         game.finished=obj.finished
         game.day=obj.day
-        game.night=obj.night
+        game.phase=obj.phase
         game.winner=obj.winner
         game.jobscount=obj.jobscount
         game.gamelogs=obj.gamelogs ? {}
@@ -347,13 +377,13 @@ class Game
                 game.participants=game.players.concat []
 
         game.quantum_patterns=obj.quantum_patterns ? []
+        game.finish_time=obj.finish_time ? null
         unless game.finished
             if game.rule
                 game.timer()
-            if game.day>0
-                if !game.night
-                    # 昼の場合投票箱をつくる
-                    game.votingbox.setCandidates game.players.filter (x)->!x.dead
+            if game.day>0 && Phase.isDay(game.phase)
+                # 昼の場合投票箱をつくる
+                game.votingbox.setCandidates game.players.filter (x)->!x.dead
         game
     # 公開情報
     publicinfo:(obj)->  #obj:选项
@@ -375,7 +405,9 @@ class Game
                     r.realid=x.realid
                 r
             day:@day
-            night:@night
+            # for backward compatibility
+            night:Phase.isNight(@phase)
+            phase:@phase
             jobscount:@jobscount
         }
     # IDからプレイヤー
@@ -821,22 +853,24 @@ class Game
         if @day<=0
             # はじまる前
             @day=1
-            @night=true
+            @phase = Phase.night
             # ゲーム開始時の年を記録
             @currentyear = (new Date).getFullYear()
-        else if @night==true
+        else if Phase.isNight(@phase)
             @day++
-            @night=false
+            @phase = Phase.day
         else
-            @night=true
+            @phase = Phase.night
 
-        if @night==false && @currentyear+1 == (new Date).getFullYear()
+        night = Phase.isNight(@phase)
+
+        if @phase == Phase.day && @currentyear+1 == (new Date).getFullYear()
             # 新年メッセージ
             @currentyear++
             log=
                 mode:"nextturn"
                 day:@day
-                night:@night
+                night:night
                 userid:-1
                 name:null
                 comment:"现在是 #{@currentyear} 年了。"
@@ -846,14 +880,14 @@ class Game
             log=
                 mode:"nextturn"
                 day:@day
-                night:@night
+                night:night
                 userid:-1
                 name:null
-                comment:"第#{@day}天的#{if @night then '夜晚' else '白天'}到来了。"
+                comment:"第#{@day}天的#{if night then '夜晚' else '白天'}到来了。"
             splashlog @id,this,log
 
         #死体処理
-        @bury(if @night then "night" else "day")
+        @bury(if night then "night" else "day")
 
         if @rule.jobrule=="特殊规则.量子人狼"
             # 量子人狼
@@ -954,13 +988,12 @@ class Game
                 probability_table:probability_table
             splashlog @id,this,log
             # もう一回死体処理
-            @bury(if @night then "night" else "day")
+            @bury(if night then "night" else "day")
     
             return if @judge()
 
-        @voting=false
-        if @night
-            # job数据を作る
+        if night
+            # jobデータを作る
             # 人狼の襲い先
             @werewolf_target=[]
             unless @day==1 && @rule.scapegoat!="off"
@@ -1039,7 +1072,8 @@ class Game
                         ninjadata[player.id] = true
             # 忍者に配布
             for player in @players
-                player.accessByJobType("Ninja")?.flag = JSON.stringify ninjadata
+                for p in player.accessByJobTypeAll("Ninja")
+                    p.setFlag(JSON.stringify ninjadata)
         else
             # 誤爆防止
             @werewolf_target_remain=0
@@ -1143,7 +1177,7 @@ class Game
         @bury "other"
         return if @judge()
         @splashjobinfo()
-        if @night
+        if night
             @checkjobs()
         else
             # 昼は15秒规则があるかも
@@ -1166,13 +1200,12 @@ class Game
     #全员寝たかチェック 寝たなら処理してtrue
     #timeoutがtrueならば时间切れなので时间でも待たない
     checkjobs:(timeout)->
-        if @day==0
-            # 开始前（希望役职制）
+        if @phase == Phase.rolerequesting
+            # 開始前（希望役職制）
             if timeout || @players.every((x)=>@rolerequesttable[x.id]?)
                 # 全员できたぞ
                 @setplayers (result)=>
                     unless result?
-                        @rolerequestingphase=false
                         @nextturn()
                         @ss.publish.channel "room#{@id}","refresh",{id:@id}
                 true
@@ -1180,7 +1213,7 @@ class Game
                 false
 
         else if @players.every( (x)=>x.dead || x.sleeping(@))
-            if @voting || timeout || !@rule.night || @rule.waitingnight!="wait" #夜に时间がある場合は待ってあげる
+            if Phase.isRemain(@phase) || timeout || !@rule.night || @rule.waitingnight!="wait" #夜に時間がある場合は待ってあげる
                 @midnight()
                 @nextturn()
                 true
@@ -1418,10 +1451,17 @@ class Game
                     name:x.name
                     comment:x.will
                 splashlog @id,this,log
-        deads.length
+        # 蘇生のログも表示
+        for n in @revive_log
+            log=
+                mode: "system"
+                comment: "#{n}は蘇生しました。"
+            splashlog @id, this, log
+        @revive_log = []
+        return deads.length
                 
     # 投票終わりチェック
-    # 返り値意味ないんじゃないの?
+    # 返り値: 処刑が終了したらtrue
     execute:->
         return false unless @votingbox.isVoteAllFinished()
         [mode,players,tos,table]=@votingbox.check()
@@ -1487,8 +1527,8 @@ class Game
                     player.votestart this
                     @ss.publish.channel "room#{@id}","voteform",true
                     @splashjobinfo()
-                if @voting
-                    # 投票犹豫の場合初期化
+                if @phase == Phase.day_remain
+                    # 投票猶予の場合初期化
                     clearTimeout @timerid
                     @timer()
                 return false
@@ -1496,7 +1536,7 @@ class Game
         return true
     # 重新投票
     dorevote:(mode)->
-        # mode: "runoff" - 决胜投票による重新投票 "revote" - 同数による重新投票 "gone" - 突然死による重新投票
+        # mode: "runoff" - 决胜投票による重新投票 "revote" - 同数による重新投票 "gone" - 猝死による重新投票
         if mode!="runoff"
             @revote_num++
         if @revote_num>=4   # 4回重新投票
@@ -1524,8 +1564,8 @@ class Game
             player.votestart this
         @ss.publish.channel "room#{@id}","voteform",true
         @splashjobinfo()
-        if @voting
-            # 投票犹豫の場合初期化
+        if @phase == Phase.day_remain
+            # 投票猶予の場合初期化
             clearTimeout @timerid
             @timer()
     
@@ -1673,18 +1713,19 @@ class Game
         if team?
             # 勝敗决定
             @finished=true
-            @last_time=Date.now()
+            @finish_time=new Date
+            @last_time=@finish_time.getTime()
             @winner=team
             if team!="Draw"
                 @players.forEach (x)=>
                     iswin=x.isWinner this,team
                     if @rule.losemode
-                        # 败北村（負けたら勝ち）
+                        # 败北村（败北たら胜利）
                         if iswin==true
                             iswin=false
                         else if iswin==false
                             iswin=true
-                    # ただし突然死したら負け
+                    # ただし猝死したら败北
                     if @gamelogs.some((log)->
                         log.id==x.id && log.event=="found" && log.flag in ["gone-day","gone-night"]
                     )
@@ -1740,9 +1781,10 @@ class Game
             # 房间を终了状态にする
             M.rooms.update {id:@id},{$set:{mode:"end"}}
             @ss.publish.channel "room#{@id}","refresh",{id:@id}
-            @save()
-            @prize_check()
             clearTimeout @timerid
+            @save()
+            @saveUserRawLogs()
+            @prize_check()
             
 
             # 向房间成员通报猝死统计
@@ -1786,14 +1828,14 @@ class Game
             else
                 # 时间切れ
                 func()
-        if @rolerequestingphase
-            # 希望役职制
+        if @phase == Phase.rolerequesting
+            # 希望役職制
             time=60
             mode="希望选择"
             func= =>
                 # 強制开始
                 @checkjobs true
-        else if @night && !@voting
+        else if @phase == Phase.night
             # 夜
             time=@rule.night
             mode="夜"
@@ -1802,54 +1844,65 @@ class Game
                 # ね な い こ だ れ だ
                 unless @checkjobs true
                     if @rule.remain
-                        # 犹豫时间があるよ
-                        @voting=true
+                        # 猶予時間があるよ
+                        @phase = Phase.night_remain
                         @timer()
                     else
                         @players.forEach (x)=>
                             return if x.dead || x.sleeping(@)
-                            x.die this,"gone-night" # 突然死
+                            x.die this,"gone-night" # 猝死
                             x.setNorevive true
-                            # 突然死記録
+                            # 猝死記録
                             M.users.update {userid:x.realid},{$push:{gone:@id}}
                         @bury("other")
                         @checkjobs true
                 else
                     return
-        else if @night
-            # 夜の犹豫
+        else if @phase == Phase.night_remain
+            # 夜の猶予
             time=@rule.remain
             mode="犹豫"
             func= =>
                 # ね な い こ だ れ だ
                 @players.forEach (x)=>
                     return if x.dead || x.sleeping(@)
-                    x.die this,"gone-night" # 突然死
+                    x.die this,"gone-night" # 猝死
                     x.setNorevive true
-                    # 突然死記録
+                    # 猝死記録
                     M.users.update {userid:x.realid},{$push:{gone:@id}}
                 @bury("other")
                 @checkjobs true
-        else if !@voting
+        else if @phase == Phase.day
             # 昼
             time=@rule.day
             mode="昼"
             return unless time
             func= =>
                 unless @execute()
-                    if @rule.remain
-                        # 犹豫があるよ
-                        @voting=true
+                    if @rule.voting
+                        # 投票专用时间がある
+                        @phase = Phase.day_voting
+                        log=
+                            mode:"system"
+                            comment:"白天的讨论时间到此结束。请投票决定要处死的人。"
+                        splashlog @id, this, log
+                        # 投票箱が開くので通知
+                        @splashjobinfo()
+                        @timer()
+                    else if @rule.remain
+                        # 猶予があるよ
+                        @phase = Phase.day_remain
                         log=
                             mode:"system"
                             comment:"白天的讨论时间到此结束。请投票决定要处死的人。"
                         splashlog @id,this,log
                         @timer()
                     else
-                        # 突然死
+                        # 猝死
                         revoting=false
-                        @players.forEach (x)=>
-                            return if x.dead || x.voted(this,@votingbox)
+                        for x in @players
+                            if x.dead || x.voted(this,@votingbox)
+                                continue
                             x.die this,"gone-day"
                             x.setNorevive true
                             revoting=true
@@ -1861,15 +1914,47 @@ class Game
                             @execute()
                 else
                     return
+        else if @phase == Phase.day_voting
+            # 投票专用时间
+            time=@rule.voting
+            mode="投票"
+            return unless time
+            func= =>
+                unless @execute()
+                    # まだ決まらない
+                    if @rule.remain
+                        # 猶予時間
+                        @phase = Phase.day_remain
+                        @timer()
+                    else
+                        # 猝死
+                        revoting=false
+                        for x in @players
+                            if x.dead || x.voted(this, @votingbox)
+                                continue
+                            x.die this, "gone-day"
+                            x.setNorevive true
+                            revoting = true
+                        @bury("other")
+                        @judge()
+                        if revoting
+                            @dorevote "gone"
+                        else
+                            @execute()
+                else
+                    return
+                        
         else
-            # 犹豫时间も過ぎたよ!
+            # @phase == Phase.day_remain
+            # 猶予時間も過ぎたよ!
             time=@rule.remain
             mode="犹豫"
             func= =>
                 unless @execute()
                     revoting=false
-                    @players.forEach (x)=>
-                        return if x.dead || x.voted(this,@votingbox)
+                    for x in @players
+                        if x.dead || x.voted(this,@votingbox)
+                            continue
                         x.die this,"gone-day"
                         x.setNorevive true
                         revoting=true
@@ -1892,6 +1977,7 @@ class Game
             ls = makelogsFor this, player, x
             result.push ls...
         return result
+    # 終了時の称号処理
     prize_check:->
         Server.prize.checkPrize @,(obj)=>
             # obj: {(userid):[prize]}
@@ -1913,33 +1999,12 @@ class Game
                         mode:"system"
                         comment:"#{pl.name} 获得了称号 #{pnames.join ''}。"
                     splashlog @id,this,log
-
-        ###
-        M.users.find(query).each (err,doc)=>
-            return unless doc?
-            oldprize=doc.prize  # 賞の一览
-            
-            # 賞を算出しなおしてもらう
-            Server.prize.checkPrize doc.userid,(prize)=>
-                prize=prize.concat doc.ownprize if doc.ownprize?
-                # 新規に獲得した賞を探す
-                newprizes= prize.filter (x)->!(x in oldprize)
-                if newprizes.length>0
-                    M.users.update {userid:doc.userid},{$set:{prize:prize}}
-                    pl=@getPlayerReal doc.userid
-                    newprizes.forEach (x)=>
-                        log=
-                            mode:"system"
-                            comment:"#{pl.name}は#{Server.prize.prizeQuote Server.prize.prizeName x}を獲得しました。"
-                        splashlog @id,this,log
-                        @addGamelog {
-                            id: pl.id
-                            type:pl.type
-                            event:"getprize"
-                            flag:x
-                            target:null
-                        }
-        ###
+    # ユーザーのゲームログを保存
+    saveUserRawLogs:->
+        libuserlogs.addGameLogs this, (err)->
+            if err?
+                console.error err
+                return
 ###
 logs:[{
     mode:"day"(昼) / "system"(システムメッセージ) /  "werewolf"(狼) / "heaven"(天国) / "prepare"(开始前/终了後) / "skill"(能力ログ) / "nextturn"(游戏進行) / "audience"(观战者のひとりごと) / "monologue"(夜のひとりごと) / "voteresult" (投票结果） / "couple"(共有者) / "fox"(妖狐) / "will"(遗言)
@@ -2337,6 +2402,15 @@ class Player
         if @isJobType(type)
             return this
         null
+    # access all sub-jobs by jobtype.
+    # Returns array.
+    accessByJobTypeAll:(type, subonly)->
+        unless type
+            throw "there must be a JOBTYPE"
+        if @isJobType type
+            return [this]
+        else
+            return []
     gatherMidnightSort:->
         return [@midnightSort]
     # complexのJobTypeを調べる
@@ -2423,10 +2497,7 @@ class Player
         p=@getParent game
         unless p?.sub==this
             # サブのときはいいや・・・
-            log=
-                mode:"system"
-                comment:"#{@name} 复活了。"
-            splashlog game.id,game,log
+            game.revive_log.push @name
             @addGamelog game,"revive",null,null
             game.ss.publish.user @id,"refresh",{id:game.id}
 
@@ -2438,7 +2509,7 @@ class Player
     touched:(game,from)->
     # 选择肢を返す
     makeJobSelection:(game)->
-        if game.night
+        if Phase.isNight(game.phase)
             # 夜の能力
             jt=@job_target
             if jt>0
@@ -2455,7 +2526,7 @@ class Player
         else
             # 昼の投票
             result=[]
-            if game?.votingbox
+            if game.votingbox
                 for pl in game.votingbox.candidates
                     result.push {
                         name:pl.name
@@ -2470,7 +2541,7 @@ class Player
     makejobinfo:(game,obj,jobdisp)->
         # 開くべきフォームを配列で（生きている場合）
         obj.open ?=[]
-        if !@jobdone(game) && (game.night || @chooseJobDay(game))
+        if !@jobdone(game) && (Phase.isNight(game.phase) || @chooseJobDay(game))
             obj.open.push @type
         # 职业解説のアレ
         obj.desc ?= []
@@ -2500,8 +2571,11 @@ class Player
     getjob_target:->@job_target
     # 昼の发言の选择肢
     getSpeakChoiceDay:(game)->
-        ["day","monologue"]
-    # 夜の发言の选择肢を得る
+        if game.phase == Phase.day
+            ["day","monologue"]
+        else
+            ["monologue"]
+    # 夜の発言の選択肢を得る
     getSpeakChoice:(game)->
         ["monologue"]
     # 霊界発言
@@ -2680,7 +2754,7 @@ class Werewolf extends Player
                         i--
 
 
-    sleeping:(game)->game.werewolf_target_remain<=0 || !game.night
+    sleeping:(game)->game.werewolf_target_remain<=0 || !Phase.isNight(game.phase)
     job:(game,playerid)->
         tp = game.getPlayer playerid
         if game.werewolf_target_remain<=0
@@ -2726,7 +2800,7 @@ class Werewolf extends Player
     team: "Werewolf"
     makejobinfo:(game,result)->
         super
-        if game.night && game.werewolf_target_remain>0
+        if Phase.isNight(game.phase) && game.werewolf_target_remain>0
             # まだ襲える
             result.open.push "_Werewolf"
         # 人狼は仲間が分かる
@@ -2756,7 +2830,7 @@ class Diviner extends Player
 
         if @type == "Diviner" && game.day == 1 && game.rule.firstnightdivine == "auto"
             # 自動白通知
-            targets2 = targets.filter (x)=> x.id != @id && x.fortuneResult == "村人" && x.id != "替身君"
+            targets2 = targets.filter (x)=> x.id != @id && x.fortuneResult == "村人" && x.id != "替身君" && !x.isJobType("Fox")
             if targets2.length > 0
                 # ランダムに決定
                 log=
@@ -2870,8 +2944,8 @@ class Guard extends Player
     sunset:(game)->
         @setTarget null
 
-        if game.day==1
-            # 猎人は一日目护卫しない
+        if game.day==1 && game.rule.scapegoat != "off"
+            # 狩人は一日目護衛しない
             @setTarget ""  # 誰も守らない
             return
         # 護衛可能対象
@@ -3058,7 +3132,7 @@ class Slave extends Player
     isWinner:(game,team)->
         nobles=game.players.filter (x)->!x.dead && x.isJobType "Noble"
         if team==@team && nobles.length==0
-            true    # 村人阵营の勝ちで贵族は死んだ
+            true    # 村人阵营の胜利で贵族は死んだ
         else
             false
     makejobinfo:(game,result)->
@@ -3149,7 +3223,7 @@ class Spy extends Player
             x.publicinfo()
     makeJobSelection:(game)->
         # 夜は投票しない
-        if game.night
+        if Phase.isNight(game.phase)
             []
         else super
 class WolfDiviner extends Werewolf
@@ -3246,7 +3320,7 @@ class WolfDiviner extends Werewolf
                 game.splashjobinfo [game.getPlayer newpl.id]
     makejobinfo:(game,result)->
         super
-        if game.night
+        if Phase.isNight(game.phase)
             if @flag?
                 # もう占いは終わった
                 result.open = result.open?.filter (x)=>x!="WolfDiviner"
@@ -3509,7 +3583,7 @@ class Copier extends Player
         #game.ss.publish.user newpl.id,"refresh",{id:game.id}
         game.splashjobinfo [game.getPlayer @id]
         null
-    isWinner:(game,team)->false # 模仿者しないと負け
+    isWinner:(game,team)->false # 模仿者しないと败北
 class Light extends Player
     type:"Light"
     jobname:"死亡笔记"
@@ -3708,18 +3782,21 @@ class Stalker extends Player
         @setFlag playerid  # ストーキング対象プレイヤー
         null
     isWinner:(game,team)->
-        @isWinnerStalk game,team,[]
-    # 跟踪狂連鎖対応版
+        if @isWinnerStalk?
+            @isWinnerStalk game,team,[]
+        else
+            false
+    # ストーカー連鎖対応版
     isWinnerStalk:(game,team,ids)->
         if @id in ids
-            # ループしてるので負け
+            # ループしてるので败北
             return false
         pl=game.getPlayer @flag
         return false unless pl?
         if team==pl.getTeam()
             return true
-        if pl.isJobType "Stalker"
-            # 跟踪狂を追跡
+        if pl.isJobType("Stalker") && pl.isWinnerStalk?
+            # ストーカーを追跡
             return pl.isWinnerStalk game,team,ids.concat @id
         else
             return pl.isWinner game,team
@@ -4263,6 +4340,8 @@ class Witch extends Player
                 @setFlag @flag^8
             if @flag & 16
                 @setFlag @flag^16
+        if game.day == 1
+            @setTarget ""
     job:(game,playerid,query)->
         # query.Witch_drug
         pl=game.getPlayer playerid
@@ -4347,7 +4426,7 @@ class Tanner extends Player
     team:""
     die:(game,found)->
         if found in ["gone-day","gone-night"]
-            # 突然死はダメ
+            # 猝死はダメ
             @setFlag "gone"
         super
     isWinner:(game,team)->@dead && @flag!="gone"
@@ -4565,8 +4644,8 @@ class Thief extends Player
         game.ss.publish.user newpl.id,"refresh",{id:game.id}
         null
     makeJobSelection:(game)->
-        if game.night
-            # 职业から选择
+        if Phase.isNight(game.phase)
+            # 役職から選択
             arr=JSON.parse(@flag ? '["Human"]')
             arr.map (x)->
                 testpl=new jobs[x]
@@ -4650,7 +4729,7 @@ class Dog extends Player
         null
     makejobinfo:(game,result)->
         super
-        if !@jobdone(game) && game.night
+        if !@jobdone(game) && Phase.isNight(game.phase)
             if @flag?
                 # 飼い主いる
                 pl=game.getPlayer @flag
@@ -4662,21 +4741,21 @@ class Dog extends Player
             else
                 result.open.push "Dog2"
     makeJobSelection:(game)->
-        # 噛むときは対象选择なし
-        if game.night && @flag?
+        # 噛むときは対象選択なし
+        if Phase.isNight(game.phase) && @flag?
             []
         else super
 class Dictator extends Player
     type:"Dictator"
     jobname:"独裁者"
     sleeping:->true
-    jobdone:(game)->@flag? || game.night
+    jobdone:(game)->@flag? || !Phase.isDay(game.phase)
     chooseJobDay:(game)->true
     job:(game,playerid,query)->
         if @flag?
             return "已经不能发动能力了"
-        if game.night
-            return "夜晚不能发的能力"
+        unless Phase.isDay(game.phase)
+            return "夜晚不能发动此能力"
         pl=game.getPlayer playerid
         unless pl?
             return "对象无效"
@@ -5150,7 +5229,7 @@ class Miko extends Player
         null
     makeJobSelection:(game)->
         # 夜は投票しない
-        if game.night
+        if Phase.isNight(game.phase)
             []
         else super
 class GreedyWolf extends Werewolf
@@ -5177,15 +5256,15 @@ class GreedyWolf extends Werewolf
         null
     makejobinfo:(game,result)->
         super
-        if game.night
+        if Phase.isNight(game.phase)
             if @sleeping game
                 # 襲撃は必要ない
                 result.open = result.open?.filter (x)=>x!="_Werewolf"
             if !@flag && game.day>=2
                 result.open?.push "GreedyWolf"
     makeJobSelection:(game)->
-        if game.night && @sleeping(game) && !@jobdone(game)
-            # 欲張る选择肢のみある
+        if Phase.isNight(game.phase) && @sleeping(game) && !@jobdone(game)
+            # 欲張る選択肢のみある
             return []
         else
             return super
@@ -5252,7 +5331,7 @@ class FascinatingWolf extends Werewolf
         splashlog game.id,game,log
     makejobinfo:(game,result)->
         super
-        if game.night
+        if Phase.isNight(game.phase)
             if @flag
                 # もう誘惑は必要ない
                 result.open = result.open?.filter (x)=>x!="FascinatingWolf"
@@ -5323,10 +5402,10 @@ class ThreateningWolf extends Werewolf
     type:"ThreateningWolf"
     jobname:"威吓的狼"
     jobdone:(game)->
-        if game.night
-            super
-        else
+        if Phase.isDay(game.phase)
             @flag?
+        else
+            super
     chooseJobDay:(game)->true
     sunrise:(game)->
         super
@@ -5336,9 +5415,9 @@ class ThreateningWolf extends Werewolf
             # 人狼の仕事
             return super
         if @flag
-            return "已经使用了能力"
-        if game.night
-            return "夜晚不能使用能力"
+            return "既に能力を使用しています"
+        unless Phase.isDay(game.phase)
+            return "夜晚不能发动此能力"
         pl=game.getPlayer playerid
         pl.touched game,@id
         unless pl?
@@ -5373,7 +5452,7 @@ class ThreateningWolf extends Werewolf
         super
     makejobinfo:(game,result)->
         super
-        if game.night
+        unless Phase.isDay(game.phase)
             # 夜は威嚇しない
             result.open = result.open?.filter (x)=>x!="ThreateningWolf"
 class HolyMarked extends Human
@@ -5459,7 +5538,7 @@ class WanderingGuard extends Player
                     fl.push pl.id
                     @setFlag JSON.stringify fl
     makeJobSelection:(game)->
-        if game.night
+        if Phase.isNight(game.phase)
             fl=JSON.parse(@flag ? "[null]")
             a=super
             return a.filter (obj)->!(obj.value in fl)
@@ -5510,7 +5589,7 @@ class TroubleMaker extends Player
     jobdone:->!!@flag
     makeJobSelection:(game)->
         # 夜は投票しない
-        if game.night
+        if Phase.isNight(game.phase)
             []
         else super
     job:(game,playerid)->
@@ -5639,7 +5718,7 @@ class BloodyMary extends Player
         else
             team==@team
     makeJobSelection:(game)->
-        if game.night
+        if Phase.isNight(game.phase)
             pls=[]
             if @flag=="punish"
                 # 村人を……
@@ -5821,7 +5900,7 @@ class Phantom extends Player
                         jobtype:@type
                     }
     makeJobSelection:(game)->
-        if game.night
+        if Phase.isNight(game.phase)
             res=[{
                 name:"放弃盗取"
                 value:""
@@ -5845,7 +5924,8 @@ class Phantom extends Player
             splashlog game.id,game,log
             return
         pl=game.getPlayer playerid
-        pl.touched game,@id
+        # 怪盗はサイコキラーを盗むことができる
+        # pl.touched game,@id
         log=
             mode:"skill"
             to:@id
@@ -5956,8 +6036,8 @@ class BadLady extends Player
         null
     makejobinfo:(game,result)->
         super
-        if !@jobdone(game) && game.night
-            # 夜の选择肢
+        if !@jobdone(game) && Phase.isNight(game.phase)
+            # 夜の選択肢
             fl=@flag ? {}
             unless fl.set
                 unless fl.main
@@ -5994,7 +6074,7 @@ class CautiousWolf extends Werewolf
     type:"CautiousWolf"
     jobname:"慎重的狼"
     makeJobSelection:(game)->
-        if game.night
+        if Phase.isNight(game.phase)
             r=super
             return r.concat {
                 name:"不袭击"
@@ -6023,13 +6103,13 @@ class Pyrotechnist extends Player
     type:"Pyrotechnist"
     jobname:"烟火师"
     sleeping:->true
-    jobdone:(game)->@flag? || game.night
+    jobdone:(game)->@flag? || !Phase.isDay(game.phase)
     chooseJobDay:(game)->true
     job:(game,playerid,query)->
         if @flag?
             return "已经不能发动能力了"
-        if game.night
-            return "夜晚不能使用此能力"
+        unless Phase.isDay(game.phase)
+            return "夜晚不能发动此能力"
         log=
             mode:"skill"
             to:@id
@@ -6327,7 +6407,7 @@ class GotChocolate extends Player
     job_target:0
     getTypeDisp:->if @flag=="done" then null else @type
     makeJobSelection:(game)->
-        if game.night
+        if Phase.isNight(game.phase)
             []
         else super
     sunset:(game)->
@@ -6630,10 +6710,10 @@ class CraftyWolf extends Werewolf
             result.open.push "CraftyWolf2"
         return result
     makeJobSelection:(game)->
-        if game.night && @dead && @flag=="revivable"
+        if Phase.isNight(game.phase) && @dead && @flag=="revivable"
             # 死んだふりやめるときは選択肢がない
             []
-        else if game.night && game.werewolf_target_remain==0
+        else if Phase.isNight(game.phase) && game.werewolf_target_remain==0
             # もう襲撃対象を選択しない
             []
         else super
@@ -6959,10 +7039,10 @@ class GameMaster extends Player
                     return "这名玩家没有死亡"
                 pl.revive game
                 if !pl.dead
-                    if game.night
+                    if Phase.isNight(game.phase)
                         # 夜のときは夜開始時の処理をしてあげる
                         pl.sunset game
-                    else
+                    else if Phase.isDay(game.phase)
                         # 昼のときは投票可能に
                         pl.votestart game
                 else
@@ -7072,7 +7152,7 @@ class Waiting extends Player
     type:"Waiting"
     jobname:"尚未分配"
     team:""
-    sleeping:(game)->!game.rolerequestingphase || game.rolerequesttable[@id]?
+    sleeping:(game)->game.phase != Phase.rolerequesting || game.rolerequesttable[@id]?
     isListener:(game,log)->
        if log.mode=="audience"
            true
@@ -7084,8 +7164,8 @@ class Waiting extends Player
         # 自己で追加する
         result.open.push "Waiting"
     makeJobSelection:(game)->
-        if game.day==0 && game.rolerequestingphase
-            # 开始前
+        if game.day==0 && game.phase == Phase.rolerequesting
+            # 開始前
             result=[{
                 name:"放弃选择"
                 value:""
@@ -7206,6 +7286,17 @@ class Complex
                 return null
             return @sub.accessByJobType(type)
         null
+    accessByJobTypeAll:(type, subonly)->
+        unless type
+            throw "there must be a JOBTYPE"
+        ret = []
+        if @main.isJobType(type)
+            if !subonly
+                ret.push this
+            ret.push (@main.accessByJobTypeAll(type, true))...
+        if @sub?
+            ret.push (@sub.accessByJobTypeAll(type))...
+        return ret
     gatherMidnightSort:->
         mids=[@midnightSort]
         mids=mids.concat @main.gatherMidnightSort()
@@ -7325,6 +7416,12 @@ class Complex
     isFox:->@main.isFox()
     isVampire:->@main.isVampire()
     isWinner:(game,team)->@main.isWinner game, team
+    hasDeadResistance:(game)->
+        if @mcall game, @main.hasDeadResistance, game
+            return true
+        if @sub?.hasDeadResistance game
+            return true
+        return false
 
 #superがつかえないので注意
 class Friend extends Complex    # 恋人
@@ -8401,12 +8498,17 @@ module.exports.actions=(req,res,ss)->
                 maxnumber:room.number
                 blind:room.blind
                 gm:room.gm
-                day: parseInt(parseInt(query.day_minute)*60+parseInt(query.day_second))
-                night: parseInt(parseInt(query.night_minute)*60+parseInt(query.night_second))
-                remain: parseInt(parseInt(query.remain_minute)*60+parseInt(query.remain_second))
-                # (n=15)秒规则
+                day: parseInt(query.day_minute)*60+parseInt(query.day_second)
+                night: parseInt(query.night_minute)*60+parseInt(query.night_second)
+                remain: parseInt(query.remain_minute)*60+parseInt(query.remain_second)
+                voting: parseInt(query.voting_minute)*60+parseInt(query.voting_second)
+                # (n=15)秒ルール
                 silentrule: parseInt(query.silentrule) ? 0
             }
+            # 不正なアレははじく
+            unless Number.isFinite(ruleobj.day) && Number.isFinite(ruleobj.night) && Number.isFinite(ruleobj.remain) && Number.isFinite(ruleobj.voting)
+                res "时间长度不是有效数字"
+                return
             
             unless ruleobj.day && ruleobj.night && ruleobj.remain
                 res "时间长度不是有效数字，或总时长为零。"
@@ -9220,9 +9322,8 @@ module.exports.actions=(req,res,ss)->
                 # 希望役职制あり
                 # とりあえず入れなくする
                 M.rooms.update {id:roomid},{$set:{mode:"playing"}}
-                # 职业选择中
-                game.rolerequestingphase=true
-                # ここ書いてないよ!
+                # 役職選択中
+                game.phase = Phase.rolerequesting
                 game.rolerequesttable={}
                 res null
                 log=
@@ -9307,6 +9408,11 @@ module.exports.actions=(req,res,ss)->
             unless libblacklist.checkPermission "watch_say", req.session.ban
                 res "您的账号受限，不能在此处发言。"
                 return
+        # 発言できない時間帯
+        if !game.finished  && Phase.isRemain(game.phase)   # 投票猶予時間は発言できない
+            if player && !player.dead && !player.isJobType("GameMaster")
+                res null
+                return  #まだ死んでいないプレイヤーの場合は発言できないよ!
 
         #console.log query,player
         log =
@@ -9318,10 +9424,6 @@ module.exports.actions=(req,res,ss)->
             log.size=query.size
         # ログを流す
         dosp=->
-            
-            if !game.finished  && game.voting   # 投票犹豫时间は发言できない
-                if player && !player.dead && !player.isJobType("GameMaster")
-                    return  #まだ死んでいないプレイヤーの場合は发言できないよ!
             if game.day<=0 || game.finished #準備中
                 unless log.mode=="audience"
                     log.mode="prepare"
@@ -9345,13 +9447,15 @@ module.exports.actions=(req,res,ss)->
                         log.mode="heavenmonologue"
                     else
                         log.mode="heaven"
-                else if !game.night
+                else if Phase.isDay(game.phase)
                     # 昼
                     unless query.mode in player.getSpeakChoiceDay game
+                        res null
                         return
                     log.mode=query.mode
                     if game.silentexpires && game.silentexpires>=Date.now()
-                        # まだ发言できない（15秒规则）
+                        # まだ発言できない（15秒ルール）
+                        res null
                         return
                     
                 else
@@ -9366,7 +9470,7 @@ module.exports.actions=(req,res,ss)->
                     log.to=player.id
                 when "heaven"
                     # 霊界の発言は悪霊憑きの発言になるかも
-                    if !game.night && !game.voting && !(game.silentexpires && game.silentexpires >= Date.now())
+                    if game.phase == Phase.day && !(game.silentexpires && game.silentexpires >= Date.now())
                         possessions = game.players.filter (x)-> !x.dead && x.isJobType "SpiritPossessed"
                         if possessions.length > 0
                             # 悪魔憑き
@@ -9390,6 +9494,7 @@ module.exports.actions=(req,res,ss)->
                         log.mode="gmreply"
                         pl=game.getPlayer result[1]
                         unless pl?
+                            res null
                             return
                         log.to=pl.id
                         log.name="GM→#{pl.name}"
@@ -9439,24 +9544,11 @@ module.exports.actions=(req,res,ss)->
         ###
         jt=player.getjob_target()
         sl=player.makeJobSelection game
-        ###
-        if !(to=game.players.filter((x)->x.id==query.target)[0]) && jt!=0
-            res {error:"这个对象不存在"}
-            return
-        if to?.dead && (!(jt & Player.JOB_T_DEAD) || !game.night) && (jt & Player.JOB_T_ALIVE)
-            res {error:"对象已经死亡"}
-            return
-        ###
         unless player.checkJobValidity game,query
             res {error:"对象选择无效"}
             return
-        if game.night || query.jobtype!="_day"  # 昼の投票
+        if game.phase == Phase.rolerequesting || Phase.isNight(game.phase) || query.jobtype!="_day"  # 昼の投票
             # 夜
-            ###
-            if !to?.dead && !(player.job_target & Player.JOB_T_ALIVE) && (player.job_target & Player.JOB_T_DEAD)
-                res {error:"対象はまだ生きています"}
-                return
-            ###
             if (player.dead && player.deadJobdone(game)) || (!player.dead && player.jobdone(game))
                 res {error:"已经使用了能力"}
                 return
@@ -9479,24 +9571,16 @@ module.exports.actions=(req,res,ss)->
             # 能力をすべて発動したかどうかチェック
             #res {sleeping:player.jobdone(game)}
             res makejobinfo game,player
-            if game.night || game.day==0
+            if game.phase == Phase.rolerequesting || Phase.isNight(game.phase)
                 game.checkjobs()
         else
             # 投票
-            ###
-            if @votingbox.isVoteFinished player
-                res {error:"既に投票しています"}
-                return
-            if query.target==player.id && game.rule.votemyself!="ok"
-                res {error:"自己には投票できません"}
-                return
-            to=game.getPlayer query.target
-            unless to?
-                res {error:"その人には投票できません"}
-                return
-            ###
             unless player.checkJobValidity game,query
                 res {error:"请选择对象"}
+                return
+            if game.rule.voting > 0 && game.phase == Phase.day
+                # 投票专用时间ではない
+                res {error: "尚未开始投票阶段"}
                 return
             err=player.dovote game,query.target
             if err?
@@ -9564,7 +9648,8 @@ module.exports.actions=(req,res,ss)->
 splashlog=(roomid,game,log)->
     log.time=Date.now() # 時間を付加
     #DBに追加
-    M.games.update {id:roomid},{$push:{logs:log}}
+    game.logsaver.saveLog log
+    #みんなに送信
     flash=(log)->
         # まず観戦者
         aulogs = makelogsFor game, null, log
@@ -9685,15 +9770,15 @@ makejobinfo = (game,player,result={})->
         # 投票が终了したかどうか（表单表示するかどうか判断）
         if plpl?
             # 参加者として
-            if game.night || game.day==0
+            if Phase.isNight(game.phase) || game.phase == Phase.rolerequesting
                 if player.dead
                     result.sleeping=player.deadJobdone game
                 else
                     result.sleeping=player.jobdone game
-            else
+            else if Phase.isDay(game.phase)
                 # 昼
                 result.sleeping=true
-                unless player.dead || game.votingbox.isVoteFinished player
+                unless player.dead || (game.rule.voting > 0 && game.phase == Phase.day) || game.votingbox.isVoteFinished player
                     # 投票ボックスオープン!!!
                     result.voteopen=true
                     result.sleeping=false
@@ -9702,15 +9787,21 @@ makejobinfo = (game,player,result={})->
                     result.sleeping &&= player.jobdone game
         else
             # それ以外（participants）
-            result.sleeping=if game.night || player.chooseJobDay(game) then player.jobdone(game) else true
+            if Phase.isNight(game.phase) || player.chooseJobDay(game)
+                result.sleeping = player.jobdone(game)
+            else
+                result.sleeping = true
         result.jobname=player.getJobDisp()
         result.winner=player.winner
         if player.dead
             result.speak =player.getSpeakChoiceHeaven game
-        else if game.night || game.day==0
+        else if Phase.isNight(game.phase) || game.phase == Phase.rolerequesting
             result.speak =player.getSpeakChoice game
-        else
+        else if Phase.isDay(game.phase)
             result.speak =player.getSpeakChoiceDay game
+        else
+            # 開始前
+            result.speak = ["day"]
         if game.rule?.will=="die"
             result.will=player.will
 

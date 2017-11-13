@@ -83,85 +83,6 @@ exports.start=(user)->
         app.page "user-color",null,Index.user.color,null
     ,false
     
-    $("#morescore").submit (je)->
-        je.preventDefault()
-        op=je.target.elements["open"].value
-        if op=="true"
-            # 隠す
-            je.target.elements["submit"].value="展开详细情报"
-            je.target.elements["open"].value="false"
-            $("#grapharea").empty()
-            return
-        je.target.elements["open"].value="true"
-        je.target.elements["submit"].value="隐藏详细情报"
-        ss.rpc "user.getMyuserlog", (obj)->
-            unless obj?
-                Index.util.message "战绩展示","尚不存在战绩，无法展示。"
-                return
-            wincount=obj.wincount ? {}
-            losecount=obj.losecount ? {}
-            # 阵营色
-            teamcolors=merge Shared.game.jobinfo,{}
-                
-            grp=(title,size=200)->
-                # 新しいグラフ作成して追加まで
-                h2=document.createElement "h2"
-                h2.textContent=title
-                $("#grapharea").append h2
-                graph=Index.user.graph.circleGraph size
-                p=document.createElement "p"
-                p.appendChild graph.canvas
-                $("#grapharea").append p
-                graph
-            
-            # 勝率グラフ
-            graph=grp "胜败的职业分布"
-            graph.hide()
-            # 勝敗を阵营ごとに
-            gs=
-                win:{}
-                lose:{}
-            for x,arr of Shared.game.teams
-                gs.win[x]={}
-                gs.lose[x]={}
-                for job in arr
-                    if wincount[job]?
-                        gs.win[x][job]=wincount[job]
-                    if losecount[job]?
-                        gs.lose[x][job]=losecount[job]
-            graph.setData gs,{
-                win:merge {
-                    name:"胜"
-                    color:"#FF0000"
-                },teamcolors
-                lose:merge {
-                    name:"负"
-                    color:"#0000FF"
-                },teamcolors
-            }
-            graph.openAnimate 0.2
-            # 职业ごとの勝率
-            graph=grp "各个职业的胜败情况"
-            graph.hide()
-            gs={}
-            names=merge teamcolors,{}   #模仿者
-            for team of names
-                gs[team]={}
-                
-                for type of names[team]
-                    continue if type in ["name","color"]
-                    names[team][type].win=
-                        name:"胜"
-                        color:"#FF0000"
-                    names[team][type].lose=
-                        name:"负"
-                        color:"#0000FF"
-                    gs[team][type]=
-                        win:wincount[type] ? 0
-                        lose:losecount[type] ? 0
-            graph.setData gs,names
-            graph.openAnimate 0.2
-
     # 称号
     unless user.prizenames?.length>0
         # 称号がない
@@ -324,11 +245,3 @@ exports.start=(user)->
             $("#newNewsNotice").remove()
 
 exports.end=->
-
-#Object2つをマージ（obj1ベース）
-merge=(obj1,obj2)->
-    r=Object.create Object.getPrototypeOf obj1
-    [obj1,obj2].forEach (x)->
-        Object.getOwnPropertyNames(x).forEach (p)->
-            r[p]=x[p]
-    r

@@ -296,7 +296,7 @@ makeOtherPrize=(result)->
                 30:"学/がく"
             func:(game,pl)->
                 game.gamelogs.filter((x)->x.target==pl.id && x.event=="brainwash").length
-        # 突然死する
+        # 猝死する
         gone:
             names:{}
             func:(game,pl)->

@@ -13,6 +13,7 @@ crypto=require 'crypto'
 url=require 'url'
 
 libblacklist = require '../libs/blacklist.coffee'
+libuserlogs  = require '../libs/userlogs.coffee'
 
 # 内部関数的なログイン
 login= (query,req,cb,ss)->
@@ -151,16 +152,54 @@ exports.actions =(req,res,ss)->
                 
 # ユーザー数据が欲しい
     userData: (userid,password)->
-        M.users.findOne {"userid":userid},(err,record)->
+        getUserOpenData userid, (err, record)->
             if err?
                 res null
                 return
             if !record?
                 res null
                 return
-            delete record.password
-            delete record.prize
-            res record
+            libuserlogs.getUserData userid, true, record.data_open_all, (err, obj)->
+                if err?
+                    res null
+                    return
+                # データを整理
+                userlog = if obj.userlog? && record.data_open_all
+                    {
+                        game: obj.userlog.counter?.allgamecount ? 0
+                        win: obj.userlog.wincount?.all ? 0
+                        lose: obj.userlog.losecount?.all ? 0
+                    }
+                else
+                    null
+                usersummary = if obj.usersummary?
+                    if record.data_open_recent
+                        {
+                            open: true
+                            days: obj.usersummary.days
+                            game_total: obj.usersummary.game_total
+                            win: obj.usersummary.win
+                            lose: obj.usersummary.lose
+                            draw: obj.usersummary.draw
+                            gone: obj.usersummary.gone
+                            gm: obj.usersummary.gm
+                            helper: obj.usersummary.helper
+                        }
+                    else
+                        {
+                            open: false
+                            days: obj.usersummary.days
+                            game_total: obj.usersummary.game_total
+                            gone: obj.usersummary.gone
+                        }
+                else
+                    null
+
+                res {
+                    user: record
+                    userlog: userlog
+                    usersummary: usersummary
+                }
     myProfile: ->
         unless req.session.userId
             res null
@@ -411,22 +450,81 @@ exports.actions =(req,res,ss)->
                 console.log "invalid3",query.prize
                 res {error:"称号无效"}
         
-# 成績をくわしく見る
+    # 成績をくわしく見る
     getMyuserlog:->
         unless req.session.userId
             res {error:"请登陆"}
             return
         myid=req.session.userId
-        # DBから自己のやつを引っ張ってくる
-        results=[]
+        # DBから自分のやつを引っ張ってくる
+        cnt = 0
+        userlog = null
+        usersummary = null
+        next=()->
+            cnt += 1
+            if cnt >= 2
+                res {
+                    userlog: userlog
+                    usersummary: usersummary
+                    data_open_recent: !!req.session.user?.data_open_recent
+                    data_open_all: !!req.session.user?.data_open_all
+                    dataOpenBarrier: Config.user.dataOpenBarrier
+                }
         M.userlogs.findOne {userid:myid},(err,doc)->
             if err?
                 console.error err
-            unless doc?
-                # 戦績数据がない
-                res null
+                res {error: String err}
                 return
-            res doc
+            userlog = doc
+            next()
+        libuserlogs.getUserSummary myid, (err,doc)->
+            if err?
+                console.error err
+                res {error: String err}
+                return
+            usersummary = doc
+            next()
+    # 战绩公開設定を変更
+    changeDataOpenSetting:(query)->
+        unless req.session.userId
+            res {error:"请登陆"}
+            return
+        mode = query.mode
+        value = !!query.value
+
+        updatequery = {}
+        switch mode
+            when 'recent'
+                updatequery.$set = {
+                    data_open_recent: value
+                }
+            when 'all'
+                updatequery.$set = {
+                    data_open_all: value
+                }
+            else
+                res {error: '设置参数无效'}
+                return
+        # 对战数をチェック
+        M.userlogs.findOne {
+            userid: req.session.userId
+        }, {'counter.allgamecount': 1}, (err, doc)->
+            if err? || !doc?
+                res {error: String err}
+                return
+            # 30戦以上に制限
+            if isNaN(doc.counter?.allgamecount) || doc.counter?.allgamecount < Config.user.dataOpenBarrier
+                res {error: '战绩不足'}
+                return
+            M.users.update {
+                userid: req.session.userId
+            }, updatequery, (err, num)->
+                if err?
+                    res {error: String err}
+                    return
+                res {value: value}
+
+
     # 私をBANしてください!!!!!!!!
     requestban:(banid)->
         libblacklist.handleBanRequest banid, req.session.userId, req.clientIp, (result)->
@@ -453,14 +551,16 @@ makeuserdata=(query)->
         icon:"" # iconのURL
         comment: ""
         mailconfirmsecurity: false
-        win:[]  # 勝ち試合
-        lose:[] # 負け試合
+        win:[]  # 胜利試合
+        lose:[] # 败北試合
         gone:[] # 行方不明試合
         ip:""   # IPアドレス
         prize:[]# 现在持っている称号
         ownprize:[] # 何かで与えられた称号（prizeに含まれる）
         nowprize:null   # 现在设定している肩書き
                 # [{type:"prize",value:(prizeid)},{type:"conjunction",value:"が"},...]
+        data_open_recent: false # 最近の战绩を公開するかどうか
+        data_open_all: false # 全期間の战绩を公開するかどうか
     }
 
 # profileに表示する用のユーザーデータをdocから作る
@@ -496,3 +596,27 @@ userProfile = (doc, ban)->
     # backward compatibility
     doc.mailconfirmsecurity = !!doc.mailconfirmsecurity
     return doc
+
+# 一般人に表示する用のデータを取得（替身君対応）
+getUserOpenData = (userid, cb)->
+    if userid == "替身君"
+        cb null, {
+            userid: "替身君"
+            name: "替身君"
+            icon: ""
+            comment: ""
+            data_open_all: true
+            data_open_recent: true
+        }
+    else
+        M.users.findOne {"userid": userid}, {
+            fields: {
+                userid: true
+                name: true
+                icon: true
+                comment: true
+                data_open_all: true
+                data_open_recent: true
+            }
+        }, cb
+

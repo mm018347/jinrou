@@ -378,13 +378,16 @@ exports.start=(roomid)->
                 daysec=rule.day-0
                 nightsec=rule.night-0
                 remainsec=rule.remain-0
+                votingsec=rule.voting|0
                 form.elements["day_minute"].value=parseInt daysec/60
                 form.elements["day_second"].value=daysec%60
                 form.elements["night_minute"].value=parseInt nightsec/60
                 form.elements["night_second"].value=nightsec%60
                 form.elements["remain_minute"].value=parseInt remainsec/60
                 form.elements["remain_second"].value=remainsec%60
-                # 其他
+                form.elements["voting_minute"].value=parseInt votingsec/60
+                form.elements["voting_second"].value=votingsec%60
+                # その他
                 delete rule.number  # 人数は違うかも
                 for key of rule
                     e=form.elements[key]
@@ -419,7 +422,7 @@ exports.start=(roomid)->
             icon.classList.add 'fa'
             icon.classList.add 'fa-fw'
             icon.classList.add 'fa-user-secret'
-            icon.title = if room.blind == 'hide' then '匿名模式（结束后公开）' else '匿名模式（结束后不公开）'
+            icon.title = if room.blind == 'complete' then '匿名模式（结束后公开）' else '匿名模式（结束后不公开）'
             iconlist.appendChild icon
         if room.comment
             icon = document.createElement 'i'
@@ -889,7 +892,7 @@ exports.start=(roomid)->
                         if obj.type=="separator"
                             continue
                         if obj.getstr?
-                            valobj=obj.getstr ruleobj[obj.name]
+                            valobj=obj.getstr ruleobj[obj.name], ruleobj
                             unless valobj?
                                 continue
                             val="#{valobj.label ? ''}:#{valobj.value ? ''}"
@@ -924,6 +927,7 @@ exports.start=(roomid)->
                                     continue
                         p.text val
                         win.append p
+            console.log "rule!", this_rule.rule
             chkrule this_rule.rule, jobcountobj,Shared.game.rules
             
         $("#willform").submit (je)->
@@ -1149,7 +1153,7 @@ exports.start=(roomid)->
     setplayersbyjobrule=(room,form,number)->
         jobrulename=form.elements["jobrule"].value
         if form.elements["scapegoat"]?.value=="on"
-            number++    # 身代わりくん
+            number++    # 替身君
         if jobrulename in ["特殊规则.自由配置","特殊规则.手调黑暗火锅"]
             j = $("#jobsfield").get 0
             j.hidden=false

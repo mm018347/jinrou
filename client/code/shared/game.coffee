@@ -1175,6 +1175,25 @@ exports.rules=[
                 getstr:->null
             }
             {
+                type:"time"
+                name:
+                    minute:"voting_minute"
+                    second:"voting_second"
+                label:"投票专用时间"
+                title:"如果「投票专用时间」设定不为零，白天的讨论期间将禁止投票，改为只在投票专用时间投票。"
+                defaultValue:
+                    minute:0
+                    second:0
+                getstr:(_, ruleobj)->
+                    if Number(ruleobj.voting) > 0
+                        {
+                            label: "投票专用时间"
+                            value: "时长 #{ruleobj.voting} 秒"
+                        }
+                    else
+                        null
+            }
+            {
                 type:"separator"
             }
             {
@@ -1557,12 +1576,12 @@ exports.rules=[
         rules:[
             {
                 name:"couplesound"
-                label:"能听到共有者的低语声"
+                label:"能否听到共有者的低语声"
                 type:"checkbox"
                 value:{
                     value:"aloud"
-                    label:"有"
-                    nolabel:"无"
+                    label:"能听到"
+                    nolabel:"听不到"
                     checked:true
                 }
                 getstr:(value)->
@@ -1578,55 +1597,56 @@ exports.rules=[
         label:null
         visible:(rule,jobs)->
             return true if isYaminabe rule
-            for job in ["Guard","Trapper","WanderingGuard"]
+            for job in ["Guard","Trapper","WanderingGuard","Cosplayer"]
                 if jobs[job]>0
                     return true
             return false
         rules:[
             {
                 name:"guardmyself"
-                label:"猎人可以保护自己"
+                label:"是否允许猎人保护自己"
+                title:"对猎人・游荡猎人・Cosplayer生效。"
                 type:"checkbox"
                 value:{
                     value:"ok"
-                    label:"有"
+                    label:"允许"
                     checked:true
                 }
                 getstr:(value)->
                     {
                         label:"猎人保护自己"
-                        value:if value=="ok" then "有" else "无"
+                        value:if value=="ok" then "允许" else "禁止"
                     }
             }
             {
                 name:"gjmessage"
                 label:"护卫成功能够知道"
-                title:"选中后，在猎人·游荡猎人成功保护他人时，该猎人会收到通知。"
+                title:"选中后，在猎人·游荡猎人・Cosplayer成功保护他人时，该猎人会收到通知。"
                 type:"checkbox"
                 value:{
                     value:"on"
-                    label:"有"
+                    label:"通知"
                 }
                 getstr:(value)->
                     {
                         label:"护卫成功通知"
-                        value:if value=="on" then "有" else "无"
+                        value:if value=="on" then "通知" else "不通知"
                     }
             }
             {
                 name:"consecutiveguard"
                 label:"连续护卫"
-                title:"设定猎人・游荡猎人是否可以连续守护同一个人。"
+                title:"是否允许猎人・游荡猎人・Cosplayer连续守护同一个人。"
                 type:"select"
                 values:[
                     {
                         value:"yes"
-                        label:"是"
+                        label:"允许"
                         selected:true
                     }
                     {
                         value:"no"
-                        label:"否"
+                        label:"禁止"
                     }
                 ]
             }

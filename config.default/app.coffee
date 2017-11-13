@@ -90,6 +90,10 @@ module.exports =
     # 古い部屋に入るまでの时间(hours)
     fresh:24*3
     suddenDeathBAN:360
+  # ユーザーについて
+  user:
+    # The number of games required to publish a user's 战绩.
+    dataOpenBarrier: 30
   # maximum length of data that mey be saved in DB
   maxlength:
     user:
@@ -111,4 +115,4 @@ module.exports =
       comment: 4096
   # Experimental feature: logging (boolean)
   logging: false
-	
+

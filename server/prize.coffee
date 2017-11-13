@@ -45,13 +45,19 @@ module.exports=exports=
             if Object.getOwnPropertyNames(query["$inc"]).length == 0
                 delete query["$inc"]
 
-            M.userlogs.findAndModify {userid:pl.realid},{},query,{
-                new:true,
-                upsert:true,
-            },(err,doc)->
+            M.userlogs.findOneAndUpdate {userid: pl.realid}, query, {
+                upsert: true
+                returnOriginal: false
+            }, (err, res)->
                 if err?
                     throw err
-                # ユーザーのいままでの戦績が得られたので称号を算出していく
+                doc = res.value
+                unless doc?
+                    console.error "checkPrize: doc is updefined"
+                    onecall()
+                    return
+
+                # ユーザーのいままでの战绩が得られたので称号を算出していく
                 gotprizes=[]
                 wincount=doc.wincount ? {}
                 losecount=doc.losecount ? {}
