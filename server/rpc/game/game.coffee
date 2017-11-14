@@ -1785,9 +1785,8 @@ class Game
             @save()
             @saveUserRawLogs()
             @prize_check()
-            
 
-            # 向房间成员通报猝死统计
+            # generate the list of Sudden Dead Player
             norevivers=@gamelogs.filter((x)->x.event=="found" && x.flag in ["gone-day","gone-night"]).map((x)->x.id)
             if norevivers.length
                 message = 
@@ -1796,9 +1795,8 @@ class Game
                     time:parseInt(Config.rooms.suddenDeathBAN/@players.length)
                 for x in norevivers
                     pl = @getPlayer x
-                    message.userlist.push {"userid":pl.realid,"name":pl.name}
+                    message.userlist.push {"userid":pl.id,"name":pl.name}
                 @ss.publish.channel "room#{@id}",'punishalert',message
-
 
             # DBからとってきて告知ツイート
             M.rooms.findOne {id:@id},(err,doc)->

@@ -703,57 +703,37 @@ module.exports.actions=(req,res,ss)->
                                 return
                             delete p.realid
                 res docs
-    suddenDeathPunish:(roomid,opt)->
-        # opt = ["someID","someID"]
-        unless opt.length
-            res error:"对象为空"
+    suddenDeathPunish:(roomid,banIDs)->
+        # banIDs = ["someID","someID"]
+        unless banIDs.length
+            res null
             return
         unless req.session.userId
-            res {error:"请登陆",require:"login"}    # ログインが必要
+            res {error:"ログインして下さい",require:"login"}    # ログインが必要
             return
         Server.game.rooms.oneRoomS roomid,(room)=>
             if !room || room.error?
-                res error:"这个房间不存在"
+                res error:"その部屋はありません"
                 return
             unless req.session.userId in (room.players.map (x)->x.realid)
-                res error:"没有加入游戏"
+                res error:"参加していません"
                 return
-            for banTarget in opt
-                unless banTarget in (room.players.map (x)->x.realid)
-                    res error:"对象无效"
+            for banID in banIDs
+                unless banID in (room.players.map (x)->x.userid)
+                    res error:"そのユーザーは参加していません"
                     return
-                console.log "目标  id："+banTarget
-                banpl=room.players.filter((pl)->pl.realid==banTarget)
-                banTargetName = banpl.name
+                banpl=room.players.filter((pl)->pl.userid==banID).pop()
                 banMinutes = parseInt(Config.rooms.suddenDeathBAN/room.players.length)
-                console.log "目标name："+banTargetName
-                M.users.findOne {userid:banTarget},(err,doc)->
-                    unless doc?
-                        res error:"此用户不存在"
-                        return
-                    addquery=
-                        userid:doc.userid
-                        ip:doc.ip #卿本佳人奈何做贼？非逼我banIP
-                        timestamp:Date.now()
-                    # 空ip？？
-                    if !(addquery.ip)
-                        delete addquery.ip
-                    M.blacklist.findOne {userid:banTarget},(err,doc)->
-                        unless doc?
-                            d=new Date()
-                            d.setMinutes d.getMinutes()+banMinutes
-                            addquery.expires=d
-                            M.blacklist.insert addquery,{safe:true},(err,doc)->
-                                ss.publish.channel "room#{roomid}", "punishresult", {id:roomid,name:banTargetName}
-                                res null
-                            return
-                        if doc.expires? then d=doc.expires else d=new Date()
-                        d.setMinutes d.getMinutes()+banMinutes
-                        addquery.expires=d
-                        M.blacklist.update {userid:banTarget},{$set:{expires:addquery.expires}},{safe:true},(err,doc)->
-                            ss.publish.channel "room#{roomid}", "punishresult", {id:roomid,userid:banTarget,name:banTargetName}
-                            res null
-            
+
+                query = 
+                    userid:banpl.realid
+                    types:["play"]
+                    reason:"突然死の罰"
+                    banMinutes:banMinutes
+
+                libblacklist.extendBlacklist query,(result)->
+                    ss.publish.channel "room#{roomid}", "punishresult", {id:roomid,name:banpl.name}
+                    res result
 
 #res: (err)->
 setRoom=(roomid,room)->

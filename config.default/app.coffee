@@ -89,6 +89,7 @@ module.exports =
   rooms:
     # 古い部屋に入るまでの时间(hours)
     fresh:24*3
+    # uplimit for Sudden Death Punishment(minutes).
     suddenDeathBAN:360
   # ユーザーについて
   user:
