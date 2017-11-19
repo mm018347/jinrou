@@ -235,12 +235,19 @@ module.exports.actions=(req,res,ss)->
                     mode:"gm"
                     nowprize:null
                 }
-            M.rooms.insert room
-            Server.game.game.newGame room,ss
-            res {id: room.id}
-            Server.oauth.template room.id,"「#{room.name}」（房间号：#{room.id} #{if room.password then '・🔒有密码' else ''}#{if room.blind then '・👤匿名模式' else ''}#{if room.gm then '・有GM' else ''}）建成了。 #月下人狼",Config.admin.password
+            M.rooms.insertOne room, {w: 1}, (err)->
+                if err?
+                    res {error: err}
+                    return
+                Server.game.game.newGame room,ss, (err)->
+                    if err?
+                        # TODO: revert?
+                        res {error: err}
+                        return
+                    res {id: room.id}
+                    Server.oauth.template room.id,"「#{room.name}」（房间号：#{room.id} #{if room.password then '・🔒有密码' else ''}#{if room.blind then '・👤匿名模式' else ''}#{if room.gm then '・有GM' else ''}）建成了。 #月下人狼",Config.admin.password
 
-            Server.log.makeroom req.session.user, room
+                    Server.log.makeroom req.session.user, room
 
     # 部屋に入る
     # 成功ならnull 失敗なら错误メッセージ
@@ -709,31 +716,13 @@ module.exports.actions=(req,res,ss)->
             res null
             return
         unless req.session.userId
-            res {error:"ログインして下さい",require:"login"}    # ログインが必要
+            res {error:"请登录",require:"login"}    # ログインが必要
             return
-        Server.game.rooms.oneRoomS roomid,(room)=>
-            if !room || room.error?
-                res error:"その部屋はありません"
-                return
-            unless req.session.userId in (room.players.map (x)->x.realid)
-                res error:"参加していません"
-                return
-            for banID in banIDs
-                unless banID in (room.players.map (x)->x.userid)
-                    res error:"そのユーザーは参加していません"
-                    return
-                banpl=room.players.filter((pl)->pl.userid==banID).pop()
-                banMinutes = parseInt(Config.rooms.suddenDeathBAN/room.players.length)
-
-                query = 
-                    userid:banpl.realid
-                    types:["play"]
-                    reason:"突然死の罰"
-                    banMinutes:banMinutes
-
-                libblacklist.extendBlacklist query,(result)->
-                    ss.publish.channel "room#{roomid}", "punishresult", {id:roomid,name:banpl.name}
-                    res result
+        err = Server.game.game.suddenDeathPunish ss, roomid, req.session.userId, banIDs
+        if err?
+            res {error: err}
+        else
+            res null
 
 #res: (err)->
 setRoom=(roomid,room)->

@@ -53,11 +53,11 @@ loadGame = (roomid, ss, callback)->
                 callback null, games[roomid]
 #内部用
 module.exports=
-    newGame: (room,ss)->
+    newGame: (room,ss, cb)->
         game=new Game ss,room
         games[room.id]=game
-        M.games.insert game.serialize()
-    # 游戏オブジェクトを読み込んで使用可能にする
+        M.games.insertOne game.serialize(), {w: 1}, cb
+    # ゲームオブジェクトを読み込んで使用可能にする
     ###
     loadDB:(roomid,ss,cb)->
         if games[roomid]
@@ -230,6 +230,41 @@ module.exports=
             if player.isJobType "Fox"
                 session.channel.subscribe "room#{roomid}_fox"
             ###
+    suddenDeathPunish:(ss, roomid, voter, targets)->
+        # voter: realid of voter
+        # targets: userids of punishment targets
+        game = games[roomid]
+        unless game?
+            return null
+        # Get the punishment data for this game
+        sdp = game.suddenDeathPunishment
+        console.log "suddenDeathPunish", roomid, voter, targets, sdp
+        unless sdp?
+            return null
+        # Am I a valid voter?
+        unless sdp.voters[voter] == true
+            return "不能投票"
+        # Are all the targets valid?
+        unless targets.every((id)-> sdp.targets[id]?)
+            return "投票对象无效"
+        # 投票を実行
+        sdp.voters[voter] = false
+
+        console.log "hey!", sdp
+
+        for id in targets
+            banpl = sdp.targets[id]
+            query =
+                userid:banpl.realid
+                types:["play"]
+                reason:"猝死惩罚"
+                banMinutes:sdp.banMinutes
+            libblacklist.extendBlacklist query,(result)->
+                ss.publish.channel "room#{roomid}", "punishresult", {id:roomid,name:banpl.name}
+                # 即時反映
+                ss.publish.user banpl.realid, "forcereload"
+        return null
+
 Server=
     game:
         game:module.exports
@@ -296,6 +331,9 @@ class Game
 
         # ログ保存用のオブジェクト
         @logsaver = new libsavelogs.LogSaver this
+        
+        # 猝死惩罚用のデータ
+        @suddenDeathPunishment = null
 
         ###
         さまざまな出来事
@@ -1789,14 +1827,35 @@ class Game
             # generate the list of Sudden Dead Player
             norevivers=@gamelogs.filter((x)->x.event=="found" && x.flag in ["gone-day","gone-night"]).map((x)->x.id)
             if norevivers.length
-                message = 
+                @suddenDeathPunishment =
+                    targets: {}
+                    voters: {}
+                    voterCount: 0
+                message =
                     id:@id
                     userlist:[]
-                    time:parseInt(Config.rooms.suddenDeathBAN/@players.length)
-                for x in norevivers
-                    pl = @getPlayer x
-                    message.userlist.push {"userid":pl.id,"name":pl.name}
-                @ss.publish.channel "room#{@id}",'punishalert',message
+                    time: 0
+                for x in @players
+                    if x.id != "身代わりくん"
+                        if x.id in norevivers
+                            @suddenDeathPunishment.targets[x.id] = {
+                                realid: x.realid
+                                name: x.name
+                            }
+                            message.userlist.push {
+                                userid: x.id
+                                name: x.name
+                            }
+                        else
+                            @suddenDeathPunishment.voters[x.realid] = true
+                            @suddenDeathPunishment.voterCount++
+                # deternime banMinutes.
+                if @suddenDeathPunishment.voterCount > 0
+                    @suddenDeathPunishment.banMinutes = Math.floor(Config.rooms.suddenDeathBAN / @suddenDeathPunishment.voterCount)
+                    message.time = @suddenDeathPunishment.banMinutes
+                    @ss.publish.channel "room#{@id}",'punishalert',message
+                else
+                    @suddenDeathPunishment = null
 
             # DBからとってきて告知ツイート
             M.rooms.findOne {id:@id},(err,doc)->
@@ -9762,6 +9821,7 @@ makejobinfo = (game,player,result={})->
         # 参加者としての（perticipantsは除く）
         plpl=game.getPlayer player.id
         player.makejobinfo game,result
+        result.playerid = player.id
         result.dead=player.dead
         result.voteopen=false
         result.sleeping=true

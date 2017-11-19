@@ -19,6 +19,7 @@ exports.start=(roomid)->
     timerid=null
     remain_time=null
     my_job=null
+    my_player_id=null
     this_room_id=null
 
     # 职业名一览
@@ -83,6 +84,7 @@ exports.start=(roomid)->
             console.log obj,this_room_id
             return unless obj.id==this_room_id
             my_job=obj.type
+            my_player_id=obj.playerid
             $("#jobinfo").empty()
             pp=(text)->
                 p=document.createElement "p"
@@ -1054,18 +1056,18 @@ exports.start=(roomid)->
         # show TO BAN list to players
         socket_ids.push Index.socket.on 'punishalert',null,(msg,channel)->
             if msg.id==roomid
-                Index.util.punish "突然死の罰",msg,(banIDs)->
+                Index.util.punish "猝死惩罚",msg,(banIDs)->
                     ss.rpc "game.rooms.suddenDeathPunish", roomid,banIDs,(result)->
                         if result?
                             if result.error?
-                                Index.util.message "突然死の罰",result.error
+                                Index.util.message "猝死惩罚",result.error
                                 return
-                            Index.util.message "突然死の罰",result
+                            Index.util.message "猝死惩罚",result
                             return
         # show result. reported as disturbing, so only show result in console.
         socket_ids.push Index.socket.on 'punishresult',null,(msg,channel)->
             if msg.id==roomid
-                # Index.util.message "突然死の罰",msg.name+" は突然死のために部屋に参加できなくなった。"
+                # Index.util.message "猝死惩罚",msg.name+" 由于猝死被禁止加入游戏。"
                 console.log "room:",msg.id,msg
     
         $(document).click (je)->

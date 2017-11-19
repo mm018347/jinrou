@@ -393,7 +393,7 @@ exports.LoadingIcon = class LoadingIcon
         for cl in @iconclasses
             @icon.classList.add cl
 
-#突然死の罰
+#猝死惩罚
 exports.punish=(title,message,cb)->
     win = showWindow "util-punish",{title:title,time:message.time}
     for user in message.userlist
