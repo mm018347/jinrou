@@ -10,7 +10,7 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 # 特殊职业2
 "Devil","ToughGuy","Cupid","Stalker","OccultMania","WhisperingMad","Lover","Dog",
 # 桃栗基本特殊职业
-"Bat","Noble","Slave","Magician","Spy","WolfDiviner",
+"Bat","Noble","Slave","Magician","Spy","WolfDiviner","Neet", 
 # 桃栗期間限定职业
 "Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Spy2","Copier",
 # 究极人狼的职业
@@ -42,10 +42,10 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 # 人狼HOUSE
 "Hypnotist",
 # オリジナル
-"SantaClaus","Pyrotechnist","Patissiere","Shishimai",
+"SantaClaus","Pyrotechnist","Patissiere","Shishimai","Light"
 ]
 # ここには入らない役職
-# Light, Neet, MinionSelector,QuantumPlayer, HolyProtected
+# MinionSelector,QuantumPlayer, HolyProtected
 
 # 人外
 exports.nonhumans=["Werewolf","Fox","BigWolf","TinyFox","WolfDiviner","MadWolf","Devil","Vampire","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf"]
