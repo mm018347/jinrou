@@ -1,4 +1,5 @@
 libblacklist = require '../../libs/blacklist.coffee'
+libuserlogs = require '../../libs/userlogs.coffee'
 ###
 room: {
   id: Number
@@ -46,7 +47,7 @@ Server=
     oauth:require '../../oauth.coffee'
     log:require '../../log.coffee'
 crypto=require 'crypto'
-# ヘルパーセット処理
+# 帮手セット処理
 sethelper=(ss,roomid,userid,id,res)->
     Server.game.rooms.oneRoomS roomid,(room)->
         if !room || room.error?
@@ -124,6 +125,49 @@ module.exports.actions=(req,res,ss)->
                     x.players.forEach (p)->
                         delete p.realid
             res results
+    getMyRooms:(page)->
+        # extract user's play logs from userrawlogs
+        M.userrawlogs.aggregate [
+            {
+                $match:
+                    userid: req.session.userId
+                    type: libuserlogs.DataTypes.game
+            }, {
+                $sort:
+                    gameid: -1
+            }, {
+                $skip: page * page_number
+            }, {
+                $limit: page_number
+            }, {
+            # join with room object
+                $lookup:
+                    from: "rooms"
+                    localField: "gameid"
+                    foreignField: "id"
+                    as: "room"
+            }, {
+                $unwind: "$room"
+            },
+        ], (err, results)->
+            if err?
+                res {error: String err}
+                return
+            for x in results
+                if x.room?
+                    if x.room.password?
+                        x.room.needpassword = true
+                        x.room.password = undefined
+                    if x.room.blind
+                        x.room.owner = undefined
+                    for p in x.room.players
+                        # find my player
+                        if p.realid == req.session.userId
+                            p.me = true
+                        p.realid = undefined
+            res results
+
+
     oneRoom:(roomid)->
         M.rooms.findOne {id:roomid},(err,result)=>
             if err?
@@ -433,7 +477,7 @@ module.exports.actions=(req,res,ss)->
                 return
             # consistencyのためにplayersをまるごとアップデートする
             room.players = room.players.filter (x)=> x.realid != req.session.userId
-            # ヘルパーになっている人は解除
+            # 帮手になっている人は解除
             for p, i in room.players
                 if p.mode == "helper_#{pl.userid}"
                     ss.publish.channel "room#{roomid}", "mode", {userid: p.userid, mode: "player"}
@@ -533,7 +577,7 @@ module.exports.actions=(req,res,ss)->
                         Server.game.game.kicklog room, pl
                         ss.publish.channel "room#{roomid}", "unjoin",id
                         ss.publish.user pl.realid, "kicked",{id:roomid}
-    # ヘルパーになる
+    # 帮手になる
     helper:(roomid,id)->
         unless req.session.userId
             res "请登陆"

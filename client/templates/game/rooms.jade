@@ -4,7 +4,11 @@ section.rooms
     thead
       tr
         th 房间名
-        th(style="width:3em;") 状态
+        if my
+          th 职业
+          th 结果
+        else
+          th(style="width:3em;") 状态
         th 房主
         th 最大人数
         th(style="width:9.5em;") 时间

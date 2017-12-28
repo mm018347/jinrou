@@ -3,13 +3,11 @@ Are you a werewolf?
 
 [http://www.werewolf.online:/ 月下人狼服务器]运行中!
 == version ==
-1.12.2
+1.12.6
 
 == requirements ==
-* SocketStream
-* mongodb
-* twitter
-and others...
+* Redis
+* MongoDB >= 3.2
 
 == usage ==
 # git clone git://github.com/uhyo/jinrou.git

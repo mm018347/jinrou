@@ -198,24 +198,32 @@ exports.showUrl=showUrl=(url,query={},nohistory=false)->
             page "reset",null,Index.reset, null
         when "/rooms"
             # 部屋一覧
-            page "game-rooms",null,Index.game.rooms, {
+            page "game-rooms", {
+                my: false
+            }, Index.game.rooms, {
                 page: Number query.page || 0
             }
         when "/rooms/old"
             # 古い部屋
-            page "game-rooms",null,Index.game.rooms, {
+            page "game-rooms", {
+                my: false
+            }, Index.game.rooms, {
                 mode: "old"
                 page: Number query.page || 0
             }
         when "/rooms/log"
             # 終わった部屋
-            page "game-rooms",null,Index.game.rooms, {
+            page "game-rooms", {
+                my: false
+            },Index.game.rooms, {
                 mode: "log"
                 page: Number query.page || 0
             }
         when "/rooms/my"
             # ぼくの部屋
-            page "game-rooms",null,Index.game.rooms, {
+            page "game-rooms", {
+                my: true
+            }, Index.game.rooms, {
                 mode: "my"
                 page: Number query.page || 0
             }
@@ -291,35 +299,37 @@ exports.refresh=->showUrl location.pathname, util.searchHash(location.search), t
 
 exports.login=login=(uid,ups,cb)->
     ss.rpc "user.login", {userid:uid,password:ups},(result)->
-        if result.banid
-            libban.saveBanData result.banid
-        else if result.forgive
-            libban.removeBanData()
-        if result.login
-            # OK
-            my_userid=uid
-            $("#username").text uid
-            $("#login").hide()
-            $("#logout").show()
-            if result.lastNews && localStorage.latestNews
-                # 最終ニュースを比較
-                last=new Date result.lastNews
-                latest=new Date localStorage.latestNews
-                if last.getTime() > latest.getTime()
-                    # 新着ニュースあり
-                    # お知らせを入れる
-                    notice=document.createElement "div"
-                    notice.classList.add "notice"
-                    notice.id="newNewsNotice"
-                    notice.textContent="有新的通知，请前往个人页面查看。"
-                    $("#content").before notice
+        processLoginResult uid, result, cb
+exports.processLoginResult = processLoginResult = (uid, result, cb)->
+    if result.banid
+        libban.saveBanData result.banid
+    else if result.forgive
+        libban.removeBanData()
+    if result.login
+        # OK
+        my_userid=uid
+        $("#username").text uid
+        $("#login").hide()
+        $("#logout").show()
+        if result.lastNews && localStorage.latestNews
+            # 最終ニュースを比較
+            last=new Date result.lastNews
+            latest=new Date localStorage.latestNews
+            if last.getTime() > latest.getTime()
+                # 新着ニュースあり
+                # お知らせを入れる
+                notice=document.createElement "div"
+                notice.classList.add "notice"
+                notice.id="newNewsNotice"
+                notice.textContent="有新的通知，请前往个人页面查看。"
+                $("#content").before notice
 
-            cb? true
-        else
-            cb? false
-        unless result.banid
-            # banではない?
-            checkBanData()
+        cb? true
+    else
+        cb? false
+    unless result.banid
+        # banではない?
+        checkBanData()
 exports.userid=->my_userid
 exports.setUserid=(id)->my_userid=id
 

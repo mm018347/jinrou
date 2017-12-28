@@ -224,6 +224,12 @@ section.profile
 table.roomstable
   td,th
     border 1px solid currentColor !important
+  span.rooms-td-win
+    color: #CC0000
+    font-weight: bold
+  span.rooms-td-lose
+    color: #0000DD
+    font-weight: bold
 //user mylog
 section.mylog
   p
@@ -276,9 +282,14 @@ body.heaven
   a
     color #000a68
 
-#roomname span.roomname-icons
+#roomname span.roomname-number
   display inline-block
   margin-left 0.7rem
+  font-size 1rem
+  font-weight normal
+#roomname span.roomname-icons
+  display inline-block
+  margin-left 0.3rem
   font-size 1.2rem
   letter-spacing 0.1rem
     
@@ -429,7 +440,7 @@ body.heaven
     background-color rgb(255,255,240)
     borderud 1px dashed #fffff8
     color #000000
-  .skill,.wolfskill
+  .skill,.wolfskill,.emmaskill,.eyeswolfskill
     background-color #cc0000
     borderud 2px dashed #700000
     color #ffffff
@@ -450,6 +461,10 @@ body.heaven
     color #000000
   .couple
     background-color #ddddff
+    borderud 1px dashed #eeffee
+    color #000000
+  .madcouple
+    background-color #e2e2c0
     borderud 1px dashed #eeffee
     color #000000
   .fox

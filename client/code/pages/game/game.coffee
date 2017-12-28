@@ -104,7 +104,7 @@ exports.start=(roomid)->
 
                 $("#jobinfo").append infop
             if obj.myteam?
-                # ケミカル人狼用の陣営情報
+                # ケミカル人狼用の阵营情報
                 if obj.myteam == ""
                     $("#jobinfo").append pp "你没有初始阵营"
                 else
@@ -114,6 +114,8 @@ exports.start=(roomid)->
                 $("#jobinfo").append pp "同伴的人狼是 #{obj.wolves.map((x)->x.name).join(",")}"
             if obj.peers?
                 $("#jobinfo").append pp "共有者是 #{obj.peers.map((x)->x.name).join(',')}"
+            if obj.madpeers?
+                $("#jobinfo").append pp "同伴的尖叫狂人是 #{obj.madpeers.map((x)->x.name).join(',')}"
             if obj.foxes?
                 $("#jobinfo").append pp "同伴的妖狐是 #{obj.foxes.map((x)->x.name).join(',')}"
             if obj.nobles?
@@ -238,6 +240,7 @@ exports.start=(roomid)->
                     $(b).click (je)->
                         # 规则を保存
                         localStorage.savedRule=JSON.stringify result.game.rule
+                        # savedJobs is for backward compatibility
                         localStorage.savedJobs=JSON.stringify result.game.jobscount
                         #Index.app.showUrl "/newroom"
                         # 新しいタブで開く
@@ -373,7 +376,15 @@ exports.start=(roomid)->
             buildrules Shared.game.rules,$("#rules")
             if localStorage.savedRule
                 rule=JSON.parse localStorage.savedRule
-                jobs=JSON.parse localStorage.savedJobs
+                jobs = rule._jobquery
+                unless jobs?
+                    # backward compatibility
+                    savedJobs = JSON.parse localStorage.savedJobs
+                    if savedJobs?
+                        jobs = {}
+                        for job in Shared.game.jobs
+                            jobs[job] = savedJobs[job]?.number ? 0
+                            jobs["job_use_#{job}"] = "on"
                 delete localStorage.savedRule
                 delete localStorage.savedJobs
                 # 时间设定
@@ -398,17 +409,24 @@ exports.start=(roomid)->
                             e.checked = e.value==rule[key]
                         else
                             e.value=rule[key]
-                # 配置も再現
-                for job in Shared.game.jobs
-                    e=form.elements[job]    # 职业
-                    if e?
-                        e.value=jobs[job]?.number ? 0
+                # 配役も再現
+                if jobs?
+                    for job in Shared.game.jobs
+                        e=form.elements[job]    # 役職
+                        if e?
+                            e.value = String jobs[job]
+                        e = form.elements["job_use_#{job}"]
+                        if e?
+                            e.checked = jobs["job_use_#{job}"] == "on"
 
             $("#gamestartsec").removeAttr "hidden"
 
             forminfo()
 
         $("#roomname").text room.name
+        roomnumber = document.createElement 'span'
+        roomnumber.classList.add 'roomname-number'
+        roomnumber.textContent = "##{roomid}"
         iconlist = document.createElement 'span'
         iconlist.classList.add 'roomname-icons'
         # ルーム情報
@@ -433,7 +451,7 @@ exports.start=(roomid)->
             icon.classList.add 'fa-info-circle'
             icon.title = room.comment
             iconlist.appendChild icon
-        $("#roomname").append iconlist
+        $("#roomname").append roomnumber, iconlist
         if room.mode=="waiting"
             # 開始前のユーザー一覧は roomから取得する
             room.players.forEach (x)->
@@ -1688,6 +1706,8 @@ speakValueToStr=(game,value)->
             "人狼的会话"
         when "couple"
             "共有者的会话"
+        when "madcouple"
+            "尖叫狂人的会话"
         when "fox"
             "妖狐的会话"
         when "gm"
@@ -1707,6 +1727,8 @@ speakValueToStr=(game,value)->
                 "→#{pl.name}"
             else if result=value.match /^helperwhisper_(.+)$/
                 "建议"
+            else
+                "???"
 
 $ ->
     $(window).resize ->

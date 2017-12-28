@@ -3,7 +3,9 @@ Shared=
 # ------ 职业一览
 # 基本职业
 exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","Fox",
-# 特殊职业?
+# ミラーズホロウの人狼
+"Hunter","Cupid",
+# 特殊役職?
 "Poisoner","BigWolf","TinyFox","Cat",
 # るる鯖で見つけた职业
 "Fanatic","Immoral"
@@ -22,11 +24,17 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 "Dictator","SeersMama","Trapper","WolfBoy","King",
 # Twitter人狼的职业
 "Counselor","Miko","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf",
-# 天国系的职业
+# 人狼物語（瓜科国）
+"MadCouple",
+# 天国系の役職
 "ObstructiveMad", # 人狼天国
 "WanderingGuard", # 錠前天国
 "BadLady", # 苍汁天国、人狼天国
 "Bomber","Blasphemy","Ushinotokimairi",  # ねじれ天国
+# 人狼式
+"Emma","EyesWolf",
+# えけけ鯖
+"MadHunter",
 # 人狼パーティー
 "TinyGhost","Ninja","Twin",
 # その他
@@ -48,28 +56,29 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 # MinionSelector,QuantumPlayer, HolyProtected
 
 # 人外
-exports.nonhumans=["Werewolf","Fox","BigWolf","TinyFox","WolfDiviner","MadWolf","Devil","Vampire","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf"]
+exports.nonhumans=["Werewolf","Fox","BigWolf","TinyFox","WolfDiviner","MadWolf","Devil","Vampire","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf","EyesWolf"]
 
 # 黒が出る人
-exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub","Dog","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","MadDog","CraftyWolf","Cosplayer"]
+exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub","Dog","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","MadDog","CraftyWolf","Cosplayer","EyesWolf"]
 
 # チームたち
 exports.teams=teams=
-    Human:["Human","Diviner","Psychic","Guard","Couple","Poisoner","ToughGuy","Noble","Slave","Magician","Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Light","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Cat","Witch","Oldman","OccultMania","Dog","Dictator","SeersMama","Trapper","RedHood","Counselor","Miko","HolyMarked","WanderingGuard","TroubleMaker","FrankensteinsMonster","BloodyMary","King","SantaClaus","Phantom","DrawGirl","Pyrotechnist","Baker","SpiritPossessed","GotChocolate","Forensic","Cosplayer","TinyGhost","Ninja","Twin"]
-    Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist","CraftyWolf","Pumpkin","MadScientist"]
+    Human:["Human","Diviner","Psychic","Guard","Couple","Poisoner","ToughGuy","Noble","Slave","Magician","Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Light","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Cat","Witch","Oldman","OccultMania","Dog","Dictator","SeersMama","Trapper","RedHood","Counselor","Miko","HolyMarked","WanderingGuard","TroubleMaker","FrankensteinsMonster","BloodyMary","King","SantaClaus","Phantom","DrawGirl","Pyrotechnist","Baker","SpiritPossessed","GotChocolate","Forensic","Cosplayer","TinyGhost","Ninja","Twin","Hunter","Emma"]
+    Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist","CraftyWolf","Pumpkin","MadScientist","MadHunter","MadCouple","EyesWolf"]
     Fox:["Fox","TinyFox","Immoral","Blasphemy"]
     Devil:["Devil"]
     Friend:["Cupid","Lover","BadLady","Patissiere"]
     Vampire:["Vampire"]
-    Others:["Bat","Stalker","Doppleganger","CultLeader","Copier","Tanner","Thief","Hoodlum","QuantumPlayer","Shishimai"],
+    Cult:["CultLeader"]
+    Others:["Bat","Stalker","Doppleganger","Copier","Tanner","Thief","Hoodlum","QuantumPlayer","Shishimai"],
     Neet:["Neet"]
 
 # カテゴリ分け(手调黑暗火锅でつかうぞ!)
 exports.categories=
     Human: teams.Human.filter((x)-> x != "GotChocolate")
-    Werewolf:["Werewolf","BigWolf","WolfDiviner","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf"]
+    Werewolf:["Werewolf","BigWolf","WolfDiviner","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf","EyesWolf"]
     Fox:["Fox","TinyFox"]
-    Madman:["Madman","Fanatic","Spy","Spy2","Sorcerer","WhisperingMad","WolfBoy","ObstructiveMad","PsychoKiller","Bomber","Ushinotokimairi","MadDog","Hypnotist","Pumpkin","MadScientist"]
+    Madman:["Madman","Fanatic","Spy","Spy2","Sorcerer","WhisperingMad","WolfBoy","ObstructiveMad","PsychoKiller","Bomber","Ushinotokimairi","MadDog","Hypnotist","Pumpkin","MadScientist","MadHunter","MadCouple"]
     Immoral:["Immoral","Blasphemy"]
     Switching:["Stalker","OccultMania","Copier","Cursed","Doppleganger","BloodyMary","Phantom","Thief"]
     Others:["Devil","Cupid","Bat","CultLeader","Vampire","Tanner","Lover","Hoodlum","BadLady","Patissiere","Shishimai"]
@@ -667,12 +676,14 @@ exports.getrulestr=(rule,jobs={})->
         if num>0
             text+="#{name}#{num} "
     return text
-# 職の名字
-exports.getjobname=(job)->
+# 職の情報
+exports.getjobobj = getjobobj = (job)->
     for name,team of Shared.game.jobinfo
         if team[job]?
-            return team[job].name
+            return team[job]
     return null
+# 職の名前
+exports.getjobname = (job)-> getjobobj(job)?.name
 exports.jobinfo=
     Human:
         name:"村人阵营"
@@ -833,6 +844,12 @@ exports.jobinfo=
         Twin:
             name:"双胞胎"
             color:"#dbfcff"
+        Hunter:
+            name:"狩猎者"
+            color:"#d11f1f"
+        Emma:
+            name:"阎魔"
+            color:"#dd2211"
         
     Werewolf:
         name:"人狼阵营"
@@ -921,6 +938,15 @@ exports.jobinfo=
         MadScientist:
             name:"疯狂科学家"
             color:"#14e051"
+        MadHunter:
+            name:"复仇者"
+            color:"#511e0f"
+        MadCouple:
+            name:"尖叫狂人"
+            color:"#f2d5bc"
+        EyesWolf:
+            name:"瞳狼"
+            color:"#000a75"
         
         
     Fox:
@@ -938,14 +964,6 @@ exports.jobinfo=
         Blasphemy:
             name:"亵渎者"
             color:"#802060"
-            
-        
-    Devil:
-        name:"恶魔"
-        color:"#735f9e"
-        Devil:
-            name:"恶魔"
-            color:"#735f9e"
     Friend:
         name:"恋人阵营"
         color:"#ffb5e5"
@@ -961,12 +979,24 @@ exports.jobinfo=
         Patissiere:
             name:"女糕点师"
             color:"#ab5f30"
+    Devil:
+        name:"恶魔"
+        color:"#735f9e"
+        Devil:
+            name:"恶魔"
+            color:"#735f9e"
     Vampire:
         name:"吸血鬼阵营"
         color:"#8f00bf"
         Vampire:
             name:"吸血鬼"
             color:"#8f00bf"
+    Cult:
+        name:"邪教主阵营"
+        color: "#b09d87"
+        CultLeader:
+            name:"邪教主"
+            color:"#b09d87"
     Others:
         name:"其他"
         color:"#cccccc"
@@ -979,9 +1009,6 @@ exports.jobinfo=
         Doppleganger:
             name:"二重身"
             color:"#bbbbbb"
-        CultLeader:
-            name:"邪教主"
-            color:"#b09d87"
         Copier:
             name:"模仿者"
             color:"#ffffff"
@@ -1056,6 +1083,16 @@ exports.rules=[
                         title:"以搞笑为目标的游戏，适当调整人狼・妖狐的数量。。"
                     }
                 ]
+            }
+            {
+                name:"hide_singleton_teams"
+                label:"是否隐藏单独阵营"
+                title:"如果选择隐藏，恶魔・吸血鬼・邪教主在阵营一览中将被计入「其他阵营」。"
+                type:"checkbox"
+                value:{
+                    value:"on"
+                    label:"隐藏"
+                }
             }
         ]
     }
@@ -1150,7 +1187,14 @@ exports.rules=[
                 defaultValue:
                     minute:2
                     second:30
-                getstr:->null
+                getstr:(_, ruleobj)->
+                    if Number(ruleobj.day) > 0
+                        {
+                            label: "白天的讨论时间"
+                            value: secondsStr ruleobj.day
+                        }
+                    else
+                        null
             }
             {
                 type:"time"
@@ -1161,7 +1205,14 @@ exports.rules=[
                 defaultValue:
                     minute:1
                     second:30
-                getstr:->null
+                getstr:(_, ruleobj)->
+                    if Number(ruleobj.day) > 0
+                        {
+                            label: "夜晚时间"
+                            value: secondsStr ruleobj.night
+                        }
+                    else
+                        null
             }
             {
                 type:"time"
@@ -1172,7 +1223,14 @@ exports.rules=[
                 defaultValue:
                     minute:2
                     second:0
-                getstr:->null
+                getstr:(_, ruleobj)->
+                    if Number(ruleobj.remain) > 0
+                        {
+                            label: "犹豫时间"
+                            value: secondsStr ruleobj.remain
+                        }
+                    else
+                        null
             }
             {
                 type:"time"
@@ -1188,7 +1246,7 @@ exports.rules=[
                     if Number(ruleobj.voting) > 0
                         {
                             label: "投票专用时间"
-                            value: "时长 #{ruleobj.voting} 秒"
+                            value: "时长 #{secondsStr ruleobj.voting} 秒"
                         }
                     else
                         null
@@ -1282,7 +1340,7 @@ exports.rules=[
                 values:[
                     {
                         value:"full"
-                        label:"替身君除去所有人外，除去女王观战者、间谍Ⅱ、埋毒者、猫又、玛丽、贵族、双胞胎"
+                        label:"替身君除去所有人外，除去女王观战者、间谍Ⅱ、埋毒者、猫又、玛丽、贵族、双胞胎、狩猎者、复仇者"
                         selected:true
                     }
                     {
@@ -1452,7 +1510,7 @@ exports.rules=[
     }
     # 人狼系
     {
-        label:null
+        label: "人狼系的设定"
         visible:(rule,jobs)->
             return true if isYaminabe rule
             for job in exports.categories.Werewolf
@@ -1497,7 +1555,7 @@ exports.rules=[
     }
     # 占い系
     {
-        label:null
+        label: "占卜师的设定"
         visible:(rule,jobs)->
             return true if isYaminabe rule
             for job in ["Diviner","ApprenticeSeer","WolfDiviner","TinyFox"]
@@ -1543,7 +1601,7 @@ exports.rules=[
     }
     # 灵能
     {
-        label:null
+        label: "灵能者的设定"
         visible:(rule,jobs)->
             return true if isYaminabe rule
             return jobs.Psychic>0
@@ -1569,14 +1627,15 @@ exports.rules=[
     }
     # 共有者
     {
-        label:null
+        label: "共有者的设定"
         visible:(rule,jobs)->
             return true if isYaminabe rule
-            return jobs.Couple>0
+            return jobs.Couple>0 || jobs.MadCouple>0
         rules:[
             {
                 name:"couplesound"
                 label:"能否听到共有者的低语声"
+                title:"设为「能听到」的时候，就能注意到共有者・尖叫狂人在夜间模糊的低语声。"
                 type:"checkbox"
                 value:{
                     value:"aloud"
@@ -1594,7 +1653,7 @@ exports.rules=[
     }
     # 护卫职业
     {
-        label:null
+        label: "猎人系的设定"
         visible:(rule,jobs)->
             return true if isYaminabe rule
             for job in ["Guard","Trapper","WanderingGuard","Cosplayer"]
@@ -1654,7 +1713,7 @@ exports.rules=[
     }
     # 妖狐
     {
-        label:null
+        label: "妖狐的设定"
         visible:(rule,jobs)->
             return true if isYaminabe rule
             return jobs.Fox>0
@@ -1674,6 +1733,32 @@ exports.rules=[
                         label:"咒杀袭击区別"
                         value:if value=="on" then "有" else "无"
                     }
+            }
+        ]
+    }
+    # 狩猎者
+    {
+        label: "狩猎者的设定"
+        visible:(rule,jobs)->
+            return true if isYaminabe rule
+            return jobs.Hunter > 0 || jobs.MadHunter > 0
+        rules:[
+            {
+                name:"hunter_lastattack"
+                label: "绝地反击"
+                title: "绝地反击设为「允许」时，狩猎者死亡后的技能将在胜利判定之前触发。"
+                type: "select"
+                values:[
+                    {
+                        value:"yes"
+                        label:"允许"
+                        selected:true
+                    }
+                    {
+                        value:"no"
+                        label:"拒绝"
+                    }
+                ]
             }
         ]
     }
@@ -1816,6 +1901,11 @@ exports.jobinfos=[
         type:"pubinfo-array"
     }
     {
+        name:"madpeers"
+        prefix:"同伴的尖叫狂人是 "
+        type:"pubinfo-array"
+    }
+    {
         name:"foxes"
         prefix:"同伴的妖狐是 "
         type:"pubinfo-array"
@@ -1881,3 +1971,9 @@ exports.jobinfos=[
 
 # 判定
 isYaminabe=(rule)->rule.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
+# 秒数を分と秒に
+secondsStr=(sec)->
+    if sec >= 60
+        "#{Math.floor(sec/60)}分#{sec % 60}秒"
+    else
+        "#{sec}秒"

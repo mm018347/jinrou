@@ -321,6 +321,14 @@
           p
             | 请选择要侦查的人：
             input(type="submit",value="侦查（忍者）",data-job="Ninja")
+        #form_Hunter(hidden).jobformarea
+          p
+            | 请选择射击的目标（必须）:
+            input(type="submit",value="开枪（狩猎者）",data-job="Hunter")
+        #form_MadHunter(hidden).jobformarea
+          p
+            | 请选择射击的目标（必须）:
+            input(type="submit",value="开枪（复仇者）",data-job="MadHunter")
       form#speakform
         p
           input(size="50",name="comment",required,autocomplete="off")
