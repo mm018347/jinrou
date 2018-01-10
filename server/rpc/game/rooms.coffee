@@ -330,8 +330,8 @@ module.exports.actions=(req,res,ss)->
                 res error:"房间已满"
                 return
             if room.mode=="playing" && room.jobrule=="特殊规则.Endless黑暗火锅"
-                # Endless黑暗火锅の場合は游戏内人数による人数判定を行う
-                if Server.game.game.endlessPlayersNumber(roomid) >= room.number
+                # エンドレス闇鍋の場合はゲーム内人数による人数判定を行う
+                unless Server.game.game.endlessCanEnter(roomid, req.session.userId, room.number)
                     # 満員
                     res error:"房间已满"
                     return

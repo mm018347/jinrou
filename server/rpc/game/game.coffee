@@ -96,14 +96,20 @@ module.exports=
                 throw err
             games[doc.id]=Game.unserialize doc,ss
     ###
-    # 参加中のプレイヤー人数（Endless黑暗火锅用）
-    endlessPlayersNumber:(roomid)->
-        game=games[roomid]
+    # Check whether a new user can enter an endless game
+    # maxnum: a maximum player number of this room
+    endlessCanEnter:(roomid, userid, maxnum)->
+        game = games[roomid]
         if game?
-            # 拒绝复活はカウントしない
-            return game.players.filter((x)->!x.dead || !x.norevive).length
-        else
-            return Number.NaN
+            # Check the number of existing players
+            num = game.players.filter((x)->!x.dead || !x.norevive).length
+            if num >= maxnum
+                return false
+            # Check whether a player already exists
+            if game.participants.some((x)-> x.realid == userid)
+                return false
+            return true
+        return false
     # プレイヤーが入室したぞ!
     inlog:(room,player)->
         name="#{player.name}"
@@ -163,7 +169,7 @@ module.exports=
                 # 头像追加
                 game.iconcollection[newpl.id]=player.icon
                 # playersには追加しない（翌朝追加）
-                games[room.id].participants.push newpl
+                game.participants.push newpl
     outlog:(room,player)->
         log=
             comment:"#{player.name} 离开了游戏。"
@@ -609,7 +615,7 @@ class Game
                 nogoat=nogoat.concat Shared.game.nonhumans  #人外は除く
             if @rule.safety=="full"
                 # 危ない
-                nogoat=nogoat.concat ["QueenSpectator","Spy2","Poisoner","Cat","BloodyMary","Noble","Twin","Hunter","MadHunter"]
+                nogoat=nogoat.concat ["QueenSpectator","Spy2","Poisoner","Cat","Cupid","BloodyMary","Noble","Twin","Hunter","MadHunter"]
             jobss=[]
             for job in Object.keys jobs
                 continue if !joblist[job] || (job in nogoat)
