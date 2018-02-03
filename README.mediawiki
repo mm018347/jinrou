@@ -1,7 +1,7 @@
 == 月下人狼 ==
 Are you a werewolf?
 
-[http://www.werewolf.online:/ 月下人狼服务器]运行中!
+[https://www.werewolf.com.cn/ 月下人狼服务器]运行中!
 == version ==
 1.12.7
 
@@ -18,7 +18,7 @@ Are you a werewolf?
 # SS_ENV=production SS_PACK=1 node app.js
 
 == jobs ==
-全80种以上?
+全100种以上
 
 === 基本 ===
 * 村人
@@ -41,9 +41,9 @@ Are you a werewolf?
 * 间谍
 * 人狼占卜师
 === 桃栗期間限定 ===
-* 逃走者
+* 逃亡者
 * 商人
-* 女王感戦者
+* 女王观战者
 * 狂人狼
 * 骗子
 * 间谍Ⅱ
