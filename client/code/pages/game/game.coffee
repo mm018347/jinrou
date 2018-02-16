@@ -1759,7 +1759,7 @@ $ ->
         sticky()
     sticky = ->
         unless $("#sticky").length > 0
-            return
+            $(".infobox,form#jobform,form#speakform,form#willform").wrapAll('<div id="sticky"></div>');
         unless $("#isfloat").is(':checked')
             $(".sticky").removeAttr "style"
             $(".sticky").removeAttr "class"
