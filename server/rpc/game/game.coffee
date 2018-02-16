@@ -6,8 +6,10 @@ Shared=
 libblacklist = require '../../libs/blacklist.coffee'
 libuserlogs  = require '../../libs/userlogs.coffee'
 libsavelogs  = require '../../libs/savelogs.coffee'
+libi18n      = require '../../libs/i18n.coffee'
 
 cron=require 'cron'
+i18n = libi18n.getWithDefaultNS "game"
 
 # フェイズの一覧
 Phase =
@@ -32,6 +34,28 @@ Phase =
     isNight: (phase)-> phase in [Phase.night, Phase.night_remain]
     isRemain: (phase)-> phase in [Phase.day_remain, Phase.night_remain]
 
+# Code of fortune result.
+FortuneResult =
+    # Human
+    human: "human"
+    # Werewolf
+    werewolf: "werewolf"
+    # Vampire
+    vampire: "vampire"
+    # pumpkin
+    pumpkin: "pumpkin"
+
+# Code of psychic result.
+PsychicResult =
+    # Human
+    human: "human"
+    # Werewolf
+    werewolf: "werewolf"
+    # BigWolf
+    BigWolf: "BigWolf"
+    # TinyFox
+    TinyFox: "TinyFox"
+
 # guard_logにおける襲撃の種類
 AttackKind =
     werewolf: 'werewolf'
@@ -54,7 +78,6 @@ GuardReason =
     # 罠
     trap: 'trap'
 
-
 # 浅いコピー
 copyObject=(obj)->
     result=Object.create Object.getPrototypeOf obj
@@ -72,7 +95,7 @@ loadGame = (roomid, ss, callback)->
                 console.error err
                 callback err,null
             else if !doc?
-                callback "游戏不存在",null
+                callback i18n.t("error.common.noSuchGame"),null
             else
                 games[roomid] = Game.unserialize doc,ss
                 callback null, games[roomid]
@@ -133,33 +156,34 @@ module.exports=
         if room.mode=="waiting"
             # 开始前（ふつう）
             log=
-                comment:"#{name} 加入了游戏。"
+                comment: i18n.t "system.rooms.enter", {name: name}
                 userid:-1
                 name:null
                 mode:"system"
-            if games[room.id]
-                splashlog room.id,games[room.id], log
+            game = games[room.id]
+            if game
+                splashlog room.id, game, log
                 # プレイヤーを追加
-                newpl=Player.factory "Waiting"
+                newpl=Player.factory "Waiting", game
                 newpl.setProfile {
                     id:player.userid
                     realid:player.realid
                     name:player.name
                 }
                 newpl.setTarget null
-                games[room.id].players.push newpl
-                games[room.id].participants.push newpl
+                game.players.push newpl
+                game.participants.push newpl
         else if room.mode=="playing" && room.jobrule=="特殊规则.Endless黑暗火锅"
-            # Endless黑暗火锅に途中参加
-            if games[room.id]
-                game=games[room.id]
+            # エンドレス闇鍋に途中参加
+            game=games[room.id]
+            if game
                 log=
-                    comment:"#{name} 加入了游戏。"
+                    comment: i18n.t "system.rooms.entering", {name: name}
                     mode:"inlog"
                     to:player.userid
                 splashlog room.id,game,log
                 # プレイヤーを追加（まだ参加しない系のひと）
-                newpl=Player.factory "Watching"
+                newpl=Player.factory "Watching", game
                 newpl.setProfile {
                     id:player.userid
                     realid:player.realid
@@ -172,7 +196,7 @@ module.exports=
                 game.participants.push newpl
     outlog:(room,player)->
         log=
-            comment:"#{player.name} 离开了游戏。"
+            comment: i18n.t "system.rooms.leave", {name: player.name}
             userid:-1
             name:null
             mode:"system"
@@ -182,24 +206,10 @@ module.exports=
             games[room.id].participants=games[room.id].participants.filter (pl)->pl.realid!=player.realid
     kicklog:(room,player)->
         log=
-            comment:"#{player.name} 被踢出了游戏。"
+            comment: i18n.t "system.rooms.kicked", {name: player.name}
             userid:-1
             name:null
             mode:"system"
-        console.log "game"+room.id+"存在"
-        unless games[room.id]?
-            # 检索数据库game是否不存在？
-            M.games.findOne {id:room.id}, (err,doc)=>
-                if err?
-                    console.log err
-                    throw err
-                unless doc?
-                    M.rooms.remove {id:room.id}
-                    console.log "由于game不存在，room"+room.id+"被移除"
-                    return
-                games[roomid]=game=Game.unserialize doc,ss
-                ne()
-            return
         if games[room.id]
             splashlog room.id,games[room.id], log
             games[room.id].players=games[room.id].players.filter (pl)->pl.realid!=player.realid
@@ -209,13 +219,13 @@ module.exports=
             log=null
             if topl?
                 log=
-                    comment:"#{player.name} 成为了 #{topl.name} 的帮手。"
+                    comment: i18n.t "system.rooms.helper", {helper: player.name, target: topl.name}
                     userid:-1
                     name:null
                     mode:"system"
             else
                 log=
-                    comment:"#{player.name} 放弃做帮手了。"
+                    comment: i18n.t "system.rooms.stophelper", {name: player.name}
                     userid:-1
                     name:null
                     mode:"system"
@@ -226,7 +236,7 @@ module.exports=
         loadGame room.id, ss, (err,game)->
             if game?
                 log=
-                    comment:"这个房间已经废弃。"
+                    comment: i18n.t "system.rooms.abandoned"
                     userid:-1
                     name:null
                     mode:"system"
@@ -239,8 +249,8 @@ module.exports=
             player=game.getPlayerReal session.userId
             unless player?
                 session.channel.subscribe "room#{roomid}_audience"
-                # session.channel.subscribe "room#{roomid}_notwerewolf"
-                # session.channel.subscribe "room#{roomid}_notcouple"
+                #session.channel.subscribe "room#{roomid}_notwerewolf"
+                #session.channel.subscribe "room#{roomid}_notcouple"
                 return
             if player.isJobType "GameMaster"
                 session.channel.subscribe "room#{roomid}_gamemaster"
@@ -274,21 +284,19 @@ module.exports=
             return null
         # Am I a valid voter?
         unless sdp.voters[voter] == true
-            return "不能投票"
+            return game.i18n.t "error.suddenDeathPunish.notvoter"
         # Are all the targets valid?
         unless targets.every((id)-> sdp.targets[id]?)
-            return "投票对象无效"
+            return game.i18n.t "error.suddenDeathPunish.invalid"
         # 投票を実行
         sdp.voters[voter] = false
-
-        console.log "hey!", sdp
 
         for id in targets
             banpl = sdp.targets[id]
             query =
                 userid:banpl.realid
                 types:["create_account", "play"]
-                reason:"猝死惩罚"
+                reason: game.i18n.t "common.suddenDeathPenalty"
                 banMinutes:sdp.banMinutes
             libblacklist.extendBlacklist query,(result)->
                 ss.publish.channel "room#{roomid}", "punishresult", {id:roomid,name:banpl.name}
@@ -307,6 +315,8 @@ Server=
 
 class Game
     constructor:(@ss,room)->
+        @i18n = i18n
+
         # @ss: ss
         if room?
             @id=room.id
@@ -407,10 +417,10 @@ class Game
         game.gm=obj.gm
         #game.logs=obj.logs
         game.rule=obj.rule
-        game.players=obj.players.map (x)->Player.unserialize x
+        game.players=obj.players.map (x)=>Player.unserialize x, game
         # 追加する
         if obj.additionalParticipants
-            game.participants=game.players.concat obj.additionalParticipants.map (x)->Player.unserialize x
+            game.participants=game.players.concat obj.additionalParticipants.map (x)->Player.unserialize x, game
         else
             game.participants=game.players.concat []
 
@@ -439,7 +449,7 @@ class Game
                     return
                 game.players=[]
                 for plobj in room.players
-                    newpl=Player.factory "Waiting"
+                    newpl=Player.factory "Waiting", game
                     newpl.setProfile {
                         id:plobj.userid
                         realid:plobj.realid
@@ -490,7 +500,6 @@ class Game
     getPlayer:(id)->
         @players.filter((x)->x.id==id)[0]
     getPlayerReal:(realid)->
-        #@players.filter((x)->x.realid==realid)[0] || if @gm && @gm==realid then new GameMaster realid,realid,"游戏管理员"
         @participants.filter((x)->x.realid==realid)[0]
     # DBにセーブ
     save:->
@@ -529,10 +538,10 @@ class Game
         for job, num of joblist
             n = parseInt num, 10
             if Number.isNaN n || n < 0
-                return "玩家数无效（#{job}:#{num}）。多次重试可能解决这个错误。"
+                return @i18n.t "error.gamestart.playerNumberInvalid1", {job: job, num: num}
             jnumber += n
         if jnumber != jallnum
-            return "玩家数无效（#{jnumber}/#{jallnum}/#{@players.length}）。多次重试可能解决这个错误。"
+            return @i18n.t "error.gamestart.playerNumberInvalid2", {request: jnumber, jallnum: jallnum, players: @players.length}
         return null
 
     #成功:null
@@ -557,12 +566,12 @@ class Game
             unless isNaN num
                 jnumber+=parseInt num
             if parseInt(num)<0
-                res "玩家人数无效（#{job}:#{num})。多次重试可能解决这个错误。"
+                res @i18n.t("error.gamestart.playerNumberInvalid1", {job: job, num: num})
                 return
 
         if jnumber!=jallnum
             # 数が合わない
-            res "玩家人数无效 (#{jnumber}/#{jallnum}/#{players.length})。多次重试可能解决这个错误。"
+            res @i18n.t("error.gamestart.playerNumberInvalid2", {request: jnumber, jallnum: jallnum, players: players.length})
             return
 
         # 名字と数を出したやつ
@@ -570,9 +579,8 @@ class Game
         unless options.yaminabe_hidejobs    # 公開モード
             for job,num of joblist
                 continue unless num>0
-                testpl=new jobs[job]
                 @jobscount[job]=
-                    name:testpl.jobname
+                    name: @i18n.t "roles:jobname.#{job}"
                     number:num
 
         # 盗賊の処理
@@ -595,7 +603,7 @@ class Game
                 # これは抜ける
                 if keys.length==0
                     # もう無い
-                    res "小偷处理失败"
+                    res @i18n.t "error.gamestart.thiefFailed"
                     return
                 thief_jobs.push keys[0]
                 joblist[keys[0]]--
@@ -636,31 +644,31 @@ class Game
 
             if gotjs.length < jobperpl
                 # 決まっていない
-                res "角色分配失败"
+                res @i18n.t "error.gamestart.castingFailed"
                 return
             # 替身君のプロフィール
             profile = {
                 id:"替身君"
                 realid:"替身君"
-                name:"替身君"
+                name: @i18n.t "common.scapegoat"
             }
             if @rule.chemical == "on"
-                # 炼成人狼なので合体职业にする
-                pl1 = Player.factory gotjs[0]
+                # ケミカル人狼なので合体役職にする
+                pl1 = Player.factory gotjs[0], this
                 pl1.setProfile profile
                 pl1.scapegoat = true
-                pl2 = Player.factory gotjs[1]
+                pl2 = Player.factory gotjs[1], this
                 pl2.setProfile profile
                 pl2.scapegoat = true
                 # ケミカル合体
-                newpl = Player.factory null, pl1, pl2, Chemical
+                newpl = Player.factory null, this, pl1, pl2, Chemical
                 newpl.setProfile profile
                 newpl.scapegoat = true
                 newpl.setOriginalJobname newpl.getJobname()
                 @players.push newpl
             else
                 # ふつーに
-                newpl=Player.factory gotjs[0]   #替身君
+                newpl=Player.factory gotjs[0], this   #替身君
                 newpl.setProfile profile
                 newpl.scapegoat = true
                 @players.push newpl
@@ -680,7 +688,7 @@ class Game
                     r=Math.floor Math.random()*conpls.length
                     pl=conpls[r]
                     players=players.filter (x)->x!=pl
-                    newpl=Player.factory job
+                    newpl=Player.factory job, this
                     newpl.setProfile {
                         id:pl.userid
                         realid:pl.realid
@@ -731,18 +739,18 @@ class Game
                         name:pl.name
                     }
                     if @rule.chemical == "on"
-                        # 炼成人狼
-                        pl1 = Player.factory gotjs[r][0]
+                        # ケミカル人狼
+                        pl1 = Player.factory gotjs[r][0], this
                         pl1.setProfile profile
-                        pl2 = Player.factory gotjs[r][1]
+                        pl2 = Player.factory gotjs[r][1], this
                         pl2.setProfile profile
-                        newpl = Player.factory null, pl1, pl2, Chemical
+                        newpl = Player.factory null, this, pl1, pl2, Chemical
                         newpl.setProfile profile
                         newpl.setOriginalJobname newpl.getJobname()
                         @players.push newpl
                     else
                         # ふつうの人狼
-                        newpl=Player.factory gotjs[r][0]
+                        newpl=Player.factory gotjs[r][0], this
                         newpl.setProfile profile
                         @players.push newpl
                     players.splice r,1
@@ -764,7 +772,7 @@ class Game
             r=Math.floor Math.random()*@players.length
             pl=@players[r]
         
-            newpl=Player.factory null,pl,null,Decider   # 酒鬼
+            newpl=Player.factory null, this, pl,null,Decider   # 酔っ払い
             pl.transProfile newpl
             pl.transform @,newpl,true,true
         if options.authority
@@ -772,7 +780,7 @@ class Game
             r=Math.floor Math.random()*@players.length
             pl=@players[r]
         
-            newpl=Player.factory null,pl,null,Authority # 酒鬼
+            newpl=Player.factory null, this, pl,null,Authority # 酔っ払い
             pl.transProfile newpl
             pl.transform @,newpl,true,true
         
@@ -783,10 +791,10 @@ class Game
                 r=Math.floor Math.random()*wolves.length
                 pl=wolves[r]
                 
-                sub=Player.factory "MinionSelector" # 子分决定者
+                sub=Player.factory "MinionSelector", this # 子分決定者
                 pl.transProfile sub
                 
-                newpl=Player.factory null,pl,sub,Complex
+                newpl=Player.factory null, this, pl, sub, Complex
                 pl.transProfile newpl
                 pl.transform @,newpl,true
         if @rule.drunk
@@ -798,7 +806,7 @@ class Game
                 r=Math.floor Math.random()*nonvillagers.length
                 pl=nonvillagers[r]
             
-                newpl=Player.factory null,pl,null,Drunk # 酒鬼
+                newpl=Player.factory null, this, pl,null,Drunk # 酔っ払い
                 pl.transProfile newpl
                 pl.transform @,newpl,true,true
 
@@ -809,8 +817,8 @@ class Game
         # ここでプレイヤー以外の処理をする
         for pl in supporters
             if pl.mode=="gm"
-                # 游戏管理员だ
-                gm=Player.factory "GameMaster"
+                # ゲームマスターだ
+                gm=Player.factory "GameMaster", this
                 gm.setProfile {
                     id:pl.userid
                     realid:pl.realid
@@ -821,9 +829,10 @@ class Game
                 # 帮手だ
                 ppl=@players.filter((x)->x.id==result[1])[0]
                 unless ppl?
-                    res "#{pl.name} 的帮助对象已不存在。"
+                    # This is a bug!
+                    res @i18n.t "error.gamestart.helperNotExist", {name: pl.name}
                     return
-                helper=Player.factory "Helper"
+                helper=Player.factory "Helper", this
                 helper.setProfile {
                     id:pl.realid
                     realid:pl.realid
@@ -831,7 +840,6 @@ class Game
                 }
                 helper.setFlag ppl.id  # ヘルプ先
                 @participants.push helper
-            #@participants.push new GameMaster pl.userid,pl.realid,pl.name
         
         # 量子人狼の場合はここで可能性リストを作る
         if @rule.jobrule=="特殊规则.量子人狼"
@@ -959,7 +967,7 @@ class Game
                 night:night
                 userid:-1
                 name:null
-                comment:"现在是 #{@currentyear} 年了。"
+                comment: @i18n.t "system.phase.newyear", {year: @currentyear}
             splashlog @id,this,log
         else
             # 普通メッセージ
@@ -969,7 +977,7 @@ class Game
                 night:night
                 userid:-1
                 name:null
-                comment:"第#{@day}天的#{if night then '夜晚' else '白天'}到来了。"
+                comment: @i18n.t "system.phase.#{if night then 'night' else 'day'}", {day: @day}
             splashlog @id,this,log
 
         #死体処理
@@ -1065,7 +1073,7 @@ class Game
                 if @rule.quantumwerewolf_table=="anonymous"
                     # 番号を表示
                     numberref_table[pflag.number]=x
-                    probability_table[x.id].name="玩家 #{pflag.number}"
+                    probability_table[x.id].name= @i18n.t "quantum.player", {num: pflag.number}
             if @rule.quantumwerewolf_table=="anonymous"
                 # ソートしなおしてあげて痕跡を消す
                 probability_table=((probability_table,numberref_table)->
@@ -1114,14 +1122,14 @@ class Game
                     @werewolf_target_remain=0
                     log=
                         mode:"wolfskill"
-                        comment:"人狼们染病了。今天无法出击。"
+                        comment: @i18n.t "system.werewolf.diseased"
                     splashlog @id,this,log
                 else if fl=="WolfCub"
                     # 狼之子フラグが立っている（2回襲撃できる）
                     @werewolf_target_remain=2
                     log=
                         mode:"wolfskill"
-                        comment:"为狼之子复仇吧，今天可以袭击两个人。"
+                        comment: @i18n.t "system.werewolf.wolfcub"
                     splashlog @id,this,log
                 else
                     werewolf_flag_result.push fl
@@ -1137,7 +1145,7 @@ class Game
                         pyr.accessByJobType("Pyrotechnist").sunset this
                 # 全员花火の虜にしてしまう
                 for pl in @players
-                    newpl=Player.factory null,pl,null,WatchingFireworks
+                    newpl=Player.factory null, this, pl,null,WatchingFireworks
                     pl.transProfile newpl
                     newpl.cmplFlag=x[0].id
                     pl.transform this,newpl,true
@@ -1179,10 +1187,10 @@ class Game
                 if alives.length>0
                     r=Math.floor Math.random()*alives.length
                     pl=alives[r]
-                    sub=Player.factory "Light"  # 副を作る
+                    sub=Player.factory "Light", this  # 副を作る
                     pl.transProfile sub
                     sub.sunset this
-                    newpl=Player.factory null,pl,sub,Complex
+                    newpl=Player.factory null, this, pl,sub,Complex
                     pl.transProfile newpl
                     @players.forEach (x,i)=>    # 入れ替え
                         if x.id==newpl.id
@@ -1202,7 +1210,7 @@ class Game
                             # 本参加ではないのでOK
                             # 职业をランダムに决定
                             newjob=jobnames[Math.floor Math.random()*jobnames.length]
-                            newpl=Player.factory newjob
+                            newpl=Player.factory newjob, this
                             player.transProfile newpl
                             player.transferData newpl
                             # 观战者を除去
@@ -1213,7 +1221,7 @@ class Game
                             # ログをだす
                             log=
                                 mode:"system"
-                                comment:"#{newpl.name} 加入了游戏。"
+                                comment: @i18n.t "system.rooms.join", {name: newpl.name}
                             splashlog @id,@,log
                             join_count++
                 # たまに転生
@@ -1231,7 +1239,7 @@ class Game
                             join_count--
                             continue
                         newjob=jobnames[Math.floor Math.random()*jobnames.length]
-                        newpl=Player.factory newjob
+                        newpl=Player.factory newjob, this
                         pl.transProfile newpl
                         pl.transferData newpl
                         # 蘇生
@@ -1239,7 +1247,7 @@ class Game
                         pl.transform @,newpl,true
                         log=
                             mode:"system"
-                            comment:"#{pl.name} 转生了。"
+                            comment:@i18n.t "system.rooms.rebirth", {name: pl.name}
                         splashlog @id,@,log
                         @ss.publish.user newpl.id,"refresh",{id:@id}
 
@@ -1289,7 +1297,7 @@ class Game
                         @currentyear++
                         log=
                             mode:"system"
-                            comment:"#{@currentyear}年到了。"
+                            comment: @i18n.t "system.phase.newyear", {year: @currentyear}
                         splashlog @id,this,log
                 ), end_date.getTime() - Date.now()
 
@@ -1401,7 +1409,7 @@ class Game
                 log=
                     mode:"skill"
                     to:t.id
-                    comment:"#{t.name} 被人狼袭击了。"
+                    comment: @i18n.t "system.werewolf.attacked", {name: t.name}
                 splashlog @id,this,log
             if !t.dead
                 # 死んだ
@@ -1467,27 +1475,9 @@ class Game
                 if obj.attack == AttackKind.werewolf
                     target = @getPlayer obj.guardedid
                     if target?
-                        comment =
-                            switch obj.reason
-                                when GuardReason.tolerance
-                                    "向 #{target.name} 发起的袭击，被耐性阻止了。"
-                                when GuardReason.guard
-                                    "向 #{target.name} 发起的袭击，被守卫阻止了。"
-                                when GuardReason.cover
-                                    "向 #{target.name} 发起的袭击，因为另一个人的牺牲失败了。"
-                                when GuardReason.absent
-                                    "向 #{target.name} 发起的袭击，因为 #{target.name} 的逃亡扑了个空。"
-                                when GuardReason.devil
-                                    "向 #{target.name} 发起的袭击，被恶魔的力量阻止了。"
-                                when GuardReason.cursed
-                                    "向 #{target.name} 发起的袭击，被诅咒的力量阻止了。"
-                                when GuardReason.holy
-                                    "向 #{target.name} 发起的袭击，被神圣的力量阻止了。"
-                                when GuardReason.trap
-                                    "向 #{target.name} 发起的袭击，被陷阱阻止了。"
                         log =
                             mode:"eyeswolfskill"
-                            comment:comment
+                            comment: @i18n.t "roles:EyesWolf.result.#{obj.reason}", {name: target.name}
                         splashlog @id, this, log
         @guard_log = []
 
@@ -1519,35 +1509,35 @@ class Game
             situation=switch x.found
                 #死因
                 when "werewolf","werewolf2","poison","hinamizawa","vampire","vampire2","witch","dog","trap","bomb","marycurse","psycho","crafty"
-                    "不成样子的尸体被发现了"
+                    @i18n.t "found.normal", {name: x.name}
                 when "curse"    # 呪殺
                     if @rule.deadfox=="obvious"
-                        "被咒杀了"
+                        @i18n.t "found.curse", {name: x.name}
                     else
-                        "不成样子的尸体被发现了"
+                        @i18n.t "found.normal", {name: x.name}
                 when "punish"
-                    "被处刑了"
+                    @i18n.t "found.punish", {name: x.name}
                 when "spygone"
-                    "离开了村子"
+                    @i18n.t "found.leave", {name: x.name}
                 when "deathnote"
-                    "的尸体被发现了"
+                    @i18n.t "found.body", {name: x.name}
                 when "foxsuicide", "friendsuicide", "twinsuicide"
-                    "追随着某个人自尽了"
+                    @i18n.t "found.suicide", {name: x.name}
                 when "infirm"
-                    "衰老而死了"
+                    @i18n.t "found.infirm", {name: x.name}
                 when "hunter"
-                    "被猎枪射杀了"
+                    @i18n.t "found.hunter", {name: x.name}
                 when "gmpunish"
-                    "被GM处死了"
+                    @i18n.t "found.gm", {name: x.name}
                 when "gone-day"
-                    "因为没有及时投票猝死了。猝死是十分令人困扰的行为，请务必不要再犯。"
+                    @i18n.t "found.goneDay", {name: x.name}
                 when "gone-night"
-                    "因为没有及时使用夜间技能猝死了。猝死是十分令人困扰的行为，请务必不要再犯。"
+                    @i18n.t "found.goneNight", {name: x.name}
                 else
-                    "死了"
+                    @i18n.t "found.fallback", {name: x.name}
             log=
                 mode:"system"
-                comment:"#{x.name} #{situation}"
+                comment:situation
             splashlog @id,this,log
 
             situation=switch x.found
@@ -1617,46 +1607,40 @@ class Game
                 # 阎魔用のログも出す
                 emma_log=switch x.found
                     when "werewolf","werewolf2","crafty"
-                        "成为了人狼的食物。"
+                        "werewolf"
                     when "poison","witch"
-                        "由于中毒死去了。"
+                        "poison"
                     when "hinamizawa"
-                        "由于雏见泽症候群发作死去了。"
+                        "hinamizawa"
                     when "vampire","vampire2"
-                        "成为了吸血鬼的食物。"
+                        "vampire"
                     when "dog"
-                        "成为了犬的食物。"
+                        "dog"
                     when "trap"
-                        "由于落入陷阱死去了。"
+                        "trap"
                     when "marycurse"
-                        "被咒杀了。"
+                        "curse"
                     when "psycho"
-                        "被变态杀人狂杀死了。"
+                        "psycho"
                     when "curse"
                         if @rule.deadfox=="obvious"
                             null
                         else
-                            "被咒杀了。"
+                            "curse"
                     when "foxsuisicde"
-                        "追随着妖狐自尽了。"
+                        "foxsuicide"
                     when "friendsuicide"
-                        "追随着恋人自尽了。"
+                        "friendsuicide"
                     when "twinsuicide"
-                        "追随着双胞胎自尽了。"
+                        "twinsuicide"
                     else
                         null
                 if emma_log?
                     log=
                         mode:"emmaskill"
-                        comment:"#{x.name} #{emma_log}"
+                        comment: @i18n.t "roles:Emma.result.#{emma_log}", {name: x.name}
                     splashlog @id,this,log
 
-#           if x.found=="punish"
-#               # 処刑→霊能
-#               @players.forEach (y)=>
-#                   if y.isJobType "Psychic"
-#                       # 霊能
-#                       y.results.push x
             @addGamelog {   # 死んだときと死因を記録
                 id:x.id
                 type:x.type
@@ -1677,7 +1661,7 @@ class Game
             for n in @revive_log
                 log=
                     mode: "system"
-                    comment: "#{n} 复活了。"
+                    comment: @i18n.t "system.revive", {name: n}
                 splashlog @id, this, log
             @revive_log = []
         return deads.length
@@ -1711,7 +1695,7 @@ class Game
             # 処刑しない
             log=
                 mode:"system"
-                comment:"没有人被处刑。"
+                comment: @i18n.t "system.voting.nopunish"
             splashlog @id,this,log
             @nextturn()
             return true
@@ -1727,7 +1711,7 @@ class Game
                     # GM霊能
                     log=
                         mode:"system"
-                        comment:"根据灵能的结论，被处刑的 #{player.name} 是 #{player.getPsychicResult()}。"
+                        comment: @i18n.t "system.gmPsychic", {name: player.name, result: @i18n.t "roles:psychic.#{player.getPsychicResult()}"}
                     splashlog @id,this,log
                 
             @votingbox.remains--
@@ -1765,17 +1749,15 @@ class Game
         if mode=="runoff"
             log=
                 mode:"system"
-                comment:"决胜投票。"
+                comment: @i18n.t "system.voting.runoff"
         else if mode in ["revote", "gone"]
             log=
                 mode:"system"
-                comment:"重新投票。"
-            if isFinite remains
-                log.comment += "如果在接下来的#{remains}轮投票中无法达成一致，本场游戏将以平局处理。"
+                comment: @i18n.t "system.voting.revote", {count: remains | 0}
         else if mode == "onemore"
             log=
                 mode:"system"
-                comment:"今天还有#{@votingbox.remains}人将被处刑。请继续投票。"
+                comment: @i18n.t "system.voting.more", {count: @votingbox.remains}
         if log?
             splashlog @id,this,log
         # 必要がある場合は候補者を再設定
@@ -1824,7 +1806,7 @@ class Game
                     plpl.setDead false
         log=
             mode: "system"
-            comment: "#{userNames.join '，'} 用最后的力量举起了猎枪，枪口指向了——"
+            comment: @i18n.t "system.hunterPrepare", {names: userNames.join ', '}
         splashlog @id, this, log
 
         @splashjobinfo()
@@ -1926,7 +1908,7 @@ class Game
                 # もうひとつもないんだ・・・
                 log=
                     mode:"system"
-                    comment:"世界崩坏，概率无法定义。"
+                    comment: @i18n.t "system.quantum.breakdown"
                 splashlog @id,this,log
                 team="Draw"
         else
@@ -2056,38 +2038,42 @@ class Game
             [resultstring,teamstring]=switch team
                 when "Human"
                     if alives>0 && aliveps.every((x)->x.isJobType "Neet")
-                        ["村子变成了NEET的乐园。","村人胜利"]
+                        [@i18n.t("judge.neet"),@i18n.t("judge.short.human")]
                     else
-                        ["村子里的人狼已经被赶尽杀绝。","村人胜利"]
+                        [@i18n.t("judge.human"),@i18n.t("judge.short.human")]
                 when "Werewolf"
-                    ["人狼吃掉了最后一个村民，向着下一个住满了猎物的村庄前进了…","人狼胜利"]
+                    [@i18n.t("judge.werewolf"),@i18n.t("judge.short.werewolf")]
                 when "Fox"
-                    ["村子成了妖狐的玩物。","妖狐胜利"]
+                    [@i18n.t("judge.fox"),@i18n.t("judge.short.fox")]
                 when "Devil"
-                    ["村子成了恶魔的玩物。","恶魔胜利"]
+                    [@i18n.t("judge.devil"),@i18n.t("judge.short.devil")]
                 when "Friend"
                     if friends_count>1
-                        # みんなで胜利（珍しい）
-                        ["村子被恋人们支配了。","恋人胜利"]
+                        # みんなで勝利（珍しい）
+                        [@i18n.t("judge.friendsAll"),@i18n.t("judge.short.friends")]
                     else
                         friends=@players.filter (x)->x.isFriend()
                         if friends.length==2 && friends.some((x)->x.isJobType "Noble") && friends.some((x)->x.isJobType "Slave")
-                            ["在主仆两人跨越世俗禁忌的爱情面前，所有阻碍都无法与之匹敌。","恋人胜利"]
+                            [@i18n.t("judge.friendsSpecial", {count: 2}),@i18n.t("judge.short.friends")]
                         else
-                            ["在#{@players.filter((x)->x.isFriend() && !x.dead).length}人爱的力量面前，所有阻碍都无法与之匹敌。","恋人胜利"]
+                            [@i18n.t("judge.friendsNormal", {count: @players.filter((x)->x.isFriend() && !x.dead).length}),@i18n.t("judge.short.friends")]
                 when "Cult"
-                    ["村子被教会支配了。","邪教胜利"]
+                    [@i18n.t("judge.cult"),@i18n.t("judge.short.cult")]
                 when "Vampire"
-                    ["吸血鬼饮尽了最后一个村民的鲜血，向着下一个住满了猎物的村庄前进了…","吸血鬼胜利"]
+                    [@i18n.t("judge.vampire"),@i18n.t("judge.short.vampire")]
                 when "LoneWolf"
-                    ["人狼吃掉了最后一个村民，向着下一个住满了猎物的村庄前进了…","一匹狼胜利"]
+                    [@i18n.t("judge.lonewolf"),@i18n.t("judge.short.lonewolf")]
                 when "Draw"
-                    ["平局。",""]
+                    [@i18n.t("judge.draw"),""]
             # 替身君单独胜利
             winpl = @players.filter (x)->x.winner
             if(winpl.length==1 && winpl[0].realid=="替身君")
                 resultstring="村子成了替身君的玩物。"
-            log.comment="#{if teamstring then "【#{teamstring}】" else ""}#{resultstring}"
+            # 显示结果
+            if teamstring
+                log.comment = @i18n.t "system.judge", {short: teamstring, result: resultstring}
+            else
+                log.comment = resultstring
             splashlog @id,this,log
             
             # 房间を终了状态にする
@@ -2110,7 +2096,7 @@ class Game
                     userlist:[]
                     time: 0
                 for x in @players
-                    if x.id != "身代わりくん"
+                    if x.id != "替身君"
                         if x.id in norevivers
                             @suddenDeathPunishment.targets[x.id] = {
                                 realid: x.realid
@@ -2132,9 +2118,9 @@ class Game
                     @suddenDeathPunishment = null
 
             # DBからとってきて告知ツイート
-            M.rooms.findOne {id:@id},(err,doc)->
+            M.rooms.findOne {id:@id},(err,doc)=>
                 return unless doc?
-                tweet doc.id,"「#{doc.name}」的结果: #{log.comment} #月下人狼"
+                tweet doc.id, @i18n.t("tweet.gameend", {roomname: doc.name, result: log.comment})
             
             return true
         else
@@ -2162,14 +2148,14 @@ class Game
         if @phase == Phase.rolerequesting
             # 希望役職制
             time=60
-            mode="希望选择"
+            mode=@i18n.t "phase.rolerequesting"
             func= =>
                 # 強制开始
                 @checkjobs true
         else if @phase == Phase.night
             # 夜
             time=@rule.night
-            mode="夜"
+            mode=@i18n.t "phase.night"
             return unless time
             func= =>
                 # ね な い こ だ れ だ
@@ -2192,7 +2178,7 @@ class Game
         else if @phase == Phase.night_remain
             # 夜の猶予
             time=@rule.remain
-            mode="犹豫"
+            mode=@i18n.t "phase.additional"
             func= =>
                 # ね な い こ だ れ だ
                 @players.forEach (x)=>
@@ -2206,7 +2192,7 @@ class Game
         else if @phase == Phase.day
             # 昼
             time=@rule.day
-            mode="昼"
+            mode=@i18n.t "phase.day"
             return unless time
             func= =>
                 unless @execute()
@@ -2215,7 +2201,7 @@ class Game
                         @phase = Phase.day_voting
                         log=
                             mode:"system"
-                            comment:"白天的讨论时间到此结束。请投票决定要处死的人。"
+                            comment:@i18n.t "system.phase.debateEnd"
                         splashlog @id, this, log
                         # 投票箱が開くので通知
                         @splashjobinfo()
@@ -2225,7 +2211,7 @@ class Game
                         @phase = Phase.day_remain
                         log=
                             mode:"system"
-                            comment:"白天的讨论时间到此结束。请投票决定要处死的人。"
+                            comment:@i18n.t "system.phase.debateEnd"
                         splashlog @id,this,log
                         @timer()
                     else
@@ -2248,7 +2234,7 @@ class Game
         else if @phase == Phase.day_voting
             # 投票専用時間
             time=@rule.voting || @rule.remain || 120
-            mode="投票"
+            mode=@i18n.t "phase.voting"
             return unless time
             func= =>
                 unless @execute()
@@ -2278,7 +2264,7 @@ class Game
         else if @phase == Phase.day_remain
             # 猶予時間も過ぎたよ!
             time=@rule.remain
-            mode="犹豫"
+            mode=@i18n.t "phase.additional"
             func= =>
                 unless @execute()
                     revoting=false
@@ -2299,7 +2285,7 @@ class Game
         else if @phase == Phase.hunter
             # 狩猎者選択中
             time = 45 # it's hard-coded!
-            mode = "正在瞄准"
+            mode = @i18n.t "phase.skill"
             func = =>
                 @hunterDo()
         else
@@ -2336,7 +2322,7 @@ class Game
                         Server.prize.prizeQuote Server.prize.prizeName plzid
                     log=
                         mode:"system"
-                        comment:"#{pl.name} 获得了称号 #{pnames.join ''}。"
+                        comment:@i18n.t "system.prize", {name: pl.name, prize: pnames.join ''}
                     splashlog @id,this,log
     # ユーザーのゲームログを保存
     saveUserRawLogs:->
@@ -2384,16 +2370,16 @@ class VotingBox
         # power: 票数
         pl=@game.getPlayer voteto
         unless pl?
-            return "这个玩家不存在"
+            return @game.i18n.t "error.common.nonexistentPlayer"
         if pl.dead
-            return "这个人已经死了"
+            return @game.i18n.t "error.common.alreadyDead"
         me=@game.getPlayer player.id
         unless me?
-            return "你没有加入游戏"
+            return @game.i18n.t "error.common.notPlayer"
         if @isVoteFinished player
-            return "你已经投过票了"
+            return @game.i18n.t "error.voting.voted"
         if pl.id==player.id && @game.rule.votemyself!="ok"
-            return "不能向自己投票"
+            return @game.i18n.t "error.voting.self"
         @votes.push {
             player:@game.getPlayer player.id
             to:pl
@@ -2403,7 +2389,7 @@ class VotingBox
         log=
             mode:"voteto"
             to:player.id
-            comment:"#{player.name} 向 #{pl.name} 投票了"
+            comment: @game.i18n.t "system.votingbox.voted", {name: player.name, target: pl.name}
         splashlog @game.id,@game,log
         null
     # その人の投票オブジェクトを得る
@@ -2552,8 +2538,10 @@ class VotingBox
         return ["punish",[@game.getPlayer(tops[0])],tos,table]
 
 class Player
-    constructor:->
-        # realid:本当のid id:仮のidかもしれない name:名字 icon:头像URL
+    # `jobname` property should be set by Player.factory
+    constructor:(@game)->
+        # game: a game to which this player is associated.
+        # realid:本当のid id:仮のidかもしれない name:名前 icon:アイコンURL
         @dead=false
         @found=null # 死体の発見状況
         @winner=null    # 勝敗
@@ -2563,12 +2551,11 @@ class Player
         @will=null  # 遗言
         # もと的职业
         @originalType=@type
-        @originalJobname=@getJobname()
-        # 拒绝复活
+        # 蘇生辞退
         @norevive=false
 
         
-    @factory:(type,main=null,sub=null,cmpl=null)->
+    @factory:(type,game,main=null,sub=null,cmpl=null)->
         p=null
         if cmpl?
             # 複合 mainとsubを使用
@@ -2587,9 +2574,12 @@ class Player
             p.sub=sub
             p.cmplFlag=null
         else if !jobs[type]?
-            p=new Player
+            p=new Player game
         else
-            p=new jobs[type]
+            p=new jobs[type] game
+            # Add `jobname` property
+            p.jobname = game.i18n.t "roles:jobname.#{type}"
+            p.originalJobname = p.getJobname()
         p
     serialize:->
         r=
@@ -2612,17 +2602,17 @@ class Player
             r.Complex_type=@cmplType
             r.Complex_flag=@cmplFlag
         r
-    @unserialize:(obj)->
+    @unserialize:(obj, game)->
         unless obj?
             return null
 
         p=if obj.type=="Complex"
             # 複合
             cmplobj=complexes[obj.Complex_type ? "Complex"]
-            Player.factory null, Player.unserialize(obj.Complex_main), Player.unserialize(obj.Complex_sub),cmplobj
+            Player.factory null, game, Player.unserialize(obj.Complex_main, game), Player.unserialize(obj.Complex_sub, game),cmplobj
         else
             # 普通
-            Player.factory obj.type
+            Player.factory obj.type, game
         p.setProfile obj    #id,realid,name...
         p.dead=obj.dead
         p.scapegoat=obj.scapegoat
@@ -2636,9 +2626,9 @@ class Player
             p.cmplFlag=obj.Complex_flag
         p
     # 汎用関数: Complexを再構築する（chain:Complexの列（上から））
-    @reconstruct:(chain,base)->
+    @reconstruct:(chain, base, game)->
         for cmpl,i in chain by -1
-            newpl=Player.factory null,base,cmpl.sub,complexes[cmpl.cmplType]
+            newpl=Player.factory null, game, base,cmpl.sub,complexes[cmpl.cmplType]
             ###
             for ok in Object.keys cmpl
                 # 自己のプロパティのみ
@@ -2807,11 +2797,11 @@ class Player
     @JOB_T_DEAD :2  # 死んだ人が対象
     #人狼に食われて死ぬかどうか
     willDieWerewolf:true
-    #占いの结果
-    fortuneResult:"村人"
+    #占いの結果
+    fortuneResult: FortuneResult.human
     getFortuneResult:->@fortuneResult
     #霊能の結果
-    psychicResult:"村人"
+    psychicResult: PsychicResult.human
     getPsychicResult:->@psychicResult
     #チーム Human/Werewolf
     team: "Human"
@@ -2944,8 +2934,8 @@ class Player
                 if flag
                     # mainまたはsubである
                     if obj.main==callee || obj.sub==callee
-                        # 自己は消える
-                        game.players[index]=Player.reconstruct chain,obj.main
+                        # 自分は消える
+                        game.players[index]=Player.reconstruct chain, obj.main, game
                     else
                         chk obj.main,index,callee,chc
                         # TODO これはよくない
@@ -2953,7 +2943,7 @@ class Player
                 else
                     # 自己がComplexである
                     if obj==callee
-                        game.players[index]=Player.reconstruct chain,obj.main
+                        game.players[index]=Player.reconstruct chain, obj.main, game
                     else
                         chk obj.main,index,callee,chc
                         # TODO これはよくない
@@ -3001,7 +2991,7 @@ class Player
                 # 親がいた
                 if pa.main==this
                     # 親書き換え
-                    newparent=Player.factory null,newpl,pa.sub,complexes[pa.cmplType]
+                    newparent=Player.factory null, game, newpl,pa.sub,complexes[pa.cmplType]
                     newparent.cmplFlag=pa.cmplFlag
                     newpl.transProfile newparent
 
@@ -3018,7 +3008,7 @@ class Player
                 pa=pa.main
                 chain.push pa
             # pa.mainはComplexではない
-            toppl=Player.reconstruct chain,newpl
+            toppl=Player.reconstruct chain, newpl, game
             toppl.setOriginalJobname "#{orig_originalJobname}→#{toppl.getJobname()}"
             # 親なんていない
             game.players.forEach (x,i)=>
@@ -3071,10 +3061,8 @@ class Player
         
 class Human extends Player
     type:"Human"
-    jobname:"村人"
 class Werewolf extends Player
     type:"Werewolf"
-    jobname:"人狼"
     sunset:(game)->
         @setTarget null
         unless game.day==1 && game.rule.scapegoat!="off"
@@ -3104,10 +3092,10 @@ class Werewolf extends Player
     job:(game,playerid)->
         tp = game.getPlayer playerid
         if game.werewolf_target_remain<=0
-            return "已经决定了袭击对象"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         if game.rule.wolfattack!="ok" && tp?.isWerewolf()
             # 人狼は人狼に攻撃できない
-            return "人狼之间不能相互袭击"
+            return game.i18n.t "roles:Werewolf.noWolfAttack"
         game.werewolf_target.push {
             from:@id
             to:playerid
@@ -3116,7 +3104,7 @@ class Werewolf extends Player
         tp.touched game,@id
         log=
             mode:"wolfskill"
-            comment:"以 #{@name} 为首的人狼们决定今晚袭击 #{tp.name}。"
+            comment: game.i18n.t "roles:Werewolf.select", {name: @name, target: tp.name}
         if @isJobType "SolitudeWolf"
             # 孤独的狼なら自己だけ…
             log.to=@id
@@ -3141,8 +3129,8 @@ class Werewolf extends Player
         super
         
     willDieWerewolf:false
-    fortuneResult:"人狼"
-    psychicResult:"人狼"
+    fortuneResult: FortuneResult.werewolf
+    psychicResult: PsychicResult.werewolf
     team: "Werewolf"
     makejobinfo:(game,result)->
         super
@@ -3162,7 +3150,6 @@ class Werewolf extends Player
         
 class Diviner extends Player
     type:"Diviner"
-    jobname:"占卜师"
     midnightSort: 100
     constructor:->
         super
@@ -3176,15 +3163,14 @@ class Diviner extends Player
 
         if @type == "Diviner" && game.day == 1 && game.rule.firstnightdivine == "auto"
             # 自動白通知
-            targets2 = targets.filter (x)=> x.id != @id && x.fortuneResult == "村人" && x.id != "替身君" && !x.isJobType("Fox")
+            targets2 = targets.filter (x)=> x.id != @id && x.fortuneResult == FortuneResult.human && x.id != "替身君" && !x.isJobType("Fox")
             if targets2.length > 0
                 # ランダムに決定
                 log=
                     mode:"skill"
                     to:@id
-                    comment:"#{@name}今天将会随机占卜一个人。"
+                    comment:game.i18n.t "roles:Diviner.auto", {name: @name}
                 splashlog game.id,game,log
-
 
                 r=Math.floor Math.random()*targets2.length
                 @job game,targets2[r].id,{}
@@ -3198,14 +3184,14 @@ class Diviner extends Player
     job:(game,playerid)->
         pl=game.getPlayer playerid
         unless pl?
-            return "这个玩家不存在。"
+            return game.i18n.t "error.common.nonexistentPlayer"
 
         @setTarget playerid
         pl.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 占卜了 #{pl.name} 的身份。"
+            comment: game.i18n.t "roles:Diviner.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         if game.rule.divineresult=="immediate"
             @dodivine game
@@ -3231,7 +3217,7 @@ class Diviner extends Player
         if p?
             @results.push {
                 player: p.publicinfo()
-                result: "#{@name} 占卜了 #{p.name} 的身份，他是 #{p.getFortuneResult()}。"
+                result: game.i18n.t "roles:Diviner.resultlog", {name: @name, target: p.name, result: game.i18n.t "roles:fortune.#{p.getFortuneResult()}"}
             }
             @addGamelog game,"divine",p.type,@target    # 占った
     showdivineresult:(game)->
@@ -3244,7 +3230,6 @@ class Diviner extends Player
         splashlog game.id,game,log
 class Psychic extends Player
     type:"Psychic"
-    jobname:"灵能者"
     constructor:->
         super
         @setFlag ""    # ここにメッセージを入れよう
@@ -3272,18 +3257,16 @@ class Psychic extends Player
     beforebury:(game,type,deads)->
         @setFlag if @flag? then @flag else ""
         deads.filter((x)-> x.found=="punish").forEach (x)=>
-            @setFlag @flag+"根据 #{@name} 的灵能结论，被处刑的 #{x.name} 是 #{x.getPsychicResult()}。\n"
+            @setFlag @flag + game.i18n.t("roles:Psychic.resultlog", {name: @name, target: x.name, result: game.i18n.t "roles:psychic.#{x.getPsychicResult()}"}) + "\n"
 
 class Madman extends Player
     type:"Madman"
-    jobname:"狂人"
     team:"Werewolf"
     makejobinfo:(game,result)->
         super
         delete result.queens
 class Guard extends Player
     type:"Guard"
-    jobname:"猎人"
     midnightSort: 80
     hasDeadResistance:->true
     sleeping:->@target?
@@ -3314,9 +3297,9 @@ class Guard extends Player
                 @setTarget ""
     job:(game,playerid)->
         if playerid==@id && game.rule.guardmyself!="ok"
-            return "不能守护自己"
+            return game.i18n.t "error.common.noSelectSelf"
         else if playerid==@flag && game.rule.consecutiveguard=="no"
-            return "不能连续守护同一个人"
+            return game.i18n.t "roles:Guard.noGuardSame"
         else
             @setTarget playerid
             @setFlag playerid
@@ -3325,7 +3308,7 @@ class Guard extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 守护了 #{pl.name}。"
+                comment: game.i18n.t "roles:Guard.select", {name: @name, target: pl.name}
             splashlog game.id,game,log
             null
     midnight:(game,midnightSort)->
@@ -3333,7 +3316,7 @@ class Guard extends Player
         unless pl?
             return
         # 複合させる
-        newpl=Player.factory null,pl,null,Guarded   # 守られた人
+        newpl=Player.factory null, game, pl,null,Guarded   # 守られた人
         pl.transProfile newpl
         newpl.cmplFlag=@id  # 护卫元cmplFlag
         pl.transform game,newpl,true
@@ -3341,7 +3324,6 @@ class Guard extends Player
         null
 class Couple extends Player
     type:"Couple"
-    jobname:"共有者"
     makejobinfo:(game,result)->
         super
         # 共有者は仲間が分かる
@@ -3356,7 +3338,6 @@ class Couple extends Player
 
 class Fox extends Player
     type:"Fox"
-    jobname:"妖狐"
     team:"Fox"
     willDieWerewolf:false
     isHuman:->false
@@ -3383,7 +3364,6 @@ class Fox extends Player
 
 class Poisoner extends Player
     type:"Poisoner"
-    jobname:"埋毒者"
     dying:(game,found,from)->
         super
         # 埋毒者の逆襲
@@ -3405,14 +3385,12 @@ class Poisoner extends Player
 
 class BigWolf extends Werewolf
     type:"BigWolf"
-    jobname:"大狼"
-    fortuneResult:"村人"
-    psychicResult:"大狼"
+    fortuneResult: FortuneResult.human
+    psychicResult: PsychicResult.BigWolf
 class TinyFox extends Diviner
     type:"TinyFox"
-    jobname:"小狐"
-    fortuneResult:"村人"
-    psychicResult:"小狐"
+    fortuneResult: FortuneResult.human
+    psychicResult: PsychicResult.TinyFox
     team:"Fox"
     midnightSort:100
     isHuman:->false
@@ -3427,10 +3405,11 @@ class TinyFox extends Diviner
         p=game.getPlayer @target
         if p?
             success= Math.random()<0.5  # 成功したかどうか
-            re=if success then "是 #{p.getFortuneResult()}" else "是一个看不透的可疑人物"
+            key = if success then "roles:TinyFox.resultlog_success" else "roles:TinyFox.resultlog_fail"
+            re = game.i18n.t key, {name: @name, target: p.name, result: game.i18n.t "roles:fortune.#{p.getFortuneResult()}"}
             @results.push {
                 player: p.publicinfo()
-                result: "根据 #{@name} 的占卜结果，#{p.name} #{re}，大概。"
+                result: re
             }
             @addGamelog game,"foxdivine",success,p.id
     showdivineresult:(game)->
@@ -3446,13 +3425,11 @@ class TinyFox extends Diviner
     
 class Bat extends Player
     type:"Bat"
-    jobname:"蝙蝠"
     team:""
     isWinner:(game,team)->
         !@dead  # 生きて入ればとにかく胜利
 class Noble extends Player
     type:"Noble"
-    jobname:"贵族"
     hasDeadResistance:(game)->
         slaves = game.players.filter (x)->!x.dead && x.isJobType "Slave"
         return slaves.length > 0
@@ -3475,7 +3452,6 @@ class Noble extends Player
 
 class Slave extends Player
     type:"Slave"
-    jobname:"奴隶"
     isWinner:(game,team)->
         nobles=game.players.filter (x)->!x.dead && x.isJobType "Noble"
         if team==@team && nobles.length==0
@@ -3489,7 +3465,6 @@ class Slave extends Player
             x.publicinfo()
 class Magician extends Player
     type:"Magician"
-    jobname:"魔术师"
     midnightSort:100
     isReviver:->!@dead
     sunset:(game)->
@@ -3503,17 +3478,17 @@ class Magician extends Player
     job:(game,playerid)->
         if game.day<3
             # まだ発動できない
-            return "现在还不能发动技能"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         @setTarget playerid
         pl=game.getPlayer playerid
         unless pl?
-            return "玩家不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         pl.touched game,@id
         
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 复活了 #{pl.name}。"
+            comment: game.i18n.t "roles:Magician.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     sleeping:(game)->game.day<3 || @target?
@@ -3536,7 +3511,6 @@ class Magician extends Player
         super
 class Spy extends Player
     type:"Spy"
-    jobname:"间谍"
     team:"Werewolf"
     midnightSort:100
     sleeping:->true # 能力使わなくてもいい
@@ -3547,12 +3521,12 @@ class Spy extends Player
         else
             @setFlag null
     job:(game,playerid)->
-        return "已经发动了技能" if @flag=="spygone"
+        return game.i18n.t "error.common.alreadyUsed" if @flag=="spygone"
         @setFlag "spygone"
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 决定要离开村子。"
+            comment: game.i18n.t "roles:Spy.select", {name: @name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -3575,7 +3549,6 @@ class Spy extends Player
         else super
 class WolfDiviner extends Werewolf
     type:"WolfDiviner"
-    jobname:"人狼占卜师"
     midnightSort:100
     constructor:->
         super
@@ -3594,10 +3567,10 @@ class WolfDiviner extends Werewolf
             return super
         # 占い
         if @flag?
-            return "已经决定占卜对象"
+            return game.i18n.t "error.common.alreadyUsed"
         pl=game.getPlayer playerid
         unless pl?
-            return "这个玩家不存在。"
+            return game.i18n.t "error.common.nonexistentPlayer"
         @setFlag playerid
         unless pl.getTeam()=="Werewolf" && pl.isHuman()
             # 狂人は変化するので
@@ -3605,7 +3578,7 @@ class WolfDiviner extends Werewolf
         log=
             mode:"skill"
             to:@id
-            comment:"人狼占卜师 #{@name} 占卜了 #{pl.name} 的身份。"
+            comment: game.i18n.t "roles:WolfDiviner.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         if game.rule.divineresult=="immediate"
             @dodivine game
@@ -3641,7 +3614,7 @@ class WolfDiviner extends Werewolf
         if p?
             @results.push {
                 player: p.publicinfo()
-                result: "人狼占卜师 #{@name} 占卜了 #{p.name} 的身份，他是 #{p.jobname}。"
+                result: game.i18n.t "roles:WolfDiviner.resultlog", {name: @name, target: p.name, result: p.jobname}
             }
             @addGamelog game,"wolfdivine",null,@flag  # 占った
             if p.getTeam()=="Werewolf" && p.isHuman()
@@ -3653,7 +3626,7 @@ class WolfDiviner extends Werewolf
 
                 plobj=p.serialize()
                 plobj.type=newjob
-                newpl=Player.unserialize plobj  # 新生狂人
+                newpl=Player.unserialize plobj, game  # 新生狂人
                 newpl.setFlag null
                 p.transferData newpl
                 p.transform game,newpl,false
@@ -3662,7 +3635,7 @@ class WolfDiviner extends Werewolf
                 log=
                     mode:"skill"
                     to:p.id
-                    comment:"#{p.name} 变成了 #{newpl.getJobDisp()}。"
+                    comment: game.i18n.t "system.changeRole", {name: p.name, result: newpl.getJobDisp()}
                 splashlog game.id,game,log
                 game.splashjobinfo [game.getPlayer newpl.id]
     makejobinfo:(game,result)->
@@ -3672,13 +3645,9 @@ class WolfDiviner extends Werewolf
                 # もう占いは終わった
                 result.open = result.open?.filter (x)=>x!="WolfDiviner"
 
-        
-    
-        
 
 class Fugitive extends Player
     type:"Fugitive"
-    jobname:"逃亡者"
     midnightSort:100
     hasDeadResistance:->true
     sunset:(game)->
@@ -3699,15 +3668,15 @@ class Fugitive extends Player
         # 逃亡先
         pl=game.getPlayer playerid
         if pl?.dead
-            return "不能逃到死者的家里去"
+            return game.i18n.t "error.common.alreadyDead"
         if playerid==@id
-            return "不能逃到自己的家里去"
+            return game.i18n.t "roles:Fugitive.noSelf"
         @setTarget playerid
         pl?.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 逃亡到 #{pl.name} 的家里去了。"
+            comment: game.i18n.t "roles:Fugitive.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         @addGamelog game,"runto",null,pl.id
         null
@@ -3736,7 +3705,6 @@ class Fugitive extends Player
         team==@team && !@dead   # 村人胜利で生存
 class Merchant extends Player
     type:"Merchant"
-    jobname:"商人"
     constructor:->
         super
         @setFlag null  # 発送済みかどうか
@@ -3744,40 +3712,39 @@ class Merchant extends Player
     jobdone:(game)->game.day<=1 || @flag?
     job:(game,playerid,query)->
         if @flag?
-            return "商品已经送出"
+            return game.i18n.t "error.common.alreadyUsed"
         # 即時発送
         unless query.Merchant_kit in ["Diviner","Psychic","Guard"]
-            return "要送出的商品无效"
-        kit_names=
-            "Diviner":"占卜套装"
-            "Psychic":"灵能套装"
-            "Guard":"守护套装"
+            return game.i18n.t "error.common.invalidSelection"
+
+        kit_name = game.i18n.t "roles:Merchant.kit.#{query.Merchant_kit}"
+
         pl=game.getPlayer playerid
         unless pl?
-            return "发送无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if pl.dead
-            return "发送对象已经死亡"
+            return game.i18n.t "error.common.alreadyDead"
         if pl.id==@id
-            return "不能发送给自己"
+            return game.i18n.t "roles:Merchant.noSelf"
         pl.touched game,@id
         # 複合させる
-        sub=Player.factory query.Merchant_kit   # 副を作る
+        sub=Player.factory query.Merchant_kit, game   # 副を作る
         pl.transProfile sub
         sub.sunset game
-        newpl=Player.factory null,pl,sub,Complex    # Complex
+        newpl=Player.factory null, game, pl,sub,Complex    # Complex
         pl.transProfile newpl
         pl.transform game,newpl,true
 
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 向 #{newpl.name} 寄出了 #{kit_names[query.Merchant_kit]}。"
+            comment: game.i18n.t "roles:Merchant.select", {name: @name, target: newpl.name, kit: kit_name}
         splashlog game.id,game,log
         # 入れ替え先は気づいてもらう
         log=
             mode:"skill"
             to:newpl.id
-            comment:"#{newpl.name} 收到了礼物 #{kit_names[query.Merchant_kit]}。"
+            comment: game.i18n.t "roles:Merchant.delivered", {name: newpl.name, kit: kit_name}
         splashlog game.id,game,log
         game.ss.publish.user newpl.id,"refresh",{id:game.id}
         @setFlag query.Merchant_kit    # 発送済み
@@ -3785,7 +3752,6 @@ class Merchant extends Player
         null
 class QueenSpectator extends Player
     type:"QueenSpectator"
-    jobname:"女王观战者"
     dying:(game,found)->
         super
         # 感染
@@ -3795,20 +3761,17 @@ class QueenSpectator extends Player
 
 class MadWolf extends Werewolf
     type:"MadWolf"
-    jobname:"狂人狼"
     team:"Human"
     isAttacker:->false
     sleeping:->true
 class Neet extends Player
     type:"Neet"
-    jobname:"NEET"
     team:""
     sleeping:->true
     voted:(game,votingbox)->true
     isWinner:->true
 class Liar extends Player
     type:"Liar"
-    jobname:"骗子"
     midnightSort:100
     job_target:Player.JOB_T_ALIVE | Player.JOB_T_DEAD   # 死人も生存も
     constructor:->
@@ -3824,16 +3787,16 @@ class Liar extends Player
     job:(game,playerid,query)->
         # 占い
         if @target?
-            return "已经决定占卜对象"
+            return game.i18n.t "error.common.alreadyUsed"
         @setTarget playerid
         pl=game.getPlayer playerid
         unless pl?
-            return "对象无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         pl.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 占卜了 #{pl.name} 的身份。"
+            comment: game.i18n.t "roles:Diviner.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     sunrise:(game)->
@@ -3842,32 +3805,32 @@ class Liar extends Player
         log=
             mode:"skill"
             to:@id
-            comment:"虽然不是很自信，根据骗子占卜的结果 #{@results[@results.length-1].player.name} 大概是 #{@results[@results.length-1].result}，大概。"
+            comment: game.i18n.t "roles:Liar.resultlog", {target: @results[@results.length-1].player.name, result: @results[@results.length-1].result}
         splashlog game.id,game,log
     midnight:(game,midnightSort)->
         p=game.getPlayer @target
         if p?
             @addGamelog game,"liardivine",null,p.id
+            result = if Math.random()<0.3
+                # 成功
+                p.getFortuneResult()
+            else
+                # 逆
+                fr = p.getFortuneResult()
+                switch fr
+                    when FortuneResult.human
+                        FortuneResult.werewolf
+                    when FortuneResult.werewolf
+                        FortuneResult.human
+                    else
+                        fr
             @results.push {
                 player: p.publicinfo()
-                result: if Math.random()<0.3
-                    # 成功
-                    p.getFortuneResult()
-                else
-                    # 逆
-                    fr = p.getFortuneResult()
-                    switch fr
-                        when "村人"
-                            "人狼"
-                        when "人狼"
-                            "村人"
-                        else
-                            fr
+                result: game.i18n.t "roles:fortune.#{result}"
             }
     isWinner:(game,team)->team==@team && !@dead # 村人胜利で生存
 class Spy2 extends Player
     type:"Spy2"
-    jobname:"间谍Ⅱ"
     team:"Werewolf"
     makejobinfo:(game,result)->
         super
@@ -3885,7 +3848,7 @@ class Spy2 extends Player
         .join " \n"
         log=
             mode:"system"
-            comment:"发现了 #{@name} 的调查报告书。"
+            comment: game.i18n.t "roles:Spy2.found", {name: @name}
         splashlog game.id,game,log
         log2=
             mode:"will"
@@ -3895,7 +3858,6 @@ class Spy2 extends Player
     isWinner:(game,team)-> team==@team && !@dead
 class Copier extends Player
     type:"Copier"
-    jobname:"模仿者"
     team:""
     isHuman:->false
     sleeping:->true
@@ -3911,17 +3873,17 @@ class Copier extends Player
     job:(game,playerid,query)->
         # 模仿者先
         if @target?
-            return "已经模仿了其他人"
+            return game.i18n.t "error.common.alreadyUsed"
         @setTarget playerid
         pl=game.getPlayer playerid
         pl.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 模仿了 #{pl.name} 的能力。"
+            comment: game.i18n.t "roles:Copier.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         p=game.getPlayer playerid
-        newpl=Player.factory p.type
+        newpl=Player.factory p.type, game
         @transProfile newpl
         @transferData newpl
         @transform game,newpl,false
@@ -3935,7 +3897,6 @@ class Copier extends Player
     isWinner:(game,team)->false # 模仿者しないと败北
 class Light extends Player
     type:"Light"
-    jobname:"死亡笔记"
     midnightSort:100
     sleeping:->true
     jobdone:(game)->@target? || game.day==1
@@ -3944,14 +3905,14 @@ class Light extends Player
     job:(game,playerid,query)->
         # 模仿者先
         if @target?
-            return "已经选择了对象"
+            return game.i18n.t "error.common.alreadyUsed"
         @setTarget playerid
         pl=game.getPlayer playerid
         pl.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 在死亡笔记上写下了 #{pl.name} 的名字。"
+            comment: game.i18n.t "roles:Light.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -3964,7 +3925,6 @@ class Light extends Player
         @uncomplex game,true    # 自己からは抜ける
 class Fanatic extends Madman
     type:"Fanatic"
-    jobname:"狂信者"
     makejobinfo:(game,result)->
         super
         # 狂信者は人狼が分かる
@@ -3972,7 +3932,6 @@ class Fanatic extends Madman
             x.publicinfo()
 class Immoral extends Player
     type:"Immoral"
-    jobname:"背德者"
     team:"Fox"
     beforebury:(game)->
         # 狐が全員死んでいたら自殺
@@ -3985,9 +3944,8 @@ class Immoral extends Player
             x.publicinfo()
 class Devil extends Player
     type:"Devil"
-    jobname:"恶魔"
     team:"Devil"
-    psychicResult:"人狼"
+    psychicResult: PsychicResult.werewolf
     hasDeadResistance:->true
     die:(game,found)->
         return if @dead
@@ -4009,7 +3967,6 @@ class Devil extends Player
     isWinner:(game,team)->team==@team && @flag=="winner"
 class ToughGuy extends Player
     type:"ToughGuy"
-    jobname:"硬汉"
     hasDeadResistance:->true
     die:(game,found)->
         if found=="werewolf"
@@ -4030,7 +3987,6 @@ class ToughGuy extends Player
             @setDead true,"werewolf"
 class Cupid extends Player
     type:"Cupid"
-    jobname:"丘比特"
     team:"Friend"
     constructor:->
         super
@@ -4055,22 +4011,22 @@ class Cupid extends Player
     sleeping:->@flag? && @target?
     job:(game,playerid,query)->
         if @flag? && @target?
-            return "已经决定了对象"
+            return game.i18n.t "error.common.alreadyUsed"
     
         pl=game.getPlayer playerid
         unless pl?
-            return "对象无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         
         unless @flag?
             @setFlag playerid
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 把 #{pl.name} 定为恋人中的一人。"
+                comment: game.i18n.t "roles:Cupid.select1", {name: @name, target: pl.name}
             splashlog game.id,game,log
             return null
         if @flag==playerid
-            return "请选择另一个恋人"
+            return game.i18n.t "roles:Cupid.noSelectTwice"
             
         @setTarget playerid
         # 恋人二人が决定した
@@ -4080,19 +4036,19 @@ class Cupid extends Player
             # 2人ぶん処理
         
             pl.touched game,@id
-            newpl=Player.factory null,pl,null,Friend    # 恋人だ！
+            newpl=Player.factory null, game, pl,null,Friend    # 恋人だ！
             newpl.cmplFlag=plpls[1-i].id
             pl.transProfile newpl
             pl.transform game,newpl,true # 入れ替え
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 向 #{newpl.name} 射出了爱之箭。"
+                comment: game.i18n.t "roles:Cupid.select", {name: @name, target: newpl.name}
             splashlog game.id,game,log
             log=
                 mode:"skill"
                 to:newpl.id
-                comment:"#{newpl.name} 成为了恋人。"
+                comment: game.i18n.t "roles:Cupid.become", {name: newpl.name}
             splashlog game.id,game,log
         # 2人とも更新する
         for pl in [game.getPlayer(@flag), game.getPlayer(@target)]
@@ -4102,7 +4058,6 @@ class Cupid extends Player
 # 跟踪狂
 class Stalker extends Player
     type:"Stalker"
-    jobname:"跟踪狂"
     team:""
     sunset:(game)->
         super
@@ -4118,17 +4073,17 @@ class Stalker extends Player
     sleeping:->@flag?
     job:(game,playerid,query)->
         if @target? || @flag?
-            return "已经决定了对象"
+            return game.i18n.t "error.common.alreadyUsed"
     
         pl=game.getPlayer playerid
         unless pl?
-            return "对象无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         pl.touched game,@id
         @setTarget playerid
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 跟踪了 #{pl.name}（#{pl.jobname}）。"
+            comment: game.i18n.t "roles:Stalker.select", {name: @name, target: pl.name, job: pl.jobname}
         splashlog game.id,game,log
         @setFlag playerid  # ストーキング対象プレイヤー
         null
@@ -4160,7 +4115,6 @@ class Stalker extends Player
 # 被诅咒者
 class Cursed extends Player
     type:"Cursed"
-    jobname:"被诅咒者"
     hasDeadResistance:->true
     die:(game,found)->
         return if @dead
@@ -4186,16 +4140,16 @@ class Cursed extends Player
                 log=
                     mode:"skill"
                     to:@id
-                    comment:"#{@name} 受到诅咒变成了人狼。"
+                    comment: game.i18n.t "roles:Cursed.becomeWerewolf", {name: @name}
             
-                newpl=Player.factory "Werewolf"
+                newpl=Player.factory "Werewolf", game
             else
                 log=
                     mode:"skill"
                     to:@id
-                    comment:"#{@name} 受到诅咒变成了吸血鬼。"
+                    comment: game.i18n.t "roles:Cursed.becomeVampire", {name: @name}
             
-                newpl=Player.factory "Vampire"
+                newpl=Player.factory "Vampire", game
 
             @transProfile newpl
             @transferData newpl
@@ -4215,17 +4169,16 @@ class Cursed extends Player
             game.splashjobinfo [this]
 class ApprenticeSeer extends Player
     type:"ApprenticeSeer"
-    jobname:"见习占卜师"
     beforebury:(game)->
         # 占卜师が誰か死んでいたら占卜师に進化
         if game.players.some((x)->x.dead && x.isJobType("Diviner")) || game.players.every((x)->!x.isJobType("Diviner"))
-            newpl=Player.factory "Diviner"
+            newpl=Player.factory "Diviner", game
             @transProfile newpl
             @transferData newpl
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 从 #{@jobname} 变成了 #{newpl.jobname}。"
+                comment: game.i18n.t "system.changeRoleFrom", {name: @name, old: @jobname, result: newpl.jobname}
             splashlog game.id,game,log
             
             @transform game,newpl,false
@@ -4234,7 +4187,6 @@ class ApprenticeSeer extends Player
             game.ss.publish.user newpl.realid,"refresh",{id:game.id}
 class Diseased extends Player
     type:"Diseased"
-    jobname:"病人"
     dying:(game,found)->
         super
         if found=="werewolf"
@@ -4242,7 +4194,6 @@ class Diseased extends Player
             game.werewolf_flag.push "Diseased"   # 病人フラグを立てる
 class Spellcaster extends Player
     type:"Spellcaster"
-    jobname:"咒言师"
     midnightSort:100
     sleeping:->true
     jobdone:->@target?
@@ -4253,7 +4204,7 @@ class Spellcaster extends Player
             @setTarget ""
     job:(game,playerid,query)->
         if @target?
-            return "已经选择了对象"
+            return game.i18n.t "error.common.alreadyUsed"
         arr=[]
         try
           arr=JSON.parse @flag
@@ -4263,14 +4214,14 @@ class Spellcaster extends Player
             arr=[]
         if playerid in arr
             # 既に呪いをかけたことがある
-            return "这个对象已经被咒言诅咒过了。"
+            return game.i18n.t "roles:Spellcaster.noSelectTwice"
         @setTarget playerid
         pl=game.getPlayer playerid
         pl.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 夺去了 #{pl.name} 的声音。"
+            comment: game.i18n.t "roles:Spellcaster.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         arr.push playerid
         @setFlag JSON.stringify arr
@@ -4282,21 +4233,19 @@ class Spellcaster extends Player
         log=
             mode:"skill"
             to:t.id
-            comment:"#{t.name} 的声音被夺去了。今天白天无法发言。"
+            comment: game.i18n.t "roles:Spellcaster.cursed", {name: t.name}
         splashlog game.id,game,log
         
         # 複合させる
 
-        newpl=Player.factory null,t,null,Muted  # 黙る人
+        newpl=Player.factory null, game, t,null,Muted  # 黙る人
         t.transProfile newpl
         t.transform game,newpl,true
 class Lycan extends Player
     type:"Lycan"
-    jobname:"狼凭"
-    fortuneResult:"人狼"
+    fortuneResult: FortuneResult.werewolf
 class Priest extends Player
     type:"Priest"
-    jobname:"圣职者"
     midnightSort:70
     hasDeadResistance:->true
     sleeping:->true
@@ -4305,14 +4254,14 @@ class Priest extends Player
         @setTarget null
     job:(game,playerid,query)->
         if @flag?
-            return "已经使用了能力"
+            return game.i18n.t "error.common.alreadyUsed"
         if @target?
-            return "已经选择了对象"
+            return game.i18n.t "error.common.alreadyUsed"
         pl=game.getPlayer playerid
         unless pl?
-            return "这个对象不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if playerid==@id
-            return "不能将自己选为对象"
+            return game.i18n.t "error.common.noSelectSelf"
         pl.touched game,@id
 
         @setTarget playerid
@@ -4320,7 +4269,7 @@ class Priest extends Player
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 以神圣的力量守护了 #{pl.name}。"
+            comment: game.i18n.t "roles:Priest.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -4329,7 +4278,7 @@ class Priest extends Player
         unless pl?
             return
 
-        newpl=Player.factory null,pl,null,HolyProtected # 守られた人
+        newpl=Player.factory null, game, pl,null,HolyProtected # 守られた人
         pl.transProfile newpl
         newpl.cmplFlag=@id  # 护卫元
         pl.transform game,newpl,true
@@ -4337,7 +4286,6 @@ class Priest extends Player
         null
 class Prince extends Player
     type:"Prince"
-    jobname:"王子"
     hasDeadResistance:->true
     die:(game,found)->
         if found=="punish" && !@flag?
@@ -4345,7 +4293,7 @@ class Prince extends Player
             @setFlag "used"    # 能力使用済
             log=
                 mode:"system"
-                comment:"#{@name} 是 #{@jobname}。本次处刑被取消了。"
+                comment: game.i18n.t "roles:Prince.cancel", {name: @name, jobname: @jobname}
             splashlog game.id,game,log
             @addGamelog game,"princeCO"
         else
@@ -4353,7 +4301,6 @@ class Prince extends Player
 # Paranormal Investigator
 class PI extends Diviner
     type:"PI"
-    jobname:"超常现象研究者"
     sleeping:->true
     jobdone:->@flag?
     job:(game,playerid)->
@@ -4363,7 +4310,7 @@ class PI extends Diviner
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 调查了 #{pl.name} 和他的左右邻居。"
+            comment: game.i18n.t "roles:PI.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         if game.rule.divineresult=="immediate"
             @dodivine game
@@ -4389,22 +4336,26 @@ class PI extends Diviner
                 
         
         if pls.length>0
-            rs=pls.map((x)->x?.getFortuneResult()).filter((x)->x!="村人")    # 村人以外
+            rs=pls.map((x)->x?.getFortuneResult())
+                .filter((x)->x != FortuneResult.human)    # 村人以外
+                .map((x)-> game.i18n.t "roles:fortune.#{x}")
             # 重複をとりのぞく
             nrs=[]
             rs.forEach (x,i)->
                 if rs.indexOf(x,i+1)<0
                     nrs.push x
             tpl=game.getPlayer @target
+
             resultstring=if nrs.length>0
                 @addGamelog game,"PIdivine",true,tpl.id
-                "发现了 #{nrs.join ","} 活动的迹象"
+                game.i18n.t "roles:PI.found", {name: @name, target: tpl.name, result: nrs.join ","}
             else
                 @addGamelog game,"PIdivine",false,tpl.id
-                "发现全员都是村人"
+                game.i18n.t "roles:PI.notfound", {name: @name, target: tpl.name}
+
             @results.push {
                 player:game.getPlayer(@target).publicinfo()
-                result:"#{@name} 调查了 #{tpl.name} 和他的左右邻居，#{resultstring}。"
+                result:resultstring
             }
     showdivineresult:(game)->
         r=@results[@results.length-1]
@@ -4416,7 +4367,6 @@ class PI extends Diviner
         splashlog game.id,game,log
 class Sorcerer extends Diviner
     type:"Sorcerer"
-    jobname:"妖术师"
     team:"Werewolf"
     sleeping:->@target?
     job:(game,playerid)->
@@ -4426,7 +4376,7 @@ class Sorcerer extends Diviner
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 用妖术调查了 #{pl.name}。"
+            comment: game.i18n.t "roles:Sorcerer.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         if game.rule.divineresult=="immediate"
             @dodivine game
@@ -4437,12 +4387,12 @@ class Sorcerer extends Diviner
         pl=game.getPlayer @target
         if pl?
             resultstring=if pl.isJobType "Diviner"
-                "是占卜师"
+                game.i18n.t "roles:Sorcerer.found", {name: @name, target: pl.name}
             else
-                "不是占卜师"
+                game.i18n.t "roles:Sorcerer.notfound", {name: @name, target: pl.name}
             @results.push {
                 player: game.getPlayer(@target).publicinfo()
-                result: "#{@name} 用妖术调查了 #{pl.name}，他#{resultstring}。"
+                result: resultstring
             }
     showdivineresult:(game)->
         r=@results[@results.length-1]
@@ -4455,23 +4405,22 @@ class Sorcerer extends Diviner
     divineeffect:(game)->
 class Doppleganger extends Player
     type:"Doppleganger"
-    jobname:"二重身"
     sleeping:->true
     jobdone:->@flag?
     team:"" # 最初はチームに属さない!
     job:(game,playerid)->
         pl=game.getPlayer playerid
         unless pl?
-            return "对象无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if pl.id==@id
-            return "不能将自己选为对象"
+            return game.i18n.t "error.common.noSelectSelf"
         if pl.dead
-            return "对象已经死亡"
+            return game.i18n.t "error.common.alreadyDead"
         pl.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 成为了 #{game.getPlayer(playerid).name} 的二重身。"
+            comment: game.i18n.t "roles:Doppleganger.select", {name: @name, target: game.getPlayer(playerid).name}
         splashlog game.id,game,log
         @setFlag playerid  # 二重身先
         null
@@ -4480,16 +4429,16 @@ class Doppleganger extends Player
         if deads.some((x)=>x.id==@flag)
             p=game.getPlayer @flag  # その人
 
-            newplmain=Player.factory p.type
+            newplmain=Player.factory p.type, game
             @transProfile newplmain
             @transferData newplmain
             
             me=game.getPlayer @id
-            # まだ二重身できる
-            sub=Player.factory "Doppleganger"
+            # まだドッペルゲンガーできる
+            sub=Player.factory "Doppleganger", game
             @transProfile sub
             
-            newpl=Player.factory null, newplmain,sub,Complex    # 合体
+            newpl=Player.factory null, game, newplmain,sub,Complex    # 合体
             @transProfile newpl
             
             pa=@getParent game  # 親を得る
@@ -4507,7 +4456,7 @@ class Doppleganger extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 变成了 #{newpl.getJobDisp()}。"
+                comment: game.i18n.t "system.changeRole", {name: @name, result: newpl.getJobDisp()}
             splashlog game.id,game,log
             @addGamelog game,"dopplemove",newpl.type,newpl.id
 
@@ -4515,7 +4464,6 @@ class Doppleganger extends Player
             game.ss.publish.user newpl.realid,"refresh",{id:game.id}
 class CultLeader extends Player
     type:"CultLeader"
-    jobname:"邪教主"
     team:"Cult"
     midnightSort:100
     sleeping:->@target?
@@ -4533,7 +4481,7 @@ class CultLeader extends Player
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 发展 #{pl.name} 成为信者。"
+            comment: game.i18n.t "roles:CultLeader.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         @addGamelog game,"brainwash",null,playerid
         null
@@ -4544,11 +4492,11 @@ class CultLeader extends Player
         log=
             mode:"skill"
             to:t.id
-            comment:"#{t.name} 成为了教会的信者。"
+            comment: game.i18n.t "roles:CultLeader.become", {name: t.name}
 
         # 信者
         splashlog game.id,game,log
-        newpl=Player.factory null, t,null,CultMember    # 合体
+        newpl=Player.factory null, game, t,null,CultMember    # 合体
         t.transProfile newpl
         t.transform game,newpl,true
 
@@ -4559,10 +4507,9 @@ class CultLeader extends Player
             x.publicinfo()
 class Vampire extends Player
     type:"Vampire"
-    jobname:"吸血鬼"
     team:"Vampire"
     willDieWerewolf:false
-    fortuneResult:"吸血鬼"
+    fortuneResult: FortuneResult.vampire
     midnightSort:100
     sleeping:(game)->@target? || game.day==1
     isHuman:->false
@@ -4578,16 +4525,16 @@ class Vampire extends Player
     job:(game,playerid,query)->
         # 襲う先
         if @target?
-            return "已经选择了对象"
+            return game.i18n.t "error.common.alreadyUsed"
         if game.day==1
-            return "今天不能袭击"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         @setTarget playerid
         pl=game.getPlayer playerid
         pl.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 袭击了 #{pl.name}。"
+            comment: game.i18n.t "roles:Vampire.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -4606,12 +4553,10 @@ class Vampire extends Player
             x.publicinfo()
 class LoneWolf extends Werewolf
     type:"LoneWolf"
-    jobname:"一匹狼"
     team:"LoneWolf"
     isWinner:(game,team)->team==@team && !@dead
 class Cat extends Poisoner
     type:"Cat"
-    jobname:"猫又"
     midnightSort:100
     isReviver:->true
     sunset:(game)->
@@ -4626,7 +4571,7 @@ class Cat extends Poisoner
     job:(game,playerid)->
         if game.day<2
             # まだ発動できない
-            return "现在还不能发动能力"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         @setTarget playerid
         pl=game.getPlayer playerid
         pl.touched game,@id
@@ -4634,7 +4579,7 @@ class Cat extends Poisoner
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 复活了 #{pl.name}。"
+            comment: game.i18n.t "roles:Cat.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     jobdone:->@target?
@@ -4672,7 +4617,6 @@ class Cat extends Poisoner
         super
 class Witch extends Player
     type:"Witch"
-    jobname:"魔女"
     midnightSort:100
     isReviver:->!@dead
     job_target:Player.JOB_T_ALIVE | Player.JOB_T_DEAD   # 死人も生存も
@@ -4698,23 +4642,23 @@ class Witch extends Player
         # query.Witch_drug
         pl=game.getPlayer playerid
         unless pl?
-            return "魔药使用无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if pl.id==@id
-            return "不能对自己使用魔药"
+            return game.i18n.t "error.common.noSelectSelf"
 
         if query.Witch_drug=="kill"
             # 毒薬
             if game.day==1
-                return "今天不能使用毒药"
+                return game.i18n.t "error.common.cannotUseSkillNow"
             if (@flag&3)==3
                 # 蘇生薬は使い切った
-                return "已经不能使用毒药了"
+                return game.i18n.t "error.common.alreadyUsed"
             else if (@flag&4) && (@flag&3)
                 # すでに薬は2つ使っている
-                return "已经不能使用毒药了"
+                return game.i18n.t "error.common.alreadyUsed"
             
             if pl.dead
-                return "使用目标已经死亡"
+                return game.i18n.t "error.common.alreadyDead"
             
             # 薬を使用
             pl.touched game,@id
@@ -4727,15 +4671,15 @@ class Witch extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 对 #{pl.name} 使用了毒药。"
+                comment: game.i18n.t "roles:Witch.selectPoison", {name: @name, target: pl.name}
             splashlog game.id,game,log
         else
             # 蘇生薬
             if (@flag&3)==3 || (@flag&4)
-                return "已经不能使用复活药了"
+                return game.i18n.t "error.common.alreadyUsed"
             
             if !pl.dead
-                return "使用对象活着"
+                return game.i18n.t "error.common.invalidSelection"
             
             # 薬を使用
             pl.touched game,@id
@@ -4744,7 +4688,7 @@ class Witch extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 对 #{pl.name} 使用了复活药。"
+                comment: game.i18n.t "roles:Witch.selectRevival", {name: @name, target: pl.name}
             splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -4765,7 +4709,6 @@ class Witch extends Player
             pl.die game,"witch"
 class Oldman extends Player
     type:"Oldman"
-    jobname:"老人"
     midnight:(game,midnightSort)->
         # 夜の終わり
         wolves=game.players.filter (x)->x.isWerewolf() && !x.dead
@@ -4774,7 +4717,6 @@ class Oldman extends Player
             @die game,"infirm"
 class Tanner extends Player
     type:"Tanner"
-    jobname:"皮革匠"
     team:""
     die:(game,found)->
         if found in ["gone-day","gone-night"]
@@ -4784,7 +4726,6 @@ class Tanner extends Player
     isWinner:(game,team)->@dead && @flag!="gone"
 class OccultMania extends Player
     type:"OccultMania"
-    jobname:"怪诞狂热者"
     midnightSort:100
     sleeping:(game)->@target? || game.day<2
     sunset:(game)->
@@ -4797,19 +4738,19 @@ class OccultMania extends Player
     job:(game,playerid)->
         if game.day<2
             # まだ発動できない
-            return "现在不能使用能力"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         @setTarget playerid
         pl=game.getPlayer playerid
         unless pl?
-            return "这个对象不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if pl.dead
-            return "对象已经死亡"
+            return game.i18n.t "error.common.alreadyDead"
         pl.touched game,@id
         
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 指定了 #{pl.name}。"
+            comment: game.i18n.t "roles:OccultMania.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -4822,7 +4763,7 @@ class OccultMania extends Player
         else if p.isWerewolf()
             type="Werewolf"
         
-        newpl=Player.factory type
+        newpl=Player.factory type, game
         @transProfile newpl
         @transferData newpl
         newpl.sunset game   # 初期化してあげる
@@ -4831,9 +4772,8 @@ class OccultMania extends Player
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 变成了 #{newpl.getJobDisp()}。"
+            comment: game.i18n.t "system.changeRole", {name: @name, result: newpl.getJobDisp()}
         splashlog game.id,game,log
-
         
         game.ss.publish.user newpl.realid,"refresh",{id:game.id}
         null
@@ -4841,14 +4781,12 @@ class OccultMania extends Player
 # 狼之子
 class WolfCub extends Werewolf
     type:"WolfCub"
-    jobname:"狼之子"
     dying:(game,found)->
         super
         game.werewolf_flag.push "WolfCub"
 # 低语狂人
 class WhisperingMad extends Fanatic
     type:"WhisperingMad"
-    jobname:"低语狂人"
 
     getSpeakChoice:(game)->
         ["werewolf"].concat super
@@ -4858,7 +4796,6 @@ class WhisperingMad extends Fanatic
         else super
 class Lover extends Player
     type:"Lover"
-    jobname:"求爱者"
     team:"Friend"
     constructor:->
         super
@@ -4874,15 +4811,15 @@ class Lover extends Player
     sleeping:(game)->@flag || @target?
     job:(game,playerid,query)->
         if @target?
-            return "已经决定了对象"
+            return game.i18n.t "error.common.alreadyUsed"
         if @flag
-            return "已经不能射出爱之箭"
+            return game.i18n.t "error.common.alreadyUsed"
     
         pl=game.getPlayer playerid
         unless pl?
-            return "对象无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if playerid==@id
-            return "请选择自己以外的对象"
+            return game.i18n.t "error.common.noSelectSelf"
         pl.touched game,@id
 
         @setTarget playerid
@@ -4892,19 +4829,19 @@ class Lover extends Player
     
         plpls=[this,pl]
         for x,i in plpls
-            newpl=Player.factory null,x,null,Friend # 恋人だ！
+            newpl=Player.factory null, game, x,null,Friend # 恋人だ！
             x.transProfile newpl
             x.transform game,newpl,true  # 入れ替え
             newpl.cmplFlag=plpls[1-i].id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 向 #{pl.name} 求爱了。"
+            comment: game.i18n.t "roles:Lover.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         log=
             mode:"skill"
             to:newpl.id
-            comment:"#{pl.name} 受到求爱变成了恋人。"
+            comment: game.i18n.t "roles:Lover.become", {name: pl.name}
         splashlog game.id,game,log
         # 2人とも更新する
         for pl in [this, pl]
@@ -4916,7 +4853,6 @@ class Lover extends Player
 # 仆从选择者
 class MinionSelector extends Player
     type:"MinionSelector"
-    jobname:"仆从选择者"
     team:"Werewolf"
     sleeping:(game)->@target? || game.day>1 # 初日のみ
     sunset:(game)->
@@ -4930,34 +4866,33 @@ class MinionSelector extends Player
     job:(game,playerid)->
         if game.day!=1
             # まだ発動できない
-            return "现在还不能发动能力"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         @setTarget playerid
         pl=game.getPlayer playerid
         unless pl?
-            return "这个对象不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if pl.dead
-            return "对象已经死亡"
+            return game.i18n.t "error.common.alreadyDead"
         
         # 複合させる
-        newpl=Player.factory null,pl,null,WolfMinion    # WolfMinion
+        newpl=Player.factory null, game, pl,null,WolfMinion    # WolfMinion
         pl.transProfile newpl
         pl.transform game,newpl,true
         log=
             mode:"wolfskill"
-            comment:"#{@name} 指定 #{pl.name}（#{pl.jobname}）成为了狼的仆从。"
+            comment: game.i18n.t "roles:MinionSelector.select", {name: @name, target: pl.name, jobname: pl.jobname}
         splashlog game.id,game,log
 
         log=
             mode:"skill"
             to:pl.id
-            comment:"#{pl.name} 变成了狼的仆从。"
+            comment: game.i18n.t "roles:MinionSelector.become", {name: pl.name}
         splashlog game.id,game,log
 
         null
 # 小偷
 class Thief extends Player
     type:"Thief"
-    jobname:"小偷"
     team:""
     sleeping:(game)->@target? || game.day>1
     sunset:(game)->
@@ -4966,12 +4901,12 @@ class Thief extends Player
         if !target?
             arr=JSON.parse(@flag ? '["Human"]')
             jobnames=arr.map (x)->
-                testpl=new jobs[x]
+                testpl = Player.factory x, game
                 testpl.getJobDisp()
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 可以选择的职业有 #{jobnames.join(",")}。"
+                comment: game.i18n.t "roles:Thief.candidates", {name: @name, jobnames: jobnames.join(",")}
             splashlog game.id,game,log
             if @scapegoat
                 # 身代わり君
@@ -4980,9 +4915,9 @@ class Thief extends Player
     job:(game,target)->
         @setTarget target
         unless jobs[target]?
-            return "不能变成那个职业"
+            return game.i18n.t "error.common.invalidSelection"
 
-        newpl=Player.factory target
+        newpl=Player.factory target, game
         @transProfile newpl
         @transferData newpl
         newpl.sunset game
@@ -4990,7 +4925,7 @@ class Thief extends Player
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 变成了 #{newpl.getJobDisp()}。"
+            comment: game.i18n.t "system.changeRole", {name: @name, result: newpl.getJobDisp()}
         splashlog game.id,game,log
         
         game.ss.publish.user newpl.id,"refresh",{id:game.id}
@@ -5000,7 +4935,7 @@ class Thief extends Player
             # 役職から選択
             arr=JSON.parse(@flag ? '["Human"]')
             arr.map (x)->
-                testpl=new jobs[x]
+                testpl = Player.factory x, game
                 {
                     name:testpl.getJobDisp()
                     value:x
@@ -5008,9 +4943,8 @@ class Thief extends Player
         else super
 class Dog extends Player
     type:"Dog"
-    jobname:"犬"
-    fortuneResult:"人狼"
-    psychicResult:"人狼"
+    fortuneResult: FortuneResult.werewolf
+    psychicResult: PsychicResult.werewolf
     midnightSort:100
     hasDeadResistance:->true
     sunset:(game)->
@@ -5034,7 +4968,7 @@ class Dog extends Player
                     # もう死んでるじゃん
                     @setTarget ""  # 洗濯済み
                 else
-                    newpl=Player.factory null,pl,null,Guarded   # 守られた人
+                    newpl=Player.factory null, game, pl,null,Guarded   # 守られた人
                     pl.transProfile newpl
                     newpl.cmplFlag=@id  # 护卫元cmplFlag
                     pl.transform game,newpl,true
@@ -5043,20 +4977,20 @@ class Dog extends Player
     jobdone:->@target?
     job:(game,playerid,query)->
         if @target?
-            return "已经决定了对象"
+            return game.i18n.t "error.common.alreadyUsed"
     
         unless @flag?
             pl=game.getPlayer playerid
             unless pl?
-                return "对象无效"
+                return game.i18n.t "error.common.invalidSelection"
             if pl.id==@id
-                return "不能成为自己的饲主。"
+                return game.i18n.t "error.common.noSelectSelf"
             pl.touched game,@id
             # 飼い主を选择した
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 选择 #{pl.name} 成为了自己的饲主。"
+                comment: game.i18n.t "roles:Dog.select", {name: @name, target: pl.name}
             splashlog game.id,game,log
             @setFlag playerid  # 飼い主
             @setTarget ""  # 襲撃対象はなし
@@ -5067,7 +5001,7 @@ class Dog extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 袭击了 #{pl.name}。"
+                comment: game.i18n.t "roles:Dog.attack", {name: @name, target: pl.name}
             splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -5099,23 +5033,22 @@ class Dog extends Player
         else super
 class Dictator extends Player
     type:"Dictator"
-    jobname:"独裁者"
     sleeping:->true
     jobdone:(game)->@flag? || !Phase.isDay(game.phase)
     chooseJobDay:(game)->true
     job:(game,playerid,query)->
         if @flag?
-            return "已经不能发动能力了"
+            return game.i18n.t "error.common.alreadyUsed"
         unless Phase.isDay(game.phase)
-            return "夜晚不能发动此能力"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         pl=game.getPlayer playerid
         unless pl?
-            return "对象无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         pl.touched game,@id
         @setTarget playerid    # 处刑する人
         log=
             mode:"system"
-            comment:"独裁者 #{@name} 宣布将要处刑 #{pl.name}。"
+            comment: game.i18n.t "roles:Dictator.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         @setFlag true  # 使用済
         # その場で殺す!!!
@@ -5123,7 +5056,7 @@ class Dictator extends Player
         # 天黑了
         log=
             mode:"system"
-            comment:"独裁者 #{@name} 宣布，现在天黑了。"
+            comment: game.i18n.t "roles:Dictator.sunset", {name: @name}
         splashlog game.id,game,log
         # XXX executeの中と同じことが書いてある
         game.bury "punish"
@@ -5136,7 +5069,6 @@ class Dictator extends Player
         return null
 class SeersMama extends Player
     type:"SeersMama"
-    jobname:"占卜师的妈妈"
     sleeping:->true
     sunset:(game)->
         unless @flag
@@ -5144,18 +5076,17 @@ class SeersMama extends Player
             # 占卜师を探す
             divs = game.players.filter (pl)->pl.isJobType "Diviner"
             divsstr=if divs.length>0
-                "#{divs.map((x)->x.name).join ','} 是占卜师"
+                game.i18n.t "roles:SeersMama.result", {name: @name, results: divs.map((x)->x.name).join(','), count: divs.length}
             else
-                "没有占卜师"
+                game.i18n.t "roles:SeersMama.resultNone", {name: @name}
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 是占卜师的妈妈。#{divsstr}。"
+                comment: divsstr
             splashlog game.id,game,log
             @setFlag true  #使用済
 class Trapper extends Player
     type:"Trapper"
-    jobname:"陷阱师"
     midnightSort:81
     hasDeadResistance:->true
     sleeping:->@target?
@@ -5172,8 +5103,8 @@ class Trapper extends Player
     job:(game,playerid)->
         unless playerid==@id && game.rule.guardmyself!="ok"
             if playerid==@flag
-                # 前も护卫した
-                return "不能连续两天守护一个人"
+                # 前も護衛した
+                return game.i18n.t "roles:Guard.noGuardSame"
             @setTarget playerid
             @setFlag playerid
             pl=game.getPlayer(playerid)
@@ -5181,25 +5112,23 @@ class Trapper extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 的陷阱守护了 #{pl.name}。"
+                comment: game.i18n.t "roles:Trapper.select", {name: @name, target: pl.name}
             splashlog game.id,game,log
             null
         else
-            "不能守护自己"
+            return game.i18n.t "error.common.noSelectSelf"
     midnight:(game,midnightSort)->
         # 複合させる
         pl = game.getPlayer @target
         unless pl?
             return
-        # 複合させる
-        newpl=Player.factory null,pl,null,TrapGuarded   # 守られた人
+        newpl=Player.factory null, game, pl,null,TrapGuarded   # 守られた人
         pl.transProfile newpl
         newpl.cmplFlag=@id  # 护卫元cmplFlag
         pl.transform game,newpl,true
         null
 class WolfBoy extends Madman
     type:"WolfBoy"
-    jobname:"狼少年"
     midnightSort:90
     sleeping:->true
     jobdone:->@target?
@@ -5217,7 +5146,7 @@ class WolfBoy extends Madman
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 把 #{pl.name} 伪装成了人狼。"
+            comment: game.i18n.t "roles:WolfBoy.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -5225,14 +5154,13 @@ class WolfBoy extends Madman
         pl = game.getPlayer @target
         unless pl?
             return
-        newpl=Player.factory null,pl,null,Lycanized
+        newpl=Player.factory null, game, pl,null,Lycanized
         pl.transProfile newpl
         newpl.cmplFlag=@id  # 护卫元cmplFlag
         pl.transform game,newpl,true
         null
 class Hoodlum extends Player
     type:"Hoodlum"
-    jobname:"无赖"
     team:""
     constructor:->
         super
@@ -5253,20 +5181,20 @@ class Hoodlum extends Player
     sleeping:->@target?
     job:(game,playerid,query)->
         if @target?
-            return "已经决定了对象"
+            return game.i18n.t "error.common.alreadyUsed"
         pl=game.getPlayer playerid
         unless pl?
-            return "对象无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         plids=JSON.parse(@flag||"[]")
         if pl.id in plids
             # 既にいる
-            return "#{pl.name} 已经被选为对象"
+            return game.i18n.t "roles:Hoodlum.alreadySelected", {name: pl.name}
         plids.push pl.id
         @setFlag JSON.stringify plids
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 憎恨 #{pl.name}。"
+            comment: game.i18n.t "roles:Hoodlum.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         if plids.length>=2
             @setTarget ""
@@ -5283,25 +5211,24 @@ class Hoodlum extends Player
         return pls.every (pl)->pl?.dead==true
 class QuantumPlayer extends Player
     type:"QuantumPlayer"
-    jobname:"量子人类"
     midnightSort:100
     getJobname:->
         flag=JSON.parse(@flag||"{}")
         jobname=null
         if flag.Human==1
-            jobname="村人"
+            jobname = @game.i18n.t "roles:jobname.Human"
         else if flag.Diviner==1
-            jobname="占卜师"
+            jobname = @game.i18n.t "roles:jobname.Diviner"
         else if flag.Werewolf==1
-            jobname="人狼"
+            jobname = @game.i18n.t "roles:jobname.Werewolf"
 
         numstr=""
         if flag.number?
             numstr="##{flag.number}"
         ret=if jobname?
-            "量子人类#{numstr}（#{jobname}）"
+            "#{@game.i18n.t "roles:jobname.QuantumPlayer"}#{numstr}（#{jobname}）"
         else
-            "量子人类#{numstr}"
+            "#{@game.i18n.t "roles:jobname.QuantumPlayer"}#{numstr}"
         if @originalJobname != ret
             # 収束したぞ!
             @setOriginalJobname ret
@@ -5343,25 +5270,25 @@ class QuantumPlayer extends Player
         tarobj=JSON.parse(@target||"{}")
         pl=game.getPlayer playerid
         unless pl?
-            return "这个对象不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if query.jobtype=="_Quantum_Diviner" && !tarobj.Diviner?
             tarobj.Diviner=playerid
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 占卜了 #{pl.name} 的身份。"
+                comment: game.i18n.t "roles:Diviner.select", {name: @name, target: pl.name}
             splashlog game.id,game,log
         else if query.jobtype=="_Quantum_Werewolf" && !tarobj.Werewolf?
             if @id==playerid
-                return "不能袭击自己。"
+                return game.i18n.t "error.common.noSelectSelf"
             tarobj.Werewolf=playerid
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 决定要袭击 #{pl.name}。"
+                comment: game.i18n.t "roles:Werewolf.select", {name: @name, target: pl.name}
             splashlog game.id,game,log
         else
-            return "对象选择无效"
+            return game.i18n.t "error.common.invalidSelection"
         @setTarget JSON.stringify tarobj
 
         null
@@ -5382,7 +5309,7 @@ class QuantumPlayer extends Player
                         log=
                             mode:"skill"
                             to:@id
-                            comment:"#{@name} 占卜了 #{pl.name} 的身份，是 人狼。"
+                            comment: game.i18n.t "roles:Diviner.resultlog", {name: @name, target: pl.name, result: game.i18n.t "roles:fortune.werewolf"}
                         splashlog game.id,game,log
                         # 人狼のやつ以外排除
                         game.quantum_patterns=game.quantum_patterns.filter (obj)=>
@@ -5394,7 +5321,7 @@ class QuantumPlayer extends Player
                         log=
                             mode:"skill"
                             to:@id
-                            comment:"#{@name} 占卜了 #{pl.name} 的身份，是 村人。"
+                            comment: game.i18n.t "roles:Diviner.resultlog", {name: @name, target: pl.name, result: game.i18n.t "roles:fortune.human"}
                         splashlog game.id,game,log
                         # 村人のやつ以外排除
                         game.quantum_patterns=game.quantum_patterns.filter (obj)=>
@@ -5407,7 +5334,7 @@ class QuantumPlayer extends Player
                     log=
                         mode:"skill"
                         to:@id
-                        comment:"#{@name} 已经不可能是占卜师，不能进行占卜。"
+                        comment: game.i18n.t "roles:QuantumPlayer.cannotDivine", {name: @name}
                     splashlog game.id,game,log
         if tarobj.Werewolf
             pl=game.getPlayer tarobj.Werewolf
@@ -5484,7 +5411,6 @@ class QuantumPlayer extends Player
 
 class RedHood extends Player
     type:"RedHood"
-    jobname:"小红帽"
     sleeping:->true
     isReviver:->!@dead || @flag?
     dying:(game,found,from)->
@@ -5507,7 +5433,6 @@ class RedHood extends Player
 
 class Counselor extends Player
     type:"Counselor"
-    jobname:"策士"
     midnightSort:100
     sleeping:->true
     jobdone:->@target?
@@ -5518,14 +5443,14 @@ class Counselor extends Player
             @setTarget ""
     job:(game,playerid,query)->
         if @target?
-            return "已经选择了对象"
+            return game.i18n.t "error.common.alreadyUsed"
         @setTarget playerid
         pl=game.getPlayer playerid
         pl.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 尝试了策反 #{pl.name}。"
+            comment: game.i18n.t "roles:Counselor.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -5546,13 +5471,13 @@ class Counselor extends Player
             log=
                 mode:"skill"
                 to:t.id
-                comment:"#{t.name} 被策反了。"
+                comment: game.i18n.t "roles:Counselor.rehabilitate", {name: t.name}
             splashlog game.id,game,log
             
             @addGamelog game,"counselSuccess",t.type,@target
             # 複合させる
 
-            newpl=Player.factory null,t,null,Counseled  # カウンセリングされた
+            newpl=Player.factory null, game, t,null,Counseled  # カウンセリングされた
             t.transProfile newpl
             t.transform game,newpl,true
         else
@@ -5560,19 +5485,18 @@ class Counselor extends Player
 # 巫女
 class Miko extends Player
     type:"Miko"
-    jobname:"巫女"
     midnightSort:71
     hasDeadResistance:->true
     sleeping:->true
     jobdone:->!!@flag
     job:(game,playerid,query)->
         if @flag
-            return "已经使用了能力"
+            return game.i18n.t "error.common.alreadyUsed"
         @setTarget playerid
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 用神圣的力量守护了自己。"
+            comment: game.i18n.t "roles:Miko.select", {name: @name}
         splashlog game.id,game,log
         @setFlag "using"
         null
@@ -5580,7 +5504,7 @@ class Miko extends Player
         # 複合させる
         if @flag=="using"
             pl = game.getPlayer @id
-            newpl=Player.factory null,pl,null,MikoProtected # 守られた人
+            newpl=Player.factory null, game, pl,null,MikoProtected # 守られた人
             pl.transProfile newpl
             pl.transform game,newpl,true
             @setFlag "done"
@@ -5592,7 +5516,6 @@ class Miko extends Player
         else super
 class GreedyWolf extends Werewolf
     type:"GreedyWolf"
-    jobname:"贪婪的狼"
     sleeping:(game)->game.werewolf_target_remain<=0 # 占いは必須ではない
     jobdone:(game)->game.werewolf_target_remain<=0 && (@flag || game.day==1)
     job:(game,playerid,query)->
@@ -5600,13 +5523,13 @@ class GreedyWolf extends Werewolf
             # 人狼の仕事
             return super
         if @flag
-            return "已经使用了能力"
+            return game.i18n.t "error.common.alreadyUsed"
         @setFlag true
         if game.werewolf_target_remain+game.werewolf_target.length ==0
-            return "今晚不能袭击"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         log=
             mode:"wolfskill"
-            comment:"为了满足 #{@name} 的贪欲。人狼们今晚可以多袭击一个人。"
+            comment: game.i18n.t "roles:GreedyWolf.select", {name: @name}
         splashlog game.id,game,log
         game.werewolf_target_remain++
         game.werewolf_flag.push "GreedyWolf_#{@id}"
@@ -5633,7 +5556,6 @@ class GreedyWolf extends Werewolf
         return super
 class FascinatingWolf extends Werewolf
     type:"FascinatingWolf"
-    jobname:"魅惑的女狼"
     sleeping:(game)->super && @flag?
     sunset:(game)->
         super
@@ -5650,15 +5572,15 @@ class FascinatingWolf extends Werewolf
             # 人狼の仕事
             return super
         if @flag
-            return "已经使用了能力"
+            return game.i18n.t "error.common.alreadyUsed"
         pl=game.getPlayer playerid
         unless pl?
-            return "对象玩家不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         pl.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 魅惑了 #{pl.name}。"
+            comment: game.i18n.t "roles:FascinatingWolf.select", {name: @name, target: pl.name}
         @setFlag playerid
         splashlog game.id,game,log
         null
@@ -5679,13 +5601,13 @@ class FascinatingWolf extends Werewolf
             # 誘惑できない
             return
 
-        newpl=Player.factory null,pl,null,WolfMinion    # WolfMinion
+        newpl=Player.factory null, game, pl,null,WolfMinion    # WolfMinion
         pl.transProfile newpl
         pl.transform game,newpl,true
         log=
             mode:"skill"
             to:pl.id
-            comment:"#{pl.name} 被狼魅惑了。"
+            comment: game.i18n.t "roles:FascinatingWolf.affected", {name: pl.name}
         splashlog game.id,game,log
     makejobinfo:(game,result)->
         super
@@ -5695,7 +5617,6 @@ class FascinatingWolf extends Werewolf
                 result.open = result.open?.filter (x)=>x!="FascinatingWolf"
 class SolitudeWolf extends Werewolf
     type:"SolitudeWolf"
-    jobname:"孤独的狼"
     sleeping:(game)-> !@flag || super
     isListener:(game,log)->
         if (log.mode in ["werewolf","wolfskill"]) && (log.to != @id)
@@ -5704,7 +5625,7 @@ class SolitudeWolf extends Werewolf
         else super
     job:(game,playerid,query)->
         if !@flag
-            return "现在还不能袭击"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         super
     isAttacker:->!@dead && @flag
     sunset:(game)->
@@ -5716,7 +5637,7 @@ class SolitudeWolf extends Werewolf
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 现在可以袭击他人了。"
+                comment: game.i18n.t "roles:SolitudeWolf.turn", {name: @name}
             splashlog game.id,game,log
         else if @flag && attackers.length>1
             # 複数いるのでやめる
@@ -5724,7 +5645,7 @@ class SolitudeWolf extends Werewolf
             log=
                 mode:"skill"
                 to:@id
-                comment:"其他的人狼还活着。#{@name} 现在不能袭击他人。"
+                comment: game.i18n.t "roles:SolitudeWolf.noturn", {name: @name}
             splashlog game.id,game,log
         super
     getSpeakChoice:(game)->
@@ -5736,13 +5657,12 @@ class SolitudeWolf extends Werewolf
         delete result.spy2s
 class ToughWolf extends Werewolf
     type:"ToughWolf"
-    jobname:"硬汉人狼"
     job:(game,playerid,query)->
         if query.jobtype!="ToughWolf"
             # 人狼の仕事
             return super
         if @flag
-            return "已经使用了能力"
+            return game.i18n.t "error.common.alreadyUsed"
         res=super
         if res?
             return res
@@ -5750,15 +5670,14 @@ class ToughWolf extends Werewolf
         game.werewolf_flag.push "ToughWolf_#{@id}"
         tp=game.getPlayer playerid
         unless tp?
-            return "这个对象不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         log=
             mode:"wolfskill"
-            comment:"#{@name} 抱着舍身的觉悟袭击了 #{tp.name}。"
+            comment: game.i18n.t "roles:ToughWolf.select", {name: @name, target: tp.name}
         splashlog game.id,game,log
         null
 class ThreateningWolf extends Werewolf
     type:"ThreateningWolf"
-    jobname:"威吓的狼"
     jobdone:(game)->
         if Phase.isDay(game.phase)
             @flag?
@@ -5773,19 +5692,19 @@ class ThreateningWolf extends Werewolf
             # 人狼の仕事
             return super
         if @flag
-            return "既に能力を使用しています"
+            return game.i18n.t "error.common.alreadyUsed"
         unless Phase.isDay(game.phase)
-            return "夜晚不能发动此能力"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         pl=game.getPlayer playerid
         pl.touched game,@id
         unless pl?
-            return "对象无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         @setTarget playerid
         @setFlag true
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 威吓了 #{pl.name}。"
+            comment: game.i18n.t "roles:ThreateningWolf.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     sunset:(game)->
@@ -5800,10 +5719,10 @@ class ThreateningWolf extends Werewolf
         log=
             mode:"skill"
             to:t.id
-            comment:"#{t.name} 受到了威吓。今晚的能力无法发动。"
+            comment: game.i18n.t "roles:ThreateningWolf.affected", {name: t.name}
         splashlog game.id,game,log
 
-        newpl=Player.factory null,t,null,Threatened  # カウンセリングされた
+        newpl=Player.factory null, game, t,null,Threatened  # カウンセリングされた
         t.transProfile newpl
         t.transform game,newpl,true
 
@@ -5815,10 +5734,8 @@ class ThreateningWolf extends Werewolf
             result.open = result.open?.filter (x)=>x!="ThreateningWolf"
 class HolyMarked extends Human
     type:"HolyMarked"
-    jobname:"圣痕者"
 class WanderingGuard extends Player
     type:"WanderingGuard"
-    jobname:"游荡猎人"
     midnightSort:80
     hasDeadResistance:->true
     sleeping:->@target?
@@ -5852,10 +5769,10 @@ class WanderingGuard extends Player
     job:(game,playerid)->
         fl=JSON.parse(@flag ? "[null]")
         if playerid==@id && game.rule.guardmyself!="ok"
-            return "不能守护自己"
+            return game.i18n.t "error.common.noSelectSelf"
         
         if playerid in fl
-            return "不能守护这个人"
+            return game.i18n.t "error.common.invalidSelection"
         @setTarget playerid
         if game.rule.consecutiveguard == "no"
             fl[0] = playerid
@@ -5867,7 +5784,7 @@ class WanderingGuard extends Player
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 守护了 #{pl.name}。"
+            comment: game.i18n.t "roles:Guard.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -5875,7 +5792,7 @@ class WanderingGuard extends Player
         pl = game.getPlayer @target
         unless pl?
             return
-        newpl=Player.factory null,pl,null,Guarded   # 守られた人
+        newpl=Player.factory null, game, pl,null,Guarded   # 守られた人
         pl.transProfile newpl
         newpl.cmplFlag=@id  # 护卫元cmplFlag
         pl.transform game,newpl,true
@@ -5890,7 +5807,7 @@ class WanderingGuard extends Player
                     log=
                         mode:"skill"
                         to:@id
-                        comment:"#{@name} 不能护卫 #{pl.name}。"
+                        comment: game.i18n.t "roles:WanderingGuard.noGuardMode", {name: @name, target: pl.name}
                     splashlog game.id,game,log
                     fl=JSON.parse(@flag ? "[null]")
                     fl.push pl.id
@@ -5904,7 +5821,6 @@ class WanderingGuard extends Player
             return super
 class ObstructiveMad extends Madman
     type:"ObstructiveMad"
-    jobname:"碍事的狂人"
     midnightSort:90
     sleeping:->@target?
     sunset:(game)->
@@ -5921,12 +5837,12 @@ class ObstructiveMad extends Madman
         @setTarget playerid
         pl=game.getPlayer playerid
         unless pl?
-            return "这个玩家不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         pl.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 妨碍了 #{pl.name}。"
+            comment: game.i18n.t "roles:ObstructiveMad.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -5934,14 +5850,13 @@ class ObstructiveMad extends Madman
         pl = game.getPlayer @target
         unless pl?
             return
-        newpl=Player.factory null,pl,null,DivineObstructed
+        newpl=Player.factory null, game, pl,null,DivineObstructed
         pl.transProfile newpl
         newpl.cmplFlag=@id  # 邪魔元cmplFlag
         pl.transform game,newpl,true
         null
 class TroubleMaker extends Player
     type:"TroubleMaker"
-    jobname:"闹事者"
     midnightSort:100
     sleeping:->true
     jobdone:->!!@flag
@@ -5951,12 +5866,13 @@ class TroubleMaker extends Player
             []
         else super
     job:(game,playerid)->
-        return "已经使用了能力" if @flag
+        if @flag
+            return game.i18n.t "error.common.alreadyUsed"
         @setFlag "using"
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 在村子里引发了混乱。"
+            comment: game.i18n.t "roles:TroubleMaker.select", {name: @name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -5970,7 +5886,7 @@ class TroubleMaker extends Player
             # トラブルがおきた
             log=
                 mode:"system"
-                comment:"闹事者在村子里引发了混乱。今日将会处刑 #{game.votingbox.remains} 个人。"
+                comment: game.i18n.t "roles:TroubleMaker.announce", {count: game.votingbox.remains}
             splashlog game.id,game,log
             @setFlag "done"
         else if @flag=="using"
@@ -5981,7 +5897,6 @@ class TroubleMaker extends Player
 
 class FrankensteinsMonster extends Player
     type:"FrankensteinsMonster"
-    jobname:"弗兰肯斯坦的怪物"
     die:(game,found)->
         super
         if found=="punish"
@@ -5996,14 +5911,14 @@ class FrankensteinsMonster extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 从 #{pl.name} 的尸体里吸收了 #{pl.getJobname()} 的能力。"
+                comment: game.i18n.t "roles:FrankensteinsMonster.drain", {name: @name, target: pl.name, jobname: pl.getJobname()}
             splashlog game.id,game,log
 
             # 同じ能力を
-            subpl = Player.factory pl.type
+            subpl = Player.factory pl.type, game
             thispl.transProfile subpl
 
-            newpl=Player.factory null, thispl,subpl,Complex    # 合成する
+            newpl=Player.factory null, game, thispl,subpl,Complex    # 合成する
             thispl.transProfile newpl
 
             # 置き換える
@@ -6016,9 +5931,8 @@ class FrankensteinsMonster extends Player
             game.splashjobinfo [thispl]
 class BloodyMary extends Player
     type:"BloodyMary"
-    jobname:"血腥玛丽"
     isReviver:->true
-    getJobname:->if @flag then @jobname else "玛丽"
+    getJobname:->if @flag then @jobname else @game.i18n.t("roles:BloodyMary.mary")
     getJobDisp:->@getJobname()
     getTypeDisp:->if @flag then @type else "Mary"
     sleeping:->true
@@ -6043,7 +5957,9 @@ class BloodyMary extends Player
             @setFlag found
             if orig_jobname != @getJobname()
                 # 変わった!
-                @setOriginalJobname @originalJobname.replace("血腥玛丽","玛丽").replace("玛丽","血腥玛丽")
+                before = game.i18n.t "roles:BloodyMary.mary"
+                after = game.i18n.t "roles:jobname.BloodyMary"
+                @setOriginalJobname @originalJobname.replace(after,before).replace(before,after)
         super
     sunset:(game)->
         @setTarget null
@@ -6051,14 +5967,14 @@ class BloodyMary extends Player
         @sunset game
     job:(game,playerid)->
         unless @flag in ["punish","werewolf"]
-            return "不能使用能力"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         pl=game.getPlayer playerid
         unless pl?
-            return "对象不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 诅咒了 #{pl.name}。"
+            comment: game.i18n.t "roles:BloodyMary", {name: @name, target: pl.name}
         splashlog game.id,game,log
         @setTarget playerid
         null
@@ -6098,13 +6014,11 @@ class BloodyMary extends Player
 
 class King extends Player
     type:"King"
-    jobname:"国王"
     voteafter:(game,target)->
         super
         game.votingbox.votePower this,1
 class PsychoKiller extends Madman
     type:"PsychoKiller"
-    jobname:"变态杀人狂"
     midnightSort:110
     constructor:->
         super
@@ -6133,7 +6047,6 @@ class PsychoKiller extends Madman
         @midnight game, midnightSort
 class SantaClaus extends Player
     type:"SantaClaus"
-    jobname:"圣诞老人"
     midnightSort:100
     sleeping:->@target?
     constructor:->
@@ -6164,21 +6077,21 @@ class SantaClaus extends Player
 
     job:(game,playerid)->
         if @flag=="gone"
-            return "已经离开了村子"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         fl=JSON.parse(@flag ? "[]")
         if playerid == @id
-            return "不能把礼物送给自己"
+            return game.i18n.t "error.common.noSelectSelf"
         if playerid in fl
-            return "这个人已经不能继续接受礼物了"
+            return game.i18n.t "roles:SantaClaus.noSelectTwice"
         pl=game.getPlayer playerid
         pl.touched game,@id
         unless pl?
-            return "对象无效"
+            return game.i18n.t "eerror.common.nonexistentPlayer"
         @setTarget playerid
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 向 #{pl.name} 赠送了礼物。"
+            comment: game.i18n.t "roles:SantaClaus.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         fl.push playerid
         @setFlag JSON.stringify fl
@@ -6192,57 +6105,49 @@ class SantaClaus extends Player
         # プレゼントを送る
         r=Math.random()
         settype=""
-        setname=""
         if r<0.05
             # 毒だった
             log=
                 mode:"skill"
                 to:pl.id
-                comment:"#{pl.name} 收到了剧毒的礼物。"
+                comment: game.i18n.t "roles:SantaClaus.deliver.poison", {name: pl.name}
             splashlog game.id,game,log
             pl.die game,"poison",@id
             @addGamelog game,"sendpresent","poison",pl.id
             return
         else if r<0.1
             settype="HolyMarked"
-            setname="圣痕者套装"
         else if r<0.15
             settype="Oldman"
-            setname="玉手箱"
         else if r<0.225
             settype="Priest"
-            setname="圣职者套装"
         else if r<0.3
             settype="Miko"
-            setname="Cosplay套装（巫女）"
         else if r<0.55
             settype="Diviner"
-            setname="占卜套装"
         else if r<0.8
             settype="Guard"
-            setname="守护套装"
         else
             settype="Psychic"
-            setname="灵能套装"
 
         # 複合させる
+        thing_name = game.i18n.t "roles:SantaClaus.thing.#{settype}"
         log=
             mode:"skill"
             to:pl.id
-            comment:"#{pl.name} 收到了礼物 #{setname}。"
+            comment: game.i18n.t "roles:SantaClaus.deliver._log", {name: pl.name, thing:thing_name}
         splashlog game.id,game,log
         
         # 複合させる
-        sub=Player.factory settype   # 副を作る
+        sub=Player.factory settype, game   # 副を作る
         pl.transProfile sub
-        newpl=Player.factory null,pl,sub,Complex    # Complex
+        newpl=Player.factory null, game, pl,sub,Complex    # Complex
         pl.transProfile newpl
         pl.transform game,newpl,true
         @addGamelog game,"sendpresent",settype,pl.id
 #怪盗
 class Phantom extends Player
     type:"Phantom"
-    jobname:"怪盗"
     sleeping:->@target?
     sunset:(game)->
         if @flag==true
@@ -6260,7 +6165,7 @@ class Phantom extends Player
     makeJobSelection:(game)->
         if Phase.isNight(game.phase)
             res=[{
-                name:"放弃盗取"
+                name: game.i18n.t "roles:Phantom.noStealOption"
                 value:""
             }]
             sup=super
@@ -6278,7 +6183,7 @@ class Phantom extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 没有盗取职业。"
+                comment: game.i18n.t "roles:Phantom.selectNoSteal", {name: @name}
             splashlog game.id,game,log
             return
         pl=game.getPlayer playerid
@@ -6287,7 +6192,7 @@ class Phantom extends Player
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 盗取了 #{pl.name} 的职业。#{pl.name} 是 #{pl.getJobDisp()}。"
+            comment: game.i18n.t "roles:Phantom.select", {name: @name, target: pl.name, jobname: pl.getJobDisp()}
         splashlog game.id,game,log
         @addGamelog game,"phantom",pl.type,playerid
         null
@@ -6304,25 +6209,24 @@ class Phantom extends Player
             if savedobj[value.name]?
                 flagobj[value.name]=savedobj[value.name]
 
-        # 自己はそ的职业に変化する
-        newpl=Player.factory pl.type
+        # 自分はその役職に変化する
+        newpl=Player.factory pl.type, game
         @transProfile newpl
         @transferData newpl
         @transform game,newpl,false
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 变成了 #{newpl.getJobDisp()}。"
+            comment: game.i18n.t "system.changeRole", {name: @name, result: newpl.getJobDisp()}
         splashlog game.id,game,log
 
         # 盗まれた側は怪盗予備軍のフラグを立てる
-        newpl2=Player.factory null,pl,null,PhantomStolen
+        newpl2=Player.factory null, game, pl,null,PhantomStolen
         newpl2.cmplFlag=flagobj
         pl.transProfile newpl2
         pl.transform game,newpl2,true
 class BadLady extends Player
     type:"BadLady"
-    jobname:"恶女"
     team:"Friend"
     sleeping:->@flag?.set
     sunset:(game)->
@@ -6335,13 +6239,13 @@ class BadLady extends Player
     job:(game,playerid,query)->
         fl=@flag ? {}
         if fl.set
-            return "已经决定了对象"
+            return game.i18n.t "error.common.alreadyUsed"
         if playerid==@id
-            return "请选择自己以外的对象"
+            return game.i18n.t "error.common.noSelectSelf"
         
         pl=game.getPlayer playerid
         unless pl?
-            return "对象无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         pl.touched game,@id
 
         unless fl.main?
@@ -6350,7 +6254,7 @@ class BadLady extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 选择了 #{pl.name} 作为自己的本命对象。"
+                comment: game.i18n.t "roles:BadLady.selectMain", {name: @name, target: pl.name}
             splashlog game.id,game,log
             @setFlag fl
             @addGamelog game,"badlady_main",pl.type,playerid
@@ -6363,7 +6267,7 @@ class BadLady extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 选择了 #{pl.name} 作为玩弄的对象。"
+                comment: game.i18n.t "roles:BadLady.selectKeep", {name: @name, target: pl.name}
             splashlog game.id,game,log
             # 2人を恋人、1人をキープに
             plm=game.getPlayer fl.main
@@ -6372,20 +6276,20 @@ class BadLady extends Player
                     log=
                         mode:"skill"
                         to:pll.id
-                        comment:"#{pll.name} 受到求爱变成了恋人。"
+                        comment: game.i18n.t "roles:Lover.become", {name: pll.name}
                     splashlog game.id,game,log
-            # 自己恋人
-            newpl=Player.factory null,this,null,Friend # 恋人だ！
+            # 自分恋人
+            newpl=Player.factory null, game, this,null,Friend # 恋人だ！
             newpl.cmplFlag=fl.main
             @transProfile newpl
             @transform game,newpl,true  # 入れ替え
             # 相手恋人
-            newpl=Player.factory null,plm,null,Friend # 恋人だ！
+            newpl=Player.factory null, game, plm,null,Friend # 恋人だ！
             newpl.cmplFlag=@id
             plm.transProfile newpl
             plm.transform game,newpl,true  # 入れ替え
             # キープ
-            newpl=Player.factory null,pl,null,KeepedLover # 恋人か？
+            newpl=Player.factory null, game, pl,null,KeepedLover # 恋人か？
             newpl.cmplFlag=@id
             pl.transProfile newpl
             pl.transform game,newpl,true  # 入れ替え
@@ -6407,7 +6311,6 @@ class BadLady extends Player
 # 看板娘
 class DrawGirl extends Player
     type:"DrawGirl"
-    jobname:"看板娘"
     sleeping:->true
     dying:(game,found)->
         if found=="werewolf"
@@ -6423,19 +6326,18 @@ class DrawGirl extends Player
             game.votingbox.addPunishedNumber 1
             log=
                 mode:"system"
-                comment:"#{@name} 是看板娘。今日将有 #{game.votingbox.remains} 人被处刑。"
+                comment: game.i18n.t "roles:DrawGirl.reveal", {name: @name, count: game.votingbox.remains}
             splashlog game.id,game,log
             @setFlag ""
             @addGamelog game,"drawgirlpower",null,null
 # 慎重的狼
 class CautiousWolf extends Werewolf
     type:"CautiousWolf"
-    jobname:"慎重的狼"
     makeJobSelection:(game)->
         if Phase.isNight(game.phase)
             r=super
             return r.concat {
-                name:"不袭击"
+                name: game.i18n.t "roles:CautiousWolf.noAttackOption"
                 value:""
             }
         else
@@ -6452,26 +6354,25 @@ class CautiousWolf extends Werewolf
         game.werewolf_target_remain--
         log=
             mode:"wolfskill"
-            comment:"以 #{@name} 为首的人狼们决定今晚不发动袭击。"
+            comment: game.i18n.t "roles:CautiousWolf.selectNoAttack", {name: @name}
         splashlog game.id,game,log
         game.splashjobinfo game.players.filter (x)=>x.id!=playerid && x.isWerewolf()
         null
 # 烟火师
 class Pyrotechnist extends Player
     type:"Pyrotechnist"
-    jobname:"烟火师"
     sleeping:->true
     jobdone:(game)->@flag? || !Phase.isDay(game.phase)
     chooseJobDay:(game)->true
     job:(game,playerid,query)->
         if @flag?
-            return "已经不能发动能力了"
+            return game.i18n.t "error.common.alreadyUsed"
         unless Phase.isDay(game.phase)
-            return "夜晚不能发动此能力"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 准备释放烟火了。"
+            comment: game.i18n.t "roles:Pyrotechnist.select", {name: @name}
         splashlog game.id,game,log
         # 使用済
         @setFlag "using"
@@ -6481,7 +6382,7 @@ class Pyrotechnist extends Player
         if @flag=="using"
             log=
                 mode:"system"
-                comment:"美丽的烟火被打上了天空。今晚不能使用能力。"
+                comment: game.i18n.t "roles:Pyrotechnist.affect"
             splashlog game.id,game,log
             @setFlag "done"
         console.log @id,@type,@flag
@@ -6496,7 +6397,6 @@ class Pyrotechnist extends Player
 # 面包店
 class Baker extends Player
     type:"Baker"
-    jobname:"面包店"
     sleeping:->true
     sunrise:(game)->
         # 最初の1人が面包店ログを管理
@@ -6510,13 +6410,13 @@ class Baker extends Player
                     @setFlag null
                 log=
                     mode:"system"
-                    comment:"面包店烤好了美味的面包。"
+                    comment: game.i18n.t "roles:Baker.alive"
                 splashlog game.id,game,log
             else if @flag!="done"
                 # 全员死亡していてまたログを出していない
                 log=
                     mode:"system"
-                    comment:"今天开始没有美味的面包吃了。"
+                    comment: game.i18n.t "roles:Baker.dead"
                 splashlog game.id,game,log
                 @setFlag "done"
 
@@ -6524,7 +6424,6 @@ class Baker extends Player
         @sunrise game
 class Bomber extends Madman
     type:"Bomber"
-    jobname:"炸弹魔"
     midnightSort:81
     sleeping:->true
     jobdone:->@flag?
@@ -6533,7 +6432,7 @@ class Bomber extends Madman
     job:(game,playerid)->
         pl=game.getPlayer playerid
         unless pl?
-            return "对象无效。"
+            return game.i18n.t "error.common.nonexistentPlayer"
         pl.touched game,@id
         @setTarget playerid
         @setFlag true
@@ -6541,14 +6440,14 @@ class Bomber extends Madman
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 向 #{pl.name} 送出了炸弹。"
+            comment: game.i18n.t "roles:Bomber.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
         pl = game.getPlayer @target
         unless pl?
             return
-        newpl=Player.factory null,pl,null,BombTrapped
+        newpl=Player.factory null, game, pl,null,BombTrapped
         pl.transProfile newpl
         newpl.cmplFlag=@id  # 护卫元cmplFlag
         pl.transform game,newpl,true
@@ -6558,7 +6457,6 @@ class Bomber extends Madman
 
 class Blasphemy extends Player
     type:"Blasphemy"
-    jobname:"亵渎者"
     team:"Fox"
     midnightSort:100
     sleeping:(game)->@target? || @flag
@@ -6584,19 +6482,19 @@ class Blasphemy extends Player
                 @die game,"foxsuicide"
     job:(game,playerid)->
         if @flag || @target?
-            return "已经不能发动能力了"
+            return game.i18n.t "error.common.alreadyUsed"
         @setTarget playerid
         pl=game.getPlayer playerid
         unless pl?
-            return "这个对象不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if pl.dead
-            return "对象已经死亡"
+            return game.i18n.t "error.common.alreadyDead"
         pl.touched game,@id
 
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 亵渎了 #{pl.name}。"
+            comment: game.i18n.t "roles:Blasphemy.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
 
         @addGamelog game,"blasphemy",pl.type,playerid
@@ -6611,14 +6509,13 @@ class Blasphemy extends Player
         return if pl.dead
         @setFlag true
 
-        # 狐凭をつける
-        newpl=Player.factory null,pl,null,FoxMinion
+        # 狐憑きをつける
+        newpl=Player.factory null, game, pl,null,FoxMinion
         pl.transProfile newpl
         pl.transform game,newpl,true
 
 class Ushinotokimairi extends Madman
     type:"Ushinotokimairi"
-    jobname:"丑时之女"
     midnightSort:90
     sleeping:->true
     jobdone:->@target?
@@ -6638,12 +6535,12 @@ class Ushinotokimairi extends Madman
         @setTarget playerid
         pl=game.getPlayer playerid
         unless pl?
-            return "这个玩家不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         pl.touched game,@id
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 诅咒了 #{pl.name}。"
+            comment: game.i18n.t "roles:Ushinotokimairi.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -6652,7 +6549,7 @@ class Ushinotokimairi extends Madman
         unless pl?
             return
 
-        newpl=Player.factory null,pl,null,DivineCursed
+        newpl=Player.factory null, game, pl,null,DivineCursed
         pl.transProfile newpl
         newpl.cmplFlag=@id  # 邪魔元cmplFlag
         pl.transform game,newpl,true
@@ -6668,7 +6565,6 @@ class Ushinotokimairi extends Madman
 
 class Patissiere extends Player
     type: "Patissiere"
-    jobname: "女糕点师"
     team:"Friend"
     midnightSort:100
     sunset:(game)->
@@ -6684,21 +6580,21 @@ class Patissiere extends Player
     sleeping:(game)->@flag || @target?
     job:(game,playerid,query)->
         if @target?
-            return "已经决定了对象"
+            return game.i18n.t "error.common.alreadyUsed"
         if @flag
-            return "已经不能送出巧克力"
+            return game.i18n.t "error.common.alreadyUsed"
         pl=game.getPlayer playerid
         unless pl?
-            return "对象无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if playerid==@id
-            return "请选择自己以外的人"
+            return game.i18n.t "error.common.noSelectSelf"
         pl.touched game,@id
         @setTarget playerid
         @setFlag true
         log=
             mode: "skill"
             to: @id
-            comment: "#{@name} 将 #{pl.name} 选为本命。"
+            comment: game.i18n.t "roles:Patissiere.select", {name: @name, target: pl.name}
         splashlog game.id, game, log
         null
     midnight:(game,midnightSort)->
@@ -6712,10 +6608,10 @@ class Patissiere extends Player
             p = game.getPlayer pid
             if p.id == pl.id
                 # 本命
-                sub = Player.factory "GotChocolate"
+                sub = Player.factory "GotChocolate", game
                 p.transProfile sub
                 sub.sunset game
-                newpl = Player.factory null, p, sub, GotChocolateTrue
+                newpl = Player.factory null, game, p, sub, GotChocolateTrue
                 newpl.cmplFlag=@id
                 p.transProfile newpl
                 p.transferData newpl
@@ -6723,14 +6619,14 @@ class Patissiere extends Player
                 log=
                     mode:"skill"
                     to: p.id
-                    comment: "#{p.name} 收到了巧克力。"
+                    comment: game.i18n.t "roles:Patissiere.deliver", {name: p.name}
                 splashlog game.id,game,log
             else if p.id != @id
                 # 義理
-                sub = Player.factory "GotChocolate"
+                sub = Player.factory "GotChocolate", game
                 p.transProfile sub
                 sub.sunset game
-                newpl = Player.factory null, p, sub, GotChocolateFalse
+                newpl = Player.factory null, game, p, sub, GotChocolateFalse
                 newpl.cmplFlag=@id
                 p.transProfile newpl
                 p.transferData newpl
@@ -6738,11 +6634,11 @@ class Patissiere extends Player
                 log=
                     mode:"skill"
                     to: p.id
-                    comment: "#{p.name} 收到了巧克力。"
+                    comment: game.i18n.t "roles:Patissiere.deliver", {name: p.name}
                 splashlog game.id,game,log
         # 自分は本命と恋人になる
         top = game.getPlayer @id
-        newpl = Player.factory null, top, null, Friend
+        newpl = Player.factory null, game, top, null, Friend
         newpl.cmplFlag=pl.id
         top.transProfile newpl
         top.transferData newpl
@@ -6751,14 +6647,13 @@ class Patissiere extends Player
         log=
             mode: "skill"
             to: @id
-            comment: "#{@name} 与 #{pl.name} 结为恋人。"
+            comment: game.i18n.t "roles:Patissiere.become", {name: @name, target: pl.name}
         splashlog game.id, game, log
         null
 
 # 内部処理用：チョコレートもらった
 class GotChocolate extends Player
     type: "GotChocolate"
-    jobname: "巧克力"
     midnightSort:90
     sleeping:->true
     jobdone:(game)-> @flag!="unselected"
@@ -6778,13 +6673,13 @@ class GotChocolate extends Player
             @setFlag "unselected"
     job:(game,playerid)->
         unless @flag == "unselected"
-            return "无法使用能力"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         # 食べると本命か義理か判明する
         flag = false
         top = game.getPlayer @id
         unless top?
             # ?????
-            return "对象无效"
+            return game.i18n.t "error.common.nonexistentPlayer"
         while top?.isComplex()
             if top.cmplType=="GotChocolateTrue" && top.sub==this
                 # 本命だ
@@ -6793,14 +6688,14 @@ class GotChocolate extends Player
                     log=
                         mode:"skill"
                         to: @id
-                        comment: "#{@name} 吃下的巧克力是本命巧克力。#{@name} 与 #{t.name} 结为恋人。"
+                        comment: game.i18n.t "roles:GotChocolate.main", {name: @name, target: t.name}
                     splashlog game.id, game, log
                     @setFlag "done"
                     # 本命を消す
                     top.uncomplex game, false
                     # 恋人になる
                     top = game.getPlayer @id
-                    newpl = Player.factory null, top, null, Friend
+                    newpl = Player.factory null, game, top, null, Friend
                     newpl.cmplFlag = t.id
                     top.transProfile newpl
                     top.transform game,newpl,true
@@ -6815,7 +6710,7 @@ class GotChocolate extends Player
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name} 吃下的巧克力是义理巧克力。"
+                    comment: game.i18n.t "roles:GotChocolate.sub", {name: @name}
                 splashlog game.id, game, log
                 break
             top = top.main
@@ -6824,7 +6719,7 @@ class GotChocolate extends Player
             log=
                 mode:"skill"
                 to: @id
-                comment: "#{@name} 吃下了巧克力，什么都没有发生。"
+                comment: game.i18n.t "roles:GotChocolate.noLover", {name: @name}
             splashlog game.id, game, log
         null
     midnight:(game,midnightSort)->
@@ -6840,9 +6735,9 @@ class GotChocolate extends Player
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name} 吃下的巧克力是被诅咒的巧克力，下一天白天不能发言。"
+                    comment: game.i18n.t "roles:GotChocolate.result.cursed", {name: @name}
                 splashlog game.id, game, log
-                newpl = Player.factory null, top, null, Muted
+                newpl = Player.factory null, game, top, null, Muted
                 top.transProfile newpl
                 top.transform game, newpl, true
             else if r < 0.30
@@ -6850,9 +6745,9 @@ class GotChocolate extends Player
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name} 吃下的巧克力是黑巧克力，占卜·灵能结果将变为「人狼」。"
+                    comment: game.i18n.t "roles:GotChocolate.result.black", {name: @name}
                 splashlog game.id, game, log
-                newpl = Player.factory null, top, null, Blacked
+                newpl = Player.factory null, game, top, null, Blacked
                 top.transProfile newpl
                 top.transform game, newpl, true
             else if r < 0.45
@@ -6860,9 +6755,9 @@ class GotChocolate extends Player
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name} 吃下的巧克力是白巧克力，占卜·灵能结果将变为「村人」。"
+                    comment: game.i18n.t "roles:GotChocolate.result.white", {name: @name}
                 splashlog game.id, game, log
-                newpl = Player.factory null, top, null, Whited
+                newpl = Player.factory null, game, top, null, Whited
                 top.transProfile newpl
                 top.transform game, newpl, true
             else if r < 0.50
@@ -6870,14 +6765,14 @@ class GotChocolate extends Player
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name} 吃下的巧克力是毒巧克力，将被毒死。"
+                    comment: game.i18n.t "roles:GotChocolate.result.poison", {name: @name}
                 splashlog game.id, game, log
                 @die game, "poison", @id
             else if r < 0.57
                 # ストーカー化
                 topl = game.getPlayer re[1]
                 if topl?
-                    newpl = Player.factory "Stalker"
+                    newpl = Player.factory "Stalker", game
                     top.transProfile newpl
                     # ストーカー先
                     newpl.setFlag re[1]
@@ -6886,16 +6781,16 @@ class GotChocolate extends Player
                     log=
                         mode:"skill"
                         to: @id
-                        comment: "#{@name} 凭借执念找到了巧克力的送出人，#{@name} 成为了 #{topl.name} 的跟踪狂。"
+                        comment: game.i18n.t "roles:GotChocolate.result.stalker", {name: @name, target: topl.name}
                     splashlog game.id, game, log
             else if r < 0.65
                 # 血入りの……
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name} 吃下的巧克力不知为何有铁锈的味道，占卜结果将变为「吸血鬼」。"
+                    comment: game.i18n.t "roles:GotChocolate.result.vampire", {name: @name}
                 splashlog game.id, game, log
-                newpl = Player.factory null, top, null, VampireBlooded
+                newpl = Player.factory null, game, top, null, VampireBlooded
                 top.transProfile newpl
                 top.transform game, newpl, true
             else if r < 0.75
@@ -6903,19 +6798,18 @@ class GotChocolate extends Player
                 log=
                     mode:"skill"
                     to: @id
-                    comment: "#{@name} 吃下的巧克力蕴含着神圣的力量，#{@name} 可以使用一次「圣职者」的力量。"
+                    comment: game.i18n.t "roles:GotChocolate.result.priest", {name: @name}
                 splashlog game.id, game, log
-                sub = Player.factory "Priest"
+                sub = Player.factory "Priest", game
                 top.transProfile sub
-                newpl = Player.factory null, top, sub, Complex
+                newpl = Player.factory null, game, top, sub, Complex
                 top.transProfile newpl
                 top.transform game, newpl, true
 
 class MadDog extends Madman
     type:"MadDog"
-    jobname:"狂犬"
-    fortuneResult:"人狼"
-    psychicResult:"人狼"
+    fortuneResult: FortuneResult.werewolf
+    psychicResult: PsychicResult.werewolf
     midnightSort:100
     jobdone:(game)->@target? || @flag
     sleeping:->true
@@ -6929,19 +6823,19 @@ class MadDog extends Madman
             @setTarget null
     job:(game,playerid)->
         if @flag || @target?
-            return "已经无法发动能力"
+            return game.i18n.t "error.common.alreadyUsed"
         @setTarget playerid
         pl=game.getPlayer playerid
         unless pl?
-            return "对象不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if pl.dead
-            return "对象已经死亡"
+            return game.i18n.t "error.common.alreadyDead"
         pl.touched game,@id
 
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 袭击了 #{pl.name}。"
+            comment: game.i18n.t "roles:MadDog.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         return null
     midnight:(game,midnightSort)->
@@ -6957,7 +6851,6 @@ class MadDog extends Madman
 
 class Hypnotist extends Madman
     type:"Hypnotist"
-    jobname:"催眠师"
     midnightSort:50
     jobdone:(game)->@target? || @flag
     sleeping:->true
@@ -6971,19 +6864,19 @@ class Hypnotist extends Madman
             @setTarget null
     job:(game,playerid)->
         if @flag || @target?
-            return "已经无法发动能力"
+            return game.i18n.t "error.common.alreadyUsed"
         @setTarget playerid
         pl=game.getPlayer playerid
         unless pl?
-            return "对象不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if pl.dead
-            return "对象已经死亡"
+            return game.i18n.t "error.common.alreadyDead"
         pl.touched game,@id
 
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 催眠了 #{pl.name}。"
+            comment: game.i18n.t "roles:Hypnotist.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
 
         @setFlag true
@@ -7000,7 +6893,7 @@ class Hypnotist extends Madman
 
         # 催眠術を付加する
         @addGamelog game,"hypnosis",pl.type,pl.id
-        newpl=Player.factory null,pl,null,UnderHypnosis
+        newpl=Player.factory null, game, pl,null,UnderHypnosis
         pl.transProfile newpl
         pl.transform game,newpl,true
 
@@ -7008,7 +6901,6 @@ class Hypnotist extends Madman
 
 class CraftyWolf extends Werewolf
     type:"CraftyWolf"
-    jobname:"狡猾的狼"
     jobdone:(game)->super && @flag == "going"
     deadJobdone:(game)->@flag != "revivable"
     midnightSort:100
@@ -7023,24 +6915,24 @@ class CraftyWolf extends Werewolf
         if @dead
             # 死亡時
             if @flag != "revivable"
-                return "不能使用能力"
+                return game.i18n.t "error.common.cannotUseSkillNow"
             @setFlag "reviving"
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 取消假死了。"
+                comment: game.i18n.t "roles:CraftyWolf.cancel", {name: @name}
             splashlog game.id,game,log
             return null
         else
             # 生存時
             if @flag != ""
-                return "已经使用过能力"
+                return game.i18n.t "error.common.alreadyUsed"
             # 生存フラグを残しつつ死ぬ
             @setFlag "going"
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 假死了。"
+                comment: game.i18n.t "roles:CraftyWolf.select", {name: @name}
             splashlog game.id,game,log
             return null
     midnight:(game,midnightSort)->
@@ -7083,7 +6975,6 @@ class CraftyWolf extends Werewolf
 
 class Shishimai extends Player
     type:"Shishimai"
-    jobname:"狮子舞"
     team:""
     sleeping:->true
     jobdone:(game)->@target?
@@ -7120,14 +7011,14 @@ class Shishimai extends Player
     job:(game,playerid)->
         pl = game.getPlayer playerid
         unless pl?
-            return "这个玩家不存在。"
+            return game.i18n.t "error.common.nonexistentPlayer"
         bitten = JSON.parse (@flag || "[]")
         if playerid in bitten
-            return "这个玩家已经被咀嚼过了。"
+            return game.i18n.t "roles:Shishimai.noSelectTwice"
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 咀嚼了 #{pl.name}。"
+            comment: game.i18n.t "roles:Shishimai.select", {name: @name, target: pl.name}
         splashlog game.id, game, log
         @setTarget playerid
         null
@@ -7136,7 +7027,7 @@ class Shishimai extends Player
         unless pl?
             return
         # 票数が減る祝いをかける
-        newpl = Player.factory null, pl, null, VoteGuarded
+        newpl = Player.factory null, game, pl, null, VoteGuarded
         pl.transProfile newpl
         pl.transform game, newpl, true
         newpl.touched game,@id
@@ -7152,7 +7043,6 @@ class Shishimai extends Player
 
 class Pumpkin extends Madman
     type: "Pumpkin"
-    jobname: "南瓜魔"
     midnightSort: 90
     sleeping:->@target?
     sunset:(game)->
@@ -7174,7 +7064,7 @@ class Pumpkin extends Madman
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 把 #{pl.name} 变成了南瓜。"
+            comment: game.i18n.t "roles:Pumpkin.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         @addGamelog game,"pumpkin",null,playerid
         null
@@ -7183,12 +7073,11 @@ class Pumpkin extends Madman
         return unless t?
         return if t.dead
 
-        newpl=Player.factory null, t,null, PumpkinCostumed
+        newpl=Player.factory null, game, t,null, PumpkinCostumed
         t.transProfile newpl
         t.transform game,newpl,true
 class MadScientist extends Madman
     type:"MadScientist"
-    jobname:"疯狂科学家"
     midnightSort:100
     isReviver:->!@dead && @flag!="done"
     sleeping:->true
@@ -7200,15 +7089,15 @@ class MadScientist extends Madman
             @setTarget ""  # 誰も死んでいないなら能力発動しない
     job:(game,playerid)->
         if game.day<2
-            return "现在还不能发动技能"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         if @flag == "done"
-            return "已经不能发动技能"
+            return game.i18n.t "error.common.alreadyUsed"
 
         pl=game.getPlayer playerid
         unless pl?
-            return "这个玩家不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         unless pl.dead
-            return "不能选择这名玩家"
+            return game.i18n.t "error.common.notDead"
 
         @setFlag "done"
         @setTarget playerid
@@ -7216,7 +7105,7 @@ class MadScientist extends Madman
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 对 #{pl.name} 实施了复活手术。"
+            comment: game.i18n.t "roles:MadScientist.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         null
     midnight:(game,midnightSort)->
@@ -7231,23 +7120,21 @@ class MadScientist extends Madman
 
         pl = game.getPlayer @target
         return if pl.dead
-        # 蘇生に成功したら胜利条件を変える
-        newpl=Player.factory null,pl,null,WolfMinion    # WolfMinion
+        # 蘇生に成功したら勝利条件を変える
+        newpl=Player.factory null, game, pl,null,WolfMinion    # WolfMinion
         pl.transProfile newpl
         pl.transform game,newpl,true
         log=
             mode:"skill"
             to:newpl.id
-            comment:"#{newpl.name} 变成了狼的仆从。"
+            comment: game.i18n.t "roles:MinionSelector.become", {name: newpl.name}
         splashlog game.id,game,log
 class SpiritPossessed extends Player
     type:"SpiritPossessed"
-    jobname:"恶灵凭依"
     isReviver:->!@dead
 
 class Forensic extends Player
     type:"Forensic"
-    jobname:"法医学者"
     mdinightSort:100
     sleeping:->@target?
     job_target: Player.JOB_T_DEAD
@@ -7268,18 +7155,18 @@ class Forensic extends Player
             @job game, targets[r].id, {}
     job:(game,playerid)->
         if game.day < 2
-            return "还不能发动能力"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         pl = game.getPlayer playerid
         unless pl?
-            return "这个玩家不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         unless pl.dead
-            return "这个玩家尚未死亡"
+            return game.i18n.t "error.common.notDead"
         pl.touched game, @id
         @setTarget playerid
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 调查了 #{pl.name} 的尸体。"
+            comment: game.i18n.t "roles:Forensic.select", {name: @name, target: pl.name}
         splashlog game.id, game, log
         null
     midnight:(game)->
@@ -7287,28 +7174,25 @@ class Forensic extends Player
         return unless pl?
         # 死亡耐性を調べる
         fl = pl.hasDeadResistance game
-        result = if fl then "持有死亡耐性。" else "没有死亡耐性。"
+        result = if fl then "resultYes" else "resultNo"
 
         @addGamelog game,"forensic", fl, pl.id
         log=
             mode:"skill"
             to:@id
-            comment:"根据 #{@name} 的调查结果，#{pl.name} #{result}"
+            comment: game.i18n.t "roles:Forensic.#{result}", {name: @name, target: pl.name}
         splashlog game.id, game, log
 
 class Cosplayer extends Guard
     type:"Cosplayer"
-    jobname:"Cosplayer"
-    fortuneResult:"人狼"
+    fortuneResult: FortuneResult.werewolf
 
 class TinyGhost extends Player
     type:"TinyGhost"
-    jobname:"妖怪"
     humanCount:-> 0
 
 class Ninja extends Player
     type:"Ninja"
-    jobname:"忍者"
     sleeping:->@target?
     sunset:(game)->
         @setFlag null
@@ -7325,17 +7209,17 @@ class Ninja extends Player
     job:(game,playerid)->
         pl = game.getPlayer playerid
         unless pl?
-            return "这个玩家不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if pl.dead
-            return "这个玩家已经死亡"
+            return game.i18n.t "error.common.alreadyDead"
         if pl.id == "替身君"
-            return "不能选择替身君"
+            return game.i18n.t "error.common.noScapegoat"
         pl.touched game, @id
         @setTarget playerid
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 侦查了 #{pl.name}。"
+            comment: game.i18n.t "roles:Ninja.select", {name: @name, target: pl.name}
         splashlog game.id, game, log
         null
     midnight:(game)->
@@ -7350,19 +7234,18 @@ class Ninja extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"根据 #{@name} 的侦查结果，#{pl.name} 可以在夜间行动。"
+                comment: game.i18n.t "roles:Ninja.resultYes", {name: @name, target: pl.name}
             splashlog game.id, game, log
         else
             log=
                 mode:"skill"
                 to:@id
-                comment:"根据 #{@name} 的侦查结果，#{pl.name} 不能在夜间行动。"
+                comment: game.i18n.t "roles:Ninja.resultNo", {name: @name, target: pl.name}
             splashlog game.id, game, log
         @addGamelog game,"ninjaresult", result, pl.id
 
 class Twin extends Player
     type:"Twin"
-    jobname:"双胞胎"
     beforebury:(game)->
         # 死亡状態の双胞胎がいたら死亡
         if game.players.some((x)-> x.dead && x.isJobType "Twin")
@@ -7374,7 +7257,6 @@ class Twin extends Player
 
 class Hunter extends Player
     type:"Hunter"
-    jobname:"狩猎者"
     sleeping:(game)-> true
     hunterJobdone:(game)-> @flag != "hunting" || @target? || game.phase != Phase.hunter
     dying:(game, found)->
@@ -7385,17 +7267,17 @@ class Hunter extends Player
     job:(game, playerid)->
         pl = game.getPlayer playerid
         unless pl?
-            return "这个玩家不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         if pl.dead
-            return "这个玩家已经死亡"
+            return game.i18n.t "error.common.alreadyDead"
         unless @flag == "hunting"
-            return "现在还不能发动技能"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         pl.touched game, @id
         @setTarget playerid
         log=
             mode: "skill"
             to: @id
-            comment: "#{@name} 向 #{pl.name} 开枪了。"
+            comment: game.i18n.t "roles:Hunter.select", {name: @name, target: pl.name}
         splashlog game.id, game, log
         null
     makeJobSelection:(game)->
@@ -7415,12 +7297,10 @@ class Hunter extends Player
 
 class MadHunter extends Hunter
     type:"MadHunter"
-    jobname:"复仇者"
     team:"Werewolf"
 
 class MadCouple extends Player
     type:"MadCouple"
-    jobname:"尖叫狂人"
     team:"Werewolf"
     makejobinfo:(game,result)->
         super
@@ -7435,7 +7315,6 @@ class MadCouple extends Player
 
 class Emma extends Player
     type:"Emma"
-    jobname:"阎魔"
     isListener:(game, log)->
         if log.mode == "emmaskill"
             true
@@ -7457,7 +7336,6 @@ class EyesWolf extends Werewolf
 # 処理上便宜的に使用
 class GameMaster extends Player
     type:"GameMaster"
-    jobname:"游戏管理员"
     team:""
     jobdone:->false
     sleeping:->true
@@ -7470,9 +7348,9 @@ class GameMaster extends Player
                 # 死亡させる
                 pl=game.getPlayer playerid
                 unless pl?
-                    return "对象无效"
+                    return game.i18n.t "error.common.nonexistentPlayer"
                 if pl.dead
-                    return "这名玩家已经死亡"
+                    return game.i18n.t "error.common.alreadyDead"
                 pl.die game,"gmpunish"
                 game.bury("other")
                 return null
@@ -7480,9 +7358,9 @@ class GameMaster extends Player
                 # 蘇生させる
                 pl=game.getPlayer playerid
                 unless pl?
-                    return "对象无效"
+                    return game.i18n.t "error.common.nonexistentPlayer"
                 if !pl.dead
-                    return "这名玩家没有死亡"
+                    return game.i18n.t "error.common.notDead"
                 pl.revive game
                 if !pl.dead
                     if Phase.isNight(game.phase)
@@ -7492,7 +7370,7 @@ class GameMaster extends Player
                         # 昼のときは投票可能に
                         pl.votestart game
                 else
-                    return "这名玩家无法复活"
+                    return game.i18n.t "roles:GameMaster.reviveFail"
                 return null
             when "longer"
                 # 時間延長
@@ -7504,7 +7382,7 @@ class GameMaster extends Player
                 # 時間短縮
                 remains = game.timer_start + game.timer_remain - Date.now()/1000
                 if remains <= 30
-                    return "无法继续缩短剩余时间"
+                    return game.i18n.t "roles:GameMaster.shortenFail"
                 clearTimeout game.timerid
                 game.timer remains-30
                 return null
@@ -7538,7 +7416,6 @@ class GameMaster extends Player
 # 帮手
 class Helper extends Player
     type:"Helper"
-    jobname:"帮手"
     team:""
     jobdone:->@flag?
     sleeping:->true
@@ -7565,15 +7442,15 @@ class Helper extends Player
     getSpeakChoiceDay:(game)->@getSpeakChoice game
     job:(game,playerid)->
         if @flag?
-            return "已经决定了帮助对象"
+            return game.i18n.t "error.common.cannotUseSkillNow"
         pl=game.getPlayer playerid
         unless pl?
-            return "帮助对象不存在"
+            return game.i18n.t "error.common.nonexistentPlayer"
         @flag=playerid
         log=
             mode:"skill"
             to:playerid
-            comment:"#{@name} 成为了 #{pl.name} 的帮手。"
+            comment: game.i18n.t "roles:Helper.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
         # 自己の表記を改める
         game.splashjobinfo [this]
@@ -7596,7 +7473,6 @@ class Helper extends Player
 # 开始前のやつだ!!!!!!!!
 class Waiting extends Player
     type:"Waiting"
-    jobname:"尚未分配"
     team:""
     sleeping:(game)->game.phase != Phase.rolerequesting || game.rolerequesttable[@id]?
     isListener:(game,log)->
@@ -7613,13 +7489,13 @@ class Waiting extends Player
         if game.day==0 && game.phase == Phase.rolerequesting
             # 開始前
             result=[{
-                name:"放弃选择"
+                name: game.i18n.t "roles:Waiting.none"
                 value:""
             }]
             for job,num of game.joblist
                 if num
                     result.push {
-                        name:Shared.game.getjobname job
+                        name: game.i18n.t "roles:jobname.#{job}"
                         value:job
                     }
             return result
@@ -7631,18 +7507,17 @@ class Waiting extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 希望成为 #{Shared.game.getjobname target}。"
+                comment: game.i18n.t "roles:Waiting.select", {name: @name, jobname: game.i18n.t "roles:jobname.#{target}"}
         else
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 放弃选择职业。"
+                comment: game.i18n.t "roles:Waiting.selectNone", {name: @name}
         splashlog game.id,game,log
         null
 # Endless黑暗火锅でまだ入ってないやつ
 class Watching extends Player
     type:"Watching"
-    jobname:"观战者"
     team:""
     sleeping:(game)->true
     isWinner:(game,team)->true
@@ -7893,8 +7768,8 @@ class Friend extends Complex    # 恋人
     cmplType:"Friend"
     isFriend:->true
     team:"Friend"
-    getJobname:->"恋人（#{@main.getJobname()}）"
-    getJobDisp:->"恋人（#{@main.getJobDisp()}）"
+    getJobname:-> @game.i18n.t "roles:Friend.jobname", {jobname: @main.getJobname()}
+    getJobDisp:-> @game.i18n.t "roles:Friend.jobname", {jobname: @main.getJobDisp()}
     
     beforebury:(game,type,deads)->
         @mcall game,@main.beforebury,game,type,deads
@@ -7918,7 +7793,7 @@ class Friend extends Complex    # 恋人
         @mcall game,@main.makejobinfo,game,result
         # 恋人が分かる
         result.desc?.push {
-            name:"恋人"
+            name: game.i18n.t "roles:Friend.name"
             type:"Friend"
         }
         if game.rule.friendssplit=="split"
@@ -7949,7 +7824,7 @@ class HolyProtected extends Complex
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 被神圣的力量守护了。"
+            comment: game.i18n.t "roles:HolyProtected.guarded", {name: @name}
         splashlog game.id,game,log
         game.getPlayer(@cmplFlag).addGamelog game,"holyGJ",found,@id
         if found == "werewolf"
@@ -7960,13 +7835,13 @@ class HolyProtected extends Complex
 class CultMember extends Complex
     cmplType:"CultMember"
     isCult:->true
-    getJobname:->"教会信者（#{@main.getJobname()}）"
-    getJobDisp:->"教会信者（#{@main.getJobDisp()}）"
+    getJobname:-> @game.i18n.t "roles:CultMember.jobname", {jobname: @main.getJobname()}
+    getJobDisp:-> @game.i18n.t "roles:CultMember.jobname", {jobname: @main.getJobDisp()}
     makejobinfo:(game,result)->
         super
         # 信者の説明
         result.desc?.push {
-            name:"教会信者"
+            name: @game.i18n.t "roles:CultMember.name"
             type:"CultMember"
         }
 # 猎人に守られた人
@@ -7985,7 +7860,7 @@ class Guarded extends Complex
                     log=
                         mode:"skill"
                         to:guard.id
-                        comment:"#{guard.name} 成功守护了 #{@name}。"
+                        comment: game.i18n.t "roles:Guard.gj", {guard: guard.name, name: @name}
                     splashlog game.id,game,log
             # 襲撃失敗ログを追加
             if found == "werewolf"
@@ -8012,22 +7887,22 @@ class Muted extends Complex
 class WolfMinion extends Complex
     cmplType:"WolfMinion"
     team:"Werewolf"
-    getJobname:->"狼的仆从（#{@main.getJobname()}）"
-    getJobDisp:->"狼的仆从（#{@main.getJobDisp()}）"
+    getJobname:-> @game.i18n.t "roles:WolfMinion.jobname", {jobname: @main.getJobname()}
+    getJobDisp:-> @game.i18n.t "roles:WolfMinion.jobname", {jobname: @main.getJobDisp()}
     makejobinfo:(game,result)->
         @sub?.makejobinfo? game,result
         @mcall game,@main.makejobinfo,game,result
         result.desc?.push {
-            name:"狼的仆从"
+            name: @game.i18n.t "roles:WolfMinion.name"
             type:"WolfMinion"
         }
     isWinner:(game,team)->@team==team
 # 酒鬼
 class Drunk extends Complex
     cmplType:"Drunk"
-    getJobname:->"酒鬼（#{@main.getJobname()}）"
+    getJobname:-> @game.i18n.t "roles:Drunk.jobname", {jobname: @main.getJobname()}
     getTypeDisp:->"Human"
-    getJobDisp:->"村人"
+    getJobDisp:-> @game.i18n.t "roles:jobname.Human"
     sleeping:->true
     jobdone:->true
     isListener:(game,log)->
@@ -8041,7 +7916,7 @@ class Drunk extends Complex
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 酒醒了。"
+                comment: game.i18n.t "roles:Drunk.awake", {name: @name}
             splashlog game.id,game,log
             @uncomplex game
             game.ss.publish.user @realid,"refresh",{id:game.id}
@@ -8119,7 +7994,7 @@ class TrapGuarded extends Complex
                     log=
                         mode:"skill"
                         to:guard.id
-                        comment:"#{guard.name} 的陷阱成功守护了 #{@name}。"
+                        comment: game.i18n.t "roles:Trapper.gj", {guard: guard.name, name: @name}
                     splashlog game.id,game,log
             # 反撃する
             canbedead=[]
@@ -8149,7 +8024,7 @@ class TrapGuarded extends Complex
 # 黙らされた人
 class Lycanized extends Complex
     cmplType:"Lycanized"
-    fortuneResult:"人狼"
+    fortuneResult: FortuneResult.werewolf
     sunset:(game)->
         # 一日しか効かない
         @sub?.sunset? game
@@ -8159,15 +8034,15 @@ class Lycanized extends Complex
 class Counseled extends Complex
     cmplType:"Counseled"
     team:"Human"
-    getJobname:->"更生者（#{@main.getJobname()}）"
-    getJobDisp:->"更生者（#{@main.getJobDisp()}）"
+    getJobname:-> @game.i18n.t "roles:Counseled.jobname", {jobname: @main.getJobname()}
+    getJobDisp:-> @game.i18n.t "roles:Counseled.jobname", {jobname: @main.getJobDisp()}
 
     isWinner:(game,team)->@team==team
     makejobinfo:(game,result)->
         @sub?.makejobinfo? game,result
         @mcall game,@main.makejobinfo,game,result
         result.desc?.push {
-            name:"更生者"
+            name: @game.i18n.t "roles:Counseled.name"
             type:"Counseled"
         }
 # 巫女のガードがある状态
@@ -8230,7 +8105,7 @@ class DivineObstructed extends Complex
             log=
                 mode:"skill"
                 to:@id
-                comment:"#{@name} 占卜了 #{pl.name} 的身份，但是被不知道什么人妨碍了。"
+                comment: game.i18n.t "roles:ObstructiveMad.blocked", {name: @name, target: pl.name}
             splashlog game.id,game,log
     dodivine:(game)->
         # 占おうとした。邪魔成功
@@ -8243,7 +8118,7 @@ class PhantomStolen extends Complex
     sunset:(game)->
         # 夜になると怪盗になってしまう!!!!!!!!!!!!
         @sub?.sunrise? game
-        newpl=Player.factory "Phantom"
+        newpl=Player.factory "Phantom", game
         # アレがなぜか狂ってしまうので一時的に保存
         saved=@originalJobname
         @uncomplex game
@@ -8254,15 +8129,15 @@ class PhantomStolen extends Complex
         log=
             mode:"skill"
             to:@id
-            comment:"#{@name} 的职业被盗走了，变成了 #{newpl.getJobDisp()}。"
+            comment: game.i18n.t "roles:Phantom.stolen", {name: @name, jobname: newpl.getJobDisp()}
         splashlog game.id,game,log
         # 夜の初期化
         pl=game.getPlayer @id
         pl.setOriginalJobname saved
         pl.setFlag true # もう盗めない
         pl.sunset game
-    getJobname:->"怪盗" #灵界とかでは既に怪盗化
-    # 胜利条件関係は村人化（昼の間だけだし）
+    getJobname:-> @game.i18n.t "roles:jobname.Phantom" #霊界とかでは既に怪盗化
+    # 勝利条件関係は村人化（昼の間だけだし）
     isWerewolf:->false
     isFox:->false
     isVampire:->false
@@ -8283,15 +8158,15 @@ class PhantomStolen extends Complex
 class KeepedLover extends Complex    # 恶女に手玉にとられた（見た目は恋人）
     # cmplFlag: 相方のid
     cmplType:"KeepedLover"
-    getJobname:->"手玉（#{@main.getJobname()}）"
-    getJobDisp:->"恋人（#{@main.getJobDisp()}）"
+    getJobname:-> @game.i18n.t "roles:KeepedLover.jobname", {jobname: @main.getJobname()}
+    getJobDisp:-> @game.i18n.t "roles:KeepedLover.fakeJobname", {jobname: @main.getJobDisp()}
     
     makejobinfo:(game,result)->
         @sub?.makejobinfo? game,result
         @mcall game,@main.makejobinfo,game,result
         # 恋人が分かる
         result.desc?.push {
-            name:"恋人"
+            name: game.i18n.t "roles:KeepedLover.fakeName"
             type:"Friend"
         }
         # 恋人だと思い込む
@@ -8407,7 +8282,7 @@ class FoxMinion extends Complex
     isFox:->true
     isFoxVisible:->true
     hasDeadResistance:->true
-    getJobname:->"狐凭（#{@main.getJobname()}）"
+    getJobname:-> @game.i18n.t "roles:FoxMinion.jobname", {jobname: @main.getJobname()}
     # 占われたら死ぬ
     divined:(game,player)->
         @mcall game,@main.divined,game,player
@@ -8447,19 +8322,19 @@ class GotChocolateFalse extends Complex
 # 黒になった
 class Blacked extends Complex
     cmplType:"Blacked"
-    fortuneResult: "人狼"
-    psychicResult:"人狼"
+    fortuneResult: FortuneResult.werewolf
+    psychicResult: PsychicResult.werewolf
 
 # 白になった
 class Whited extends Complex
     cmplType:"Whited"
-    fortuneResult: "村人"
-    psychicResult:"村人"
+    fortuneResult: FortuneResult.human
+    psychicResult: PsychicResult.human
 
 # 占い結果吸血鬼化
 class VampireBlooded extends Complex
     cmplType:"VampireBlooded"
-    fortuneResult: "吸血鬼"
+    fortuneResult: FortuneResult.vampire
 
 # 催眠術をかけられた
 class UnderHypnosis extends Complex
@@ -8494,13 +8369,13 @@ class VoteGuarded extends Complex
 # 南瓜魔の呪い
 class PumpkinCostumed extends Complex
     cmplType:"PumpkinCostumed"
-    fortuneResult: "南瓜"
+    fortuneResult: FortuneResult.pumpkin
 
 
 # 决定者
 class Decider extends Complex
     cmplType:"Decider"
-    getJobname:->"#{@main.getJobname()}（决定者）"
+    getJobname:-> @game.i18n.t "roles:Decider.jobname", {jobname: @main.getJobname()}
     dovote:(game,target)->
         result=@mcall game,@main.dovote,game,target
         return result if result?
@@ -8509,7 +8384,7 @@ class Decider extends Complex
 # 权力者
 class Authority extends Complex
     cmplType:"Authority"
-    getJobname:->"#{@main.getJobname()}（权力者）"
+    getJobname:-> @game.i18n.t "roles:Authority.jobname", {jobname: @main.getJobname()}
     dovote:(game,target)->
         result=@mcall game,@main.dovote,game,target
         return result if result?
@@ -8521,12 +8396,12 @@ class Chemical extends Complex
     cmplType:"Chemical"
     getJobname:->
         if @sub?
-            "#{@main.getJobname()}×#{@sub.getJobname()}"
+            @game.i18n.t "roles:Chemical.jobname", {left: @main.getJobname(), right: @sub.getJobname()}
         else
             @main.getJobname()
     getJobDisp:->
         if @sub?
-            "#{@main.getJobDisp()}×#{@sub.getJobDisp()}"
+            @game.i18n.t "roles:Chemical.jobname", {left: @main.getJobDisp(), right: @sub.getJobDisp()}
         else
             @main.getJobDisp()
     sleeping:(game)->@main.sleeping(game) && (!@sub? || @sub.sleeping(game))
@@ -8574,19 +8449,19 @@ class Chemical extends Complex
     getFortuneResult:->
         fsm = @main.getFortuneResult()
         fss = @sub?.getFortuneResult()
-        if "吸血鬼" in [fsm, fss]
-            "吸血鬼"
-        else if "人狼" in [fsm, fss]
-            "人狼"
+        if FortuneResult.vampire in [fsm, fss]
+            FortuneResult.vampire
+        else if FortuneResult.werewolf in [fsm, fss]
+            FortuneResult.werewolf
         else
-            "村人"
+            FortuneResult.human
     getPsychicResult:->
         fsm = @main.getPsychicResult()
         fss = @sub?.getPsychicResult()
-        if "人狼" in [fsm, fss]
-            "人狼"
+        if PsychicResult.werewolf in [fsm, fss]
+            PsychicResult.werewolf
         else
-            "村人"
+            PsychicResult.human
     getTeam:->
         myt = null
         maint = @main.getTeam()
@@ -8960,21 +8835,21 @@ module.exports.actions=(req,res,ss)->
     gameStart:(roomid,query)->
         game=games[roomid]
         unless game?
-            res "游戏不存在"
+            res i18n.t "error.common.noSuchGame"
             return
         Server.game.rooms.oneRoomS roomid,(room)->
             if room.error?
                 res room.error
                 return
             unless room.mode=="waiting"
-                # すでに开始している
-                res "游戏已经开始"
+                # すでに開始している
+                res game.i18n.t "error.gamestart.alreadyStarted"
                 return
             if room.players.some((x)->!x.start)
-                res "全员尚未全部准备好"
+                res game.i18n.t "error.gamestart.notReady"
                 return
             if room.gm!=true && query.yaminabe_hidejobs!="" && !(query.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"])
-                res "「配置公开」选项在黑暗火锅模式下，只有在有GM的房间才能使用"
+                res game.i18n.t "error.gamestart.noHiddenRole"
                 return
 
 
@@ -8993,11 +8868,10 @@ module.exports.actions=(req,res,ss)->
             }
             # 不正なアレははじく
             unless Number.isFinite(ruleobj.day) && Number.isFinite(ruleobj.night) && Number.isFinite(ruleobj.remain) && Number.isFinite(ruleobj.voting)
-                res "时间长度不是有效数字"
+                res game.i18n.t "error.gamestart.invalidTime"
                 return
-            
             unless ruleobj.day && ruleobj.night && ruleobj.remain
-                res "时间长度不是有效数字，或总时长为零。"
+                res game.i18n.t "error.gamestart.invalidTime"
                 return
             
             options={}  # 选项ズ
@@ -9025,17 +8899,17 @@ module.exports.actions=(req,res,ss)->
             playersnumber=frees
             # 人数の確認
             if frees<6
-                res "人数不足，不能开始。含替身君最少要有6人。"
+                res game.i18n.t "error.gamestart.playerNotEnough", {count: 6}
                 return
             if query.jobrule=="特殊规则.量子人狼" && frees>=20
                 # 多すぎてたえられない
-                res "人数过多。量子人狼的人数应当在19人以下。"
+                res game.i18n.t "error.gamestart.tooManyQuantum", {count: 19}
                 return
             # 炼成人狼の場合
             if query.chemical=="on"
-                # 黑暗火锅と量子人狼は無理
+                # 闇鍋と量子人狼は無理
                 if query.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅","特殊规则.量子人狼"]
-                    res "本规则「#{query.jobrule}」无法使用炼成人狼。"
+                    res game.i18n.t "error.gamestart.noChemical"
                     return
                 
             ruleinfo_str="" # 开始告知
@@ -9371,6 +9245,7 @@ module.exports.actions=(req,res,ss)->
                 ((date)->
                     month=date.getMonth()
                     d=date.getDate()
+                    # 期間機率提升
                     if month==11 && 24<=d<=25
                         # 12/24〜12/25はサンタがよくでる
                         if Math.random()<0.5 && frees>0 && !nonavs.SantaClaus
@@ -9676,13 +9551,11 @@ module.exports.actions=(req,res,ss)->
                     query.divineresult="sunrise"
                     log=
                         mode:"system"
-                        comment:"由于存在能够左右占卜结果的职业，占卜结果从「立刻知道」变更为「天亮才知道」。"
+                        comment: game.i18n.t "system.gamestart.divinerModeChanged"
                     splashlog game.id,game,log
 
-
-
             else if query.jobrule=="特殊规则.量子人狼"
-                # 量子人狼のときは全员量子人类だけど职业はある
+                # 量子人狼のときは全員量子人間だけど役職はある
                 func=Shared.game.getrulefunc "内部利用.量子人狼"
                 joblist=func frees
                 sum=0
@@ -9713,7 +9586,7 @@ module.exports.actions=(req,res,ss)->
                 # 配置に従ってアレする
                 func=Shared.game.getrulefunc query.jobrule
                 unless func
-                    res "不明的配置"
+                    res game.i18n.t "error.gamestart.unknownCasting"
                     return
                 joblist=func frees
                 sum=0   # 穴を埋めつつ合計数える
@@ -9738,27 +9611,27 @@ module.exports.actions=(req,res,ss)->
                 ruleinfo_str = ""
             if query.chemical == "on"
                 # ケミカル人狼の場合は表示
-                ruleinfo_str = "炼成人狼　" + (ruleinfo_str ? "")
+                ruleinfo_str = "#{game.i18n.t "common.chemicalWerewolf"}　" + (ruleinfo_str ? "")
                 
             if query.divineresult=="immediate" && ["WolfBoy", "ObstructiveMad", "Pumpkin", "Patissiere", "Hypnotist"].some((job)-> joblist[job] > 0)
                 query.divineresult="sunrise"
                 log=
                     mode:"system"
-                    comment:"由于存在能够左右占卜结果的职业，占卜结果从「立刻知道」变更为「天亮才知道」。"
+                    comment: game.i18n.t "system.gamestart.divinerModeChanged"
                 splashlog game.id,game,log
                 
             if ruleinfo_str != ""
                 # 表示すべき情報がない場合は表示しない
                 log=
                     mode:"system"
-                    comment:"配置: #{ruleinfo_str}"
+                    comment: game.i18n.t "system.gamestart.casting", {casting: ruleinfo_str}
                 splashlog game.id,game,log
             if query.jobrule == "特殊规则.手调黑暗火锅" && excluded_exceptions.length > 0
-                # 除外职业の情報を表示する
-                exclude_str = excluded_exceptions.map((job)-> Shared.game.getjobname job).join ", "
+                # 除外役職の情報を表示する
+                exclude_str = excluded_exceptions.map((job)-> game.i18n.t "roles:jobname.#{job}").join ", "
                 log=
                     mode:"system"
-                    comment:"除外职业：#{exclude_str}"
+                    comment: game.i18n.t "system.gamestart.excluded", {jobnames: exclude_str}
                 splashlog game.id,game,log
 
             
@@ -9786,7 +9659,7 @@ module.exports.actions=(req,res,ss)->
 
                 log=
                     mode:"system"
-                    comment:"出场阵营信息: "+teaminfos.join(" ")
+                    comment: game.i18n.t "system.gamestart.teams", {info: teaminfos.join(" ")}
                 splashlog game.id,game,log
             if query.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
                 if query.yaminabe_hidejobs==""
@@ -9794,10 +9667,10 @@ module.exports.actions=(req,res,ss)->
                     jobinfos=[]
                     for job,num of joblist
                         continue if num==0
-                        jobinfos.push "#{Shared.game.getjobname job}#{num}"
+                        jobinfos.push "#{game.i18n.t "roles:jobname.#{job}"}#{num}"
                     log=
                         mode:"system"
-                        comment:"出场职业: "+jobinfos.join(" ")
+                        comment: game.i18n.t "system.gamestart.roles", {info: jobinfos.join(" ")}
                     splashlog game.id,game,log
 
             
@@ -9844,7 +9717,7 @@ module.exports.actions=(req,res,ss)->
                 res null
                 log=
                     mode:"system"
-                    comment:"本场游戏采取了希望役职制，请选择想要的职业。"
+                    comment: game.i18n.t "system.gamestart.roleRequesting"
                 splashlog game.id,game,log
                 game.timer()
                 ss.publish.channel "room#{roomid}","refresh",{id:roomid}
@@ -9878,7 +9751,7 @@ module.exports.actions=(req,res,ss)->
                 console.error err
                 res {error: err}
             else if !doc?
-                res {error: "游戏不存在"}
+                res {error: i18n.t "error.common.noSuchGame"}
             else
                 unless games[roomid]?
                     games[roomid] = Game.unserialize doc,ss
@@ -9902,27 +9775,27 @@ module.exports.actions=(req,res,ss)->
     speak: (roomid,query)->
         game=games[roomid]
         unless game?
-            res "游戏不存在"
+            res i18n.t "error.common.noSuchGame"
             return
         unless req.session.userId
-            res "请登陆"
+            res game.i18n.t "error.common.needLogin"
             return
         unless query?
-            res "无效操作"
+            res game.i18n.t "error.common.invalidQuery"
             return
         comment=query.comment
         unless comment
-            res "没有简介"
+            res game.i18n.t "error.common.invalidQuery"
             return
         if comment.length > Config.maxlength.game.comment
-            res "发言过长"
+            res game.i18n.t "error.speak.tooLong"
             return
         player=game.getPlayerReal req.session.userId
 
         unless player?
             # 観戦発言に対するチェック
             unless libblacklist.checkPermission "watch_say", req.session.ban
-                res "您的账号受限，不能在此处发言。"
+                res game.i18n.t "error.speak.ban"
                 return
         # 発言できない時間帯
         if !game.finished  && Phase.isRemain(game.phase)   # 投票猶予時間は発言できない
@@ -9999,13 +9872,13 @@ module.exports.actions=(req,res,ss)->
                             log.possess_name = pl.name
                             log.possess_id = pl.id
                 when "gm"
-                    log.name="GM→所有人"
+                    log.name= game.i18n.t "roles:jobname.GameMaster"
                 when "gmheaven"
-                    log.name="GM→灵界"
+                    log.name= game.i18n.t "roles:GameMaster.heavenLog"
                 when "gmaudience"
-                    log.name="GM→观战者"
+                    log.name= game.i18n.t "roles:GameMaster.audienceLog"
                 when "gmmonologue"
-                    log.name="GM自言自语"
+                    log.name= game.i18n.t "roles:GameMaster.monologueLog"
                 when "prepare"
                     # ごちゃごちゃ言わない
                 else
@@ -10044,17 +9917,17 @@ module.exports.actions=(req,res,ss)->
     job:(roomid,query)->
         game=games[roomid]
         unless game?
-            res {error:"游戏不存在"}
+            res {error: i18n.t "error.common.noSuchGame"}
             return
         unless req.session.userId
-            res {error:"请登陆"}
+            res {error: game.i18n.t "error.common.needLogin"}
             return
         player=game.getPlayerReal req.session.userId
         unless player?
-            res {error:"没有加入游戏"}
+            res {error: game.i18n.t "error.common.notPlayer"}
             return
         unless player in game.participants
-            res {error:"没有加入游戏"}
+            res {error: game.i18n.t "error.common.notPlayer"}
             return
         ###
         if player.dead && player.deadJobdone game
@@ -10064,7 +9937,7 @@ module.exports.actions=(req,res,ss)->
         jt=player.getjob_target()
         sl=player.makeJobSelection game
         unless player.checkJobValidity game,query
-            res {error:"对象选择无效"}
+            res {error: game.i18n.t "error.job.invalid"}
             return
         if game.phase == Phase.rolerequesting || Phase.isNight(game.phase) || game.phase == Phase.hunter || query.jobtype!="_day"  # 昼の投票
             # 夜
@@ -10076,10 +9949,10 @@ module.exports.actions=(req,res,ss)->
                 else
                     player.jobdone(game)
             if jdone
-                res {error:"已经使用了能力"}
+                res {error: game.i18n.t "error.job.done"}
                 return
             unless player.isJobType query.jobtype
-                res {error:"职业错误"}
+                res {error: game.i18n.t "error.job.invalid"}
                 return
             # 错误メッセージ
             if ret=player.job game,query.target,query
@@ -10102,11 +9975,11 @@ module.exports.actions=(req,res,ss)->
         else
             # 投票
             unless player.checkJobValidity game,query
-                res {error:"请选择对象"}
+                res {error: game.i18n.t "error.voting.noTarget"}
                 return
             if game.rule.voting > 0 && game.phase == Phase.day
-                # 投票专用时间ではない
-                res {error: "尚未开始投票阶段"}
+                # 投票専用時間ではない
+                res {error: game.i18n.t "error.voting.notNow"}
                 return
             err=player.dovote game,query.target
             if err?
@@ -10126,20 +9999,20 @@ module.exports.actions=(req,res,ss)->
     will:(roomid,will)->
         game=games[roomid]
         unless game?
-            res "游戏不存在"
+            res i18n.t "error.common.noSuchGame"
             return
         unless req.session.userId
-            res "请登陆"
+            res game.i18n.t "error.common.needLogin"
             return
         unless !game.rule || game.rule.will
-            res "不能使用遗言"
+            res game.i18n.t "error.will.noWill"
             return
         player=game.getPlayerReal req.session.userId
         unless player?
-            res "没有加入游戏"
+            res game.i18n.t "error.common.notPlayer"
             return
         if player.dead
-            res "你已经死了"
+            res game.i18n.t "error.will.alreadyDead"
             return
         player.setWill will
         res null
@@ -10147,14 +10020,14 @@ module.exports.actions=(req,res,ss)->
     norevive:(roomid)->
         game=games[roomid]
         unless game?
-            res "游戏不存在"
+            res i18n.t "error.common.noSuchGame"
             return
         unless req.session.userId
-            res "请登陆"
+            res game.i18n.t "error.common.needLogin"
             return
         player=game.getPlayerReal req.session.userId
         unless player?
-            res "没有加入游戏"
+            res game.i18n.t "error.common.notPlayer"
             return
         if player.norevive
             res "已经不可复活"
@@ -10162,7 +10035,7 @@ module.exports.actions=(req,res,ss)->
         player.setNorevive true
         log=
             mode:"userinfo"
-            comment:"#{player.name} 拒绝复活。"
+            comment: game.i18n.t "system.declineRevival", {name: player.name}
             to:player.id
         splashlog roomid,game,log
         # 全员に通知
@@ -10212,16 +10085,16 @@ makelogsFor=(game,player,log)->
         # 狼的远吠が能听到
         otherslog=
             mode:"werewolf"
-            comment:"嗷呜・・・"
-            name:"狼的远吠"
+            comment: game.i18n.t "logs.werewolf.comment"
+            name: game.i18n.t "logs.werewolf.name"
             time:log.time
         return [otherslog]
     if log.mode in ["couple", "madcouple"] && game.rule.couplesound=="aloud"
         # 共有者の小声が聞こえる
         otherslog=
             mode:"couple"
-            comment:"沙沙・・・"
-            name:"模糊的低语声"
+            comment: game.i18n.t "logs.couple.comment"
+            name: game.i18n.t "logs.couple.name"
             time:log.time
         return [otherslog]
     if log.mode=="heaven" && log.possess_name?

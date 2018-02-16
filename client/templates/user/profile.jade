@@ -64,13 +64,13 @@ section.profile
       h3 密码变更
       p: label
         | 现在的密码
-        input(name="password",type="password",size="20",required)
+        input(name="password",type="password",size="20",required,autocomplete="current-password")
       p: label
         | 新密码
-        input(name="newpass",type="password",size="20",required)
+        input(name="newpass",type="password",size="20",required,autocomplete="new-password")
       p: label
         | 再输入一次
-        input(name="newpass2",type="password",size="20",required)
+        input(name="newpass2",type="password",size="20",required,autocomplete="new-password")
       p: input(type="submit",value="变更")
   h1 通知
   table.newstable
@@ -107,3 +107,5 @@ section.profile
     form#prizearea
       p
         input(type="submit",value="保存称号")
+  p
+    a(href="/logout") 退出

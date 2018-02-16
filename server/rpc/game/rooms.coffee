@@ -1,5 +1,9 @@
 libblacklist = require '../../libs/blacklist.coffee'
 libuserlogs = require '../../libs/userlogs.coffee'
+libi18n = require '../../libs/i18n.coffee'
+
+i18n = libi18n.getWithDefaultNS 'rooms'
+
 ###
 room: {
   id: Number
@@ -51,18 +55,18 @@ crypto=require 'crypto'
 sethelper=(ss,roomid,userid,id,res)->
     Server.game.rooms.oneRoomS roomid,(room)->
         if !room || room.error?
-            res "这个房间不存在"
+            res i18n.t "error.noSuchRoom"
             return
         pl = room.players.filter((x)->x.realid==userid)[0]
         topl=room.players.filter((x)->x.userid==id)[0]
         if pl?.mode=="gm"
-            res "GM不能成为帮手"
+            res i18n.t "error.gmCannotBeHelper"
             return
         if userid==id
-            res "不能成为自己的帮手"
+            res i18n.t "error.noSelfHelper"
             return
         unless room.mode=="waiting"
-            res "游戏已经开始"
+            res i18n.t "error.alreadyStarted"
             return
         mode= if topl? then "helper_#{id}" else "player"
         room.players.forEach (x,i)=>
@@ -76,7 +80,7 @@ sethelper=(ss,roomid,userid,id,res)->
                     }
                 }, (err)=>
                     if err?
-                        res "错误:#{err}"
+                        res String err
                     else
                         res null
                         # 帮手の様子を 知らせる
@@ -190,22 +194,22 @@ module.exports.actions=(req,res,ss)->
     # 失敗: {error: ""}
     newRoom: (query)->
         unless req.session.userId
-            res {error: "没有登陆"}
+            res {error: i18n.t "common:error.needLogin"}
             return
         unless query.name?.trim?()
-            res {error: "房间名不能为空"}
+            res {error: i18n.t "error.newRoom.noName"}
             return
         if query.name.length > Config.maxlength.room.name
-            res {error: "房间名过长"}
+            res {error: i18n.t "error.newRoom.nameTooLong"}
             return
         if query.comment && query.comment.length > Config.maxlength.room.comment
-            res {error: "简介过长"}
+            res {error: i18n.t "error.newRoom.commentTooLong"}
             return
         unless query.blind in ['', 'yes', 'complete']
-            res {error: "参数无效"}
+            res {error: i18n.t "error.newRoom.invalidParameter"}
             return
         unless libblacklist.checkPermission "play", req.session.ban
-            res {error: "您的账号受限，不能创建房间。"}
+            res {error: i18n.t "error.newRoom.banned"}
             return
 
         M.rooms.find().sort({id:-1}).limit(1).nextObject (err,doc)=>
@@ -260,7 +264,7 @@ module.exports.actions=(req,res,ss)->
             #unless room.blind
             #   room.players.push req.session.user
             unless room.number
-                res {error: "玩家人数无效"}
+                res {error: i18n.t "error.newRoom.invalidParameter"}
                 return
             room.owner=
                 userid:req.session.user.userid
@@ -289,7 +293,19 @@ module.exports.actions=(req,res,ss)->
                         res {error: err}
                         return
                     res {id: room.id}
-                    Server.oauth.template room.id,"「#{room.name}」（房间号：#{room.id} #{if room.password then '・🔒有密码' else ''}#{if room.blind then '・👤匿名模式' else ''}#{if room.gm then '・有GM' else ''}）建成了。 #月下人狼",Config.admin.password
+                    # build options string
+                    delimiter = i18n.t "tweet.newRoom.delimiter"
+                    options = [
+                        (if room.password then delimiter + i18n.t("tweet.newRoom.password") else ''),
+                        (if room.blind then delimiter + i18n.t("tweet.newRoom.blind") else ''),
+                        (if room.gm then delimiter + i18n.t("tweet.newRoom.gm") else ''),
+                    ].join ''
+                    tweet = i18n.t "tweet.newRoom.main", {
+                        name: room.name
+                        id: room.id
+                        options: options
+                    }
+                    Server.oauth.template room.id, tweet, Config.admin.password
 
                     Server.log.makeroom req.session.user, room
 
@@ -297,7 +313,7 @@ module.exports.actions=(req,res,ss)->
     # 成功ならnull 失敗なら错误メッセージ
     join: (roomid,opt)->
         unless req.session.userId
-            res {error:"请登陆",require:"login"}    # ログインが必要
+            res {error: i18n.t("common:error.needLogin"), require:"login"}    # ログインが必要
             return
         M.users.findOne {userid:req.session.userId},(err,doc)->
             unless doc?
@@ -306,34 +322,37 @@ module.exports.actions=(req,res,ss)->
         unless libblacklist.checkPermission "play", req.session.ban
             # アクセス制限
             res {
-                error: "您的账号受限，不能加入房间。"
+                error: i18n.t "error.join.banned"
             }
             return
         Server.game.rooms.oneRoomS roomid,(room)=>
             if !room || room.error?
-                res error:"这个房间不存在"
+                res error: i18n.t "error.noSuchRoom"
                 return
             if req.session.userId in (room.players.map (x)->x.realid)
-                res error:"已经加入"
+                res error: i18n.t "error.join.alreadyJoined"
                 return
             if Array.isArray(room.ban) && (req.session.userId in room.ban)
-                res error:"被禁止加入此房间"
+                res error: i18n.t "error.join.kicked"
+                return
+            if opt.name in (room.players.map (x)->x.name)
+                res error: i18n.t "error.join.nameUsed", {name: opt.name}
                 return
             if room.gm && room.owner.userid==req.session.userId
-                res error:"GM不能加入游戏"
+                res error: i18n.t "error.join.alreadyJoined"
                 return
             unless room.mode=="waiting" || (room.mode=="playing" && room.jobrule=="特殊规则.Endless黑暗火锅")
-                res error:"无法加入游戏"
+                res error: i18n.t "error.alreadyStarted"
                 return
             if room.mode=="waiting" && room.players.length >= room.number
                 # 満員
-                res error:"房间已满"
+                res error: i18n.t "error.join.full"
                 return
             if room.mode=="playing" && room.jobrule=="特殊规则.Endless黑暗火锅"
                 # エンドレス闇鍋の場合はゲーム内人数による人数判定を行う
                 unless Server.game.game.endlessCanEnter(roomid, req.session.userId, room.number)
                     # 満員
-                    res error:"房间已满"
+                    res error: i18n.t "error.join.full"
                     return
             #room.players.push req.session.user
             su=req.session.user
@@ -354,7 +373,7 @@ module.exports.actions=(req,res,ss)->
                 
             # please no, link of data:image/jpeg;base64 would be a disaster
             if user.icon?.length > Config.maxlength.user.icon
-                res error:"头像链接过长（#{user.icon.length}）"
+                res error: i18n.t "error.join.iconTooLong"
                 return
 
             if room.theme
@@ -367,11 +386,11 @@ module.exports.actions=(req,res,ss)->
                     return
                 
             if room.blind
-                unless opt?.name || room.theme
-                    res error:"请输入昵称"
+                unless opt?.name
+                    res error: i18n.t "error.join.nameNeeded"
                     return
                 if opt.name.length > Config.maxlength.user.name
-                    res {error: "昵称过长"}
+                    res {error: i18n.t "error.join.nameTooLong"}
                     return
                 # 分配皮肤
                 if room.theme && theme != null
@@ -420,7 +439,7 @@ module.exports.actions=(req,res,ss)->
                 res error:"禁止冒名顶替「替身君」"
                 return
             if user.name.length<1
-                res error:"昵称不能仅为空格"
+                res error: i18n.t "error.join.nameOnlySpaces"
                 return
             if room.players.some((x)->x.realid==user.realid)
                 res error:"#{user.realid} 正在尝试重复加入游戏，请检查您的网络连接是否正常稳定。"
@@ -428,7 +447,7 @@ module.exports.actions=(req,res,ss)->
 
             M.rooms.update {id:roomid},{$push: {players:user}},(err)=>
                 if err?
-                    res error:"错误:#{err}"
+                    res error: String err
                 else
                     # 啊啦，为什么身上有一张身份证，这就是我吗？
                     if room.theme && theme != null
@@ -459,21 +478,21 @@ module.exports.actions=(req,res,ss)->
     # 部屋から出る
     unjoin: (roomid)->
         unless req.session.userId
-            res "请登陆"
+            res i18n.t "common:error.needLogin"
             return
         Server.game.rooms.oneRoomS roomid,(room)=>
             if !room || room.error?
-                res "这个房间不存在"
+                res i18n.t "error.noSuchRoom"
                 return
             pl = room.players.filter((x)->x.realid==req.session.userId)[0]
             unless pl
-                res "尚未加入游戏"
+                res i18n.t "error.notMember"
                 return
             if pl.mode=="gm"
-                res "GM不能退出房间"
+                res i18n.t "error.unjoin.noGMLeave"
                 return
             unless room.mode=="waiting"
-                res "游戏已经开始"
+                res i18n.t "error.alreadyStarted"
                 return
             # consistencyのためにplayersをまるごとアップデートする
             room.players = room.players.filter (x)=> x.realid != req.session.userId
@@ -487,7 +506,7 @@ module.exports.actions=(req,res,ss)->
                         p.start = false
             M.rooms.update {id:roomid},{$set: {players: room.players}},(err)=>
                 if err?
-                    res "错误:#{err}"
+                    res String err
                 else
                     res null
                     # 退室通知
@@ -499,17 +518,17 @@ module.exports.actions=(req,res,ss)->
         # 準備ができたか？
         console.log "ready:"+req.session.userId
         unless req.session.userId
-            res "请登陆"
+            res i18n.t "common:error.needLogin"
             return
         Server.game.rooms.oneRoomS roomid,(room)=>
             if !room || room.error?
-                res "这个房间不存在"
+                res i18n.t "error.noSuchRoom"
                 return
             unless req.session.userId in (room.players.map (x)->x.realid)
-                res "尚未加入游戏"
+                res i18n.t "error.notMember"
                 return
             unless room.mode=="waiting"
-                res "游戏已经开始"
+                res i18n.t "error.alreadyStarted"
                 return
             room.players.forEach (x,i)=>
                 if x.realid==req.session.userId
@@ -522,7 +541,7 @@ module.exports.actions=(req,res,ss)->
                         }
                     }, (err)=>
                         if err?
-                            res "错误:#{err}"
+                            res String err
                         else
                             res null
                             # ready? 知らせる
@@ -531,25 +550,24 @@ module.exports.actions=(req,res,ss)->
     # 部屋から追い出す
     kick:(roomid,id,ban)->
         unless req.session.userId
-            res "请登陆"
+            res i18n.t "common:error.needLogin"
             return
         Server.game.rooms.oneRoomS roomid,(room)=>
             if !room || room.error?
-                res "这个房间不存在"
+                res i18n.t "error.noSuchRoom"
                 return
             if room.owner.userid != req.session.userId
-                res "你不是房主"
-                console.log room.owner,req.session.userId
+                res i18n.t "common:invalidInput"
                 return
             unless room.mode=="waiting"
-                res "游戏已经开始"
+                res i18n.t "error.alreadyStarted"
                 return
             pl=room.players.filter((x)->x.userid==id)[0]
             unless pl
-                res "这个玩家没有加入游戏"
+                res i18n.t "common:invalidInput"
                 return
             if pl.mode=="gm"
-                res "GM无法被踢出游戏"
+                res i18n.t "common.kick.noKickGM"
                 return
             room.players = room.players.filter (x)=> x.realid != pl.realid
             for p, i in room.players
@@ -570,7 +588,7 @@ module.exports.actions=(req,res,ss)->
                     ban: id
             M.rooms.update {id:roomid}, update, (err)=>
                 if err?
-                    res "错误:#{err}"
+                    res String err
                 else
                     res null
                     if pl?
@@ -580,24 +598,24 @@ module.exports.actions=(req,res,ss)->
     # 帮手になる
     helper:(roomid,id)->
         unless req.session.userId
-            res "请登陆"
+            res i18n.t "common:error.needLogin"
             return
         sethelper ss,roomid,req.session.userId,id,res
     # 全员ready解除する
     unreadyall:(roomid,id)->
         unless req.session.userId
-            res "请登陆"
+            res i18n.t "common:error.needLogin"
             return
         Server.game.rooms.oneRoomS roomid,(room)=>
             if !room || room.error?
-                res "这个房间不存在"
+                res i18n.t "error.noSuchRoom"
                 return
             if room.owner.userid != req.session.userId
-                res "你不是房主"
+                res i18n.t "common:error.invalidInput"
                 console.log room.owner,req.session.userId
                 return
             unless room.mode=="waiting"
-                res "游戏已经开始"
+                res i18n.t "error.alreadyStarted"
                 return
             for p,i in room.players
                 p.start = false
@@ -607,7 +625,7 @@ module.exports.actions=(req,res,ss)->
                 }
             },(err)=>
                 if err?
-                    res "错误:#{err}"
+                    res String err
                 else
                     res null
                     # readyを初期化する系
@@ -615,30 +633,30 @@ module.exports.actions=(req,res,ss)->
     # 追い出しリストを取得
     getbanlist:(roomid)->
         unless req.session.userId
-            res {error: "请登陆"}
+            res {error: i18n.t "common:error.needLogin"}
             return
         Server.game.rooms.oneRoomS roomid,(room)=>
             if !room || room.error?
-                res {error: "这个房间不存在"}
+                res {error: i18n.t "error.noSuchRoom"}
                 return
             if room.owner.userid != req.session.userId
-                res {error:"你不是房主"}
+                res {error: i18n.t "common:error.invalidInput"}
                 return
             res {result: room.ban}
     # 追い出しリストを編集
     cancelban:(roomid, ids)->
         unless req.session.userId
-            res "请登陆"
+            res i18n.t "common:error.needLogin"
             return
         unless Array.isArray ids
-            res "输入无效"
+            res i18n.t "common:error.invalidInput"
             return
         Server.game.rooms.oneRoomS roomid, (room)->
             if !room || room.error?
-                res "这个房间不存在"
+                res i18n.t "error.noSuchRoom"
                 return
             if room.owner.userid != req.session.userId
-                res "你不是房主"
+                res i18n.t "common:error.invalidInput"
                 return
             M.rooms.update {
                 id: roomid
@@ -648,7 +666,7 @@ module.exports.actions=(req,res,ss)->
                 }
             }, (err)->
                 if err?
-                    res "错误:#{err}"
+                    res String err
                 else
                     res null
 
@@ -662,7 +680,7 @@ module.exports.actions=(req,res,ss)->
         #   return
         Server.game.rooms.oneRoomS roomid,(room)=>
             if !room?
-                res {error:"这个房间不存在"}
+                res {error: i18n.t "error.noSuchRoom"}
                 return
             if room.error?
                 res {error:room.error}
@@ -681,30 +699,26 @@ module.exports.actions=(req,res,ss)->
     # 成功ならnull 失敗なら错误メッセージ
     # 部屋房间から出る
     exit: (roomid)->
-        #unless req.session.userId
-        #   res "请登陆"
-        #   return
-        #       req.session.channel.unsubscribe "room#{roomid}"
         req.session.channel.reset()
         res null
     # 部屋を削除
     del: (roomid)->
         unless req.session.userId
-            res "请登陆"
+            res i18n.t "common:error.needLogin"
             return
         Server.game.rooms.oneRoomS roomid,(room)=>
             if !room || room.error?
-                res "这个房间不存在"
+                res i18n.t "error.noSuchRoom"
                 return
             if !room.old && room.owner.userid != req.session.userId
-                res "除了房主无法删除房间"
+                res i18n.t "common:error.invalidInput"
                 return
             unless room.mode=="waiting"
-                res "游戏已经开始"
+                res i18n.t "error.alreadyStarted"
                 return
             M.rooms.update {id:roomid},{$set: {mode:"end"}},(err)=>
                 if err?
-                    res "错误:#{err}"
+                    res String err
                 else
                     res null
                     Server.game.game.deletedlog ss,room
@@ -712,9 +726,9 @@ module.exports.actions=(req,res,ss)->
     # 部屋探し
     find:(query,page)->
         unless query?
-            res {error:"检索无效"}
+            res {error: i18n.t "common:error.invalidInput"}
             return
-        res {error:"现在无法使用检索。"}
+        res {error: i18n.t "error.find.disabled"}
         return
         q=
             finished:true
@@ -760,7 +774,7 @@ module.exports.actions=(req,res,ss)->
             res null
             return
         unless req.session.userId
-            res {error:"请登录",require:"login"}    # ログインが必要
+            res {error: i18n.t "common:error.needLogin",require:"login"}    # ログインが必要
             return
         err = Server.game.game.suddenDeathPunish ss, roomid, req.session.userId, banIDs
         if err?

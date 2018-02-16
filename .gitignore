@@ -3,3 +3,4 @@ node_modules/
 /client/static/assets/main
 /server/themes/*
 !/server/themes/example.coffee
+/language/*/*.missing.json
