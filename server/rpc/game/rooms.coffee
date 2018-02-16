@@ -386,7 +386,7 @@ module.exports.actions=(req,res,ss)->
                     return
                 
             if room.blind
-                unless opt?.name
+                unless opt?.name || room.theme
                     res error: i18n.t "error.join.nameNeeded"
                     return
                 if opt.name.length > Config.maxlength.user.name
