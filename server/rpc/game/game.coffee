@@ -4662,11 +4662,14 @@ class Witch extends Player
             
             # 薬を使用
             pl.touched game,@id
-            @flag |= 16 # 今晩殺害使用
-            if (@flag&1)==0
-                @flag |= 1  # 1つ目
+            # flagを書き換える
+            fl = @flag
+            fl |= 16 # 今晩殺害使用
+            if (fl&1)==0
+                fl |= 1  # 1つ目
             else
-                @flag |= 2  # 2つ目
+                fl |= 2  # 2つ目
+            @setFlag fl
             @setTarget playerid
             log=
                 mode:"skill"
@@ -4675,7 +4678,8 @@ class Witch extends Player
             splashlog game.id,game,log
         else
             # 蘇生薬
-            if (@flag&3)==3 || (@flag&4)
+            fl = @flag
+            if (fl&3)==3 || (fl&4)
                 return game.i18n.t "error.common.alreadyUsed"
             
             if !pl.dead
@@ -4683,7 +4687,8 @@ class Witch extends Player
             
             # 薬を使用
             pl.touched game,@id
-            @flag |= 12
+            fl |= 12
+            @setFlag fl
             @setTarget playerid
             log=
                 mode:"skill"
@@ -5097,8 +5102,12 @@ class Trapper extends Player
             @setTarget ""  # 誰も守らない
         else if @scapegoat
             # 身代わり君の自動占い
-            r=Math.floor Math.random()*game.players.length
-            if @job game,game.players[r].id,{}
+            targets = game.players.filter (pl)-> !pl.dead
+            if targets.length == 0
+                @setTarget ""
+                return
+            r=Math.floor Math.random()*targets.length
+            if @job game,targets[r].id,{}
                 @sunset game
     job:(game,playerid)->
         unless playerid==@id && game.rule.guardmyself!="ok"
