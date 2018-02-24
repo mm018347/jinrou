@@ -1246,7 +1246,7 @@ exports.rules=[
                     if Number(ruleobj.voting) > 0
                         {
                             label: "投票专用时间"
-                            value: "时长 #{secondsStr ruleobj.voting} 秒"
+                            value: "时长 #{secondsStr ruleobj.voting}"
                         }
                     else
                         null
