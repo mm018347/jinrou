@@ -5718,9 +5718,11 @@ class ThreateningWolf extends Werewolf
         null
     sunset:(game)->
         t=game.getPlayer @target
-        return unless t?
-        return if t.dead
-            
+        unless t?
+            return super
+        if t.dead
+            return super
+
         # 威嚇して能力無しにする
         @addGamelog game,"threaten",t.type,@target
         # 複合させる
