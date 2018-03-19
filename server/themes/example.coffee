@@ -1,6 +1,6 @@
 module.exports=
     name:"东方Project"
-    opening:""
+    opening:"异变发生！"
     vote:""
     sunrise:""
     sunset:""
