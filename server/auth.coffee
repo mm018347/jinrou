@@ -58,4 +58,4 @@ crpassword_old = (raw)->
     md5=crypto.createHash "md5"
     md5.update raw  # md5でハッシュ化
     sha256.update raw+md5.digest 'hex'  # sha256でさらにハッシュ化
-    sha256.digest 'hex' # 結果を返す
+    sha256.digest 'hex' # 结果を返す

@@ -1318,7 +1318,7 @@ exports.rules=[
                 }
                 getstr:(value)->
                     {
-                        label:"投票結果"
+                        label:"投票结果"
                         value:if value=="hide" then "隐藏" else "显示"
                     }
             }

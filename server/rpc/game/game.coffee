@@ -2332,7 +2332,7 @@ class Game
                 return
 ###
 logs:[{
-    mode:"day"(昼) / "system"(システムメッセージ) /  "werewolf"(狼) / "heaven"(天国) / "prepare"(開始前/終了後) / "skill"(能力ログ) / "nextturn"(ゲーム進行) / "audience"(観戦者のひとりごと) / "monologue"(夜のひとりごと) / "voteresult" (投票結果） / "couple"(共有者) / "fox"(妖狐) / "will"(遺言) / "madcouple"(尖叫狂人)
+    mode:"day"(昼) / "system"(システムメッセージ) /  "werewolf"(狼) / "heaven"(天国) / "prepare"(開始前/終了後) / "skill"(能力ログ) / "nextturn"(ゲーム進行) / "audience"(観戦者のひとりごと) / "monologue"(夜のひとりごと) / "voteresult" (投票结果） / "couple"(共有者) / "fox"(妖狐) / "will"(遺言) / "madcouple"(尖叫狂人)
     "wolfskill"(人狼に見える) / "emmaskill"(阎魔に見える) / "eyeswolfskill"(瞳狼に見える)
     comment: String
     userid:Userid
@@ -2534,7 +2534,7 @@ class VotingBox
                     @setCandidates @game.players.filter (x)->x.id in tops
                     @runoffmode=true
                     return ["runoff",null,tos,table]
-        # 結果を教える
+        # 结果を教える
         return ["punish",[@game.getPlayer(tops[0])],tos,table]
 
 class Player
@@ -2797,10 +2797,10 @@ class Player
     @JOB_T_DEAD :2  # 死んだ人が対象
     #人狼に食われて死ぬかどうか
     willDieWerewolf:true
-    #占いの結果
+    #占いの结果
     fortuneResult: FortuneResult.human
     getFortuneResult:->@fortuneResult
-    #霊能の結果
+    #霊能の结果
     psychicResult: PsychicResult.human
     getPsychicResult:->@psychicResult
     #チーム Human/Werewolf
@@ -2835,7 +2835,7 @@ class Player
             game.ss.publish.user @id,"refresh",{id:game.id}
     # 埋葬するまえに全員呼ばれる（foundが見られる状況で）
     beforebury: (game,type,deads)->
-    # 占われたとき（結果は別にとられる player:占い元）
+    # 占われたとき（结果は別にとられる player:占い元）
     divined:(game,player)->
     # ちょっかいを出されたとき(jobのとき)
     touched:(game,from)->
@@ -8342,7 +8342,7 @@ class Whited extends Complex
     fortuneResult: FortuneResult.human
     psychicResult: PsychicResult.human
 
-# 占い結果吸血鬼化
+# 占い结果吸血鬼化
 class VampireBlooded extends Complex
     cmplType:"VampireBlooded"
     fortuneResult: FortuneResult.vampire
