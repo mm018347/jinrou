@@ -39,9 +39,9 @@ error:
   # Error during gamestart operation
   gamestart:
     # Player number is invalid (invalid number is passed as a number of a role)
-    playerNumberInvalid1: "玩家数无效（{{job}}:{{num}}）。多次重试可能解决这个错误。"
+    playerNumberInvalid1: "职业数不是有效数字（{{job}}:{{num}}）。多次重试可能解决这个错误。"
     # Player number is invalid (sum of requested jobs is not the same as number of players)
-    playerNumberInvalid2: "玩家数无效（{{request}}/{{jallnum}}/{{players}}）。多次重试可能解决这个错误。"
+    playerNumberInvalid2: "玩家总数与职业总数不相等（职业数：{{request}}/玩家数：{{jallnum}}/房间人数：{{players}}）。多次重试可能解决这个错误。"
     # Failed to process Thief
     thiefFailed: "小偷处理失败。"
     # Casting is failed
