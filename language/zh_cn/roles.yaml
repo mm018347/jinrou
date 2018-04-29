@@ -450,7 +450,7 @@ BloodyMary:
   # Select a target.
   select: "{{name}} 诅咒了 {{target}}。"
   # name of normal Mary.
-  mary: "メアリー"
+  mary: "玛丽"
 
 SantaClaus:
   # Error: this player is already given a present.
