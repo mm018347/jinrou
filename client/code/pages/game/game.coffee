@@ -23,7 +23,7 @@ exports.start=(roomid)->
     this_room_id=null
 
     # 职业名一览
-    cjobs=Shared.game.jobs.filter (x)->x!="Human"    # 村人は自動で决定する
+    cjobs=Shared.game.jobs.filter (x)->x!="Human" and x!="Neet" # 村人は自動で决定する
 
     # CSS操作
     this_style=document.createElement "style"
