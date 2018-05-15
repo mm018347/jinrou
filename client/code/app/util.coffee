@@ -319,8 +319,8 @@ exports.blindName=(opt={},cb)->
             cb {name:je.target.elements["name"].value, icon:def}
         else
             byteSub = (str, maxLength) ->
-              str = str.substr(0, str.length - 1)  while str.replace(/[^\x00-\xFF]/g, "**").length > maxLength
-              str
+                str = str.substr(0, str.length - 1)  while str.replace(/[^\x00-\xFF]/g, "**").length > maxLength
+                str
             je.target.elements["name"].value = byteSub(je.target.elements["name"].value, maxLength)
             util.message "错误","昵称不能超过"+maxLength+"个字节。"
     
@@ -407,8 +407,8 @@ exports.punish=(title,message,cb)->
         $("#prePunishUser").append(b).append("<br>")
 
     ipt =->
-        user=document.punish.userList;
-        userChecked=[];
+        user=document.punish.userList
+        userChecked=[]
         if !user[0]
             a=[]
             a.push user

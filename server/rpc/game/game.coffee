@@ -733,8 +733,8 @@ class Game
                     if all_wolves == 1
                         # 人狼が1人のときは人狼を消さない
                         if (gotjs[r][0] in Shared.game.categories.Werewolf && job in Shared.game.categories.Fox) || (gotjs[r][0] in Shared.game.categories.Fox && job in Shared.game.categories.Werewolf)
-                           # 人狼×妖狐はまずい
-                           continue
+                            # 人狼×妖狐はまずい
+                            continue
                 gotjs[r].push job
                 if gotjs[r].length >= jobperpl
                     # 必要な职业を獲得した
@@ -4228,9 +4228,9 @@ class Spellcaster extends Player
             return game.i18n.t "error.common.alreadyUsed"
         arr=[]
         try
-          arr=JSON.parse @flag
+            arr=JSON.parse @flag
         catch error
-          arr=[]
+            arr=[]
         unless arr instanceof Array
             arr=[]
         if playerid in arr
@@ -6058,18 +6058,18 @@ class PsychoKiller extends Madman
     touched:(game,from)->
         # 殺すリストに追加する
         fl=try
-               JSON.parse @flag || "[]"
-           catch e
-               []
+            JSON.parse @flag || "[]"
+        catch e
+            []
         fl.push from
         @setFlag JSON.stringify fl
     sunset:(game)->
         @setFlag "[]"
     midnight:(game,midnightSort)->
         fl=try
-               JSON.parse @flag || "[]"
-           catch e
-               []
+            JSON.parse @flag || "[]"
+        catch e
+            []
         for id in fl
             pl=game.getPlayer id
             if pl? && !pl.dead
@@ -7510,9 +7510,9 @@ class Waiting extends Player
     team:""
     sleeping:(game)->game.phase != Phase.rolerequesting || game.rolerequesttable[@id]?
     isListener:(game,log)->
-       if log.mode=="audience"
-           true
-       else super
+        if log.mode=="audience"
+            true
+        else super
     getSpeakChoice:(game)->
         return ["prepare"]
     makejobinfo:(game,result)->
@@ -7556,10 +7556,10 @@ class Watching extends Player
     sleeping:(game)->true
     isWinner:(game,team)->true
     isListener:(game,log)->
-       if log.mode in ["audience","inlog"]
+        if log.mode in ["audience","inlog"]
            # 参加前なので
-           true
-       else super
+            true
+        else super
     getSpeakChoice:(game)->
         return ["audience"]
     getSpeakChoiceDay:(game)->
@@ -10158,7 +10158,7 @@ makelogsFor=(game,player,log)->
     
     return []
 
-# プレイヤーにログを見せてもよいか          
+# プレイヤーにログを見せてもよいか
 islogOK=(game,player,log)->
     # player: Player / null
     return true if game.finished    # 终了ならtrue

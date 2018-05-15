@@ -12,7 +12,7 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 # 特殊职业2
 "Devil","ToughGuy","Cupid","Stalker","OccultMania","WhisperingMad","Lover","Dog",
 # 桃栗基本特殊职业
-"Bat","Noble","Slave","Magician","Spy","WolfDiviner","Neet", 
+"Bat","Noble","Slave","Magician","Spy","WolfDiviner","Neet",
 # 桃栗期間限定职业
 "Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Spy2","Copier",
 # 究极人狼的职业
@@ -94,70 +94,70 @@ exports.categoryNames=
 
 # 职业规则たち 职业人数一览を返す（Humanは向こうで補完）
 normal1=(number)->
-  ret={}
-  #狼
-  ret.Werewolf=1
-  if number>=8
-    ret.Werewolf++
-    if number>=13
-      ret.Werewolf++
-      if number>=20
+    ret={}
+    #狼
+    ret.Werewolf=1
+    if number>=8
         ret.Werewolf++
-        if number>=25
-          ret.Werewolf++
-          if number>=30
+        if number>=13
             ret.Werewolf++
-  ret.Diviner=1 #占い
-  if number>=22
-    ret.Diviner++
-  if number>=8
-    ret.Psychic=1 #灵能
-  if number>=6
-    ret.Madman=1 #狂人
-    ret.Guard=1 #猎人
-    if 18 <= number <= 19 || number >= 23
-      ret.Madman++
-    if number>=20
-      ret.Guard++
-  if number>=13
-    ret.Couple=2 #共有
-    if number>=18
-      ret.Couple++
-  if number>=11
-    ret.Fox=1 #狐
-    if number>=19
-      ret.Fox++
-  ret
+            if number>=20
+                ret.Werewolf++
+                if number>=25
+                    ret.Werewolf++
+                    if number>=30
+                        ret.Werewolf++
+    ret.Diviner=1 #占い
+    if number>=22
+        ret.Diviner++
+    if number>=8
+        ret.Psychic=1 #灵能
+    if number>=6
+        ret.Madman=1 #狂人
+        ret.Guard=1 #猎人
+        if 18 <= number <= 19 || number >= 23
+            ret.Madman++
+        if number>=20
+            ret.Guard++
+    if number>=13
+        ret.Couple=2 #共有
+        if number>=18
+            ret.Couple++
+    if number>=11
+        ret.Fox=1 #狐
+        if number>=19
+            ret.Fox++
+    ret
 normal2=(number)->
-  ret={}
-  # 人狼
-  ret.Werewolf=1
-  if number>=8
-    ret.Werewolf++
-    if number>=16
-     ret.Werewolf++
-     if number>=20
-       ret.Werewolf++
-       if number>=25
-         ret.Werewolf++
-         if number>=29
-           ret.Werewolf++
-  ret.Diviner=1 #占卜师
-  if number>=8
-    ret.Psychic=1   #灵能者
-  if number>=10
-    ret.Madman=1    #狂人
-    if number>=28
-      ret.Madman++
-  if number>=11
-    ret.Guard=1 #猎人
-  if number>=13
-    ret.Couple=2    #共有者
-    if number>=28
-      ret.Couple++
-  if number>=15
-    ret.Fox=1   #狐
-  ret
+    ret={}
+    # 人狼
+    ret.Werewolf=1
+    if number>=8
+        ret.Werewolf++
+        if number>=16
+            ret.Werewolf++
+            if number>=20
+                ret.Werewolf++
+                if number>=25
+                    ret.Werewolf++
+                    if number>=29
+                        ret.Werewolf++
+    ret.Diviner=1 #占卜师
+    if number>=8
+        ret.Psychic=1 #灵能者
+    if number>=10
+        ret.Madman=1 #狂人
+        if number>=28
+            ret.Madman++
+    if number>=11
+        ret.Guard=1 #猎人
+    if number>=13
+        ret.Couple=2 #共有者
+        if number>=28
+            ret.Couple++
+    if number>=15
+        ret.Fox=1 #狐
+    ret
 
 exports.jobrules=[
   {

@@ -462,7 +462,7 @@ module.exports.actions=(req,res,ss)->
                             name = "「#{user.tpr}」#{user.name}"
                         else
                             name = "#{user.name}"
-                        res 
+                        res
                             tip: "#{name}"
                             title:"#{theme.skin_tip}"
                     else

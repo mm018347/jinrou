@@ -10,7 +10,7 @@ module.exports=
     skins:
         # 罗马字名 ，只允许半角英数字和下划线，数字和下划线不允许是首位
         # 不可以重复
-        some_character: 
+        some_character:
             # 头像链接 和 称号 可以是字符串数组，也可以是字符串
             # 头像在显示的时候 会压缩为48*48，所以最好纵横比是1:1
             avatar:"http://img.example.com/some_character.jpg" # 头像链接

@@ -80,8 +80,8 @@ loadTable=(arr)->
         result[jobname]=obj={}
         for name,i in row
             if name
-               ns=name.split "\n"
-               obj[if normalflag then normals[i] else specials[i]]=(if ns.length>1 then ns else name)
+                ns=name.split "\n"
+                obj[if normalflag then normals[i] else specials[i]]=(if ns.length>1 then ns else name)
     result
 
 # 名字つける

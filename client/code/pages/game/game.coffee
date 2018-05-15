@@ -171,8 +171,8 @@ exports.start=(roomid)->
                     document.body.classList.remove (if game.night then "day" else "night")
 
                     if $("#sticky").hasClass("sticky")
-                      $("#sticky").css
-                        "background-color": $("body").css("background-color")
+                        $("#sticky").css
+                            "background-color": $("body").css("background-color")
 
                 unless $("#jobform").get(0).hidden= game.finished ||  obj.sleeping || !obj.type
                     # 代入しつつの　投票表单必要な場合
@@ -1759,7 +1759,7 @@ $ ->
         sticky()
     sticky = ->
         unless $("#sticky").length > 0
-            $(".infobox,form#jobform,form#speakform,form#willform").wrapAll('<div id="sticky"></div>');
+            $(".infobox,form#jobform,form#speakform,form#willform").wrapAll('<div id="sticky"></div>')
         unless $("#isfloat").is(':checked')
             $(".sticky").removeAttr "style"
             $(".sticky").removeAttr "class"

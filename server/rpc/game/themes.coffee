@@ -11,7 +11,7 @@ getThemes=()->
         unless themeFile.match(/\.coffee$/) == null
             name = themeFile.replace /\.coffee$/, ""
             try
-                delete require.cache[require.resolve("../../themes/#{name}.coffee")];
+                delete require.cache[require.resolve("../../themes/#{name}.coffee")]
                 themes[name] = require "../../themes/#{name}.coffee"
             catch e
                 console.error e
@@ -22,7 +22,7 @@ getThemes()
 fs.watch "server/themes/",(e)->
     getThemes()
 
-module.exports = 
+module.exports =
     getTheme:(name)->
         if themes[name] != null
             return themes[name]

@@ -223,7 +223,7 @@ exports.start=(user)->
                         if result?.error?
                             util.message "错误",result.error
     
-    Index.game.rooms.start()    # 房间一览を表示してもらう    
+    Index.game.rooms.start()    # 房间一览を表示してもらう
     # お知らせ一览を取得する
     ss.rpc "user.getNews",(docs)->
         if docs.error?
