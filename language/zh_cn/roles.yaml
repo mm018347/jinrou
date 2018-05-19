@@ -109,6 +109,8 @@ jobname:
   MadCouple: "尖叫狂人"
   Emma: "阎魔"
   EyesWolf: "瞳狼"
+  TongueWolf: "舌祸狼"
+  BlackCat: "黑猫"
   GameMaster: "游戏管理员"
   Helper: "帮手"
   Waiting: "尚未分配"
@@ -649,6 +651,12 @@ EyesWolf:
     holy: "向 {{name}} 发起的袭击，被神圣的力量阻止了。"
     # Guard by a trap
     trap: "向 {{name}} 发起的袭击，被陷阱阻止了。"
+
+TongueWolf:
+  # Result of TongueWolf skill.
+  result: "根据 {{name}} 品尝的结果，{{target}} 是 {{job}}。"
+  # Result when the skill is lost.
+  resultLost: "根据 {{name}} 品尝的结果，{{target}} 是 {{job}}。从此以后无法再知道袭击目标的职业了。"
 
 
 GameMaster:

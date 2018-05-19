@@ -9,8 +9,9 @@ remain_time=null
 this_rule=null  # 规则オブジェクトがある
 enter_result=null #enter
 
-this_icons={}   #名字と头像の対応表
-this_logdata={} # ログ数据をアレする
+this_icons={}   #名前とアイコンの対応表
+this_icons_cache = {} # cache object for urls in this_icons
+this_logdata={} # ログデータをアレする
 this_style=null #style要素（終わったら消したい）
 
 
@@ -1412,7 +1413,7 @@ exports.start=(roomid)->
                     img.style.width="1em"
                     img.style.height="1em"
                     img.alt=""  # 飾り
-                    Index.util.setHTTPSicon img, this_icons[log.name]
+                    Index.util.setHTTPSicon img, this_icons[log.name], this_icons_cache
                     icondiv.appendChild img
             p.appendChild icondiv
             p.appendChild div
