@@ -10,7 +10,7 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 # るる鯖で見つけた职业
 "Fanatic","Immoral"
 # 特殊职业2
-"Devil","ToughGuy","Cupid","Stalker","OccultMania","WhisperingMad","Lover","Dog",
+"Devil","ToughGuy","Stalker","OccultMania","WhisperingMad","Lover","Dog",
 # 桃栗基本特殊职业
 "Bat","Noble","Slave","Magician","Spy","WolfDiviner","Neet",
 # 桃栗期間限定职业
