@@ -447,7 +447,7 @@ exports.start=(roomid)->
             icon.classList.add 'fa'
             icon.classList.add 'fa-fw'
             icon.classList.add 'fa-user-secret'
-            icon.title = if room.blind == 'complete' then '匿名模式（结束后公开）' else '匿名模式（结束后不公开）'
+            icon.title = if room.blind == 'complete' then '匿名模式（结束后不公开）' else '匿名模式（结束后公开）'
             iconlist.appendChild icon
         if room.comment
             icon = document.createElement 'i'
