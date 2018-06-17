@@ -141,6 +141,10 @@ exports.start=(roomid)->
                 $("#jobinfo").append pp "你的玩家编号是第 #{obj.quantumwerewolf_number} 号"
             if obj.twins?
                 $("#jobinfo").append pp "双胞胎是 #{obj.twins.map((x)->x.name).join(',')}"
+            if obj.myfans?
+                $("#jobinfo").append pp "粉丝是 #{obj.myfans.map((x)->x.name).join(',')}"
+            if obj.fanof?
+                $("#jobinfo").append pp "你是 #{obj.fanof.name} 的粉丝"
             
             if obj.winner?
                 # 勝敗

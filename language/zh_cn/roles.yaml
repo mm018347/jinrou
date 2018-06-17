@@ -111,6 +111,7 @@ jobname:
   EyesWolf: "瞳狼"
   TongueWolf: "舌祸狼"
   BlackCat: "黑猫"
+  Idol: "偶像"
   GameMaster: "游戏管理员"
   Helper: "帮手"
   Waiting: "尚未分配"
@@ -658,6 +659,13 @@ TongueWolf:
   # Result when the skill is lost.
   resultLost: "根据 {{name}} 品尝的结果，{{target}} 是 {{job}}。从此以后无法再知道袭击目标的职业了。"
 
+Idol:
+  # Select a fan,
+  select: "{{name}} 把 {{target}} 变成自己的粉丝了。"
+  # Becoming a fan of idol.
+  become: "{{name}} 被 {{idol}} 圈粉了。"
+  # Result of observation.
+  result: "根据 {{name}} 的敏锐观察，现在村人阵营的人数有 {{count}} 人。"
 
 GameMaster:
   # Failed to revive.
@@ -722,6 +730,11 @@ KeepedLover:
 
 FoxMinion:
   jobname: "狐凭（{{jobname}}）"
+  
+FanOfIdol:
+  name: "粉丝"
+  # message when his idol is dead.
+  idolDead: "偶像的死亡导致伤心过度，{{name}} 今晚不能使用能力。"
 
 Decider:
   jobname: "{{jobname}}（决定者）"

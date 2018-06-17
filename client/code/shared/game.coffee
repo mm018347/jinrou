@@ -52,7 +52,7 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 # 人狼ジャッジメント
 "BlackCat",
 # オリジナル
-"SantaClaus","Pyrotechnist","Patissiere","Shishimai","Light"
+"SantaClaus","Pyrotechnist","Patissiere","Shishimai","Light","Idol",
 ]
 # ここには入らない役職
 # MinionSelector,QuantumPlayer, HolyProtected
@@ -65,7 +65,7 @@ exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub",
 
 # チームたち
 exports.teams=teams=
-    Human:["Human","Diviner","Psychic","Guard","Couple","Poisoner","ToughGuy","Noble","Slave","Magician","Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Light","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Cat","Witch","Oldman","OccultMania","Dog","Dictator","SeersMama","Trapper","RedHood","Counselor","Miko","HolyMarked","WanderingGuard","TroubleMaker","FrankensteinsMonster","BloodyMary","King","SantaClaus","Phantom","DrawGirl","Pyrotechnist","Baker","SpiritPossessed","GotChocolate","Forensic","Cosplayer","TinyGhost","Ninja","Twin","Hunter","Emma"]
+    Human:["Human","Diviner","Psychic","Guard","Couple","Poisoner","ToughGuy","Noble","Slave","Magician","Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Light","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Cat","Witch","Oldman","OccultMania","Dog","Dictator","SeersMama","Trapper","RedHood","Counselor","Miko","HolyMarked","WanderingGuard","TroubleMaker","FrankensteinsMonster","BloodyMary","King","SantaClaus","Phantom","DrawGirl","Pyrotechnist","Baker","SpiritPossessed","GotChocolate","Forensic","Cosplayer","TinyGhost","Ninja","Twin","Hunter","Emma","Idol"]
     Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist","CraftyWolf","Pumpkin","MadScientist","MadHunter","MadCouple","EyesWolf","TongueWolf","BlackCat"]
     Fox:["Fox","TinyFox","Immoral","Blasphemy"]
     Devil:["Devil"]
@@ -852,6 +852,9 @@ exports.jobinfo=
         Emma:
             name:"阎魔"
             color:"#dd2211"
+        Idol:
+            name:"偶像"
+            color:"#ffcc55"
         
     Werewolf:
         name:"人狼阵营"
@@ -1973,6 +1976,18 @@ exports.jobinfos=[
         name:"twins"
         prefix:"双胞胎是 "
         type:"pubinfo-array"
+    }
+    {
+        name:"myfans"
+        prefix:"粉丝是 "
+        suffix:""
+        type:"pubinfo-array"
+    }
+    {
+        name:"fanof"
+        prefix:"你是 "
+        suffix:" 的粉丝"
+        type:"pubinfo"
     }
 ]
 
