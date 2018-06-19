@@ -8441,6 +8441,7 @@ class WatchingFireworks extends Complex
     cmplType:"WatchingFireworks"
     sleeping:->true
     jobdone:->true
+    isAttacker:->false
 
     sunrise:(game)->
         @sub?.sunrise? game
