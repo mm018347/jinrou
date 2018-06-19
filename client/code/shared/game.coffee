@@ -1434,8 +1434,8 @@ exports.rules=[
             }
             {
                 name:"drawvote"
-                label:"投票数相同时的处理"
-                title:"设定投票数相同时的处理方法。"
+                label:"最高得票数相同时的处理"
+                title:"设定最高得票数相同时的处理。"
                 type:"select"
                 values:[
                     {
@@ -1444,16 +1444,16 @@ exports.rules=[
                         selected:true
                     }
                     {
-                        value:"random"
-                        label:"随机处刑"
-                    }
-                    {
                         value:"none"
                         label:"谁也不被处刑"
                     }
                     {
+                        value:"random"
+                        label:"最高得票者随机处刑一人"
+                    }
+                    {
                         value:"all"
-                        label:"全员处刑"
+                        label:"最高得票者全员处刑"
                     }
                 ]
             }
