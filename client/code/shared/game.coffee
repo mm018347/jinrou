@@ -1,7 +1,10 @@
 Shared=
     game:exports
-# ------ 职业一览
-# 基本职业
+
+# 身代わりセーフティありのときの除外役職一覧
+exports.SAFETY_EXCLUDED_JOBS = SAFETY_EXCLUDED_JOBS = ["QueenSpectator","Spy2","Poisoner","Cat","Cupid","BloodyMary","Noble","Twin","Hunter","MadHunter","Idol"]
+# ------ 役職一覧
+# 基本役職
 exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","Fox",
 # ミラーズホロウの人狼
 "Hunter","Cupid",
@@ -1345,21 +1348,24 @@ exports.rules=[
             {
                 name:"safety"
                 label:"替身安全性"
-                title:"仅在首次分配职业时生效，对转生无效。"
+                title:"仅在首次分配职业时生效，对转生无效。如果设为「任意」，则替身君可以成为包括人狼在内的任何职业"
                 type:"select"
                 values:[
                     {
                         value:"full"
-                        label:"替身君除去所有人外，除去女王观战者、间谍Ⅱ、埋毒者、猫又、玛丽、贵族、双胞胎、狩猎者、复仇者、偶像"
+                        label:"有"
                         selected:true
+                        title:"替身君除去所有人外，除去"+SAFETY_EXCLUDED_JOBS.map((job)-> exports.getjobname(job)).join("、")
                     }
                     {
                         value:"no"
-                        label:"替身君除去所有人外"
+                        label:"无"
+                        title:"替身君除去所有人外"
                     }
                     {
                         value:"free"
-                        label:"替身君可以成为任何职业"
+                        label:"任意"
+                        title:"替身君可以成为任何职业"
                     }
                 ]
             }
