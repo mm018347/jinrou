@@ -1831,17 +1831,17 @@ exports.rules=[
             {
                 name:"friendssplit"
                 label:"多组恋人相互独立"
-                title:"选中后在有复数组恋人的场合下，恋人的胜利条件从只有恋人阵营生存，变为只有本组恋人生存。"
+                title:"选中后在有复数组恋人的场合下，玩家将看不到自己的恋爱对象以外的其他组恋人，也不会追随其他组恋人自尽。"
                 type:"checkbox"
                 value:{
                     value:"split"
-                    label:"有"
+                    label:"是"
                     checked:true
                 }
                 getstr:(value)->
                     {
                         label:"恋人的独立"
-                        value:if value=="split" then "有" else "无"
+                        value:if value=="split" then "是" else "否"
                     }
             }
         ]
