@@ -1357,6 +1357,9 @@ class Game
             else
                 false
         else if Phase.isNight(@phase)
+            @players.forEach (pl)=>
+                if pl.scapegoat && !pl.dead && !pl.sleeping(@)
+                    pl.sunset(@)
             # 夜時間
             if @players.every( (x)=>x.dead || x.sleeping(@))
                 # 全員寝たが……
@@ -2795,8 +2798,11 @@ class Player
         #@voteto=null
         return if @dead
         if @scapegoat
-            # 替身君は投票
-            alives=game.players.filter (x)=>!x.dead && x!=this
+            # 身代わりくんは投票
+            alives=game.votingbox.candidates.filter (x)=>
+                pl=game.getPlayer x.id
+                return !pl.dead && pl!=this
+            #alives=game.players.filter (x)=>!x.dead && x!=this
             r=Math.floor Math.random()*alives.length    # 投票先
             return unless alives[r]?
             #@voteto=alives[r].id
@@ -2814,7 +2820,13 @@ class Player
     # 狩猎者フェイズに仕事があるか?
     hunterJobdone:(game)->true
     # 昼に投票を終えたか
-    voted:(game,votingbox)->game.votingbox.isVoteFinished this
+    voted:(game,votingbox)->
+        result = game.votingbox.isVoteFinished this
+        if result==false && @scapegoat
+            @votestart game
+            true
+        else
+            result
     # 夜の仕事
     job:(game,playerid,query)->
         @setTarget playerid
@@ -9142,8 +9154,8 @@ module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
     req.use 'session'
 
-#游戏开始処理
-#成功：null
+    #ゲーム開始処理
+    #成功：null
     gameStart:(roomid,query)->
         game=games[roomid]
         unless game?
