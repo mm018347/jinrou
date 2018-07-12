@@ -159,6 +159,11 @@ module.exports=
                 pr = player.tpr
         if pr
             name="#{Server.prize.prizeQuote pr}#{name}"
+        
+        game = games[room.id]
+        unless game && !game.participants.some((p)->p.realid==player.realid)
+            return
+
         if room.mode=="waiting"
             # 开始前（ふつう）
             log=
@@ -166,7 +171,6 @@ module.exports=
                 userid:-1
                 name:null
                 mode:"system"
-            game = games[room.id]
             if game
                 splashlog room.id, game, log
                 # プレイヤーを追加
@@ -181,7 +185,6 @@ module.exports=
                 game.participants.push newpl
         else if room.mode=="playing" && room.jobrule=="特殊规则.Endless黑暗火锅"
             # エンドレス闇鍋に途中参加
-            game=games[room.id]
             if game
                 log=
                     comment: i18n.t "system.rooms.entering", {name: name}
@@ -1223,7 +1226,7 @@ class Game
                 for player in pcs
                     if player.isJobType "Watching"
                         # 参加待機のひとだ
-                        if !@players.some((p)->p.id==player.id)
+                        if !@players.some((p)->p.realid==player.realid)
                             # 本参加ではないのでOK
                             # 职业をランダムに决定
                             newjob=jobnames[Math.floor Math.random()*jobnames.length]
@@ -1241,6 +1244,8 @@ class Game
                                 comment: @i18n.t "system.rooms.join", {name: newpl.name}
                             splashlog @id,@,log
                             join_count++
+                        else
+                            @participants=@participants.filter (x)->x!=player
                 # たまに転生
                 deads=shuffle @players.filter (x)->x.dead && !x.norevive
                 # 転生確率
