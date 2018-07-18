@@ -112,6 +112,7 @@ jobname:
   TongueWolf: "舌祸狼"
   BlackCat: "黑猫"
   Idol: "偶像"
+  XianFox: "仙狐"
   GameMaster: "游戏管理员"
   Helper: "帮手"
   Waiting: "尚未分配"
@@ -666,6 +667,12 @@ Idol:
   become: "{{name}} 被 {{idol}} 圈粉了。"
   # Result of observation.
   result: "根据 {{name}} 的敏锐观察，现在村人阵营的人数有 {{count}} 人。"
+  
+XianFox:
+  # Select a target.
+  select: "{{name}} 透视了 {{target}} 的职业。"
+  # Result of skill (announced to everyone).
+  result: "昨晚仙狐透视的结果是 {{result}}。"
 
 GameMaster:
   # Failed to revive.

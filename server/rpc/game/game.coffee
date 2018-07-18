@@ -2766,6 +2766,8 @@ class Player
 
     # jobtypeが合っているかどうか（夜）
     isJobType:(type)->type==@type
+    # メイン役職のjobtypeを判定
+    isMainJobType:(type)->@isJobType type
     #An access to @flag, etc.
     accessByJobType:(type)->
         unless type
@@ -2778,7 +2780,7 @@ class Player
     accessByJobTypeAll:(type, subonly)->
         unless type
             throw "there must be a JOBTYPE"
-        if @isJobType type
+        if !subonly && @isJobType(type)
             return [this]
         else
             return []
@@ -6131,6 +6133,10 @@ class SantaClaus extends Player
     isWinner:(game,team)->@flag=="gone" || super
     sunset:(game)->
         # まだ届けられる人がいるかチェック
+        if @flag == "gone"
+            # もう届け終わった
+            @setTarget ""
+            return
         fl=JSON.parse(@flag ? "[]")
         if game.players.some((x)=>!x.dead && x.id!=@id && !(x.id in fl))
             @setTarget null
@@ -6144,7 +6150,10 @@ class SantaClaus extends Player
         else
             @setTarget ""
     sunrise:(game)->
-        # 全员に配ったかチェック
+        if @flag == "gone"
+            # もう届け終わったのに生存している
+            return
+        # 全員に配ったかチェック
         fl=JSON.parse(@flag ? "[]")
         unless game.players.some((x)=>!x.dead && x.id!=@id && !(x.id in fl))
             # 村を去る
@@ -7051,7 +7060,9 @@ class Shishimai extends Player
         # 獅子舞に噛まれた人を集計
         bitten = []
         for pl in game.players
+            console.log "accessbyjobtypeall", pl.id
             ps = pl.accessByJobTypeAll("Shishimai")
+            console.log "accessed", ps
             if ps.length > 0
                 bitten.push pl.id
             for p in ps
@@ -7603,6 +7614,57 @@ class Idol extends Player
             vote.priority++
         vote
 
+class XianFox extends Fox
+    type:"XianFox"
+    # moves early so that jobname is obtained before target changes its job.
+    midnightSort: 75
+    jobdone:(game)->@target?
+    sleeping:->true
+    sunset:(game)->
+        super
+        @setTarget null
+        @setFlag null
+        if @scapegoat
+            # 能力の対象を選択
+            targets = game.players.filter (x)=> !x.dead && x.id != @id
+            if targets.length > 0
+                r = Math.floor Math.random() * targets.length
+                @job game, targets[r].id, {}
+            else
+                @setTarget ""
+    job:(game, playerid)->
+        pl=game.getPlayer playerid
+        unless pl?
+            return game.i18n.t "error.common.nonexistentPlayer"
+
+        @setTarget playerid
+        pl.touched game,@id
+        log=
+            mode:"skill"
+            to:@id
+            comment: game.i18n.t "roles:XianFox.select", {name: @name, target: pl.name}
+        splashlog game.id,game,log
+        null
+    midnight:(game)->
+        # obtain target's job.
+        pl = game.getPlayer @target
+        unless pl?
+            return
+        if pl.isJobType "Human"
+            # if pl is Human, result is not available.
+            @setFlag null
+        else
+            @setFlag pl.getJobname()
+        @addGamelog game, "xianresult", pl.type, pl.id
+
+    sunrise:(game)->
+        # show result.
+        if @flag?
+            log=
+                mode:"system"
+                comment: game.i18n.t "roles:XianFox.result", {result: @flag}
+            splashlog game.id, game, log
+            @setFlag null
 
 
 # ============================
@@ -7884,6 +7946,8 @@ class Complex
         return {dead:@dead,found:@found}
     isJobType:(type)->
         @main.isJobType(type) || @sub?.isJobType?(type)
+    isMainJobType:(type)-> @main.isMainJobType type
+    # Those like Friend return their own @team, these like Guarded return @main.getTeam()
     getTeam:-> if @team then @team else @main.getTeam()
     #An access to @main.flag, etc.
     accessByJobType:(type)->
@@ -7902,7 +7966,7 @@ class Complex
         unless type
             throw "there must be a JOBTYPE"
         ret = []
-        if @main.isJobType(type)
+        if @main.isMainJobType(type)
             if !subonly
                 ret.push this
             ret.push (@main.accessByJobTypeAll(type, true))...
@@ -8815,6 +8879,27 @@ class Chemical extends Complex
         if subt == myt || subt == "" || subt == "Devil"
             win = win || @sub.isWinner(game,team)
         return win
+    isWinnerStalk:(game,team,ids)->
+        if @id in ids
+            # infinite loop of Stalkers is formed, so terminate by false.
+            return false
+        # same as above but stalker-aware.
+        myt = @getTeam()
+        win = false
+        maint = @main.getTeam()
+        subt = @sub?.getTeam()
+        if maint == myt || maint == "" || maint == "Devil"
+            if @main.isWinnerStalk?
+                win = win || @main.isWinnerStalk(game, team, ids.concat @id)
+            else
+                win = win || @main.isWinner(game,team)
+        if subt == myt || subt == "" || subt == "Devil"
+            if @sub.isWinnerStalk?
+                win = win || @sub.isWinnerStalk(game, team, ids.concat @id)
+            else
+                win = win || @sub.isWinner(game,team)
+        return win
+
     die:(game, found, from)->
         return if @dead
         if found=="werewolf" && (!@main.willDieWerewolf || (@sub? && !@sub.willDieWerewolf))
@@ -9003,6 +9088,7 @@ jobs=
     TongueWolf:TongueWolf
     BlackCat:BlackCat
     Idol:Idol
+    XianFox:XianFox
     # 特殊
     GameMaster:GameMaster
     Helper:Helper
@@ -9154,6 +9240,8 @@ jobStrength=
     EyesWolf:70
     TongueWolf:60
     BlackCat:19
+    Idol:12
+    XianFox:35
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
