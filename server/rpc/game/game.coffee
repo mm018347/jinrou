@@ -1187,6 +1187,11 @@ class Game
                     player.sunset this
                 else
                     player.deadsunset this
+
+            #sunset後の死体処理
+            @bury "other"
+            return if @judge()
+
             # 忍者のデータを作る
             @ninja_data = {}
             for player in @players
@@ -1275,6 +1280,8 @@ class Game
 
 
             # 投票リセット処理
+            # Votingbox should be initialized before sunrise()
+            # because roles like TroubleMaker may modify it.
             @votingbox.init()
             alives=[]
             deads=[]
@@ -1291,17 +1298,20 @@ class Game
                 else
                     player.deadsunrise this
 
+            # sunrise後の死体処理
+            @bury "other"
+            return if @judge()
+
             alives = @players.filter (x)->!x.dead
 
             @votingbox.setCandidates alives
             for pl in alives
                 pl.votestart this
             @revote_num=0   # 再投票の回数は0にリセット
+
             # New year messageの処理
             end_date = new Date
             end_date.setTime(end_date.getTime() + @rule.day * 1000)
-            # debug
-            # end_date.setTime(end_date.getTime() + 145*60*1000)
             if (new Date).getFullYear() == @currentyear && end_date.getFullYear() > @currentyear
                 # 昼時間中に変わるので専用タイマー
                 end_date.setMonth 0
@@ -1314,7 +1324,6 @@ class Game
                 # end_date.setTime(end_date.getTime() - 145*60*1000)
                 current_day = @day
                 setTimeout (()=>
-                    console.log 'time!', @finished, @phase
                     if !@finished && @day == current_day && @phase in [Phase.day, Phase.day_remain, Phase.day_voting]
                         @currentyear++
                         log=
@@ -1323,9 +1332,6 @@ class Game
                         splashlog @id,this,log
                 ), end_date.getTime() - Date.now()
 
-        #死体処理
-        @bury "other"
-        return if @judge()
         @splashjobinfo()
         if night
             @checkjobs()
@@ -2719,6 +2725,8 @@ class Player
     getTypeDisp:->@type
     # 职业名を得る
     getJobname:->@jobname
+    # サブ役職の情報を除いた役職名を得る
+    getMainJobname:-> @getJobname()
     # 村人かどうか
     isHuman:->!@isWerewolf()
     # 人狼かどうか
@@ -3673,7 +3681,7 @@ class WolfDiviner extends Werewolf
         if p?
             @results.push {
                 player: p.publicinfo()
-                result: game.i18n.t "roles:WolfDiviner.resultlog", {name: @name, target: p.name, result: p.jobname}
+                result: game.i18n.t "roles:WolfDiviner.resultlog", {name: @name, target: p.name, result: p.getMainJobname()}
             }
             @addGamelog game,"wolfdivine",null,@flag  # 占った
             if p.getTeam()=="Werewolf" && p.isHuman()
@@ -3903,7 +3911,7 @@ class Spy2 extends Player
             
     publishdocument:(game)->
         str=game.players.map (x)->
-            "#{x.name}:#{x.jobname}"
+            "#{x.name}:#{x.getMainJobname()}"
         .join " \n"
         log=
             mode:"system"
@@ -4150,7 +4158,7 @@ class Stalker extends Player
         log=
             mode:"skill"
             to:@id
-            comment: game.i18n.t "roles:Stalker.select", {name: @name, target: pl.name, job: pl.jobname}
+            comment: game.i18n.t "roles:Stalker.select", {name: @name, target: pl.name, job: pl.getMainJobname()}
         splashlog game.id,game,log
         @setFlag playerid  # ストーキング対象プレイヤー
         null
@@ -4898,8 +4906,8 @@ class Lover extends Player
         @setFlag true
         # 恋人二人が决定した
         
-    
-        plpls=[this,pl]
+        mytop = game.getPlayer @id
+        plpls = [mytop, pl]
         for x,i in plpls
             newpl=Player.factory null, game, x,null,Friend # 恋人だ！
             x.transProfile newpl
@@ -4916,7 +4924,7 @@ class Lover extends Player
             comment: game.i18n.t "roles:Lover.become", {name: pl.name}
         splashlog game.id,game,log
         # 2人とも更新する
-        for pl in [this, pl]
+        for pl in [mytop, pl]
             game.ss.publish.user pl.id,"refresh",{id:game.id}
 
         null
@@ -5989,7 +5997,7 @@ class FrankensteinsMonster extends Player
             log=
                 mode:"skill"
                 to:@id
-                comment: game.i18n.t "roles:FrankensteinsMonster.drain", {name: @name, target: pl.name, jobname: pl.getJobname()}
+                comment: game.i18n.t "roles:FrankensteinsMonster.drain", {name: @name, target: pl.name, jobname: pl.getMainJobname()}
             splashlog game.id,game,log
 
             # 同じ能力を
@@ -6354,6 +6362,7 @@ class BadLady extends Player
                 to:@id
                 comment: game.i18n.t "roles:BadLady.selectKeep", {name: @name, target: pl.name}
             splashlog game.id,game,log
+
             # 2人を恋人、1人をキープに
             plm=game.getPlayer fl.main
             for pll in [plm,pl]
@@ -6364,10 +6373,11 @@ class BadLady extends Player
                         comment: game.i18n.t "roles:Lover.become", {name: pll.name}
                     splashlog game.id,game,log
             # 自分恋人
-            newpl=Player.factory null, game, this,null,Friend # 恋人だ！
+            mypl = game.getPlayer @id
+            newpl=Player.factory null, game, mypl, null, Friend # 恋人だ！
             newpl.cmplFlag=fl.main
-            @transProfile newpl
-            @transform game,newpl,true  # 入れ替え
+            mypl.transProfile newpl
+            mypl.transform game,newpl,true  # 入れ替え
             # 相手恋人
             newpl=Player.factory null, game, plm,null,Friend # 恋人だ！
             newpl.cmplFlag=@id
@@ -7432,7 +7442,7 @@ class TongueWolf extends Werewolf
                 continue unless pl?
                 results.push {
                     player: pl.publicinfo()
-                    jobname: pl.jobname
+                    jobname: pl.getMainJobname()
                     isHuman: pl.isJobType "Human"
                 }
             @setFlag {
@@ -7654,7 +7664,7 @@ class XianFox extends Fox
             # if pl is Human, result is not available.
             @setFlag null
         else
-            @setFlag pl.getJobname()
+            @setFlag pl.getMainJobname()
         @addGamelog game, "xianresult", pl.type, pl.id
 
     sunrise:(game)->
@@ -7902,6 +7912,7 @@ class Complex
 
     
     jobdone:(game)-> @mcall(game,@main.jobdone,game) && (!@sub?.jobdone? || @sub.jobdone(game)) # ジョブの場合はサブも考慮
+    deadJobdone:(game)-> @mcall(game,@main.deadJobdone,game) && (!@sub?.deadJobdone? || @sub.deadJobdone(game))
     hunterJobdone:(game)-> @mcall(game,@main.hunterJobdone,game) && (!@sub?.hunterJobdone? || @sub.hunterJobdone(game))
     job:(game,playerid,query)-> # どちらの
         # query.jobtypeがない場合は内部処理なのでmainとして処理する?
@@ -8477,7 +8488,8 @@ class PhantomStolen extends Complex
         pl.setFlag true # もう盗めない
         pl.sunset game
     getJobname:-> @game.i18n.t "roles:jobname.Phantom" #霊界とかでは既に怪盗化
-    # 胜利条件関係は村人化（昼の間だけだし）
+    getMainJobname:-> @getJobname()
+    # 勝利条件関係は村人化（昼の間だけだし）
     isWerewolf:->false
     isFox:->false
     isVampire:->false
@@ -8645,7 +8657,7 @@ class DivineCursed extends Complex
 # パティシエールに本命チョコをもらった
 class GotChocolateTrue extends Friend
     cmplType:"GotChocolateTrue"
-    getJobname:->@main.getJobname()
+    getJobname:-> @game.i18n.t "roles:GotChocolateTrue.jobname", {jobname: @main.getJobname()}
     getJobDisp:->@main.getJobDisp()
     getPartner:->
         if @cmplType=="GotChocolateTrue"
@@ -8781,6 +8793,12 @@ class Chemical extends Complex
             @game.i18n.t "roles:Chemical.jobname", {left: @main.getJobname(), right: @sub.getJobname()}
         else
             @main.getJobname()
+    # same as above but uses getMainJobname.
+    getMainJobname:->
+        if @sub?
+            @game.i18n.t "roles:Chemical.jobname", {left: @main.getMainJobname(), right: @sub.getMainJobname()}
+        else
+            @main.getMainJobname()
     getJobDisp:->
         if @sub?
             @game.i18n.t "roles:Chemical.jobname", {left: @main.getJobDisp(), right: @sub.getJobDisp()}
@@ -8788,6 +8806,7 @@ class Chemical extends Complex
             @main.getJobDisp()
     sleeping:(game)->@main.sleeping(game) && (!@sub? || @sub.sleeping(game))
     jobdone:(game)->@main.jobdone(game) && (!@sub? || @sub.jobdone(game))
+    deadJobdone:(game)->@main.deadJobdone(game) && (!@sub? || @sub.deadJobdone(game))
 
     isHuman:->
         if @sub?
