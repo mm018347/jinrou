@@ -38,3 +38,18 @@ module.exports =
                 theme = null
             return theme
         return null
+
+module.exports.actions =(req,res,ss)->
+    req.use 'user.fire.wall'
+    req.use 'session'
+    getThemeList:->
+        results=[]
+        try
+            for t of themes
+                results.push {
+                    value:t
+                    name:themes[t].name
+                }
+            res results
+        catch e
+            res {error:e}
