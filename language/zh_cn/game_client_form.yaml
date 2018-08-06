@@ -1,0 +1,123 @@
+# name for normal job form.
+normalName: "{{job}}的能力"
+# label of button of normal job form.
+normalButton: "选择"
+
+# label for each form type.
+formType:
+  required: "必须"
+  optional: "任意"
+  optionalOnce: "任意（只限一次）"
+
+# Name forms which is a little special.
+specialName:
+  _day: "处刑投票"
+  _Werewolf: "人狼的袭击"
+  Dog1: "犬的能力"
+  Dog2: "犬的能力"
+  BadLady1: "恶女的能力"
+  BadLady2: "恶女的能力"
+  CraftyWolf2: "狡猾的狼的能力"
+  _Quantum_Diviner: "占卜师的能力"
+  _Quantum_Werewolf: "人狼的袭击"
+
+# Message for normal selection form.  normalMessage:
+messages:
+  _day: "请投票选择要处刑的人"
+  Waiting: "请选择希望就职的角色"
+  _Werewolf: "请选择要杀死的人"
+  WolfDiviner: "请选择一个要占卜的人"
+  GreedyWolf: "在希望满足自身贪欲的场合下请选择"
+  Diviner: "请选择一个要占卜的人"
+  TinyFox: "请选择一个要占卜的人"
+  Guard: "请选择一个要护卫的人"
+  Magician: "请选择一个要复活的人"
+  Spy: "准备今晚离开村子的时候请选择"
+  Fugitive: "请选择要逃亡到谁家里"
+  Liar: "请选择一个要占卜的人"
+  Copier: "请选择模仿的对象"
+  Light: "请选择死亡笔记要杀死的对象"
+  Cupid: "请依次选择两名恋人"
+  Lover: "请选择你的恋人"
+  Stalker: "请选择要跟踪的对象"
+  Spellcaster: "请选择咒言对象"
+  Priest: "请选择一个要守护的人"
+  PI: "请选择要调查的人"
+  Sorcerer: "请选择要调查的人"
+  Doppleganger: "请选择一个人作为二重身的对象"
+  CultLeader: "请选择一个人使他成为信者"
+  Vampire: "请选择一个要袭击的人"
+  Cat: "请选择一个要复活的人"
+  OccultMania: "请指定发动能力的对象"
+  Dog1: "袭击你的饲主"
+  Dog2: "请选择你的饲主"
+  Dictator: "终止讨论，指定处刑对象"
+  Trapper: "请选择要护卫的对象"
+  WolfBoy: "想要让谁看起来像人狼"
+  MinionSelector: "请指定狼的仆从"
+  Theif: "请选择要成为的职业"
+  Hoodlum: "请依次选择你憎恨的人"
+  _Quantum_Diviner: "请选择一个要占卜的人"
+  _Quantum_Werewolf: "请选择一个要袭击的人"
+  Counselor: "请选择你要策反的人"
+  Miko: "用神圣的力量守护自己"
+  FascinatingWolf: "请选择要诱惑的人"
+  ToughWolf: "想要使用能力的时候请在此处选择袭击对象"
+  ThreateningWolf: "请选择要威吓的人"
+  WanderingGuard: "请选择一个要护卫的人"
+  ObstructiveMad: "请选择要妨碍的人"
+  TroubleMaker: "白天将有两人被处刑"
+  BloodyMary: "请选择要咒杀的人"
+  SantaClaus: "请选择要送礼物的对象"
+  Phantom: "请选择要盗走职业能力的对象"
+  BadLady1: "首先请选择你的本命对象"
+  BadLady2: "请选择要玩弄的对象"
+  Pyrotechnist: "准备放烟火的时候请点"
+  Helper: "请选择要帮助的对象"
+  Bomber: "请选择要送炸弹的人"
+  Blasphemy: "请选择要亵渎的人"
+  Ushinotokimairi: "请选择要诅咒的人"
+  Patissiere: "请选择要送出本命巧克力的对象"
+  MadDog: "请选择一个要袭击的人"
+  Hypnotist: "请选择要使用催眠术的对象"
+  CraftyWolf: "在想要假死的时候请选择"
+  CraftyWolf2: "在想要取消假死的时候请选择"
+  GotChocolate: "吃下巧克力"
+  Shishimai: "请选择狮子舞咀嚼的对象"
+  Pumpkin: "请选择变成南瓜的对象"
+  MadScientist: "请选择一个要复活的人"
+  Forensic: "请选择要调查的人"
+  Cosplayer: "请选择一个要护卫的人"
+  Ninja: "请选择要侦查的人"
+  Hunter: "请选择射击的目标"
+  MadHunter: "请选择射击的目标"
+  Idol: "请选择一个人使其成为你的粉丝"
+  XianFox: "请选择透视的对象"
+  GameMaster: "GM命令"
+
+# Texts for GameMaster form.
+GameMaster:
+  deadalive: "杀死/复活"
+  kill: "杀死"
+  revive: "复活"
+  time: "时间延长/缩短"
+  longer: "延长{{count}}秒"
+  shorter: "缩短{{count}}秒"
+
+# Texts for Merchant form.
+Merchant:
+  # name of kits.
+  kit:
+    Diviner: "占卜套装"
+    Psychic: "灵能套装"
+    Guard: "守护套装"
+  # description.
+  description: "请选择商品的收件人"
+# Texts for Witch form.
+Witch:
+  description: "请选择使用的魔药和使用对象"
+  # name of drugs.
+  drug:
+    kill: "毒药"
+    revive: "复活药"
+

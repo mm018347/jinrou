@@ -4,4 +4,5 @@ node_modules/
 /server/themes/*
 !/server/themes/example.coffee
 !/server/themes/readme.md
+/client/static/front-assets
 /language/*/*.missing.json

@@ -88,16 +88,7 @@ exports.categories=
     Switching:["Stalker","OccultMania","Copier","Cursed","Doppleganger","BloodyMary","Phantom","Thief"]
     Others:["Devil","Cupid","Bat","CultLeader","Vampire","Tanner","Lover","Hoodlum","BadLady","Patissiere","Shishimai"]
 
-exports.categoryNames=
-    Human:"村人系"
-    Werewolf:"人狼系"
-    Fox:"妖狐系"
-    Madman:"狂人系"
-    Immoral:"背德者系"
-    Switching:"职业变化系"
-    Others:"第三阵营系"
-
-# 职业规则たち 职业人数一览を返す（Humanは向こうで補完）
+# 役職ルールたち 役職人数一覧を返す（Humanは向こうで補完）
 normal1=(number)->
     ret={}
     #狼
@@ -170,19 +161,16 @@ exports.jobrules=[
     rule:[
       {
         name:"普通1"
-        title:"较少的人数也能享受游戏的配置。"
         minNumber:4
         rule:normal1
       }
       {
         name:"普通2"
-        title:"普通的配置。"
         minNumber:4
         rule:normal2
       }
       {
         name:"普通3"
-        title:"较少的人数也会出现妖狐的配置。"
         minNumber:4
         rule:(number)->
           ret=normal1 number
@@ -199,7 +187,6 @@ exports.jobrules=[
     rule:[
       {
         name:"恋人"
-        title:"恋人会出现的配置。"
         rule:(number)->
           ret=normal1 number
           if ret.Fox>0  #NaNかも
@@ -210,7 +197,6 @@ exports.jobrules=[
       }
       {
         name:"背德者"
-        title:"背德者会出现的配置。"
         rule:(number)->
           ret=normal1 number
           if ret.Fox>0
@@ -220,7 +206,6 @@ exports.jobrules=[
       }
       {
         name:"埋毒者"
-        title:"埋毒者会出现的配置。"
         rule:(number)->
           ret=normal1 number
           ret.Poisoner=1
@@ -229,7 +214,6 @@ exports.jobrules=[
       }
       {
         name:"猫又"
-        title:"猫又会出现的配置。"
         rule:(number)->
           ret=normal1 number
           ret.Cat=1
@@ -238,7 +222,6 @@ exports.jobrules=[
       }
       {
         name:"低语狂人"
-        title:"低语狂人会代替普通狂人出现的配置。"
         rule:(number)->
           ret=normal1 number
           if ret.Madman>0
@@ -253,7 +236,6 @@ exports.jobrules=[
     rule:[
       {
         name:"蝙蝠"
-        title:"蝙蝠会出现的配置。"
         rule:(number)->
           ret=normal1 number
           ret.Bat=1
@@ -265,7 +247,6 @@ exports.jobrules=[
       }
       {
         name:"贵族奴隶"
-        title:"贵族奴隶会出现的配置。"
         rule:(number)->
           ret=normal1 number
           ret.Noble=1
@@ -283,7 +264,6 @@ exports.jobrules=[
       }
       {
         name:"魔术师"
-        title:"魔术师会出现的配置。"
         rule:(number)->
           ret=normal1 number
           ret.Magician=1
@@ -291,7 +271,6 @@ exports.jobrules=[
       }
       {
         name:"间谍"
-        title:"间谍会出现的配置。"
         rule:(number)->
           ret=normal1 number
           ret.Spy=1
@@ -301,7 +280,6 @@ exports.jobrules=[
       }
       {
         name:"人狼占卜师"
-        title:"人狼占卜师会出现的配置。"
         rule:(number)->
           ret=normal1 number
           ret.Werewolf--
@@ -312,7 +290,6 @@ exports.jobrules=[
       }
       {
         name:"商人"
-        title:"商人会出现的配置。"
         rule:(number)->
           ret=normal1 number
           ret.Merchant=1
@@ -325,7 +302,6 @@ exports.jobrules=[
       rule:[
         {
           name:"变化村"
-          title:"有很多能够变换职业的人。"
           minNumber:6
           rule:(number)->
             ret={}
@@ -375,7 +351,6 @@ exports.jobrules=[
         }
         {
           name:"黑村"
-          title:"黑啊，真他妈黑啊。村人几乎看不到生存希望的村子。"
           minNumber:6
           rule:(number)->
             ret={}
@@ -442,7 +417,6 @@ exports.jobrules=[
         }
         {
           name:"女王村"
-          title:"存在女王观战者的村子。推荐人数:14-16人。"
           minNumber:10
           suggestedOption:
             scapegoat:"no"
@@ -496,7 +470,6 @@ exports.jobrules=[
     rule:[
       {
         name:"疯狂的世界"
-        title:"狂人很多。"
         rule:(number)->
           ret={}
           count=3
@@ -562,7 +535,6 @@ exports.jobrules=[
       }
       {
         name:"六方混战"
-        title:"多个阵营的大乱战。"
         rule:(number)->
           ret={}
           ret.Diviner=1
@@ -606,20 +578,19 @@ exports.jobrules=[
           if number>=38
             ret.Vampire++
           ret
-            
-          
+
+
       }
     ]
   }
 ]
-# 规则オブジェクトを得る
-exports.getruleobj=(name)->
+# ルールオブジェクトを得る
+getruleobj=(name)->
     # オブジェクトから探す
     if name=="特殊规则.量子人狼"
         # 特殊だ!
         return {
             name:"量子人狼"
-            title:"全员的的真实职业以概率表示。只限村人・人狼・占卜师。"
             rule:null
             suggestedNight:{
                 max:60
@@ -658,1251 +629,833 @@ exports.getrulefunc=(name)->
             ret
 
     # ほかはオブジェクトから探す
-    ruleobj=exports.getruleobj name
+    ruleobj = getruleobj name
     return ruleobj?.rule
-# 规则の名字を書く
-exports.getrulestr=(rule,jobs={})->
-    text=""
-    if rule=="特殊规则.黑暗火锅"
-        # 黑暗火锅の場合
-        return "黑暗火锅"
-    if rule=="特殊规则.Endless黑暗火锅"
-        return "Endless黑暗火锅"
-    text="#{rule.split('.').pop()} / "
-
-    for job in Shared.game.jobs
-        continue if job=="Human" && rule=="特殊规则.手调黑暗火锅" #手调黑暗火锅は村人部分だけ黑暗火锅
-        num=jobs[job]
-        continue unless parseInt num
-        text+="#{Shared.game.getjobname job}#{num} "
-    # さらにカテゴリ分も
-    for type,name of Shared.game.categoryNames
-        num=jobs["category_#{type}"]
-        if num>0
-            text+="#{name}#{num} "
-    return text
 # 職の情報
-exports.getjobobj = getjobobj = (job)->
+exports.getjobobj = (job)->
     for name,team of Shared.game.jobinfo
         if team[job]?
             return team[job]
     return null
-# 職の名前
-exports.getjobname = (job)-> getjobobj(job)?.name
+# jobinfo.name can now be removed
 exports.jobinfo=
     Human:
-        name:"村人阵营"
         color:"#00CC00"
         Human:
-            name:"村人"
             color:"#dddddd"
         Diviner:
-            name:"占卜师"
             color:"#00b3ff"
         Psychic:
-            name:"灵能者"
             color:"#bb00ff"
         Guard:
-            name:"猎人"
             color:"#969ad4"
         Couple:
-            name:"共有者"
             color:"#ffffab"
         Poisoner:
-            name:"埋毒者"
             color:"#853c24"
         Noble:
-            name:"贵族"
             color:"#ffff00"
         Slave:
-            name:"奴隶"
             color:"#1417d9"
         Magician:
-            name:"魔术师"
             color:"#f03eba"
         Fugitive:
-            name:"逃亡者"
             color:"#e8b279"
         Merchant:
-            name:"商人"
             color:"#e06781"
         QueenSpectator:
-            name:"女王观战者"
             color:"#faeebe"
         Liar:
-            name:"骗子"
             color:"#a3e4e6"
         Light:
-            name:"死亡笔记"
             color:"#2d158c"
         MadWolf:
-            name:"狂人狼"
             color:"#847430"
         ToughGuy:
-            name:"硬汉"
             color:"#ff5900"
         Cursed:
-            name:"被诅咒者"
             color:"#bda3bf"
         ApprenticeSeer:
-            name:"见习占卜师"
             color:"#bfecff"
         Diseased:
-            name:"病人"
             color:"#b35b98"
         Spellcaster:
-            name:"咒言师"
             color:"#4b4f7d"
         Lycan:
-            name:"狼凭"
             color:"#7d5f5f"
         Priest:
-            name:"圣职者"
             color:"#fff94a"
         Prince:
-            name:"王子"
             color:"#e5ff00"
         PI:
-            name:"超常现象研究者"
             color:"#573670"
         Cat:
-            name:"猫又"
             color:"#9200C7"
         Witch:
-            name:"魔女"
             color:"#9200C7"
         Oldman:
-            name:"老人"
             color:"#ede4b9"
         OccultMania:
-            name:"怪诞狂热者"
             color:"#edda8c"
         Dog:
-            name:"犬"
             color:"#d4a152"
         Dictator:
-            name:"独裁者"
             color:"#ff0000"
         SeersMama:
-            name:"占卜师的妈妈"
             color:"#ff9500"
         Trapper:
-            name:"陷阱师"
             color:"#b58500"
         RedHood:
-            name:"小红帽"
             color:"#ff2200"
         Counselor:
-            name:"策士"
             color:"#ff94d9"
         Miko:
-            name:"巫女"
             color:"#f5b8ca"
         HolyMarked:
-            name:"圣痕者"
             color:"#c4e8ff"
         WanderingGuard:
-            name:"游荡猎人"
             color:"#16bf0d"
         TroubleMaker:
-            name:"闹事者"
             color:"#64b82c"
         FrankensteinsMonster:
-            name:"弗兰肯斯坦的怪物"
             color:"#4d3a03"
         BloodyMary:
-            name:"血腥玛丽"
             color:"#ee0000"
         King:
-            name:"国王"
             color:"#fcdd28"
         SantaClaus:
-            name:"圣诞老人"
             color:"#ff0000"
         Phantom:
-            name:"怪盗"
             color:"#f3f3f3"
         DrawGirl:
-            name:"看板娘"
             color:"#ffc796"
         Pyrotechnist:
-            name:"烟火师"
             color:"#ff6a19"
         Baker:
-            name:"面包店"
             color:"#fad587"
         SpiritPossessed:
-            name:"恶灵凭依"
             color:"#a196d1"
         Forensic:
-            name:"法医学者"
             color:"#d4e9fc"
         Cosplayer:
-            name:"Cosplayer"
             color:"#69652b"
         TinyGhost:
-            name:"妖怪"
             color:"#999999"
         Ninja:
-            name:"忍者"
             color:"#1f136d"
         Twin:
-            name:"双胞胎"
             color:"#dbfcff"
         Hunter:
-            name:"狩猎者"
             color:"#d11f1f"
         Emma:
-            name:"阎魔"
             color:"#dd2211"
         Idol:
-            name:"偶像"
             color:"#ffcc55"
-        
+
     Werewolf:
-        name:"人狼阵营"
         color:"#DD0000"
         Werewolf:
-            name:"人狼"
             color:"#220000"
         Madman:
-            name:"狂人"
             color:"#ffbb00"
         BigWolf:
-            name:"大狼"
             color:"#660000"
         Spy:
-            name:"间谍"
             color:"#ad5d28"
         WolfDiviner:
-            name:"人狼占卜师"
             color:"#5b0080"
         Spy2:
-            name:"间谍Ⅱ"
             color:"#d3b959"
         Fanatic:
-            name:"狂信者"
             color:"#94782b"
         Sorcerer:
-            name:"妖术师"
             color:"#b91be0"
         LoneWolf:
-            name:"一匹狼"
             color:"#222222"
         MinionSelector:
-            name:"仆从选择者"
             color:"#ffffff"
         WolfCub:
-            name:"狼之子"
             color:"#662233"
         WhisperingMad:
-            name:"低语狂人"
             color:"#ccab52"
         WolfBoy:
-            name:"狼少年"
             color:"#5b2266"
         GreedyWolf:
-            name:"贪婪的狼"
             color:"#910052"
         FascinatingWolf:
-            name:"魅惑的女狼"
             color:"#f200c2"
         SolitudeWolf:
-            name:"孤独的狼"
             color:"#a13f3f"
         ToughWolf:
-            name:"硬汉人狼"
             color:"#c47f35"
         ThreateningWolf:
-            name:"威吓的狼"
             color:"#9e6f00"
         ObstructiveMad:
-            name:"碍事的狂人"
             color:"#d95e38"
         PsychoKiller:
-            name:"变态杀人狂"
             color:"#1ee37d"
         CautiousWolf:
-            name:"慎重的狼"
             color:"#5c3716"
         Bomber:
-            name:"炸弹魔"
             color:"#cda764"
         Ushinotokimairi:
-            name:"丑时之女"
             color:"#c9563c"
         MadDog:
-            name:"狂犬"
             color:"#c21f1f"
         Hypnotist:
-            name:"催眠师"
             color:"#e01bs9"
         CraftyWolf:
-            name:"狡猾的狼"
             color:"#4a03ad"
         Pumpkin:
-            name:"南瓜魔"
             color:"#ffb042"
         MadScientist:
-            name:"疯狂科学家"
             color:"#14e051"
         MadHunter:
-            name:"复仇者"
             color:"#511e0f"
         MadCouple:
-            name:"尖叫狂人"
             color:"#f2d5bc"
         EyesWolf:
-            name:"瞳狼"
             color:"#000a75"
         TongueWolf:
-            name:"舌祸狼"
             color:"#912d5b"
         BlackCat:
-            name:"黑猫"
             color:"#38004c"
-        
+
     Fox:
-        name:"妖狐阵营"
         color:"#934293"
         Fox:
-            name:"妖狐"
             color:"#934293"
         TinyFox:
-            name:"小狐"
             color:"#dd81f0"
         Immoral:
-            name:"背德者"
             color:"#5c2f5c"
         Blasphemy:
-            name:"亵渎者"
             color:"#802060"
         XianFox:
-            name:"仙狐"
             color:"#edd5ed"
     Friend:
-        name:"恋人阵营"
         color:"#ffb5e5"
         Cupid:
-            name:"丘比特"
             color:"#ffb5e5"
         Lover:
-            name:"求爱者"
             color:"#ffcfee"
         BadLady:
-            name:"恶女"
             color:"#cf0085"
         Patissiere:
-            name:"女糕点师"
             color:"#ab5f30"
     Devil:
-        name:"恶魔"
         color:"#735f9e"
         Devil:
-            name:"恶魔"
             color:"#735f9e"
     Vampire:
-        name:"吸血鬼阵营"
         color:"#8f00bf"
         Vampire:
-            name:"吸血鬼"
             color:"#8f00bf"
     Cult:
-        name:"邪教主阵营"
         color: "#b09d87"
         CultLeader:
-            name:"邪教主"
             color:"#b09d87"
     Others:
-        name:"其他"
         color:"#cccccc"
         Bat:
-            name:"蝙蝠"
             color:"#000066"
         Stalker:
-            name:"跟踪狂"
             color:"#ad6628"
         Doppleganger:
-            name:"二重身"
             color:"#bbbbbb"
         Copier:
-            name:"模仿者"
             color:"#ffffff"
         Tanner:
-            name:"皮革匠"
             color:"#ede4b9"
         Thief:
-            name:"小偷"
             color:"#a4a4a4"
         Hoodlum:
-            name:"无赖"
             color:"#88002d"
         QuantumPlayer:
-            name:"量子人类"
             color:"#eeeeee"
         Shishimai:
-            name:"狮子舞"
             color:"#2c8c3e"
     Neet:
-        name:"NEET"
         color:"#aaaaaa"
         Neet:
-            name:"NEET"
             color:"#aaaaaa"
-# 设定項目
-exports.rules=[
+
+# TODO temporal new version
+exports.new_rules=[
     # 黑暗火锅関係
     {
-        label:"黑暗火锅选项"
-        visible:(rule,jobs)->rule.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
-        rules:[
+        type: 'group'
+        label:
+            id: 'yaminabe_option'
+            visible: (rule)->rule.casting in ['特殊规则.黑暗火锅','特殊规则.手调黑暗火锅','特殊规则.Endless黑暗火锅']
+        items: [
             {
-                name:"yaminabe_safety"
-                label:"黑暗火锅安全性"
-                title:"指定职业分配的严谨程度"
-                type:"select"
-                values:[
-                    {
-                        value:"supersuper"
-                        label:"超超（α2）"
-                        title:"姑且算是调整了各阵营的强度平衡。"
-                    }
-                    {
-                        value:"super"
-                        label:"超(β2)"
-                        title:"将会调整各阵营的强度平衡。"
-                    }
-                    {
-                        value:"high"
-                        label:"高"
-                        title:"将会考虑出现的职业间的相互影响（不会出现有背德者却没有妖狐的情况）。"
-                    }
-                    {
-                        value:"middle"
-                        label:"中"
-                        title:"调整各阵营的人数比例。"
-                    }
-                    {
-                        value:"low"
-                        label:"低"
-                        title:"适当调整人狼・妖狐的数量。"
-                        selected:true
-                    }
-                    {
-                        value:"none"
-                        label:"无"
-                        title:"完全不调整。除了保证人狼系至少为1以外完全随机。"
-                    }
-                    {
-                        value:"reverse"
-                        label:"逆（α）"
-                        title:"以搞笑为目标的游戏，适当调整人狼・妖狐的数量。"
-                    }
-                ]
+                type: 'item'
+                value:
+                    type: 'select'
+                    id: 'yaminabe_safety'
+                    defaultValue: 'low'
+                    values:[
+                        "supersuper"
+                        "super"
+                        "high"
+                        "middle"
+                        "low"
+                        "none"
+                        "reverse"
+                    ]
             }
             {
-                name:"hide_singleton_teams"
-                label:"是否隐藏单独阵营"
-                title:"如果选择隐藏，恶魔・吸血鬼・邪教主在阵营一览中将被计入「其他阵营」。"
-                type:"checkbox"
-                value:{
-                    value:"on"
-                    label:"隐藏"
-                }
+                type: 'item'
+                value:
+                    type: 'checkbox'
+                    id: 'hide_singleton_teams'
+                    defaultChecked: false
+                    value: 'on'
             }
         ]
     }
     # 標準规则
     {
-        label:null
-        visible:->true
-        rules:[
+        type: 'group'
+        label:
+            id: 'normal_rules'
+            visible:->true
+        items: [
             {
-                name:"decider"
-                label:"决定者"
-                title:"白天的处刑投票有人票数相同时，决定者的投票将有优先决定权。所有人不会知道谁是决定者。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type: 'checkbox'
+                    id: 'decider'
+                    defaultChecked: false
+                    value: '1'
+            }
+            {
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"authority"
+                    defaultChecked: false
                     value:"1"
-                    label:"有"
-                }
             }
             {
-                name:"authority"
-                label:"权力者"
-                title:"白天的处刑投票时，权力者的投票将以两票计。所有人不会知道谁是权力者。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"deathnote"
+                    defaultChecked: false
                     value:"1"
-                    label:"有"
-                }
             }
             {
-                name:"deathnote"
-                label:"死亡笔记"
-                title:"死亡笔记每晚都会传递给另一个人。持有死亡笔记的人能够杀死一个人。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"wolfminion"
+                    defaultChecked: false
                     value:"1"
-                    label:"有"
-                }
             }
             {
-                name:"wolfminion"
-                label:"狼的仆从"
-                title:"第一天夜里人狼会指定狼的仆从。狼的仆从仍持有原职业的技能，但是阵营变为人狼阵营。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"drunk"
+                    defaultChecked: false
                     value:"1"
-                    label:"有"
-                }
             }
             {
-                name:"drunk"
-                label:"酒鬼"
-                title:"会有随机一人变成酒鬼。酒鬼在第三天夜里之前会把自己当做村人。"
-                type:"checkbox"
-                value:{
-                    value:"1"
-                    label:"有"
-                }
+                type: 'item'
+                value:
+                    type:"separator"
             }
             {
-                type:"separator"
+                type: 'item'
+                value:
+                    type:"select"
+                    id:"scapegoat"
+                    defaultValue: 'on'
+                    values: [
+                        "on"
+                        "off"
+                        "no"
+                    ]
             }
             {
-                name:"scapegoat"
-                label:"替身君"
-                title:"替身君是在第一天夜里被杀的NPC。"
-                type:"select"
-                values: [
-                    {
-                        value:"on"
-                        label:"有"
-                    }
-                    {
-                        value:"off"
-                        label:"无（玩家会被杀）"
-                        selected:true
-                    }
-                    {
-                        value:"no"
-                        label:"无（没有人会死）"
-                    }
-                ]
+                type: 'item'
+                value:
+                    type:"separator"
             }
             {
-                type:"separator"
+                type: 'item'
+                value:
+                    type:"time"
+                    id: 'day'
+                    defaultValue: 330
             }
             {
-                type:"time"
-                name:
-                    minute:"day_minute"
-                    second:"day_second"
-                label:"昼"
-                defaultValue:
-                    minute:2
-                    second:30
-                getstr:(_, ruleobj)->
-                    if Number(ruleobj.day) > 0
-                        {
-                            label: "白天的讨论时间"
-                            value: secondsStr ruleobj.day
-                        }
-                    else
-                        null
+                type: 'item'
+                value:
+                    type:"time"
+                    id: 'night'
+                    defaultValue: 150
             }
             {
-                type:"time"
-                name:
-                    minute:"night_minute"
-                    second:"night_second"
-                label:"夜"
-                defaultValue:
-                    minute:1
-                    second:30
-                getstr:(_, ruleobj)->
-                    if Number(ruleobj.day) > 0
-                        {
-                            label: "夜晚时间"
-                            value: secondsStr ruleobj.night
-                        }
-                    else
-                        null
+                type: 'item'
+                value:
+                    type:"time"
+                    id: 'remain'
+                    defaultValue: 120
             }
             {
-                type:"time"
-                name:
-                    minute:"remain_minute"
-                    second:"remain_second"
-                label:"犹豫"
-                defaultValue:
-                    minute:2
-                    second:0
-                getstr:(_, ruleobj)->
-                    if Number(ruleobj.remain) > 0
-                        {
-                            label: "犹豫时间"
-                            value: secondsStr ruleobj.remain
-                        }
-                    else
-                        null
+                type: 'item'
+                value:
+                    type:"time"
+                    id: 'voting'
+                    defaultValue: 0
             }
             {
-                type:"time"
-                name:
-                    minute:"voting_minute"
-                    second:"voting_second"
-                label:"投票专用时间"
-                title:"如果「投票专用时间」设定不为零，白天的讨论期间将禁止投票，改为只在投票专用时间投票。"
-                defaultValue:
-                    minute:0
-                    second:0
-                getstr:(_, ruleobj)->
-                    if Number(ruleobj.voting) > 0
-                        {
-                            label: "投票专用时间"
-                            value: "时长 #{secondsStr ruleobj.voting}"
-                        }
-                    else
-                        null
+                type: 'item'
+                value:
+                    type:"separator"
             }
             {
-                type:"separator"
-            }
-            {
-                name:"will"
-                label:"遗言"
-                title:"遗言有效的时候各个参加者能够设置遗言，遗言将在死亡时公开。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"will"
+                    defaultChecked: true
                     value:"die"
-                    label:"有"
-                    nolabel:"无"
-                    checked:true
-                }
             }
             {
-                name:"heavenview"
-                label:"灵界视野"
-                title:"选择有的时候，在灵界可以看到职业的一览表，夜间的发言全部可以看到。"
-                type:"select"
-                values:[
-                    {
+                type: 'item'
+                value:
+                    type:"select"
+                    id:"heavenview"
+                    defaultValue: 'norevive'
+                    values:[
+                        "view"
+                        "norevive"
                         # ""なのは歴史的経緯
-                        value:"view"
-                        label:"常开"
-                        title:"即使有能复活他人的角色，也开放灵界。"
-                    }
-                    {
-                        value:"norevive"
-                        label:"有"
-                        title:"仅在所有人都不能复活的时候公开灵界。"
-                        selected:true
-                    }
-                    {
-                        value:""
-                        label:"无"
-                        title:"直到游戏结束都不公开灵界。"
-                    }
-                ]
+                        ""
+                    ]
             }
             {
-                name:"votemyself"
-                label:"允许向自己投票"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"votemyself"
                     value:"ok"
-                    label:"有"
-                    nolabel:"无"
-                    checked:true
-                }
-                getstr:(value)->
-                    {
-                        label:"向自己投票"
-                        value:if value=="ok" then "有" else "无"
-                    }
             }
             {
-                name:"voteresult"
-                label:"隐藏投票结果"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"voteresult"
                     value:"hide"
-                    label:"隐藏"
-                    nolabel:"显示"
-                }
-                getstr:(value)->
-                    {
-                        label:"投票结果"
-                        value:if value=="hide" then "隐藏" else "显示"
-                    }
             }
             {
-                name:"waitingnight"
-                label:"等待直到夜晚结束"
-                type:"hidden"
-                value:{
-                    value:"wait"
-                    label:"有"
-                    nolabel:"无"
-                }
+                type: 'item'
+                value:
+                    type:"hidden"
+                    id:"waitingnight"
+                    value: "wait"
             }
             {
-                name:"safety"
-                label:"替身安全性"
-                title:"仅在首次分配职业时生效，对转生无效。如果设为「任意」，则替身君可以成为包括人狼在内的任何职业"
-                type:"select"
-                values:[
-                    {
-                        value:"full"
-                        label:"有"
-                        selected:true
-                        title:"替身君除去所有人外，除去"+SAFETY_EXCLUDED_JOBS.map((job)-> exports.getjobname(job)).join("、")
-                    }
-                    {
-                        value:"no"
-                        label:"无"
-                        title:"替身君除去所有人外"
-                    }
-                    {
-                        value:"free"
-                        label:"任意"
-                        title:"替身君可以成为任何职业"
-                    }
-                ]
-            }
-            {
-                type:"separator"
-            }
-            {
-                name:"noticebitten"
-                label:"被咬的时候会知道"
-                title:"被人狼袭击的时候会收到通知。"
-                type:"checkbox"
-                value:{
-                    value:"notice"
-                    label:"有"
-                    nolabel:"无"
-                }
-                getstr:(value)->
-                    {
-                        label:"遭受袭击警报"
-                        value:if value=="notice" then "有" else "无"
-                    }
-            }
-            {
-                name:"GMpsychic"
-                label:"GM灵能"
-                title:"选中的时候，被处刑人的灵能结果会向所有人公开。"
-                type:"checkbox"
-                value:{
-                    value:"on"
-                    label:"有"
-                    nolabel:"无"
-                }
-            }
-            {
-                name:"silentrule"
-                label:"秒规则"
-                backlabel:true  # 後ろに
-                title:"设为1以上的时候，白天刚开始数秒内全员不能发言。"
-                type:"second"
-                defaultValue:{
-                    value:0
-                }
-                getstr:(value)->
-                    if value==0
-                        return null
-                    else
-                        return {
-                            label:null
-                            value:"#{value}秒规则"
+                type: 'item'
+                value:
+                    type:"select"
+                    id:"safety"
+                    defaultValue: 'full'
+                    values:[
+                        "full"
+                        "no"
+                        "free"
+                    ]
+                    getOptionStr: (t, value)->
+                        {
+                            label: t("rules:rule.safety.labels.#{value}")
+                            description: t("rules:rule.safety.descriptions.#{value}", {
+                                safety_excluded_jobs: SAFETY_EXCLUDED_JOBS.map((job)-> t("roles:jobname.#{job}")).join("、")
+                            })
                         }
             }
             {
-                name:"runoff"
-                label:"决胜投票"
-                title:"选中的时候，票数最高的人之间将进行决胜投票。"
-                type:"select"
-                values:[
-                    {
-                        value:"no"
-                        label:"无"
-                    }
-                    {
-                        value:"revote"
-                        label:"票数相同时"
-                        selected:true
-                    }
-                    {
-                        value:"yes"
-                        label:"总是"
-                    }
-                ]
+                type: 'item'
+                value:
+                    type:"separator"
             }
             {
-                name:"drawvote"
-                label:"最高得票数相同时的处理"
-                title:"设定最高得票数相同时的处理。"
-                type:"select"
-                values:[
-                    {
-                        value:"revote"
-                        label:"重新投票"
-                        selected:true
-                    }
-                    {
-                        value:"none"
-                        label:"谁也不被处刑"
-                    }
-                    {
-                        value:"random"
-                        label:"最高得票者随机处刑一人"
-                    }
-                    {
-                        value:"all"
-                        label:"最高得票者全员处刑"
-                    }
-                ]
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"noticebitten"
+                    value:"notice"
             }
             {
-                type: "separator"
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"GMpsychic"
+                    value:"on"
+            }
+            {
+                type: 'item'
+                value:
+                    type:"integer"
+                    id:"silentrule"
+                    defaultValue: 0
+                    getstr:(t, value)->
+                        {
+                            value:
+                                if !value
+                                    t('rules:common.none')
+                                else
+                                    value + t('rules:common.seconds')
+                        }
+            }
+            {
+                type: 'item'
+                value:
+                    type:"select"
+                    id:"runoff"
+                    defaultValue: 'no'
+                    values:[
+                        "no"
+                        "revote"
+                        "yes"
+                    ]
+            }
+            {
+                type: 'item'
+                value:
+                    type:"select"
+                    id:"drawvote"
+                    defaultValue: 'revote'
+                    values:[
+                        "revote"
+                        "random"
+                        "none"
+                        "all"
+                    ]
+            }
+            {
+                type: 'item'
+                value:
+                    type: "separator"
             }
             {
                 # 名前がyaminabeなのは歴史的経緯
-                name:"yaminabe_hidejobs"
-                label:"配置公开"
-                title:"指定配置的公开方式。"
-                type:"select"
-                values:[
-                    {
+                type: 'item'
+                value:
+                    type:"select"
+                    id:"yaminabe_hidejobs"
+                    defaultValue: ''
+                    values:[
                         # ""なのは歴史的経緯
-                        value:""
-                        label:"公开职业一览"
-                        title:"配置结束后，公开将会出现的职业。"
-                        selected:true
-                    }
-                    {
-                        value:"team"
-                        label:"只公开阵营人数"
-                        title:"只会公开各个阵营的人数。"
-                    }
-                    {
-                        value:"2"
-                        label:"隐藏"
-                        title:"隐藏将出现的职业一览。"
-                    }
-                ]
+                        ""
+                        "team"
+                        "2"
+                    ]
             }
             {
-                name:"losemode"
-                label:"败北村"
-                title:"以败北为目的的人狼。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"losemode"
                     value:"on"
-                    label:"有"
-                }
             }
             {
-                name:"rolerequest"
-                label:"希望役职制"
-                title:"所有参加者可以选择希望就职的角色。在黑暗火锅中无效。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"rolerequest"
                     value:"on"
-                    label:"有"
-                }
             }
             {
-                name:"chemical"
-                label:"炼成人狼"
-                title:"每人分配两个职业的特殊规则。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"chemical"
                     value:"on"
-                    label:"有"
-                }
             }
         ]
     }
     # 人狼系
     {
-        label: "人狼系的设定"
-        visible:(rule,jobs)->
-            return true if isYaminabe rule
-            for job in exports.categories.Werewolf
-                if jobs[job]>0
-                    return true
-            return false
-        rules:[
+        type: 'group'
+        label:
+            id: "werewolf"
+            visible: (rule)->
+                return true if isYaminabe rule
+                for job in exports.categories.Werewolf
+                    if rule.jobNumbers[job]>0
+                        return true
+                return false
+        items:[
             {
-                name:"wolfsound"
-                label:"能够听到狼的远吠"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"wolfsound"
+                    defaultChecked: true
                     value:"aloud"
-                    label:"有"
-                    nolabel:"无"
-                    checked:true
-                }
-                getstr:(value)->
-                    {
-                        label:"狼的远吠"
-                        value:if value=="aloud" then "能听到" else "听不到"
-                    }
             }
             {
-                name:"wolfattack"
-                label:"人狼之间可以相互袭击"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"wolfattack"
                     value:"ok"
-                    label:"有"
-                }
-                getstr:(value)->
-                    if value=="ok"
-                        {
-                            label:null
-                            value:"人狼之间可以相互袭击"
-                        }
-                    else
-                        null
             }
         ]
     }
     # 占い系
     {
-        label: "占卜师的设定"
-        visible:(rule,jobs)->
-            return true if isYaminabe rule
-            for job in ["Diviner","ApprenticeSeer","WolfDiviner","TinyFox"]
-                if jobs[job]>0
-                    return true
-            return false
-        rules:[
+        type: 'group'
+        label:
+            id: 'diviner'
+            visible:(rule)->
+                return true if isYaminabe rule
+                for job in ["Diviner","ApprenticeSeer","WolfDiviner","TinyFox"]
+                    if rule.jobNumbers[job]>0
+                        return true
+                return false
+        items:[
             {
-                name:"divineresult"
-                label:"占卜结果"
-                title:"晚上的占卜结果在什么时候发表。"
-                type:"select"
-                values:[
-                    {
-                        value:"immediate"
-                        label:"立刻知道"
-                        selected:true
-                    }
-                    {
-                        value:"sunrise"
-                        label:"天亮才知道"
-                    }
-                ]
+                type: 'item'
+                value:
+                    type:"select"
+                    id:"divineresult"
+                    defaultValue: 'sunrise'
+                    values:[
+                        "immediate"
+                        "sunrise"
+                    ]
             }
             {
-                name:"firstnightdivine"
-                label:"占卜初日白通知"
-                title:"如果设为「是」的话，占卜师首天晚上将自动从占卜结果为「村人」的人中随机选择一个人进行占卜。"
-                type:"select"
-                values:[
-                    {
-                        value:"auto"
-                        label:"是"
-                    }
-                    {
-                        value:"manual"
-                        label:"否"
-                        selected:true
-                    }
-                ]
+                type: 'item'
+                value:
+                    type:"select"
+                    id:"firstnightdivine"
+                    defaultValue: 'manual'
+                    values:[
+                        "auto"
+                        "manual"
+                    ]
             }
         ]
     }
     # 灵能
     {
-        label: "灵能者的设定"
-        visible:(rule,jobs)->
-            return true if isYaminabe rule
-            return jobs.Psychic>0
-        rules:[
+        type: 'group'
+        label:
+            id: 'psychic'
+            visible:(rule)->
+                return true if isYaminabe rule
+                return rule.jobNumbers.Psychic>0
+        items:[
             {
-                name:"psychicresult"
-                label:"灵能结果"
-                title:"晚上的灵能结果在什么时候发表。"
-                type:"select"
-                values:[
-                    {
-                        value:"sunset"
-                        label:"立刻知道"
-                        selected:true
-                    }
-                    {
-                        value:"sunrise"
-                        label:"天亮才知道"
-                    }
-                ]
+                type: 'item'
+                value:
+                    type:"select"
+                    id:"psychicresult"
+                    defaultValue: 'sunrise'
+                    values:[
+                        "sunset"
+                        "sunrise"
+                    ]
             }
         ]
     }
     # 共有者
     {
-        label: "共有者的设定"
-        visible:(rule,jobs)->
-            return true if isYaminabe rule
-            return jobs.Couple>0 || jobs.MadCouple>0
-        rules:[
+        type: 'group'
+        label:
+            id: 'couple'
+            visible:(rule)->
+                return true if isYaminabe rule
+                return rule.jobNumbers.Couple>0 || rule.jobNumbers.MadCouple>0
+        items:[
             {
-                name:"couplesound"
-                label:"能否听到共有者的低语声"
-                title:"设为「能听到」的时候，就能注意到共有者・尖叫狂人在夜间模糊的低语声。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"couplesound"
                     value:"aloud"
-                    label:"能听到"
-                    nolabel:"听不到"
-                    checked:true
-                }
-                getstr:(value)->
-                    {
-                        label:"共有者的低语声"
-                        value:if value=="aloud" then "能听到" else "听不到"
-                    }
             }
         ]
     }
     # 护卫职业
     {
-        label: "猎人系的设定"
-        visible:(rule,jobs)->
-            return true if isYaminabe rule
-            for job in ["Guard","Trapper","WanderingGuard","Cosplayer"]
-                if jobs[job]>0
-                    return true
-            return false
-        rules:[
+        type: 'group'
+        label:
+            id: 'guard'
+            visible:(rule)->
+                return true if isYaminabe rule
+                for job in ["Guard","Trapper","WanderingGuard","Cosplayer"]
+                    if rule.jobNumbers[job]>0
+                        return true
+                return false
+        items:[
             {
-                name:"guardmyself"
-                label:"是否允许猎人保护自己"
-                title:"对猎人・游荡猎人・Cosplayer生效。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"guardmyself"
                     value:"ok"
-                    label:"允许"
-                    checked:true
-                }
-                getstr:(value)->
-                    {
-                        label:"猎人保护自己"
-                        value:if value=="ok" then "允许" else "禁止"
-                    }
             }
             {
-                name:"gjmessage"
-                label:"护卫成功能够知道"
-                title:"选中后，在猎人·游荡猎人・Cosplayer成功保护他人时，该猎人会收到通知。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"gjmessage"
                     value:"on"
-                    label:"通知"
-                }
-                getstr:(value)->
-                    {
-                        label:"护卫成功通知"
-                        value:if value=="on" then "通知" else "不通知"
-                    }
             }
             {
-                name:"consecutiveguard"
-                label:"连续护卫"
-                title:"是否允许猎人・游荡猎人・Cosplayer连续守护同一个人。"
-                type:"select"
-                values:[
-                    {
-                        value:"yes"
-                        label:"允许"
-                        selected:true
-                    }
-                    {
-                        value:"no"
-                        label:"禁止"
-                    }
-                ]
+                type: 'item'
+                value:
+                    type:"select"
+                    id:"consecutiveguard"
+                    defaultValue: 'yes'
+                    values:[
+                        "yes"
+                        "no"
+                    ]
             }
         ]
     }
     # 妖狐
     {
-        label: "妖狐的设定"
-        visible:(rule,jobs)->
-            return true if isYaminabe rule
-            return jobs.Fox>0
-        rules:[
+        type: 'group'
+        label:
+            id: "fox"
+            visible:(rule)->
+                return true if isYaminabe rule
+                return rule.jobNumbers.Fox>0
+        items:[
             {
-                name:"deadfox"
-                label:"区分咒杀和袭击"
-                title:"选中后，妖狐被占卜师咒杀和被人狼袭击致死会有不同的通知。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"deadfox"
                     value:"obvious"
-                    label:"有"
-                    nolabel:"无"
-                }
-                getstr:(value)->
-                    {
-                        label:"咒杀袭击区別"
-                        value:if value=="on" then "有" else "无"
-                    }
             }
         ]
     }
     # 狩猎者
     {
-        label: "狩猎者的设定"
-        visible:(rule,jobs)->
-            return true if isYaminabe rule
-            return jobs.Hunter > 0 || jobs.MadHunter > 0
-        rules:[
+        type: 'group'
+        label:
+            id: 'hunter'
+            visible:(rule)->
+                return true if isYaminabe rule
+                return rule.jobNumbers.Hunter > 0 || rule.jobNumbers.MadHunter > 0
+        items:[
             {
-                name:"hunter_lastattack"
-                label: "绝地反击"
-                title: "绝地反击设为「允许」时，狩猎者死亡后的技能将在胜利判定之前触发。"
-                type: "select"
-                values:[
-                    {
-                        value:"yes"
-                        label:"允许"
-                        selected:true
-                    }
-                    {
-                        value:"no"
-                        label:"拒绝"
-                    }
-                ]
+                type: 'item'
+                value:
+                    type: "select"
+                    id:"hunter_lastattack"
+                    defaultValue: 'yes'
+                    values:[
+                        "yes"
+                        "no"
+                    ]
             }
         ]
     }
     # 埋毒者、猫又
     {
-        label:null
-        visible:(rule,jobs)->
-            return true if isYaminabe rule
-            return jobs.Poisoner>0 || jobs.Cat>0
-        rules:[
+        type: 'group'
+        label:
+            id: 'poison'
+            visible:(rule)->
+                return true if isYaminabe rule
+                return rule.jobNumbers.Poisoner>0 || rule.jobNumbers.Cat>0
+        items:[
             {
-                name: "poisonwolf"
-                label: "人狼袭击有毒对象"
-                title: "人狼袭击「埋毒者」・「猫又」时的动作设定。"
-                type: "select"
-                values:[
-                    {
-                        value: "selector"
-                        label: "连坐袭击者"
-                        selected: true
-                    }
-                    {
-                        value: ""
-                        label: "随机连坐"
-                    }
-                ]
+                type: 'item'
+                value:
+                    type: "select"
+                    id: "poisonwolf"
+                    defaultValue: 'selector'
+                    values:[
+                        "selector"
+                        ""
+                    ]
             }
         ]
     }
     # 恋人
     {
-        label:null
-        visible:(rule,jobs)->
-            return true if isYaminabe rule
-            return jobs.Lover>0 || jobs.Cupid>0
-        rules:[
+        type: 'group'
+        label:
+            id: 'lover'
+            visible:(rule)->
+                return true if isYaminabe rule
+                for job in ["Cupid","Lover","BadLady","Patissiere"]
+                    if rule.jobNumbers[job]>0
+                        return true
+                return false
+        items:[
             {
-                name:"friendsjudge"
-                label:"恋人阵营的胜利条件"
-                type:"select"
-                values:[
-                    {
-                        value:"alive"
-                        label:"终了时生存"
-                        title:"与妖狐相同。"
-                        selected:true
-                    }
-                    {
-                        value:"ruin"
-                        label:"只有恋人生存"
-                    }
-                ]
+                type: 'item'
+                value:
+                    type:"select"
+                    id:"friendsjudge"
+                    defaultValue: 'alive'
+                    values:[
+                        "alive"
+                        "ruin"
+                    ]
             }
             {
-                name:"friendssplit"
-                label:"多组恋人相互独立"
-                title:"选中后在有复数组恋人的场合下，玩家将看不到自己的恋爱对象以外的其他组恋人，也不会追随其他组恋人自尽。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"friendssplit"
+                    defaultChecked: true
                     value:"split"
-                    label:"是"
-                    checked:true
-                }
-                getstr:(value)->
-                    {
-                        label:"恋人的独立"
-                        value:if value=="split" then "是" else "否"
-                    }
             }
         ]
     }
     # 量子人狼
     {
-        label:null
-        visible:(rule,jobs)->rule.jobrule=="特殊规则.量子人狼"
-        rules:[
+        type: 'group'
+        label:
+            id: 'quantum'
+            visible:(rule)->rule.casting=="特殊规则.量子人狼"
+        items:[
             {
-                name:"quantumwerewolf_table"
-                label:"概率表"
-                type:"select"
-                values:[
-                    {
-                        value:"open"
-                        label:"显示玩家名"
-                        selected:true
-                    }
-                    {
-                        value:"anonymous"
-                        label:"显示玩家编号"
-                        title:"不会得知其他玩家的编号。"
-                    }
-                ]
+                type: 'item'
+                value:
+                    type:"select"
+                    id:"quantumwerewolf_table"
+                    defaultValue: 'open'
+                    values:[
+                        "open"
+                        "anonymous"
+                    ]
             }
             {
-                name:"quantumwerewolf_dead"
-                label:"不显示死亡率"
-                title:"概率表中不显示死亡率。默认显示。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"quantumwerewolf_dead"
                     value:"no"
-                    label:"有"
-                    nolabel:"无"
-                }
             }
             {
-                name:"quantumwerewolf_diviner"
-                label:"显示占卜师的概率"
-                title:"概率表中显示占卜师的概率。默认不显示。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"quantumwerewolf_diviner"
                     value:"on"
-                    label:"有"
-                    nolabel:"无"
-                }
             }
             {
-                name:"quantumwerewolf_firstattack"
-                label:"第一天的袭击"
-                title:"选中后第一天即可发动袭击。"
-                type:"checkbox"
-                value:{
+                type: 'item'
+                value:
+                    type:"checkbox"
+                    id:"quantumwerewolf_firstattack"
                     value:"on"
-                    label:"有"
-                    nolabel:"无"
-                }
             }
         ]
     }
@@ -1911,100 +1464,56 @@ exports.rules=[
 exports.jobinfos=[
     {
         name:"wolves"
-        prefix:"同伴的人狼是 "
-        type:"pubinfo-array"
     }
     {
         name:"peers"
-        prefix:"共有者是 "
-        type:"pubinfo-array"
     }
     {
         name:"madpeers"
-        prefix:"同伴的尖叫狂人是 "
-        type:"pubinfo-array"
     }
     {
         name:"foxes"
-        prefix:"同伴的妖狐是 "
-        type:"pubinfo-array"
     }
     {
         name:"nobles"
-        prefix:"贵族是 "
-        type:"pubinfo-array"
     }
     {
         name:"queens"
-        prefix:"女王观战者是 "
-        type:"pubinfo-array"
     }
     {
         name:"spy2s"
-        prefix:"间谍Ⅱ是 "
-        type:"pubinfo-array"
     }
     {
         name:"friends"
-        prefix:"恋人是 "
-        type:"pubinfo-array"
     }
     {
         name:"stalking"
-        prefix:"你是 "
-        suffix:" 的跟踪狂"
-        type:"pubinfo"
     }
     {
         name:"cultmembers"
-        prefix:"信者是 "
-        type:"pubinfo-array"
     }
     {
         name:"supporting"
-        prefix:"向 "
-        suffix:" 提供帮助"
-        type:"pubinfo+job-array"
     }
     {
         name:"dogOwner"
-        prefix:"你的饲主是 "
-        type:"pubinfo"
     }
     {
         name:"quantumwerewolf_number"
-        prefix:"你的玩家编号是第 "
-        suffix:" 号"
-        type:"raw"
     }
     {
         name:"watchingfireworks",
-        type:"hidden"
     }
     {
         name:"twins"
-        prefix:"双胞胎是 "
-        type:"pubinfo-array"
     }
     {
         name:"myfans"
-        prefix:"粉丝是 "
-        suffix:""
-        type:"pubinfo-array"
     }
     {
         name:"fanof"
-        prefix:"你是 "
-        suffix:" 的粉丝"
-        type:"pubinfo"
     }
 ]
 
 # 判定
-isYaminabe=(rule)->rule.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
-# 秒数を分と秒に
-secondsStr=(sec)->
-    if sec >= 60
-        "#{Math.floor(sec/60)}分#{sec % 60}秒"
-    else
-        "#{sec}秒"
+isYaminabe=(rule)-> (rule.casting ? rule.jobrule) in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]

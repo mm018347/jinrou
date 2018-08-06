@@ -118,6 +118,30 @@ jobname:
   Waiting: "尚未分配"
   Watching: "观战者"
 
+# Name of categories.
+categoryName:
+  Human: "村人系"
+  Werewolf: "人狼系"
+  Fox: "妖狐系"
+  Madman: "狂人系"
+  Immoral: "背德者系"
+  Switching: "职业变化系"
+  Others: "第三阵营系"
+
+# Name of teams.
+teamName:
+  Human: "村人阵营"
+  Werewolf: "人狼阵营"
+  LoneWolf: "人狼阵营"
+  Fox: "妖狐阵营"
+  Friend: "恋人阵营"
+  Devil: "恶魔"
+  Vampire: "吸血鬼阵营"
+  Cult: "邪教主阵营"
+  Neet: "NEET"
+  Others: "其他"
+
+
 # Fortune result.
 fortune:
   human: "村人"
@@ -131,6 +155,8 @@ psychic:
   werewolf: "人狼"
   BigWolf: "大狼"
   TinyFox: "小狐"
+  # delimiter of multiple result in chemical.
+  _delimiter: "×"
 
 
 
@@ -449,6 +475,8 @@ TroubleMaker:
 FrankensteinsMonster:
   # Drained a role from a body.
   drain: "{{name}} 从 {{target}} 的尸体里吸收了 {{jobname}} 的能力。"
+  # separator ob jobs.
+  separator: "、"
 
 BloodyMary:
   # Select a target.
@@ -722,7 +750,7 @@ HolyProtected:
 
 Drunk:
   # jobname
-  jobname: "酒鬼（{{jobname}}）"
+  jobname: "醉鬼（{{jobname}}）"
   # Awake from drunk.
   awake: "{{name}} 酒醒了。"
 

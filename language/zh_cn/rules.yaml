@@ -1,0 +1,340 @@
+# texts related to game rule settings.
+# each rule object has `name` and `label` fields.
+# type=select rules have `labels` and `descriptions` field.
+# type=checkbox & type=hidden rules have `yes` and `no` fields.
+# `yes` and `no` fields may be empty.
+# other fields are used by `getstr` functions.
+rule:
+  yaminabe_safety:
+    name: "黑暗火锅安全性"
+    label: "指定职业分配的严谨程度"
+    labels:
+      supersuper: "超超(α2)"
+      super: "超(β2)"
+      high: "高"
+      middle: "中"
+      low: "低"
+      none: "无"
+      reverse: "逆(α)"
+    descriptions:
+      supersuper: "也许算是调整了各阵营的强度平衡。"
+      super: "将会调整各阵营的强度平衡。"
+      high: "将会考虑出现的职业间的相互影响（不会出现有背德者却没有妖狐的情况）。"
+      middle: "调整各阵营的人数比例。"
+      low: "适当调整人狼・妖狐的数量。"
+      none: "完全不调整。除了保证人狼系至少为1以外完全随机。"
+      reverse: "以破坏平衡为目标的游戏，适当调整人狼・妖狐的数量。"
+  hide_singleton_teams:
+    name: "是否隐藏单独阵营"
+    label: "如果选择隐藏，恶魔・吸血鬼・邪教主在阵营一览中将被计入「其他阵营」。"
+    yes: "隐藏"
+    no: ""
+  decider:
+    name: "决定者"
+    label: "白天的处刑投票有人得票数相同时，决定者的投票将有优先决定权。所有人不会知道谁是决定者。"
+    yes: "有"
+    no: ""
+  authority:
+    name: "权力者"
+    label: "白天的处刑投票时，权力者的投票将以两票计。所有人不会知道谁是权力者。"
+    yes: "有"
+    no: ""
+  deathnote:
+    name: "死亡笔记"
+    label: "死亡笔记每晚都会传递给另一个人。持有死亡笔记的人能够杀死一个人。"
+    yes: "有"
+    no: ""
+  wolfminion:
+    name: "狼的仆从"
+    label: "第一天夜里人狼会指定狼的仆从。狼的仆从仍持有原职业的技能，但是阵营变为人狼阵营。"
+    yes: "有"
+    no: ""
+  drunk:
+    name: "醉鬼"
+    label: "会有随机一人变成醉鬼。醉鬼在第三天夜里之前会把自己当做村人。"
+    yes: "有"
+    no: ""
+  scapegoat:
+    name: "替身君"
+    label: "替身君是在第一天夜里被杀的NPC。"
+    labels:
+      on: "有"
+      off: "无（玩家会被杀）"
+      no: "无（没有人会死）"
+    descriptions:
+      on: ""
+      off: ""
+      no: ""
+  day:
+    name: "昼"
+    label: "白天的讨论时间"
+  night:
+    name: "夜"
+    label: "夜晚时间"
+  remain:
+    name: "犹豫"
+    label: "犹豫时间"
+  voting:
+    name: "投票专用时间"
+    label: "如果「投票专用时间」设定不为零，白天的讨论期间将禁止投票，改为只在投票专用时间投票。"
+  will:
+    name: "遗言"
+    label: "遗言设为「有」的时候各个参加者能够设置遗言，遗言将在死亡时公开。"
+    yes: "有"
+    no: "无"
+  heavenview:
+    name: "灵界视野"
+    label: "设为「有」的时候，在灵界可以看到职业的一览表，可以看到全部的夜间发言。"
+    labels:
+      view: "常开"
+      norevive: "有"
+      "": "无"
+    descriptions:
+      view: "即使有能复活他人的角色，也开放灵界。"
+      norevive: "仅在所有人都不能复活的时候公开灵界。"
+      "": "直到游戏结束都不公开灵界。"
+  votemyself:
+    name: "向自己投票"
+    label: "设为「允许」的时候，处刑投票时可以向自己投票。"
+    yes: "允许"
+    no: "不允许"
+  voteresult:
+    name: "隐藏投票结果"
+    label: "设为「隐藏」的时候，将不能知道在处刑投票时，谁向谁投票了。"
+    yes: "隐藏"
+    no: "显示"
+  waitingnight:
+    name: "等待直到夜晚结束"
+    label: ""
+    yes: "有"
+    no: "无"
+  safety:
+    name: "替身安全性"
+    label: "仅在首次分配职业时生效，对转生无效。如果设为「任意」，则替身君可以成为包括人狼在内的任何职业。"
+    labels:
+      full: "有"
+      no: "无"
+      free: "任意"
+    # {{safety_excluded_jobs}} is provided by getOptionStr
+    descriptions:
+      full: "替身君不会成为人外，也不会成为 {{safety_excluded_jobs}}。"
+      no: "替身君不会成为人外。"
+      free: "替身君可以成为任何职业。"
+  noticebitten:
+    name: "被咬的时候会知道"
+    label: "被人狼袭击的时候会收到通知。"
+    yes: "有"
+    no: "无"
+  GMpsychic:
+    name: "GM灵能"
+    label: "设为「有」的时候，被处刑人的灵能结果会向所有人公开。"
+    yes: "有"
+    no: "无"
+  silentrule:
+    name: "n秒规则"
+    label: "设为1以上的时候，白天刚开始数秒内全员不能发言。"
+  runoff:
+    name: "决胜投票"
+    label: "设为「有」的时候，处刑投票得票数最高的人之间将进行决胜投票。"
+    labels:
+      no: "无"
+      revote: "票数相同时"
+      yes: "总是"
+    descriptions:
+      no: ""
+      revote: ""
+      yes: ""
+  drawvote:
+    name: "最高得票数相同时的处理"
+    label: "设定最高得票数相同时的处理。"
+    labels:
+      revote: "重新投票"
+      random: "最高得票者随机处刑一人"
+      none: "谁也不被处刑"
+      all: "最高得票者全员处刑"
+    descriptions:
+      revote: ""
+      random: ""
+      none: ""
+      all: ""
+  yaminabe_hidejobs:
+    name: "配置公开"
+    label: "指定配置的公开方式。"
+    labels:
+      "": "公开职业一览"
+      team: "只公开各阵营人数"
+      "2": "隐藏"
+    descriptions:
+      "": "配置结束后，公开将会出现的职业。"
+      team: "只会公开各个阵营的人数。"
+      "2": "隐藏将出现的职业一览。"
+  losemode:
+    name: "败北村"
+    label: "以败北为目的的人狼。"
+    yes: "有"
+    no: ""
+  rolerequest:
+    name: "希望役职制"
+    label: "所有参加者可以选择希望就职的角色。"
+    yes: "有"
+    no: ""
+  chemical:
+    name: "炼成人狼"
+    label: "每人分配两个职业的特殊规则。"
+    yes: "有"
+    no: ""
+  wolfsound:
+    name: "能够听到狼的远吠"
+    label: "设为「能听到」的时候，如果人狼进行夜间对话，能够听到「嗷呜」的声音。"
+    yes: "能听到"
+    no: "听不到"
+  wolfattack:
+    name: "人狼之间可以相互袭击"
+    label: ""
+    yes: "有"
+    no: ""
+  divineresult:
+    name: "占卜结果"
+    label: "晚上的占卜结果在什么时候发表。"
+    labels:
+      immediate: "立刻知道"
+      sunrise: "次日天亮才知道"
+    descriptions:
+      immediate: ""
+      sunrise: ""
+  firstnightdivine:
+    name: "占卜初日白通知"
+    label: "设为「有」的时候，占卜师首天晚上将自动从占卜结果为「村人」的人中随机选择一个人进行占卜。"
+    labels:
+      auto: "有"
+      manual: "无"
+    descriptions:
+      auto: ""
+      manual: ""
+  psychicresult:
+    name: "灵能结果"
+    label: "晚上的灵能结果在什么时候发表。"
+    labels:
+      sunset: "立刻知道"
+      sunrise: "次日天亮才知道"
+    descriptions:
+      sunset: ""
+      sunrise: ""
+  couplesound:
+    name: "能否听到共有者的说话声"
+    label: "设为「能听到」的时候，如果共有者・尖叫狂人进行夜间对话，能够听到「沙沙」的声音。"
+    yes: "能听到"
+    no: "听不到"
+  guardmyself:
+    name: "是否允许猎人保护自己"
+    label: "对猎人・游荡猎人・Cosplayer生效。"
+    yes: "允许"
+    no: ""
+  gjmessage:
+    name: "护卫成功通知"
+    label: "设为「有」的时候，在猎人·游荡猎人・Cosplayer成功保护他人时，该猎人会收到通知。"
+    yes: "有"
+    no: ""
+  consecutiveguard:
+    name: "连续护卫"
+    label: "是否允许猎人・游荡猎人・Cosplayer连续守护同一个人。"
+    labels:
+      yes: "允许"
+      no: "禁止"
+    descriptions:
+      yes: ""
+      no: ""
+  deadfox:
+    name: "区分咒杀和袭击"
+    label: "设为「有」的时候，妖狐被占卜师咒杀的通知将与被人狼袭击致死的通知不同。"
+    yes: "有"
+    no: "无"
+  hunter_lastattack:
+    name: "绝地反击"
+    label: "绝地反击设为「允许」的时候，狩猎者死亡后的技能将在胜利判定之前触发。"
+    labels:
+      yes: "允许"
+      no: "拒绝"
+    descriptions:
+      yes: ""
+      no: ""
+  poisonwolf:
+    name: "人狼袭击有毒对象"
+    label: "人狼袭击「埋毒者」・「猫又」时的动作设定。"
+    labels:
+      selector: "连坐袭击者"
+      "": "随机连坐"
+    descriptions:
+      selector: ""
+      "": ""
+  friendsjudge:
+    name: "恋人阵营的胜利条件"
+    label: ""
+    labels:
+      alive: "结束时生存"
+      ruin: "只有恋人生存"
+    descriptions:
+      alive: "与妖狐相同。"
+      ruin: ""
+  friendssplit:
+    name: "多组恋人相互独立"
+    label: "设为「有」的时候，如果有复数组恋人，玩家将看不到自己的恋爱对象以外的其他组恋人，也不会追随其他组恋人自尽。"
+    yes: "有"
+    no: "无"
+  quantumwerewolf_table:
+    name: "概率表"
+    label: "设定概率表的显示方法"
+    labels:
+      open: "显示玩家名"
+      anonymous: "显示玩家编号"
+    descriptions:
+      open: ""
+      anonymous: "不会得知自己以外玩家的编号"
+  quantumwerewolf_dead:
+    name: "不显示死亡率"
+    label: "概率表中不显示死亡率。默认是显示。"
+    yes: "有"
+    no: "无"
+  quantumwerewolf_diviner:
+    name: "显示占卜师的概率"
+    label: "概率表中显示占卜师的概率。默认是不显示。"
+    yes: "有"
+    no: "无"
+  quantumwerewolf_firstattack:
+    name: "第一天的袭击"
+    label: "选中后第一天即可发动袭击。"
+    yes: "有"
+    no: "无"
+
+# texts related to rule groups.
+ruleGroup:
+  yaminabe_option:
+    name: "黑暗火锅安全性"
+  normal_rules:
+    name: "一般设定"
+  werewolf:
+    name: "人狼系的设定"
+  diviner:
+    name: "占卜师的设定"
+  psychic:
+    name: "灵能者的设定"
+  couple:
+    name: "共有者的设定"
+  guard:
+    name: "猎人系的设定"
+  fox:
+    name: "妖狐的设定"
+  hunter:
+    name: "狩猎者的设定"
+  poison:
+    name: "埋毒者・猫又的设定"
+  lover:
+    name: "恋人的设定"
+  quantum:
+    name: "量子人狼的设定"
+
+# rule-related string.
+common:
+  minutes: "分"
+  seconds: "秒"
+  none: "无"

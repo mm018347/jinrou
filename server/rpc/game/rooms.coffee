@@ -349,7 +349,7 @@ module.exports.actions=(req,res,ss)->
                 res error: i18n.t "error.join.full"
                 return
             if room.mode=="playing" && room.jobrule=="特殊规则.Endless黑暗火锅"
-                # エンドレス闇鍋の場合はゲーム内人数による人数判定を行う
+                # エンドレス黑暗火锅の場合はゲーム内人数による人数判定を行う
                 unless Server.game.game.endlessCanEnter(roomid, req.session.userId, room.number)
                     # 満員
                     res error: i18n.t "error.join.full"
@@ -557,14 +557,14 @@ module.exports.actions=(req,res,ss)->
                 res i18n.t "error.noSuchRoom"
                 return
             if room.owner.userid != req.session.userId
-                res i18n.t "common:invalidInput"
+                res i18n.t "common:error.invalidInput"
                 return
             unless room.mode=="waiting"
                 res i18n.t "error.alreadyStarted"
                 return
             pl=room.players.filter((x)->x.userid==id)[0]
             unless pl
-                res i18n.t "common:invalidInput"
+                res i18n.t "common:error.invalidInput"
                 return
             if pl.mode=="gm"
                 res i18n.t "common.kick.noKickGM"
@@ -642,7 +642,7 @@ module.exports.actions=(req,res,ss)->
             if room.owner.userid != req.session.userId
                 res {error: i18n.t "common:error.invalidInput"}
                 return
-            res {result: room.ban}
+            res {result: room.ban ? []}
     # 追い出しリストを編集
     cancelban:(roomid, ids)->
         unless req.session.userId
@@ -670,10 +670,10 @@ module.exports.actions=(req,res,ss)->
                 else
                     res null
 
-    
-    
-    # 成功ならjoined 失敗なら错误メッセージ
-    # 部屋房间に入る
+
+
+    # 成功ならjoined 失敗ならエラーメッセージ
+    # 部屋ルームに入る
     enter: (roomid,password)->
         #unless req.session.userId
         #   res {error:"请登陆"}
@@ -695,9 +695,9 @@ module.exports.actions=(req,res,ss)->
             req.session.channel.subscribe "room#{roomid}"
             Server.game.game.playerchannel ss,roomid,req.session
             res {joined:room.players.some((x)=>x.realid==req.session.userId)}
-    
-    # 成功ならnull 失敗なら错误メッセージ
-    # 部屋房间から出る
+
+    # 成功ならnull 失敗ならエラーメッセージ
+    # 部屋ルームから出る
     exit: (roomid)->
         req.session.channel.reset()
         res null
@@ -722,7 +722,7 @@ module.exports.actions=(req,res,ss)->
                 else
                     res null
                     Server.game.game.deletedlog ss,room
-                    
+
     # 部屋探し
     find:(query,page)->
         unless query?
