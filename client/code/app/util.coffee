@@ -308,23 +308,8 @@ exports.blindName=(opt={},cb)->
             t = t.parentNode
     $("#nameform").submit (je)->
         je.preventDefault()
-        #max bytes of blind name
-        maxLength=20
-
-        je.target.elements["name"].value = je.target.elements["name"].value.trim()
-        if je.target.elements["name"].value.trim() == ''
-            util.message "错误","昵称不能仅为空格。"
-        else if je.target.elements["name"].value.replace(/[^\x00-\xFF]/g,'**').length <= maxLength
-            closeWindow win
-            cb {name:je.target.elements["name"].value, icon:def}
-        else
-            byteSub = (str, maxLength) ->
-                str = str.substr(0, str.length - 1)  while str.replace(/[^\x00-\xFF]/g, "**").length > maxLength
-                str
-            je.target.elements["name"].value = byteSub(je.target.elements["name"].value, maxLength)
-            util.message "错误","昵称不能超过"+maxLength+"个字节。"
-    
-        
+        closeWindow win
+        cb {name:je.target.elements["name"].value, icon:def}        
 
 # Dateをtime要素に
 exports.timeFromDate=(date)->

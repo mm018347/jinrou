@@ -329,19 +329,6 @@ exports.start=(roomid)->
                     document.body.classList.add (if game.night then "night" else "day")
                     document.body.classList.remove (if game.night then "day" else "night")
 
-                unless $("#jobform").get(0).hidden= game.finished ||  obj.sleeping || !obj.type
-                    # 代入しつつの　投票フォーム必要な場合
-                    $("#jobform div.jobformarea").attr "hidden","hidden"
-                    #$("#form_day").get(0).hidden= game.night || obj.sleeping || obj.type=="GameMaster"
-                    $("#form_day").get(0).hidden= !obj.voteopen
-                    obj.open?.forEach (x)->
-                        # 開けるべきフォームが指定されている
-                        $("#form_#{x}").prop "hidden",false
-                    if (obj.job_selection ? []).length==0
-                        # 対象選択がない・・・表示しない
-                        $("#form_players").prop "hidden",true
-                    else
-                        $("#form_players").prop "hidden",false
                 if game.players
                     formplayers game.players
                     this_rule=
