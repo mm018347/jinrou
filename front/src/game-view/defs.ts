@@ -258,6 +258,10 @@ export interface RoomPrelude {
    * Whether this room is blind mode.
    */
   blind: boolean;
+  /**
+   * Whether this room has a theme.
+   */
+  theme: boolean;
 }
 /**
  * State of room after the end.

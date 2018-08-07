@@ -199,12 +199,13 @@ module.exports=
                 else
                     # 接続
                     pr+=x.value
-            if room.blind in ["complete","yes"] && room.theme #如果房间使用了主题，匿名房间也可以有称号
-                theme = Server.game.themes.getTheme room.theme
-                if theme != null && player.tpr
-                    pr = player.tpr
-            if pr
-                name="#{Server.prize.prizeQuote pr}#{name}"
+        #如果房间使用了主题，匿名房间也可以有称号
+        if room.blind in ["complete","yes"] && room.theme
+            theme = Server.game.themes.getTheme room.theme
+            if theme != null && player.tpr
+                pr = player.tpr
+        if pr
+            name="#{Server.prize.prizeQuote pr}#{name}"
 
         game = games[room.id]
         unless game && !game.participants.some((p)->p.realid==player.realid)
