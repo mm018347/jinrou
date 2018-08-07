@@ -112,7 +112,7 @@ speak:
     # announce from GM to everyone.
     gm: "致全员"
     # announce from GM to the heaven.
-    heaven: "致灵界"
+    gmheaven: "致灵界"
     # announce from GM to audience.
     gmaudience: "致观战者"
     # monologue of GM.

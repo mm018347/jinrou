@@ -1264,12 +1264,8 @@ class Game
                     sub.sunset this
                     newpl=Player.factory null, this, pl,sub,Complex
                     pl.transProfile newpl
-                    @players.forEach (x,i)=>    # 入れ替え
-                        if x.id==newpl.id
-                            @players[i]=newpl
-                        else
-                            x
-            # Endless黑暗火锅用途中参加処理
+                    pl.transform this, newpl, true
+            # エンドレス闇鍋用途中参加処理
             if @rule.jobrule=="特殊规则.Endless黑暗火锅"
                 exceptions=["MinionSelector","Thief","GameMaster","Helper","QuantumPlayer","Waiting","Watching","GotChocolate"]
                 jobnames=Object.keys(jobs).filter (name)->!(name in exceptions)
@@ -1493,9 +1489,13 @@ class Game
                 # 死んだ
                 t.die this,"werewolf",target.from
             # 逃亡者を探す
-            runners=@players.filter (x)=>!x.dead && x.isJobType("Fugitive") && x.target==target.to
-            runners.forEach (x)=>
-                x.die this,"werewolf2",target.from   # その家に逃げていたら逃亡者も死ぬ
+            for x in @players
+                if x.dead
+                    continue
+                runners = x.accessByJobTypeAll "Fugitive"
+                for pl in runners
+                    if pl.target == target.to
+                        x.die this, "werewolf2", target.from
 
             if !t.dead
                 # 死んでない
@@ -2885,6 +2885,8 @@ class Player
             @dovote game,alives[r].id
 
     # 夜のはじまり（死体処理よりも前）
+    # Note: people should not die at sunset,
+    # with FrankensteinsMonster and Pyrotechnist in mind
     sunset:(game)->
     deadsunset:(game)->
     # 夜にもう寝たか
@@ -4102,9 +4104,9 @@ class Light extends Player
         null
     midnight:(game,midnightSort)->
         t=game.getPlayer @target
-        return unless t?
-        return if t.dead
-        t.die game,"deathnote"
+        # デスノートで殺す
+        if t? && !t.dead
+            t.die game,"deathnote"
 
         # 誰かに移る処理
         if @flag == "onenight"
@@ -4165,8 +4167,7 @@ class ToughGuy extends Player
         super
         if @flag=="bitten"
             @setFlag "dying"   # 死にそう！
-    sunset:(game)->
-        super
+    midnight:(game)->
         if @flag=="dying"
             # 噛まれた次の夜
             @setFlag null
@@ -4736,10 +4737,14 @@ class Vampire extends Player
         return unless t?
         return if t.dead
         t.die game,"vampire",@id
-        # 逃亡者を探す
-        runners=game.players.filter (x)=>!x.dead && x.isJobType("Fugitive") && x.target==t.id
-        runners.forEach (x)=>
-            x.die game,"vampire2",@id   # その家に逃げていたら逃亡者も死ぬ
+        # 襲撃先に逃げていた逃亡者を探して殺す
+        for x in game.players
+            if x.dead
+                continue
+            runners = x.accessByJobTypeAll "Fugitive"
+            for pl in runners
+                if pl.target == t.id
+                    x.die game, "vampire2", @id
     makejobinfo:(game,result)->
         super
         # 吸血鬼が分かる
@@ -5088,7 +5093,7 @@ class MinionSelector extends Player
         pl.transform game,newpl,true
         log=
             mode:"wolfskill"
-            comment: game.i18n.t "roles:MinionSelector.select", {name: @name, target: pl.name, jobname: pl.jobname}
+            comment: game.i18n.t "roles:MinionSelector.select", {name: @name, target: pl.name, jobname: pl.getMainJobname()}
         splashlog game.id,game,log
 
         log=
@@ -8345,9 +8350,9 @@ class Complex
         result
     checkJobValidity:(game,query)->
         if query.jobtype=="_day"
-            return @mcall(game,@main.checkJobValidity,game,query)
-        if @mcall(game,@main.isJobType,query.jobtype) && !@mcall(game,@main.jobdone,game)
-            return @mcall(game,@main.checkJobValidity,game,query)
+            return @main.checkJobValidity game, query
+        if @main.isJobType(query.jobtype) && !@main.jobdone(game)
+            return @main.checkJobValidity game, query
         else if @sub?.isJobType?(query.jobtype) && !@sub?.jobdone?(game)
             return @sub.checkJobValidity game,query
         else
@@ -9226,7 +9231,7 @@ class Chemical extends Complex
         else
             pl.setDead false, null
     touched:(game, from)->
-        @main.touched game, from
+        @mcall game, @main.touched, game, from
         @sub?.touched game, from
     makejobinfo:(game,result)->
         @main.makejobinfo game,result
@@ -10653,8 +10658,6 @@ module.exports.actions=(req,res,ss)->
             res {error:"你已经死了"}
             return
         ###
-        jt=player.getjob_target()
-        sl=player.makeJobSelection game
         unless player.checkJobValidity game,query
             res {error: game.i18n.t "error.job.invalid"}
             return
