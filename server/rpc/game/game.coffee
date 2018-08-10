@@ -1705,7 +1705,7 @@ class Game
                             null
                         else
                             "curse"
-                    when "foxsuisicde"
+                    when "foxsuicide"
                         "foxsuicide"
                     when "friendsuicide"
                         "friendsuicide"
