@@ -117,6 +117,10 @@ export interface FormDesc {
    * Type of requiredness.
    */
   formType: FormType;
+  /**
+   * ID of owner of this form.
+   */
+  objid: string;
 }
 export interface FormOption {
   /**
@@ -395,7 +399,7 @@ export interface VoteResultLog extends LogBase {
  * Probability table log.
  */
 export interface ProbabilityTableLog extends LogBase {
-  mode: 'probabilitytable';
+  mode: 'probability_table';
   /**
    * Probability table attached to this log.
    */

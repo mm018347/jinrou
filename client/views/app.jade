@@ -8,14 +8,24 @@ html(xmlns:wb="http://open.weibo.com/wb")
     link(rel="icon",sizes="16x16",href="/favicon.ico")
     link(rel="icon",sizes="144x144",href="/icons/icon-144x144.png")
     //- script(src="https://use.fontawesome.com/e0e7afd227.js",async)
-    if notSupportedPage
-      script!= 'var _global_notSupportedPage = ' + JSON.stringify(notSupportedPage)
-      script(src="/feature-check.js")
+    //- load feature-check script if needed.
     script(src=bundle)
 
     meta(property="wb:webmaster",content="429c879e40644052")
     meta(name="baidu-tc-verification",content="85f2a37978bcfa919b4270610f5f3e96")
     script(src="https://tjs.sjs.sinajs.cn/open/api/js/wb.js?appkey=1128983570&debug=true",type="text/javascript",charset="utf-8")
+    if legacyBuilds || notSupportedPage
+      script(src=featureCheckJs)
+    if legacyBuilds
+      script.
+        if(_global_legacy_browser==='legacy'){
+            document.write('<script src="' + !{JSON.stringify(legacyBundle)} + '"></' + 'script>');
+        }
+    else if notSupportedPage
+      script.
+        if(_global_legacy_browser){
+            location.href = !{JSON.stringify(notSupportedPage)};
+        }
     != SocketStream
   body
     header
