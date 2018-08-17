@@ -559,6 +559,14 @@ class Game
         @players.filter((x)->x.id==id)[0]
     getPlayerReal:(realid)->
         @participants.filter((x)->x.realid==realid)[0]
+    # 指定したIDのプレイヤーを設定
+    setPlayer:(id, pl)->
+        for x, i in @players
+            if x.id == id
+                @players[i] = pl
+        for x, i in @participants
+            if x.id == id
+                @participants[i] = pl
     # DBにセーブ
     save:->
         M.games.update {id:@id},{
@@ -2957,6 +2965,7 @@ class Player
     # 死んだとき
     dying:(game,found)->
     # 行きかえる
+    # XXX This method must be call for top of player.
     revive:(game)->
         # logging: ログを表示するか
         if @norevive
@@ -3070,48 +3079,43 @@ class Player
     # 自分宛の投票を書き換えられる
     modifyMyVote:(game, vote)-> vote
     # Complexから抜ける
-    uncomplex:(game,flag=false)->
+    uncomplex:(game, flag=false)->
         #flag: 自分がComplexで自分が消滅するならfalse 自分がmainまたはsubで親のComplexを消すならtrue(その際subは消滅）
 
         befpl=game.getPlayer @id
+        orig_jobname = befpl.originalJobname
+        jobname1 = befpl.getJobname()
 
-        # objがPlayerであること calleeは呼び出し元のオブジェクト chainは継承連鎖
-        # index: game.playersの番号
-        chk=(obj,index,callee,chain)->
-            return unless obj?
-            chc=chain.concat obj
-            if obj.isComplex()
-                if flag
-                    # mainまたはsubである
-                    if obj.main==callee || obj.sub==callee
-                        # 自分は消える
-                        game.players[index]=Player.reconstruct chain, obj.main, game
-                    else
-                        chk obj.main,index,callee,chc
-                        # TODO これはよくない
-                        chk obj.sub,index,callee,chc
-                else
-                    # 自己がComplexである
-                    if obj==callee
-                        game.players[index]=Player.reconstruct chain, obj.main, game
-                    else
-                        chk obj.main,index,callee,chc
-                        # TODO これはよくない
-                        chk obj.sub,index,callee,chc
+        res = getSubParentAndMainChain befpl, this
+        unless res?
+            return
+        [topParent, complexChain, main] = res
 
-        game.players.forEach (x,i)=>
-            if x.id==@id
-                chk x,i,this,[]
-                # participantsも
-                for pl,j in game.participants
-                    if pl.id==@id
-                        game.participants[j]=game.players[i]
-                        break
+        if flag
+            if complexChain.length > 0
+                # Remove the most recent parent.
+                complexChain.pop()
+            else
+                # fallback to top parent.
+                if topParent?
+                    topParent.uncomplex game, false
+                return
+        else
+            # Remove myself from the chain.
+            complexChain = complexChain.filter (c)=> c != this
+        # reconstruct the player object.
+        newpl = Player.reconstruct complexChain, main
+
+        if topParent?
+            topParent.sub = newpl
+        else
+            game.setPlayer @id, newpl
 
         aftpl=game.getPlayer @id
+        jobname2 = aftpl.getJobname()
         #前と後で比較
-        if befpl.getJobname()!=aftpl.getJobname()
-            aftpl.setOriginalJobname "#{befpl.originalJobname}→#{aftpl.getJobname()}"
+        if jobname1 != jobname2
+            aftpl.setOriginalJobname "#{orig_jobname}→#{jobname2}"
 
     # 自分自身を変える
     transform:(game,newpl,override,initial=false)->
@@ -3120,7 +3124,25 @@ class Player
         pl = game.getPlayer @id
         jobname = pl.getJobname()
         orig_name = pl.originalJobname
-        @transform_inner game, newpl, override, initial
+
+        res = getSubParentAndMainChain pl, this
+        unless res?
+            # This should never happen
+            return
+        [topParent, complexChain, main] = res
+        # If override flag is set, replaced pl is just newpl.
+        # otherwise, reconstruct player object structure.
+        replacepl =
+            if override
+                newpl
+            else
+                Player.reconstruct complexChain, newpl, game
+        # replace old object with new one.
+        if topParent?
+            topParent.sub = replacepl
+        else
+            game.setPlayer @id, replacepl
+
         pl = game.getPlayer @id
         jobname2 = pl.getJobname()
         if jobname != jobname2
@@ -3131,49 +3153,6 @@ class Player
             else
                 # ふつうの変化
                 pl.setOriginalJobname "#{orig_name}→#{jobname2}"
-    # transformの本体処理
-    transform_inner:(game,newpl,override)->
-        @addGamelog game,"transform",newpl.type
-        # 职业変化ログ
-        if override || !@isComplex()
-            # 全部取っ払ってnewplになる
-            pa=@getParent game
-            unless pa?
-                # 親なんていない
-                game.players.forEach (x,i)=>
-                    if x.id==@id
-                        game.players[i]=newpl
-                game.participants.forEach (x,i)=>
-                    if x.id==@id
-                        game.participants[i]=newpl
-            else
-                # 親がいた
-                if pa.main==this
-                    # 親書き換え
-                    newparent=Player.factory null, game, newpl,pa.sub,complexes[pa.cmplType]
-                    newparent.cmplFlag=pa.cmplFlag
-                    newpl.transProfile newparent
-
-                    pa.transform_inner game,newparent,override # たのしい再帰
-                else
-                    # サブだった
-                    pa.sub=newpl
-        else
-            # 中心のみ変える
-            pa=game.getPlayer @id
-            chain=[pa]
-            while pa.main.isComplex()
-                pa=pa.main
-                chain.push pa
-            # pa.mainはComplexではない
-            toppl=Player.reconstruct chain, newpl, game
-            # 親なんていない
-            game.players.forEach (x,i)=>
-                if x.id==@id
-                    game.players[i]=toppl
-            game.participants.forEach (x,i)=>
-                if x.id==@id
-                    game.participants[i]=toppl
     getParent:(game)->
         chk=(parent,name)=>
             if parent[name]?.isComplex?()
@@ -3325,7 +3304,7 @@ class Diviner extends Player
     formType: FormType.required
     constructor:->
         super
-        @results=[]
+        @setFlag []
             # {player:Player, result:String}
     sunset:(game)->
         super
@@ -3387,13 +3366,13 @@ class Diviner extends Player
     dodivine:(game)->
         p=game.getPlayer @target
         if p?
-            @results.push {
+            @setFlag @flag.concat {
                 player: p.publicinfo()
                 result: game.i18n.t "roles:Diviner.resultlog", {name: @name, target: p.name, result: game.i18n.t "roles:fortune.#{p.getFortuneResult()}"}
             }
             @addGamelog game,"divine",p.type,@target    # 占った
     showdivineresult:(game)->
-        r=@results[@results.length-1]
+        r=@flag[@flag.length-1]
         return unless r?
         log=
             mode:"skill"
@@ -3585,13 +3564,13 @@ class TinyFox extends Diviner
             success= Math.random()<0.5  # 成功したかどうか
             key = if success then "roles:TinyFox.resultlog_success" else "roles:TinyFox.resultlog_fail"
             re = game.i18n.t key, {name: @name, target: p.name, result: game.i18n.t "roles:fortune.#{p.getFortuneResult()}"}
-            @results.push {
+            @setFlag @flag.concat {
                 player: p.publicinfo()
                 result: re
             }
             @addGamelog game,"foxdivine",success,p.id
     showdivineresult:(game)->
-        r=@results[@results.length-1]
+        r=@flag[@flag.length-1]
         return unless r?
         log=
             mode:"skill"
@@ -3734,26 +3713,35 @@ class WolfDiviner extends Werewolf
     midnightSort:100
     constructor:->
         super
-        @results=[]
-            # {player:Player, result:String}
+        @setFlag {
+            # 占い結果のリスト
+            results: []
+            # 占い対象
+            target: null
+        }
     sunset:(game)->
         @setTarget null
-        @setFlag null  # 占い対象
-        @result=null    # 占卜结果
+        @setFlag {
+            results: @flag.results
+            target: null
+        }
         super
     sleeping:(game)->game.werewolf_target_remain<=0 # 占いは必須ではない
-    jobdone:(game)->game.werewolf_target_remain<=0 && @flag?
+    jobdone:(game)->game.werewolf_target_remain<=0 && @flag.target?
     job:(game,playerid,query)->
         if query.jobtype!="WolfDiviner"
             # 人狼の仕事
             return super
         # 占い
-        if @flag?
+        if @flag.target?
             return game.i18n.t "error.common.alreadyUsed"
         pl=game.getPlayer playerid
         unless pl?
             return game.i18n.t "error.common.nonexistentPlayer"
-        @setFlag playerid
+        @setFlag {
+            results: @flag.results
+            target: playerid
+        }
         unless pl.getTeam()=="Werewolf" && pl.isHuman()
             # 狂人は変化するので
             pl.touched game,@id
@@ -3777,14 +3765,14 @@ class WolfDiviner extends Werewolf
             @dodivine game
     #占った影響を与える
     divineeffect:(game)->
-        p=game.getPlayer @flag
+        p=game.getPlayer @flag.target
         if p?
             p.divined game,this
             if p.isJobType "Diviner"
                 # 逆呪殺
                 @die game,"curse"
     showdivineresult:(game)->
-        r=@results[@results.length-1]
+        r=@flag.results[@flag.results.length-1]
         return unless r?
         log=
             mode:"skill"
@@ -3792,38 +3780,44 @@ class WolfDiviner extends Werewolf
             comment:r.result
         splashlog game.id,game,log
     dodivine:(game)->
-        p=game.getPlayer @flag
+        p=game.getPlayer @flag.target
         if p?
-            @results.push {
-                player: p.publicinfo()
-                result: game.i18n.t "roles:WolfDiviner.resultlog", {name: @name, target: p.name, result: p.getMainJobname()}
+            @setFlag {
+                results: @flag.results.concat {
+                    player: p.publicinfo()
+                    result: game.i18n.t "roles:WolfDiviner.resultlog", {name: @name, target: p.name, result: p.getMainJobname()}
+                }
+                target: @flag.target
             }
-            @addGamelog game,"wolfdivine",null,@flag  # 占った
+            @addGamelog game,"wolfdivine",null,@flag.target  # 占った
             if p.getTeam()=="Werewolf" && p.isHuman()
                 # 狂人変化
                 #避免狂人成为某些职业，"GameMaster"保留
                 jobnames=Object.keys jobs
-                jobnames=jobnames.filter((x)->!(x in ["MinionSelector","Thief","Helper","QuantumPlayer","Waiting","Watching"]))
-                newjob = jobnames[Math.floor(Math.random() * jobnames.length)]
+                # inspect all target roles.
+                for targetpl in getAllMainRoles p
+                    # check whether this target should change.
+                    unless targetpl.getTeam()=="Werewolf" && targetpl.isHuman()
+                        continue
+                    newjob=jobnames[Math.floor Math.random()*jobnames.length]
+                    # convert this to new pl.
+                    newpl = Player.factory newjob, game
+                    targetpl.transProfile newpl
+                    targetpl.transferData newpl
 
-                plobj=p.serialize()
-                plobj.type=newjob
-                newpl=Player.unserialize plobj, game  # 新生狂人
-                newpl.setFlag null
-                p.transferData newpl
-                p.transform game,newpl,false
-                p=game.getPlayer @flag
+                    targetpl.transform game,newpl,false
+                    log=
+                        mode:"skill"
+                        to:p.id
+                        comment: game.i18n.t "system.changeRole", {name: p.name, result: newpl.getJobDisp()}
+                    splashlog game.id,game,log
+                p=game.getPlayer @flag.target
                 p.sunset game
-                log=
-                    mode:"skill"
-                    to:p.id
-                    comment: game.i18n.t "system.changeRole", {name: p.name, result: newpl.getJobDisp()}
-                splashlog game.id,game,log
-                game.splashjobinfo [game.getPlayer newpl.id]
+                game.splashjobinfo [game.getPlayer p.id]
     makejobinfo:(game,result)->
         super
         if Phase.isNight(game.phase)
-            unless @flag?
+            unless @flag.target?
                 # 占いが可能
                 result.open.push @type
                 result.forms.push {
@@ -3967,7 +3961,7 @@ class Liar extends Player
     job_target:Player.JOB_T_ALIVE | Player.JOB_T_DEAD   # 死人も生存も
     constructor:->
         super
-        @results=[]
+        @setFlag []
     sunset:(game)->
         @setTarget null
         if @scapegoat
@@ -3992,11 +3986,12 @@ class Liar extends Player
         null
     sunrise:(game)->
         super
-        return if !@results? || @results.length==0
+        return if !@flag? || @flag.length==0
+        resultobj = @flag[@flag.length-1]
         log=
             mode:"skill"
             to:@id
-            comment: game.i18n.t "roles:Liar.resultlog", {target: @results[@results.length-1].player.name, result: @results[@results.length-1].result}
+            comment: game.i18n.t "roles:Liar.resultlog", {target: resultobj.player.name, result: resultobj.result}
         splashlog game.id,game,log
     midnight:(game,midnightSort)->
         p=game.getPlayer @target
@@ -4015,7 +4010,7 @@ class Liar extends Player
                         FortuneResult.human
                     else
                         fr
-            @results.push {
+            @setFlag @flag.concat {
                 player: p.publicinfo()
                 result: game.i18n.t "roles:fortune.#{result}"
             }
@@ -4086,9 +4081,9 @@ class Copier extends Player
         newpl=Player.factory p.type, game
         # TODO: we want to apply sunset to only newly-craeted role,
         # ideally after it is in role tree.
-        newpl.sunset game   # 初期化してあげる
         @transProfile newpl
         @transferData newpl
+        newpl.sunset game   # 初期化してあげる
         @transform game,newpl,false
         pl=game.getPlayer @id
 
@@ -4510,7 +4505,7 @@ class PI extends Diviner
     type:"PI"
     formType: FormType.optionalOnce
     sleeping:->true
-    jobdone:->@flag?
+    jobdone:->@target? || @flag.length > 0
     job:(game,playerid)->
         @setTarget playerid
         pl=game.getPlayer playerid
@@ -4523,7 +4518,6 @@ class PI extends Diviner
         if game.rule.divineresult=="immediate"
             @dodivine game
             @showdivineresult game
-        @setFlag "done"    # 能力一回限り
         null
     #占い実行
     dodivine:(game)->
@@ -4561,12 +4555,12 @@ class PI extends Diviner
                 @addGamelog game,"PIdivine",false,tpl.id
                 game.i18n.t "roles:PI.notfound", {name: @name, target: tpl.name}
 
-            @results.push {
+            @setFlag @flag.concat {
                 player:game.getPlayer(@target).publicinfo()
                 result:resultstring
             }
     showdivineresult:(game)->
-        r=@results[@results.length-1]
+        r=@flag[@flag.length-1]
         return unless r?
         log=
             mode:"skill"
@@ -4598,12 +4592,12 @@ class Sorcerer extends Diviner
                 game.i18n.t "roles:Sorcerer.found", {name: @name, target: pl.name}
             else
                 game.i18n.t "roles:Sorcerer.notfound", {name: @name, target: pl.name}
-            @results.push {
+            @setFlag @flag.concat {
                 player: game.getPlayer(@target).publicinfo()
                 result: resultstring
             }
     showdivineresult:(game)->
-        r=@results[@results.length-1]
+        r=@flag[@flag.length-1]
         return unless r?
         log=
             mode:"skill"
@@ -4653,27 +4647,28 @@ class Doppleganger extends Player
             # まだドッペルゲンガーできる
             sub=Player.factory "Doppleganger", game
             @transProfile sub
-            # 同じところが変わる
-            sub.setFlag {
-                done: false
-                ownerid: newplmain.objid
-                target: null
-            }
 
             newpl=Player.factory null, game, newplmain,sub,Complex    # 合体
             @transProfile newpl
+
+            # 同じところが変わる
+            sub.setFlag {
+                done: false
+                ownerid: newpl.objid
+                target: null
+            }
 
             # 変化する
             ownerid = @flag.ownerid
             if ownerid?
                 # 自分は消滅してその人を変化させる
-                @uncomplex game, true
                 me=game.getPlayer @id
                 transpl = me.accessByObjid ownerid
                 unless transpl?
                     # ???
                     return
                 transpl.transform game, newpl, false
+                @uncomplex game, true
             else
                 # 初めてなので自分が変化する
                 @transform game, newpl, false
@@ -5710,7 +5705,8 @@ class RedHood extends Player
             w=game.getPlayer @flag
             if w?.dead
                 # 殺した狼が死んだ!復活する
-                @revive game
+                pl = game.getPlayer @id
+                pl.revive game
     deadsunrise:(game)->
         # 同じ
         @deadsunset game
@@ -8215,9 +8211,11 @@ class Complex
             # そのまま
             return method.apply @main,args
         # 他は親が必要
-        top=game.participants.filter((x)=>x.id==@id)[0]
-        if top?
-            return method.apply top,args
+        root = game.participants.filter((x)=>x.id==@id)[0]
+        res = searchPlayerInTree root, this
+        if res?
+            [_, myTop] = res
+            return method.apply myTop, args
         return null
 
     setDead:(@dead,@found)->
@@ -8526,18 +8524,18 @@ class Guarded extends Complex
 
     sunrise:(game)->
         # 一日しか守られない
+        @mcall game,@main.sunrise,game
         @sub?.sunrise? game
         @uncomplex game
-        @mcall game,@main.sunrise,game
 # 黙らされた人
 class Muted extends Complex
     cmplType:"Muted"
 
     sunset:(game)->
         # 一日しか効かない
+        @mcall game,@main.sunset,game
         @sub?.sunset? game
         @uncomplex game
-        @mcall game,@main.sunset,game
         game.ss.publish.user @id,"refresh",{id:game.id}
     getSpeakChoiceDay:(game)->
         ["monologue"]   # 全员に喋ることができない
@@ -8673,22 +8671,19 @@ class TrapGuarded extends Complex
 
     sunrise:(game)->
         # 一日しか守られない
+        @mcall game,@main.sunrise,game
         @sub?.sunrise? game
         @uncomplex game
-        pl=game.getPlayer @id
-        if pl?
-            #pl.sunset game
-            pl.sunrise game
 # 黙らされた人
 class Lycanized extends Complex
     cmplType:"Lycanized"
     getFortuneResult:-> FortuneResult.werewolf
     sunset:(game)->
         # 一日しか効かない
+        @mcall game,@main.sunset,game
         @sub?.sunset? game
         @uncomplex game
-        @mcall game,@main.sunset,game
-# 策士によって更生させられた人
+# カウンセラーによって更生させられた人
 class Counseled extends Complex
     cmplType:"Counseled"
     getTeam:-> "Human"
@@ -8717,9 +8712,9 @@ class MikoProtected extends Complex
             game.addGuardLog @id, AttackKind.werewolf, GuardReason.holy
     sunset:(game)->
         # 一日しか効かない
+        @mcall game,@main.sunset,game
         @sub?.sunset? game
         @uncomplex game
-        @mcall game,@main.sunset,game
 # 威嚇する人狼に威嚇された
 class Threatened extends Complex
     cmplType:"Threatened"
@@ -8730,11 +8725,9 @@ class Threatened extends Complex
 
     sunrise:(game)->
         # この昼からは戻る
+        @mcall game,@main.sunrise,game
+        @sub?.sunrise? game
         @uncomplex game
-        pl=game.getPlayer @id
-        if pl?
-            #pl.sunset game
-            pl.sunrise game
     sunset:(game)->
     midnight:(game,midnightSort)->
     job:(game,playerid,query)->
@@ -8754,9 +8747,9 @@ class DivineObstructed extends Complex
     cmplType:"DivineObstructed"
     sunset:(game)->
         # 一日しか守られない
-        @sub?.sunrise? game
-        @uncomplex game
         @mcall game,@main.sunset,game
+        @sub?.sunset? game
+        @uncomplex game
     # 占いの影響なし
     divineeffect:(game)->
     showdivineresult:(game)->
@@ -8847,14 +8840,15 @@ class WatchingFireworks extends Complex
     isAttacker:->false
 
     sunrise:(game)->
+        @mcall game,@main.sunrise,game
         @sub?.sunrise? game
         # もう终了
         @uncomplex game
-        pl=game.getPlayer @id
-        if pl?
-            #pl.sunset game
-            pl.sunrise game
-    deadsunrise:(game)->@sunrise game
+    deadsunrise:(game)->
+        @mcall game,@main.deadsunrise,game
+        @sub?.deadsunrise? game
+        @uncomplex game
+
     makejobinfo:(game,result)->
         super
         result.watchingfireworks=true
@@ -8957,8 +8951,9 @@ class DivineCursed extends Complex
     cmplType:"DivineCursed"
     sunset:(game)->
         # 1日で消える
-        @uncomplex game
         @mcall game,@main.sunset,game
+        @sub?.sunset? game
+        @uncomplex game
     divined:(game,player)->
         @mcall game,@main.divined,game,player
         @die game,"curse"
@@ -9004,10 +8999,8 @@ class UnderHypnosis extends Complex
     cmplType:"UnderHypnosis"
     sunrise:(game)->
         # 昼になったら戻る
+        @mcall game,@main.sunrise,game
         @uncomplex game
-        pl=game.getPlayer @id
-        if pl?
-            pl.sunrise game
     midnight:(game,midnightSort)->
     die:(game,found,from)->
         Human.prototype.die.call @,game,found,from
@@ -9272,8 +9265,6 @@ class Chemical extends Complex
         # 女王観戦者は村人阵营×村人阵营じゃないと見えない
         if result.queens? && (@main.getTeam() != "Human" || @sub?.getTeam() != "Human")
             delete result.queens
-        # 阵营情報
-        result.myteam = @getTeam()
 
 
 
@@ -10939,6 +10930,11 @@ makejobinfo = (game,player,result={})->
         # 投票が终了したかどうか（表单表示するかどうか判断）
         if plpl?
             # 参加者として
+
+            # If Chemical, tell player's team.
+            if game.rule?.chemical == "on"
+                result.myteam = plpl.getTeam()
+
             if Phase.isNight(game.phase) || game.phase == Phase.rolerequesting
                 if player.dead
                     result.sleeping=player.deadJobdone game
@@ -11018,6 +11014,55 @@ getrulestr = (i18n, rule, jobs={})->
 # Generate an ID for use as Player objid.
 generateObjId = ->
     "pl" + Math.random().toString(36).slice(2)
+
+# Search a specific object in Player structure.
+# Returns its parent, its top of main chain, and parent of the top.
+searchPlayerInTree = (root, target)->
+    # perform depth-first search.
+    stack = [[root, null, root, null]]
+    while stack.length > 0
+        [pl, plParent, plTop, topParent] = stack.pop()
+        if pl == target
+            # Target is found.
+            return [plParent, plTop, topParent]
+        # otherwise, search its child,
+        if pl.isComplex()
+            if pl.sub?
+                stack.push [pl.sub, pl, pl.sub, pl]
+            stack.push [pl.main, pl, plTop, topParent]
+    # Player was not found.
+    return null
+# Dig Player structure to find main-chain and its parent.
+# If the main job is the target, parent would be null.
+getSubParentAndMainChain = (top, target)->
+    # construct a chain of Complexes from mainTop to target.
+    constructChain = (topParent)->
+        result = []
+        while topParent.isComplex()
+            result.push topParent
+            topParent = topParent.main
+        return [result, topParent]
+
+    res = searchPlayerInTree top, target
+    unless res?
+        return null
+    [_, chainTop, topParent] = res
+    # construct a chain of Complexes.
+    [complexChain, main] = constructChain chainTop
+    return [topParent, complexChain, main]
+# List up all main roles in given player.
+getAllMainRoles = (top)->
+    results = []
+    stack = [top]
+    while stack.length > 0
+        pl = stack.pop()
+        if pl.isComplex()
+            if pl.sub?
+                stack.push pl.sub
+            stack.push pl.main
+        else
+            results.push pl
+    return results
 
 # 配列シャッフル（破壊的）
 shuffle= (arr)->
