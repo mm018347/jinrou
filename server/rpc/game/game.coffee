@@ -5396,12 +5396,6 @@ class WolfBoy extends Madman
     jobdone:->@target?
     sunset:(game)->
         @setTarget null
-        if @scapegoat
-            # 身代わり君の自動占い
-            alives=game.players.filter (x)=>!x.dead
-            r=Math.floor Math.random()*alives.length
-            if @job game,alives[r].id,{}
-                @sunset game
     job:(game,playerid)->
         @setTarget playerid
         pl=game.getPlayer playerid
@@ -6884,14 +6878,6 @@ class Ushinotokimairi extends Madman
     sunset:(game)->
         super
         @setTarget null
-        if @scapegoat
-            alives=game.players.filter (x)->!x.dead
-            if alives.length>0
-                r=Math.floor Math.random()*alives.length
-                if @job game,alives[r].id,{}
-                    @setTarget ""
-            else
-                @setTarget ""
 
     job:(game,playerid)->
         @setTarget playerid
@@ -7388,9 +7374,6 @@ class Shishimai extends Player
         alives = game.players.filter (x)->!x.dead
         if alives.length > 0
             @setTarget null
-            if @scapegoat
-                r = Math.floor Math.random()*alives.length
-                @job game, alives[r].id, {}
         else
             @setTarget ""
     job:(game,playerid)->
@@ -7938,14 +7921,6 @@ class XianFox extends Fox
         super
         @setTarget null
         @setFlag null
-        if @scapegoat
-            # 能力の対象を選択
-            targets = game.players.filter (x)=> !x.dead && x.id != @id
-            if targets.length > 0
-                r = Math.floor Math.random() * targets.length
-                @job game, targets[r].id, {}
-            else
-                @setTarget ""
     job:(game, playerid)->
         pl=game.getPlayer playerid
         unless pl?
