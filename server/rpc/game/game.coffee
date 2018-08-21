@@ -3129,6 +3129,7 @@ class Player
         unless res?
             # This should never happen
             return
+        @addGamelog game, "transform", newpl.type
         [topParent, complexChain, main] = res
         # If override flag is set, replaced pl is just newpl.
         # otherwise, reconstruct player object structure.
@@ -3817,7 +3818,7 @@ class WolfDiviner extends Werewolf
     makejobinfo:(game,result)->
         super
         if Phase.isNight(game.phase)
-            unless @flag.target?
+            unless @flag?.target?
                 # 占いが可能
                 result.open.push @type
                 result.forms.push {
@@ -4366,7 +4367,7 @@ class Cursed extends Player
                 game.splashjobinfo game.players.filter (x)=>x.id!=@id && x.isVampire()
             # 自己も知らせる
             #game.ss.publish.user newpl.realid,"refresh",{id:game.id}
-            game.splashjobinfo [this]
+            game.splashjobinfo [game.getPlayer @id]
 class ApprenticeSeer extends Player
     type:"ApprenticeSeer"
     beforebury:(game)->
