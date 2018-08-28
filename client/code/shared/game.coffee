@@ -14,9 +14,9 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 "Fanatic","Immoral"
 # 特殊职业2
 "Devil","ToughGuy","Stalker","OccultMania","WhisperingMad","Lover","Dog",
-# 桃栗基本特殊职业
-"Bat","Noble","Slave","Magician","Spy","WolfDiviner","Neet",
-# 桃栗期間限定职业
+# 桃栗基本特殊役職
+"Bat","Noble","Slave","Magician","Spy","WolfDiviner",
+# 桃栗期間限定役職
 "Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Spy2","Copier",
 # 究极人狼的职业
 "Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Sorcerer",
@@ -55,10 +55,10 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 # 人狼ジャッジメント
 "BlackCat",
 # オリジナル
-"SantaClaus","Pyrotechnist","Patissiere","Shishimai","Light","Idol",
+"SantaClaus","Pyrotechnist","Patissiere","Shishimai","Idol","LurkingMad"
 ]
 # ここには入らない役職
-# MinionSelector,QuantumPlayer, HolyProtected
+# Light, Neet, MinionSelector,QuantumPlayer, HolyProtected
 
 # 人外
 exports.nonhumans=["Werewolf","Fox","BigWolf","TinyFox","WolfDiviner","MadWolf","Devil","Vampire","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf","EyesWolf","TongueWolf","XianFox"]
@@ -69,7 +69,7 @@ exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub",
 # チームたち
 exports.teams=teams=
     Human:["Human","Diviner","Psychic","Guard","Couple","Poisoner","ToughGuy","Noble","Slave","Magician","Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Light","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Cat","Witch","Oldman","OccultMania","Dog","Dictator","SeersMama","Trapper","RedHood","Counselor","Miko","HolyMarked","WanderingGuard","TroubleMaker","FrankensteinsMonster","BloodyMary","King","SantaClaus","Phantom","DrawGirl","Pyrotechnist","Baker","SpiritPossessed","GotChocolate","Forensic","Cosplayer","TinyGhost","Ninja","Twin","Hunter","Emma","Idol"]
-    Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist","CraftyWolf","Pumpkin","MadScientist","MadHunter","MadCouple","EyesWolf","TongueWolf","BlackCat"]
+    Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist","CraftyWolf","Pumpkin","MadScientist","MadHunter","MadCouple","EyesWolf","TongueWolf","BlackCat","LurkingMad"]
     Fox:["Fox","TinyFox","Immoral","Blasphemy","XianFox"]
     Devil:["Devil"]
     Friend:["Cupid","Lover","BadLady","Patissiere"]
@@ -83,7 +83,7 @@ exports.categories=
     Human: teams.Human.filter((x)-> x != "GotChocolate")
     Werewolf:["Werewolf","BigWolf","WolfDiviner","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf","EyesWolf","TongueWolf"]
     Fox:["Fox","TinyFox","XianFox"]
-    Madman:["Madman","Fanatic","Spy","Spy2","Sorcerer","WhisperingMad","WolfBoy","ObstructiveMad","PsychoKiller","Bomber","Ushinotokimairi","MadDog","Hypnotist","Pumpkin","MadScientist","MadHunter","MadCouple","BlackCat"]
+    Madman:["Madman","Fanatic","Spy","Spy2","Sorcerer","WhisperingMad","WolfBoy","ObstructiveMad","PsychoKiller","Bomber","Ushinotokimairi","MadDog","Hypnotist","Pumpkin","MadScientist","MadHunter","MadCouple","BlackCat","LurkingMad"]
     Immoral:["Immoral","Blasphemy"]
     Switching:["Stalker","OccultMania","Copier","Cursed","Doppleganger","BloodyMary","Phantom","Thief"]
     Others:["Devil","Cupid","Bat","CultLeader","Vampire","Tanner","Lover","Hoodlum","BadLady","Patissiere","Shishimai"]
@@ -820,6 +820,8 @@ exports.jobinfo=
             color:"#912d5b"
         BlackCat:
             color:"#38004c"
+        LurkingMad:
+            color:"#937930"
 
     Fox:
         color:"#934293"
@@ -887,7 +889,7 @@ exports.new_rules=[
         type: 'group'
         label:
             id: 'yaminabe_option'
-            visible: (rule)->rule.casting in ['特殊规则.黑暗火锅','特殊规则.手调黑暗火锅','特殊规则.Endless黑暗火锅']
+            visible: (rule)-> isYaminabe rule
         items: [
             {
                 type: 'item'
@@ -905,6 +907,20 @@ exports.new_rules=[
                         "reverse"
                     ]
             }
+        ]
+    }
+    # 配役表示
+    {
+        type: 'group'
+        label:
+            id: 'show_roles_option'
+            visible: (rule)->
+                return false unless rule.rules.get('yaminabe_hidejobs') == 'team'
+                return true if isYaminabe(rule)
+                for job in ["Vampire","Devil","CultLeader"]
+                    if rule.jobNumbers[job]>0
+                        return true
+        items: [
             {
                 type: 'item'
                 value:

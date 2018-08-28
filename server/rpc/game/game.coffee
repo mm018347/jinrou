@@ -1487,7 +1487,7 @@ class Game
             continue unless t?
             # 噛まれた
             t.addGamelog this,"bitten"
-            if @rule.noticebitten=="notice" || t.isJobType "Devil"
+            if @rule.noticebitten=="notice"
                 log=
                     mode:"skill"
                     to:t.id
@@ -2807,6 +2807,8 @@ class Player
     isWerewolf:->false
     # 妖狐かどうか
     isFox:->false
+    # 人狼の仲間として見えるかどうか
+    isWerewolfVisible:->@isWerewolf()
     # 妖狐の仲間としてみえるか
     isFoxVisible:->false
     # 恋人かどうか
@@ -2829,6 +2831,8 @@ class Player
     isDead:->{dead:@dead,found:@found}
     # get my team
     getTeam:-> @team
+    # Display of my team.
+    getTeamDisp:-> @getTeam()
     # 終了時の人間カウント
     humanCount:->
         if !@isFox() && @isHuman()
@@ -3289,7 +3293,7 @@ class Werewolf extends Player
             result.open = result.open.filter (x)=> x != @type
             result.forms = result.forms.filter (x)=> x.type != @type
         # 人狼は仲間が分かる
-        result.wolves=game.players.filter((x)->x.isWerewolf()).map (x)->
+        result.wolves=game.players.filter((x)->x.isWerewolfVisible()).map (x)->
             x.publicinfo()
         # 间谍2も分かる
         result.spy2s=game.players.filter((x)->x.isJobType "Spy2").map (x)->
@@ -3701,8 +3705,8 @@ class Spy extends Player
         team==@getTeam() && @dead && @flag=="spygone"    # 人狼が勝った上で自分は任務完了の必要あり
     makejobinfo:(game,result)->
         super
-        # 间谍は人狼が分かる
-        result.wolves=game.players.filter((x)->x.isWerewolf()).map (x)->
+        # スパイは人狼が分かる
+        result.wolves=game.players.filter((x)->x.isWerewolfVisible()).map (x)->
             x.publicinfo()
     makeJobSelection:(game)->
         # 夜は投票しない
@@ -4021,8 +4025,8 @@ class Spy2 extends Player
     team:"Werewolf"
     makejobinfo:(game,result)->
         super
-        # 间谍は人狼が分かる
-        result.wolves=game.players.filter((x)->x.isWerewolf()).map (x)->
+        # スパイは人狼が分かる
+        result.wolves=game.players.filter((x)->x.isWerewolfVisible()).map (x)->
             x.publicinfo()
 
     dying:(game,found)->
@@ -4128,7 +4132,7 @@ class Fanatic extends Madman
     makejobinfo:(game,result)->
         super
         # 狂信者は人狼が分かる
-        result.wolves=game.players.filter((x)->x.isWerewolf()).map (x)->
+        result.wolves=game.players.filter((x)->x.isWerewolfVisible()).map (x)->
             x.publicinfo()
 class Immoral extends Player
     type:"Immoral"
@@ -4154,6 +4158,12 @@ class Devil extends Player
             unless @flag
                 # まだ噛まれていない
                 @setFlag "bitten"
+                # 専用ログを出す
+                log=
+                    mode: "skill"
+                    to: @id
+                    comment: game.i18n.t "roles:Devil.attacked", {name: @name}
+                splashlog game.id, game, log
             game.addGuardLog @id, AttackKind.werewolf, GuardReason.devil
         else if found=="punish"
             # 处刑されたぞ！
@@ -6515,8 +6525,9 @@ class Phantom extends Player
             sup=super
             for obj in sup
                 pl=game.getPlayer obj.value
-                unless pl?.scapegoat
-                    res.push obj
+                continue unless pl?
+                continue if pl.scapegoat || pl.id == @id
+                res.push obj
             return res
         else
             super
@@ -6578,7 +6589,7 @@ class BadLady extends Player
         unless @flag?.set
             # まだ恋人未设定
             if @scapegoat
-                @flag={
+                @setFlag {
                     set:true
                 }
     job:(game,playerid,query)->
@@ -7956,6 +7967,9 @@ class XianFox extends Fox
             splashlog game.id, game, log
             @setFlag null
 
+class LurkingMad extends Madman
+    type: "LurkingMad"
+    isWerewolfVisible:-> true
 
 # ============================
 # 処理上便宜的に使用
@@ -8229,6 +8243,7 @@ class Complex
         @main.isJobType(type) || @sub?.isJobType?(type)
     isMainJobType:(type)-> @main.isMainJobType type
     getTeam:-> @main.getTeam()
+    getTeamDisp:-> @getTeam()
     #An access to @main.flag, etc.
     accessByJobType:(type)->
         unless type
@@ -8386,6 +8401,7 @@ class Complex
     isWerewolf:->@main.isWerewolf()
     isFox:->@main.isFox()
     isVampire:->@main.isVampire()
+    isWerewolfVisible:->@main.isWerewolfVisible()
     isWinner:(game,team)->@main.isWinner game, team
     hasDeadResistance:(game)->
         if @mcall game, @main.hasDeadResistance, game
@@ -8534,7 +8550,15 @@ class Drunk extends Complex
     cmplType:"Drunk"
     getJobname:-> @game.i18n.t "roles:Drunk.jobname", {jobname: @main.getJobname()}
     getTypeDisp:->"Human"
-    getJobDisp:-> @game.i18n.t "roles:jobname.Human"
+    getTeamDisp:->"Human"
+    getJobDisp:->
+        if @game.rule.chemical == "on"
+            @game.i18n.t "roles:Chemical.jobname", {
+                left: @game.i18n.t "roles:jobname.Human"
+                right: @game.i18n.t "roles:jobname.Human"
+            }
+        else
+            @game.i18n.t "roles:jobname.Human"
     sleeping:->true
     jobdone:->true
     isListener:(game,log)->
@@ -9094,6 +9118,7 @@ class Chemical extends Complex
             @main.isHuman()
     isWerewolf:-> @main.isWerewolf() || @sub?.isWerewolf()
     isFox:-> @main.isFox() || @sub?.isFox()
+    isWerewolfVisible:-> @main.isWerewolfVisible() || @sub?.isWerewolfVisible()
     isFoxVisible:-> @main.isFoxVisible() || @sub?.isFoxVisible()
     isVampire:-> @main.isVampire() || @sub?.isVampire()
     isAttacker:-> @main.isAttacker?() || @sub?.isAttacker?()
@@ -9388,6 +9413,7 @@ jobs=
     BlackCat:BlackCat
     Idol:Idol
     XianFox:XianFox
+    LurkingMad:LurkingMad
     # 特殊
     GameMaster:GameMaster
     Helper:Helper
@@ -9541,6 +9567,7 @@ jobStrength=
     BlackCat:19
     Idol:12
     XianFox:35
+    LurkingMad:9
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
@@ -10653,6 +10680,9 @@ module.exports.actions=(req,res,ss)->
         unless player in game.participants
             res {error: game.i18n.t "error.common.notPlayer"}
             return
+        if game.finished
+            res {error: game.i18n.t "error.common.alreadyFinished"}
+            return
 
         plobj = player.accessByObjid query.objid
         unless plobj?
@@ -10909,7 +10939,7 @@ makejobinfo = (game,player,result={})->
 
             # If Chemical, tell player's team.
             if game.rule?.chemical == "on"
-                result.myteam = plpl.getTeam()
+                result.myteam = plpl.getTeamDisp()
 
             if Phase.isNight(game.phase) || game.phase == Phase.rolerequesting
                 if player.dead

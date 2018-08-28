@@ -113,6 +113,7 @@ jobname:
   BlackCat: "黒猫"
   Idol: "アイドル"
   XianFox: "仙狐"
+  LurkingMad: "暗躍者"
   GameMaster: "ゲームマスター"
   Helper: "ヘルパー"
   Waiting: "待機中"
@@ -254,6 +255,12 @@ Copier:
 Light:
   # Selected a target.
   select: "{{name}}が{{target}}の名前を死神の手帳に書きました。"
+
+# Devil
+Devil:
+  # attacked by a werewolf.
+  attacked: "{{name}}は人狼に襲われて悪魔の力を増大させました。"
+
 
 # Cupid
 Cupid:

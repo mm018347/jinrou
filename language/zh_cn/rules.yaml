@@ -310,6 +310,8 @@ rule:
 ruleGroup:
   yaminabe_option:
     name: "黑暗火锅安全性"
+  show_roles_option:
+    name: "配置显示设定"
   normal_rules:
     name: "一般设定"
   werewolf:

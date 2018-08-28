@@ -36,6 +36,8 @@ error:
     needLogin: "请先登陆。"
     # given query is invalid.
     invalidQuery: "无效的操作。"
+    # Game has already finished.
+    alreadyFinished: "此游戏已经结束。"
   # Error during gamestart operation
   gamestart:
     # Player number is invalid (invalid number is passed as a number of a role)

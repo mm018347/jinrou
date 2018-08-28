@@ -3,6 +3,7 @@ import { action, computed, observable, runInAction } from 'mobx';
 import { CastingDefinition, PresetFunction } from '../defs/casting-definition';
 import { RoleCategoryDefinition } from '../defs/category-definition';
 import { Rule } from '../defs/rule-definition';
+import { mapToObject } from '../util/map-to-object';
 
 /**
  * Store of current selection of casting.
@@ -153,6 +154,19 @@ export class CastingStore {
       jobNumbers: this.jobNumbers,
     };
   }
+  /**
+   * Serialized representation of whole rule setting.
+   */
+  @computed
+  public get serializedRule(): string {
+    const ruleObj = {
+      casting: this.currentCasting.id,
+      rules: mapToObject(this.rules),
+      jobNumbers: this.jobNumbers,
+      jobInclusions: mapToObject(this.jobInclusions),
+    };
+    return JSON.stringify(ruleObj);
+  }
 
   /**
    * Set player number.
@@ -223,6 +237,45 @@ export class CastingStore {
   protected resetInclusion(): void {
     for (const role of this.roles) {
       this.jobInclusions.set(role, true);
+    }
+  }
+  /**
+   * Load serialized representation of rule.
+   */
+  @action
+  public loadSerializedRule(
+    repr: string,
+    lookupCasting: (id: string) => CastingDefinition | null,
+  ): void {
+    try {
+      const { casting, rules, jobNumbers, jobInclusions } = JSON.parse(repr);
+
+      this.resetInclusion();
+      const castingDef = lookupCasting(casting);
+      if (castingDef == null) {
+        // unknown casting id.
+        return;
+      }
+      this.setCurrentCasting(castingDef);
+      for (const ruleKey in rules) {
+        const ruleValue = rules[ruleKey];
+        if ('string' !== typeof ruleValue) {
+          continue;
+        }
+        this.updateRule(ruleKey, rules[ruleKey]);
+      }
+      for (const job in jobNumbers) {
+        const jobNum = jobNumbers[job];
+        if ('number' !== typeof jobNum) {
+          continue;
+        }
+        const ji = jobInclusions[job];
+
+        this.updateJobNumber(job, jobNum, ji != null ? !!ji : true);
+      }
+    } catch (err) {
+      console.error(err);
+      return;
     }
   }
 }
