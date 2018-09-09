@@ -114,6 +114,8 @@ jobname:
   Idol: "偶像"
   XianFox: "仙狐"
   LurkingMad: "潜伏者"
+  SnowLover: "雪女"
+  Raven: "乌鸦"
   GameMaster: "游戏管理员"
   Helper: "帮手"
   Waiting: "尚未分配"
@@ -139,6 +141,7 @@ teamName:
   Devil: "恶魔"
   Vampire: "吸血鬼阵营"
   Cult: "邪教主阵营"
+  Raven: "乌鸦阵营"
   Neet: "NEET"
   Others: "其他"
 
@@ -688,6 +691,8 @@ EyesWolf:
     holy: "向 {{name}} 发起的袭击，被神圣的力量阻止了。"
     # Guard by a trap
     trap: "向 {{name}} 发起的袭击，被陷阱阻止了。"
+    # Guard by a SnowLover
+    snow: "向 {{name}} 发起的袭击，被风雪阻止了。"
 
 TongueWolf:
   # Result of TongueWolf skill.
@@ -708,6 +713,16 @@ XianFox:
   select: "{{name}} 透视了 {{target}} 的职业。"
   # Result of skill (announced to everyone).
   result: "昨晚仙狐透视的结果是 {{result}}。"
+  
+SnowLover:
+  # Select a target.
+  select: "{{name}} 向 {{target}} 求爱了。"
+  # Become a lover.
+  become: "{{name}} 受到求爱变成了恋人。"
+
+Raven:
+  # message when 1 or less Ravens are alive.
+  message: "乌鸦的啼鸣响彻村子的上空。"
 
 GameMaster:
   # Failed to revive.

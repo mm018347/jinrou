@@ -223,6 +223,7 @@ judge:
   cult: "村子被教会支配了。"
   vampire: "吸血鬼饮尽了最后一个村民的鲜血，向着下一个住满了猎物的村庄前进了…"
   lonewolf: "人狼吃掉了最后一个村民，向着下一个住满了猎物的村庄前进了…"
+  raven: "村子被乌鸦支配了。"
   draw: "平局。"
   # short summary
   short:
@@ -234,6 +235,7 @@ judge:
     cult: "邪教主胜利"
     vampire: "吸血鬼胜利"
     lonewolf: "一匹狼胜利"
+    raven: "乌鸦胜利"
 
 
 # Terms for quantum werewolf

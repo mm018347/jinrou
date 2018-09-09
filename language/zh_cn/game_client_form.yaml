@@ -25,7 +25,6 @@ specialName:
 messages:
   _day: "请投票选择要处刑的人"
   Waiting: "请选择希望就职的角色"
-  _Werewolf: "请选择要杀死的人"
   WolfDiviner: "请选择一个要占卜的人"
   GreedyWolf: "在希望满足自身贪欲的场合下请选择"
   Diviner: "请选择一个要占卜的人"
@@ -93,6 +92,7 @@ messages:
   MadHunter: "请选择射击的目标"
   Idol: "请选择一个人使其成为你的粉丝"
   XianFox: "请选择透视的对象"
+  SnowLover: "请选择你的恋人"
   GameMaster: "GM命令"
 
 # Texts for GameMaster form.
@@ -103,6 +103,11 @@ GameMaster:
   time: "时间延长/缩短"
   longer: "延长{{count}}秒"
   shorter: "缩短{{count}}秒"
+  
+# Texts for _Werewolf form.
+_Werewolf:
+  description: "请选择要杀死的人"
+  remains: "剩余的可袭击人数：{{count}}"
 
 # Texts for Merchant form.
 Merchant:

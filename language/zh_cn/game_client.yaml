@@ -61,6 +61,10 @@ jobinfo:
     none: "你没有初始阵营"
     # other.
     message: "你的初始阵营是 {{team}}"
+    # short message for no team.
+    none_short: "阵营：无"
+    # short message for usual team.
+    message_short: "阵营：{{team}}"
   # detail of jobs.
   detail_one: "详细"
   detail: "{{job}}的详细"
@@ -77,10 +81,13 @@ jobinfo:
     cultmembers: "教会信者是 {{names}}"
     vampires: "吸血鬼是 {{names}}"
     twins: "双胞胎是 {{names}}"
+    myfans: "粉丝是 {{names}}"
+    ravens: "乌鸦是 {{names}}"
     stalking: "你是 {{name}} 的跟踪狂"
     supporting: "向 {{name}}（{{job}}）提供帮助"
     dogOwner: "你的饲主是 {{name}}"
     quantumwerewolfNumber: "你的玩家编号是 {{number}}"
+    fanof: "你是 {{name}} 的粉丝"
 
 
 # game-view: speak form.

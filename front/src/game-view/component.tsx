@@ -22,6 +22,7 @@ import { ShowRule } from './rule';
 import { showConfirmDialog } from '../dialog';
 import { Players } from './players';
 import { RoomControls } from './room-controls';
+import { lightA } from '../styles/a';
 
 interface IPropGame {
   /**
@@ -44,6 +45,10 @@ interface IPropGame {
    * Definition of rules.
    */
   ruleDefs: RuleGroup;
+  /**
+   * Color of each team.
+   */
+  teamColors: Record<string, string | undefined>;
   /**
    * Handle a speak event.
    */
@@ -75,6 +80,7 @@ export class Game extends React.Component<IPropGame, {}> {
       store,
       roles,
       ruleDefs,
+      teamColors,
       onJobQuery,
       onWillChange,
       roomControlHandlers,
@@ -91,8 +97,14 @@ export class Game extends React.Component<IPropGame, {}> {
       roomControls,
       logPickup,
     } = store;
+
+    const theme = {
+      user: themeStore.themeObject,
+      teamColors,
+    };
+
     return (
-      <ThemeProvider theme={themeStore.themeObject}>
+      <ThemeProvider theme={theme}>
         <I18nProvider i18n={i18n}>
           <div>
             {/* List of players. */}
@@ -280,6 +292,10 @@ const RuleWrapper = withProps<IPropsRuleWrapper>()(styled.div)`
 
   background-color: #ffd1f2;
   color: black;
+
+  a {
+    ${lightA}
+  }
 `;
 
 const RuleStickyWrapper = withProps<IPropsRuleWrapper>()(styled.div)`
@@ -292,6 +308,7 @@ const RuleStickyWrapper = withProps<IPropsRuleWrapper>()(styled.div)`
 
 const RuleInnerWrapper = styled.div`
   box-sizing: border-box;
+  max-height: 100vh;
   width: 20em;
   padding: 5px;
 `;

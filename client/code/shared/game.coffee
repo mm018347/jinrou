@@ -2,7 +2,7 @@ Shared=
     game:exports
 
 # 身代わりセーフティありのときの除外役職一覧
-exports.SAFETY_EXCLUDED_JOBS = SAFETY_EXCLUDED_JOBS = ["QueenSpectator","Spy2","Poisoner","Cat","Cupid","BloodyMary","Noble", "Lover", "Twin","Hunter","MadHunter","Idol"]
+exports.SAFETY_EXCLUDED_JOBS = SAFETY_EXCLUDED_JOBS = ["QueenSpectator","Spy2","Poisoner","Cat","Cupid","BloodyMary","Noble", "Lover", "Twin","Hunter","MadHunter","Idol","SnowLover"]
 # ------ 役職一覧
 # 基本役職
 exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","Fox",
@@ -49,7 +49,7 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 # わんないと人狼
 "Phantom",
 # 月夜の人狼
-"DrawGirl","CautiousWolf",
+"DrawGirl","CautiousWolf","SnowLover","Raven",
 # 人狼HOUSE
 "Hypnotist",
 # 人狼ジャッジメント
@@ -72,9 +72,10 @@ exports.teams=teams=
     Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist","CraftyWolf","Pumpkin","MadScientist","MadHunter","MadCouple","EyesWolf","TongueWolf","BlackCat","LurkingMad"]
     Fox:["Fox","TinyFox","Immoral","Blasphemy","XianFox"]
     Devil:["Devil"]
-    Friend:["Cupid","Lover","BadLady","Patissiere"]
+    Friend:["Cupid","Lover","BadLady","Patissiere","SnowLover"]
     Vampire:["Vampire"]
     Cult:["CultLeader"]
+    Raven:["Raven"]
     Others:["Bat","Stalker","Doppleganger","Copier","Tanner","Thief","Hoodlum","QuantumPlayer","Shishimai"],
     Neet:["Neet"]
 
@@ -86,7 +87,7 @@ exports.categories=
     Madman:["Madman","Fanatic","Spy","Spy2","Sorcerer","WhisperingMad","WolfBoy","ObstructiveMad","PsychoKiller","Bomber","Ushinotokimairi","MadDog","Hypnotist","Pumpkin","MadScientist","MadHunter","MadCouple","BlackCat","LurkingMad"]
     Immoral:["Immoral","Blasphemy"]
     Switching:["Stalker","OccultMania","Copier","Cursed","Doppleganger","BloodyMary","Phantom","Thief"]
-    Others:["Devil","Cupid","Bat","CultLeader","Vampire","Tanner","Lover","Hoodlum","BadLady","Patissiere","Shishimai"]
+    Others:["Devil","Cupid","Bat","CultLeader","Vampire","Tanner","Lover","Hoodlum","BadLady","Patissiere","Shishimai","SnowLover","Raven"]
 
 # 役職ルールたち 役職人数一覧を返す（Humanは向こうで補完）
 normal1=(number)->
@@ -845,6 +846,8 @@ exports.jobinfo=
             color:"#cf0085"
         Patissiere:
             color:"#ab5f30"
+        SnowLover:
+            color:"#f6ceff"
     Devil:
         color:"#735f9e"
         Devil:
@@ -857,6 +860,10 @@ exports.jobinfo=
         color: "#b09d87"
         CultLeader:
             color:"#b09d87"
+    Raven:
+        color: "#444466"
+        Raven:
+            color: "#444466"
     Others:
         color:"#cccccc"
         Bat:
@@ -1288,6 +1295,7 @@ exports.new_rules=[
         label:
             id: 'couple'
             visible:(rule)->
+                console.log 'rule!', rule
                 return true if isYaminabe rule
                 return rule.jobNumbers.Couple>0 || rule.jobNumbers.MadCouple>0
         items:[
@@ -1529,7 +1537,16 @@ exports.jobinfos=[
     {
         name:"fanof"
     }
+    {
+        name:"ravens"
+    }
 ]
 
 # 判定
-isYaminabe=(rule)-> (rule.casting ? rule.jobrule) in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
+isYaminabe=(rule)->
+   if (rule.casting ? rule.jobrule) in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
+       return true
+   if rule.rules.get("yaminabe_hidejobs") != ""
+       # 役職が隠されている場合もtrue
+       return true
+   return false

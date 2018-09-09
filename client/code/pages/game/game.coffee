@@ -62,6 +62,7 @@ exports.start=(roomid)->
                 node: $("#game-app").get(0)
                 roles: Shared.game.jobs
                 rules: Shared.game.new_rules
+                teamColors: makeTeamColors()
                 onSpeak: (query)->
                     ss.rpc "game.game.speak", roomid, query, (result)->
                         if result?
@@ -272,6 +273,9 @@ exports.start=(roomid)->
                             supporting: obj.supporting
                             dogOwner: obj.dogOwner
                             twins: obj.twins
+                            myfans: obj.myfans
+                            fanof: obj.fanof
+                            ravens: obj.ravens
                         }
                     else
                         null
@@ -532,7 +536,7 @@ exports.start=(roomid)->
 
         # show TO BAN list to players
         socket_ids.push Index.socket.on 'punishalert',null,(msg,channel)->
-            if msg.id==roomid && my_player_id? && msg.userlist.every((x)-> x.userid != my_player_id)
+            if msg.id==roomid && my_player_id? && (my_player_id in msg.voters)
                 dialog.showSuddenDeathPunishDialog({
                     time: msg.time
                     options: msg.userlist.map (user)-> {
@@ -788,3 +792,9 @@ getPlayerInfoFlags = (ready, mode) ->
     if ready
         flags.push 'ready'
     flags
+# make team color map from jobinfo
+makeTeamColors = ->
+    result = {}
+    for team, obj of Shared.game.jobinfo
+        result[team] = obj.color
+    result
