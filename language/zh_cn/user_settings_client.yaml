@@ -1,0 +1,78 @@
+# Language file for user settings page.
+
+# title of page.
+title: "用户设定"
+
+# loading text.
+loading: "正在读取…"
+
+# back to mypage link.
+backLink: "返回个人页面"
+
+# description of settings page.
+description: "用户设定将保存到所有终端。"
+
+
+# colors.
+color:
+  # default name of profile (without number).
+  defaultProfile: "默认设定"
+  # saved profiles
+  savedProfiles: "已保存的配色设置"
+  # title of colors tab.
+  title: "配色设置"
+  # text color.
+  textColor: "文字颜色"
+  # background color.
+  backgroundColor: "背景颜色"
+  # sample text
+  sampleText: "示例文字 Sample Text"
+  # text that indicates currently color is edited
+  editing: "编辑中"
+  # button to edit profile.
+  editButton: "编辑"
+  # button to delete profile,
+  deleteButton: "删除"
+  # button to use this profile.
+  useButton: "使用此设定"
+  # button label when this is currently used.
+  usedButtonLabel: "正在使用"
+  # button to add a new profile.
+  addButton: "追加"
+  # new name dialog.
+  profileNameDialog:
+    title: "编辑设定"
+    newMessage: "请为新的设定命名。"
+    ok: "决定"
+    cancel: "取消"
+  # delete profile dialog.
+  deleteProfileDialog:
+    title: "删除设定設定の消去"
+    message: "确认要删除设定「{{name}}」？"
+    ok: "删除"
+    cancel: "取消"
+  # name of each color settings.
+  colorSetting:
+    day: "白天的背景色与文字色"
+    night: "夜间的背景色与文字色"
+    heaven: "灵界的背景色与文字色"
+    system: "系统通知"
+    nextturn: "回合前进通知"
+    audience: "旁观者的发言"
+    couple: "共有者的会话"
+    fox: "妖狐的会话"
+    gm1: "GM的发言1"
+    gm2: "GM的发言2"
+    heavenmonologue: "灵界的自言自语"
+    half_day: "恶灵凭依的发言（灵界）"
+    helperwhisper: "帮手的发言"
+    inlog: "Endless黑暗火锅的加入通知"
+    madcouple: "尖叫狂人的发言"
+    monologue: "自言自语"
+    probability_table: "量子人狼的概率表"
+    userinfo: "拒绝复活"
+    skill: "职业的能力"
+    voteto: "投票"
+    werewolf: "人狼的会话"
+    will: "遗言"
+
