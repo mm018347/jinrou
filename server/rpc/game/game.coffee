@@ -405,6 +405,7 @@ class Game
         @werewolf_flag=[] # 人狼襲撃に関するフラグ
 
         @revive_log = [] # 蘇生した人の記録
+        @nextturn_deferred_log = []
         @guard_log = []  # 襲撃阻止の記録（for 瞳狼）
         @ninja_data =
 
@@ -1060,12 +1061,14 @@ class Game
                 comment: @i18n.t "system.phase.#{if night then 'night' else 'day'}", {day: @day}
             splashlog @id,this,log
 
+        @showNextturnDeferredLogs()
+
         #死体処理
         @bury(if night then "night" else "day")
 
         return if @rule.hunter_lastattack == "no" && @judge()
-        unless @hunterCheck "day"
-            # 狩猎者フェイズの割り込みがなければターン開始
+        unless @hunterCheck(if night then "night" else "day")
+            # ハンターフェイズの割り込みがなければターン開始
 
             @beginturn()
 
@@ -1412,15 +1415,26 @@ class Game
 
     #全員に状況更新 pls:状況更新したい人を指定する場合の配列
     splashjobinfo:(pls)->
-        unless pls?
+        targets = null
+        if pls?
+            # 対象が定まっている
+            plids = pls.map (pl)-> pl.id
+            targets = plids.map (id)=> @getPlayer id
+            # ヘルパーにも同時に配信
+            for pl in @participants
+                for h in pl.accessByJobTypeAll "Helper"
+                    if h.flag in plids
+                        targets.push pl
+        else
+            # 全員を更新
             # プレイヤー以外にも
             @ss.publish.channel "room#{@id}_audience","getjob",makejobinfo this,null
             # GMにも
             if @gm?
                 @ss.publish.channel "room#{@id}_gamemaster","getjob",makejobinfo this,@getPlayerReal @gm
-            pls=@participants
+            targets = @participants
 
-        pls.forEach (x)=>
+        targets.forEach (x)=>
             @ss.publish.user x.realid,"getjob",makejobinfo this,x
     #全员寝たかチェック 寝たなら処理してtrue
     #timeoutがtrueならば时间切れなので时间でも待たない
@@ -1572,7 +1586,7 @@ class Game
     # 死んだ人を処理する type: タイミング
     # type:
     #   "day": 夜が明けたタイミング
-    #   "punish": 処刑後
+    #   "punish": 処刑後（ターンが変わる前）
     #   "night": 夜になったタイミング
     #   "other":その他(ターン変わり時の能力で死んだやつなど）
     bury:(type)->
@@ -1601,7 +1615,7 @@ class Game
             deads.push newdeads...
 
             alives=@players.filter (x)->!x.dead
-            alives.forEach (x)=>
+            @players.forEach (x)=>
                 res = x.beforebury this,type,newdeads
                 if res
                     next_loop_flag = true
@@ -1775,8 +1789,7 @@ class Game
                     comment:x.will
                 splashlog @id,this,log
         # 蘇生のログも表示
-        if type != "punish"
-            @showReviveLogs()
+        @showReviveLogs()
         return deads.length
     # 蘇生ログを表示
     showReviveLogs:->
@@ -1786,7 +1799,14 @@ class Game
                 comment: @i18n.t "system.revive", {name: n}
             splashlog @id, this, log
         @revive_log = []
-
+    # 遅延されているログを表示
+    showNextturnDeferredLogs:->
+        for log in @nextturn_deferred_log
+            splashlog @id, this, log
+        @nextturn_deferred_log = []
+    # ログを次のターン開始時まで遅延
+    deferLogToNextturn:(log)->
+        @nextturn_deferred_log.push log
 
     # 投票終わりチェック
     # 返り値: 処刑が終了したらtrue
@@ -1819,7 +1839,13 @@ class Game
                 mode:"system"
                 comment: @i18n.t "system.voting.nopunish"
             splashlog @id,this,log
-            @nextturn()
+            @bury "punish"
+            return true if @rule.hunter_lastattack == "no" && @judge()
+            # ハンターフェイズ割り込みがあるかもしれない
+            unless @hunterCheck("nextturn")
+                if @rule.hunter_lastattack == "yes"
+                    return if @judge()
+                @nextturn()
             return true
         else if mode=="punish"
             # 投票
@@ -1848,12 +1874,13 @@ class Game
                 return false
             # ターン移る前に死体処理
             @bury "punish"
-            return true if @rule.hunter_lastcheck == "no" && @judge()
-            # 狩猎者フェイズ割り込みがあるかもしれない
+            return true if @rule.hunter_lastattack == "no" && @judge()
+            # ハンターフェイズ割り込みがあるかもしれない
             unless @hunterCheck("nextturn")
+                if @rule.hunter_lastattack == "yes"
+                    return true if @judge()
                 @nextturn()
-            if @rule.hunter_lastcheck == "yes"
-                @judge()
+            # this judge is needed?
         return true
     # 重新投票
     dorevote:(mode)->
@@ -1905,6 +1932,7 @@ class Game
     # nextScene:
     #   "nextturn": 次のターンへ
     #   "day": 昼のターン開始処理
+    #   "night": 夜のターン開始処理
     #   "vote": 次の投票へ
     hunterCheck:(nextScene)->
         # まず狩猎者を列挙
@@ -1983,6 +2011,9 @@ class Game
                 @nextturn()
             when "day"
                 @phase = Phase.day
+                @beginturn()
+            when "night"
+                @phase = Phase.night
                 @beginturn()
             when "vote"
                 @phase = Phase.day_voting
@@ -2156,7 +2187,10 @@ class Game
             team="Draw" # 引き分け
 
         if team?
-            # 勝敗决定
+            # 勝敗決定
+
+            @showNextturnDeferredLogs()
+
             @finished=true
             @finish_time=new Date
             @last_time=@finish_time.getTime()
@@ -2405,7 +2439,7 @@ class Game
                             x.setNorevive true
                             revoting=true
                         @bury("other")
-                        @judge()
+                        return if @judge()
                         if revoting
                             @dorevote "gone"
                         else
@@ -2456,7 +2490,7 @@ class Game
                         x.setNorevive true
                         revoting=true
                     @bury("other")
-                    @judge()
+                    return if @judge()
                     if revoting
                         @dorevote "gone"
                     else
@@ -3377,16 +3411,17 @@ class Werewolf extends Player
         if Phase.isNight(game.phase)
             if game.werewolf_target_remain>0
                 # まだ襲える
-                result.open.push "_Werewolf"
-                result.forms.push {
-                    type: "_Werewolf"
-                    options: @makeJobSelection game, false
-                    formType: FormType.required
-                    objid: @objid
-                    # 襲撃可能人数のデータ
-                    data:
-                        remains: game.werewolf_target_remain
-                }
+                if @isAttacker()
+                    result.open.push "_Werewolf"
+                    result.forms.push {
+                        type: "_Werewolf"
+                        options: @makeJobSelection game, false
+                        formType: FormType.required
+                        objid: @objid
+                        # 襲撃可能人数のデータ
+                        data:
+                            remains: game.werewolf_target_remain
+                    }
             # 人狼の場合は役職固有のやつは一旦閉じる
             result.open = result.open.filter (x)=> x != @type
             result.forms = result.forms.filter (x)=> x.type != @type
@@ -3513,6 +3548,7 @@ class Psychic extends Player
 
     # 処刑で死んだ人を調べる
     beforebury:(game,type,deads)->
+        return false if @dead
         @setFlag if @flag? then @flag else ""
         deads.filter((x)-> x.found=="punish").forEach (x)=>
             @setFlag @flag + game.i18n.t("roles:Psychic.resultlog", {
@@ -4019,7 +4055,7 @@ class Merchant extends Player
             to:newpl.id
             comment: game.i18n.t "roles:Merchant.delivered", {name: newpl.name, kit: kit_name}
         splashlog game.id,game,log
-        game.ss.publish.user newpl.id,"refresh",{id:game.id}
+        game.splashjobinfo [newpl]
         @setFlag query.Merchant_kit    # 発送済み
         @addGamelog game,"sendkit",@flag,newpl.id
         null
@@ -4161,7 +4197,6 @@ class Copier extends Player
         if @scapegoat
             scapegoatRunJobs game, @id
 
-        #game.ss.publish.user newpl.id,"refresh",{id:game.id}
         game.splashjobinfo [game.getPlayer @id]
         null
     isWinner:(game,team)->false # 模仿者しないと败北
@@ -4206,6 +4241,7 @@ class Immoral extends Player
     type:"Immoral"
     team:"Fox"
     beforebury:(game)->
+        return false if @dead
         # 狐が全員死んでいたら自殺
         unless game.players.some((x)->!x.dead && x.isFox())
             @die game,"foxsuicide"
@@ -4322,8 +4358,7 @@ class Cupid extends Player
                 comment: game.i18n.t "roles:Cupid.become", {name: newpl.name}
             splashlog game.id,game,log
         # 2人とも更新する
-        for pl in [game.getPlayer(@flag), game.getPlayer(@target)]
-            game.ss.publish.user pl.id,"refresh",{id:game.id}
+        game.splashjobinfo [game.getPlayer(@flag), game.getPlayer(@target)]
 
         null
 # 跟踪狂
@@ -4399,9 +4434,10 @@ class Cursed extends Player
             return true
         else
             return false
-    sunset:(game)->
-        if @flag in ["bitten","vampire"]
-            # この夜から変化する
+    beforebury:(game, type)->
+        return false if @dead
+        if type == "punish" && @flag in ["bitten", "vampire"]
+            # 投票後（夜になる直前）のタイミングで狼に変化
             log=null
             newpl=null
             if @flag=="bitten"
@@ -4418,6 +4454,8 @@ class Cursed extends Player
                     comment: game.i18n.t "roles:Cursed.becomeVampire", {name: @name}
 
                 newpl=Player.factory "Vampire", game
+            # show log at the beginning of next trun.
+            game.deferLogToNextturn log
 
             @transProfile newpl
             @transferData newpl
@@ -4425,20 +4463,11 @@ class Cursed extends Player
             newpl.sunset game
 
             splashlog game.id,game,log
-            if @flag=="bitten"
-                # 人狼侧に知らせる
-                #game.ss.publish.channel "room#{game.id}_werewolf","refresh",{id:game.id}
-                game.splashjobinfo game.players.filter (x)=>x.id!=@id && x.isWerewolf()
-            else
-                # 吸血鬼に知らせる
-                game.splashjobinfo game.players.filter (x)=>x.id!=@id && x.isVampire()
-            # 自己も知らせる
-            #game.ss.publish.user newpl.realid,"refresh",{id:game.id}
-            game.splashjobinfo [game.getPlayer @id]
 class ApprenticeSeer extends Player
     type:"ApprenticeSeer"
     beforebury:(game)->
-        # 占卜师が誰か死んでいたら占卜师に進化
+        return false if @dead
+        # 占い師が誰か死んでいたら占い師に進化
         if game.players.some((x)->x.dead && x.isJobType("Diviner")) || game.players.every((x)->!x.isJobType("Diviner"))
             newpl=Player.factory "Diviner", game
             @transProfile newpl
@@ -4452,7 +4481,7 @@ class ApprenticeSeer extends Player
             @transform game,newpl,false
 
             # 更新
-            game.ss.publish.user newpl.realid,"refresh",{id:game.id}
+            game.splashjobinfo [newpl]
         return false
 class Diseased extends Player
     type:"Diseased"
@@ -4692,6 +4721,7 @@ class Doppleganger extends Player
         }
         null
     beforebury:(game,type,deads)->
+        return false if @dead
         # 対象が死んだら移る
         targetid = @flag?.target
         if deads.some((x)=> x.id == targetid)
@@ -4737,8 +4767,7 @@ class Doppleganger extends Player
             splashlog game.id,game,log
             @addGamelog game,"dopplemove",newpl.type,newpl.id
 
-
-            game.ss.publish.user newpl.realid,"refresh",{id:game.id}
+            game.splashjobinfo [newpl]
             return true
         return false
 class CultLeader extends Player
@@ -4886,7 +4915,7 @@ class Cat extends Poisoner
         pl.revive game
     deadnight:(game,midnightSort)->
         @setTarget @id
-        @midnight game, midnightSort
+        Cat::midnight.call this, game, midnightSort
 
     job_target:Player.JOB_T_DEAD
     makejobinfo:(game,result)->
@@ -4992,6 +5021,7 @@ class Witch extends Player
 class Oldman extends Player
     type:"Oldman"
     beforebury:(game, type)->
+        return false if @dead
         # 老衰は朝になったタイミングのみ
         return false unless type == "day"
 
@@ -5062,7 +5092,7 @@ class OccultMania extends Player
             comment: game.i18n.t "system.changeRole", {name: @name, result: newpl.getJobDisp()}
         splashlog game.id,game,log
 
-        game.ss.publish.user newpl.realid,"refresh",{id:game.id}
+        # game.ss.publish.user newpl.realid,"refresh",{id:game.id}
         null
 
 # 狼之子
@@ -5132,8 +5162,7 @@ class Lover extends Player
             comment: game.i18n.t "roles:Lover.become", {name: pl.name}
         splashlog game.id,game,log
         # 2人とも更新する
-        for pl in [mytop, pl]
-            game.ss.publish.user pl.id,"refresh",{id:game.id}
+        game.splashjobinfo [mytop, pl]
 
         null
 
@@ -5183,22 +5212,21 @@ class MinionSelector extends Player
 # 盗人
 class Thief extends Player
     type:"Thief"
-    team:""
+    isWinner:-> false
     formType: FormType.required
-    sleeping:(game)->@target? || game.day>1
+    sleeping:(game)->@target?
     sunset:(game)->
-        @setTarget (if game.day==1 then null else "")
-        # @flag:JSON的职业候補配列
-        if !target?
-            arr=JSON.parse(@flag ? '["Human"]')
-            jobnames=arr.map (x)->
-                testpl = Player.factory x, game
-                testpl.getJobDisp()
-            log=
-                mode:"skill"
-                to:@id
-                comment: game.i18n.t "roles:Thief.candidates", {name: @name, jobnames: jobnames.join(",")}
-            splashlog game.id,game,log
+        @setTarget null
+        # @flag:JSONの役職候補配列
+        arr=JSON.parse(@flag ? '["Human"]')
+        jobnames=arr.map (x)->
+            testpl = Player.factory x, game
+            testpl.getJobDisp()
+        log=
+            mode:"skill"
+            to:@id
+            comment: game.i18n.t "roles:Thief.candidates", {name: @name, jobnames: jobnames.join(",")}
+        splashlog game.id,game,log
     job:(game,target)->
         @setTarget target
         unless jobs[target]?
@@ -5215,7 +5243,7 @@ class Thief extends Player
             comment: game.i18n.t "system.changeRole", {name: @name, result: newpl.getJobDisp()}
         splashlog game.id,game,log
 
-        game.ss.publish.user newpl.id,"refresh",{id:game.id}
+        game.splashjobinfo [game.getPlayer @id]
         null
     makeJobSelection:(game, isvote)->
         unless isvote
@@ -5359,12 +5387,12 @@ class Dictator extends Player
         splashlog game.id,game,log
         # XXX executeの中と同じことが書いてある
         game.bury "punish"
-        return if game.rule.hunter_lastcheck == "no" && game.judge()
+        return if game.rule.hunter_lastattack == "no" && game.judge()
         # 次のターンへ移行
         unless game.hunterCheck("nextturn")
+            if game.rule.hunter_lastattack == "yes"
+                return if game.judge()
             game.nextturn()
-        if game.rule.hunter_lastcheck == "yes"
-            game.judge()
         return null
 class SeersMama extends Player
     type:"SeersMama"
@@ -5723,16 +5751,15 @@ class RedHood extends Player
             @setFlag from
         else
             @setFlag null
-    deadsunset:(game)->
-        if @flag
+    beforebury:(game, type)->
+        # 自分を食った狼が死んだら即座に蘇生
+        if @flag && @dead
             w=game.getPlayer @flag
             if w?.dead
-                # 殺した狼が死んだ!復活する
                 pl = game.getPlayer @id
                 pl.revive game
-    deadsunrise:(game)->
-        # 同じ
-        @deadsunset game
+                return true
+        return false
 
 class Counselor extends Player
     type:"Counselor"
@@ -6000,13 +6027,15 @@ class ToughWolf extends Werewolf
         super
         unless @sleeping game
             # 襲撃可能なときは一途な狼の能力も発動可能
-            result.open.push @type
-            result.forms.push {
-                type: @type
-                options: @makeJobSelection game, false
-                formType: FormType.optionalOnce
-                objid: @objid
-            }
+            unless @flag
+                # 能力はまだ使用されていない
+                result.open.push @type
+                result.forms.push {
+                    type: @type
+                    options: @makeJobSelection game, false
+                    formType: FormType.optionalOnce
+                    objid: @objid
+                }
 
 class ThreateningWolf extends Werewolf
     type:"ThreateningWolf"
@@ -6127,6 +6156,7 @@ class WanderingGuard extends Player
         pl.transform game,newpl,true
         null
     beforebury:(game,type)->
+        return false if @dead
         if type=="day"
             # 昼になったとき
             if game.players.filter((x)->x.dead && x.found).length==0
@@ -6225,7 +6255,8 @@ class TroubleMaker extends Player
             # 不発だった
             @setFlag "done"
 
-    deadsunrise:(game)->@sunrise game
+    deadsunrise:(game)->
+        TroubleMaker::sunrise.call this, game
 
 class FrankensteinsMonster extends Player
     type:"FrankensteinsMonster"
@@ -6235,7 +6266,8 @@ class FrankensteinsMonster extends Player
             # 处刑で死んだらもうひとり处刑できる
             game.votingbox.addPunishedNumber 1
     beforebury:(game,type,deads)->
-        # 新しく死んだひとたちで村人阵营ひとたち
+        return false if @dead
+        # 新しく死んだひとたちで村人陣営ひとたち
         founds=deads.filter (x)->x.getTeam()=="Human" && !x.isJobType("FrankensteinsMonster")
         # 吸収する
         thispl=this
@@ -6316,7 +6348,7 @@ class BloodyMary extends Player
     sunset:(game)->
         @setTarget null
     deadsunset:(game)->
-        @sunset game
+        BloodyMary::sunset.call this, game
     job:(game,playerid)->
         unless @flag in ["punish","werewolf"]
             return game.i18n.t "error.common.cannotUseSkillNow"
@@ -6409,7 +6441,7 @@ class PsychoKiller extends Madman
                 pl.die game,"psycho",@id
         @setFlag "[]"
     deadnight:(game,midnightSort)->
-        @midnight game, midnightSort
+        PsychoKiller::midnight.call this, game, midnightSort
 class SantaClaus extends Player
     type:"SantaClaus"
     midnightSort:100
@@ -6814,7 +6846,7 @@ class Baker extends Player
                 @setFlag "done"
 
     deadsunrise:(game)->
-        @sunrise game
+        Baker::sunrise.call this, game
 class Bomber extends Madman
     type:"Bomber"
     midnightSort:81
@@ -6867,6 +6899,7 @@ class Blasphemy extends Player
         else
             @setTarget null
     beforebury:(game)->
+        return false if @dead
         if @flag
             # まだ狐を作ってないときは耐える
             # 狐が全员死んでいたら自殺
@@ -7091,7 +7124,7 @@ class GotChocolate extends Player
                     top.transform game,newpl,true
                     top = game.getPlayer @id
                     flag = true
-                    game.ss.publish.user top.id,"refresh",{id:game.id}
+                    game.splashjobinfo [top]
                     break
             else if top.cmplType=="GotChocolateFalse" && top.sub==this
                 # 義理だ
@@ -7196,6 +7229,12 @@ class GotChocolate extends Player
                 newpl = Player.factory null, game, top, sub, Complex
                 top.transProfile newpl
                 top.transform game, newpl, true
+    midnightAlways:(game, midnightSort)->
+        # disable chocolate selection
+        # even if skill is disabled.
+        if /^selected:(.+)$/.test(@flag)
+            @setFlag "done"
+            @uncomplex game, true
 
 class MadDog extends Madman
     type:"MadDog"
@@ -7645,7 +7684,8 @@ class Ninja extends Player
 class Twin extends Player
     type:"Twin"
     beforebury:(game)->
-        # 死亡状態の双胞胎がいたら死亡
+        return false if @dead
+        # 死亡状態の双子がいたら死亡
         if game.players.some((x)-> x.dead && x.isJobType "Twin")
             @die game, "twinsuicide"
         return false
@@ -8091,7 +8131,7 @@ class Raven extends Player
             # ログ出し終わったフラグ
             @setFlag true
     deadsunrise:(game)->
-        @sunrise game
+        Raven::sunrise.call this, game
     makejobinfo:(game, result)->
         # 鴉の一覧を知ることができる
         super
@@ -8237,6 +8277,7 @@ class Helper extends Player
         if pl?
             helpedinfo={}
             pl.makejobinfo game,helpedinfo
+
             result.supporting=pl?.publicinfo()
             # This is for old client
             result.supportingJob=pl?.getJobDisp()
@@ -8244,6 +8285,7 @@ class Helper extends Player
             for value in Shared.game.jobinfos
                 if helpedinfo[value.name]?
                     result[value.name]=helpedinfo[value.name]
+            writeGlobalJobInfo game, pl, result
         null
 
 # 开始前のやつだ!!!!!!!!
@@ -8473,6 +8515,11 @@ class Complex
 
     makejobinfo:(game,result)->
         @sub?.makejobinfo? game,result
+        # make all forms optional.
+        if Array.isArray result.forms
+            for obj in result.forms
+                if obj.formType == FormType.required
+                    obj.formType = FormType.optional
         @main.makejobinfo game, result, @main.getJobDisp()
     beforebury:(game,type,deads)->
         res1 = @mcall game,@main.beforebury,game,type,deads
@@ -8566,20 +8613,21 @@ class Friend extends Complex    # 恋人
     beforebury:(game,type,deads)->
         res1 = @mcall game,@main.beforebury,game,type,deads
         res2 = @sub?.beforebury? game,type,deads
-        ato=false
-        if game.rule.friendssplit=="split"
-            # 独立
-            pl=game.getPlayer @cmplFlag
-            if pl? && pl.dead && pl.isFriend()
-                ato=true
-        else
-            # みんな
-            friends=game.players.filter (x)->x.isFriend()   #恋人たち
-            if friends.length>1 && friends.some((x)->x.dead)
-                ato=true
-        # 恋人が誰か死んだら自殺
-        if ato
-            @die game,"friendsuicide"
+        unless @dead
+            ato=false
+            if game.rule.friendssplit=="split"
+                # 独立
+                pl=game.getPlayer @cmplFlag
+                if pl? && pl.dead && pl.isFriend()
+                    ato=true
+            else
+                # みんな
+                friends=game.players.filter (x)->x.isFriend()   #恋人たち
+                if friends.length>1 && friends.some((x)->x.dead)
+                    ato=true
+            # 恋人が誰か死んだら自殺
+            if ato
+                @die game,"friendsuicide"
         return res1 || res2
     makejobinfo:(game,result)->
         @sub?.makejobinfo? game,result
@@ -8674,7 +8722,6 @@ class Muted extends Complex
         @mcall game,@main.sunset,game
         @sub?.sunset? game
         @uncomplex game
-        game.ss.publish.user @id,"refresh",{id:game.id}
     getSpeakChoiceDay:(game)->
         ["monologue"]   # 全员に喋ることができない
 # 狼的仆从
@@ -8723,7 +8770,6 @@ class Drunk extends Complex
                 comment: game.i18n.t "roles:Drunk.awake", {name: @name}
             splashlog game.id,game,log
             @uncomplex game
-            game.ss.publish.user @realid,"refresh",{id:game.id}
     makejobinfo:(game,obj)->
         Human.prototype.makejobinfo.call @,game,obj
         obj.forms = []
@@ -8947,7 +8993,7 @@ class PhantomStolen extends Complex
             pl.sunset game
     deadsunset:(game)->
         # 死んでいても解除
-        @sunset game
+        PhantomStolen::sunset.call this, game
     getJobname:-> @game.i18n.t "roles:jobname.Phantom" #霊界とかでは既に怪盗化
     getMainJobname:-> @getJobname()
     # 勝利条件関係は村人化（昼の間だけだし）
@@ -9018,7 +9064,8 @@ class WatchingFireworks extends Complex
     makejobinfo:(game,result)->
         super
         result.watchingfireworks=true
-        result.forms = []
+        if Phase.isNight(game.phase)
+            result.forms = []
 # 爆弾魔に爆弾を仕掛けられた人
 class BombTrapped extends Complex
     # cmplFlag: 护卫元ID
@@ -10861,7 +10908,12 @@ module.exports.actions=(req,res,ss)->
                 when "heaven"
                     # 霊界の発言は悪霊憑きの発言になるかも
                     if game.phase == Phase.day && !(game.silentexpires && game.silentexpires >= Date.now())
-                        possessions = game.players.filter (x)-> !x.dead && x.isJobType "SpiritPossessed"
+                        possessions = game.players.filter (x)->
+                            if x.dead || !x.isJobType("SpiritPossessed")
+                                return false
+                            # SpiritPossessed alive!
+                            # if it is muted, it cannot be target.
+                            return "day" in x.getSpeakChoiceDay game
                         if possessions.length > 0
                             # 悪魔憑き
                             r = Math.floor (Math.random()*possessions.length)
@@ -11076,6 +11128,7 @@ makelogsFor=(game,player,log)->
             otherslog=
                 mode:"half-day"
                 comment: log.comment
+                userid: log.possess_id
                 name: log.possess_name
                 time: log.time
                 size: log.size
@@ -11104,6 +11157,8 @@ makelogsFor=(game,player,log)->
         otherslog =
             mode:"day"
             comment: log.comment
+            # 偽のuserid
+            userid: log.possess_id
             name:log.possess_name
             time:log.time
             size:log.size
@@ -11148,6 +11203,15 @@ isLogTarget = (to, player)->
     else
         # otherwise to is a string.
         to in ids
+# add global player information to jobinfo
+writeGlobalJobInfo = (game, player, result={})->
+    unless Phase.isBeforeStart(game.phase)
+        result.myteam = player.getTeamDisp()
+        # 女王観戦者の情報
+        if player.getTeam() == "Human"
+            result.queens = game.players.filter((x)-> x.isJobType "QueenSpectator").map (x)->
+                x.publicinfo()
+
 #job情報を
 makejobinfo = (game,player,result={})->
     result.type= if player? then player.getTypeDisp() else null
@@ -11159,6 +11223,7 @@ makejobinfo = (game,player,result={})->
             unless actpl?
                 #あれっ
                 actpl=player
+    is_helper = player?.isJobType("Helper")
     is_gm = actpl?.isJobType("GameMaster")
     openjob_flag=game.finished || (actpl?.dead && game.heavenview) || is_gm
     result.openjob_flag = openjob_flag
@@ -11184,13 +11249,7 @@ makejobinfo = (game,player,result={})->
         if plpl?
             # 参加者として
 
-            # tell player's team.
-            unless Phase.isBeforeStart(game.phase)
-                result.myteam = plpl.getTeamDisp()
-                # 女王観戦者の情報
-                if plpl.getTeam() == "Human"
-                    result.queens = game.players.filter((x)-> x.isJobType "QueenSpectator").map (x)->
-                        x.publicinfo()
+            writeGlobalJobInfo game, plpl, result
 
             result.sleeping = playerIsJobDone game, player
             if Phase.isDay(game.phase)
@@ -11217,7 +11276,7 @@ makejobinfo = (game,player,result={})->
         result.winner=player.winner
         if player.dead
             result.speak =player.getSpeakChoiceHeaven game
-        else if is_gm
+        else if is_gm || is_helper
             result.speak =player.getSpeakChoice game
         else if Phase.isNight(game.phase) || game.phase == Phase.rolerequesting
             result.speak =player.getSpeakChoice game

@@ -9,7 +9,9 @@ i18next.use(xhrBackend).init({
     parse: (data: any) => data,
     ajax,
   },
-  escapeValue: false,
+  interpolation: {
+    escapeValue: false,
+  },
   fallbackLng: EXTERNAL_SYSTEM_LANGUAGE,
   ns: [
     'common',
@@ -18,8 +20,9 @@ i18next.use(xhrBackend).init({
     'game_client_form',
     'rules',
     'casting',
+    'server_connection_client',
   ],
-} as any);
+});
 
 /**
  * Reexport type of i18n.
@@ -114,5 +117,7 @@ function loadLanguageBundle(
   lng: string,
   ns: string,
 ): Promise<{ default: unknown }> {
-  return import(`../../../language/${lng}/${ns}.yaml`);
+  return import(/*
+    webpackChunkName: "language-data-[request]"
+  */ `../../../language/${lng}/${ns}.yaml`);
 }

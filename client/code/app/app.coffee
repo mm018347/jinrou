@@ -3,10 +3,38 @@
 # Bind to socket events
 app=require '/app'
 util=require '/util'
+
+# placement of server connection info.
+serverConnectionPlace = null
+# 少し待って初期化
+setTimeout (()->
+    Promise.all([
+        getI18n()
+        JinrouFront.loadServerConnection()
+    ]).then(([i18n, sc])->
+        serverConnectionPlace = sc.place {
+            i18n: i18n,
+            node: document.getElementById 'serverconnection'
+            connected: navigator.onLine ? true
+        }
+    )), 100
 ss.server.on 'disconnect', ->
-    util.message "服务器","连接已断开。"
+    if serverConnectionPlace?
+        serverConnectionPlace.store.setConnection false
+    else
+        # fallback to legacy way of notifying user
+        util.message "服务器","连接已断开。"
 ss.server.on 'reconnect', ->
-    util.message "服务器","连接已恢复，请刷新页面。"
+    if serverConnectionPlace?
+        serverConnectionPlace.store.setConnection true
+        # activate the registed reconnect event.
+        cdom = $("#content").get 0
+        reconnect = jQuery.data cdom, "reconnect"
+        if reconnect?
+            reconnect()
+    else
+        # fallback to legacy way of notifying user
+        util.message "服务器","连接已恢复，请刷新页面。"
 libban = require '/ban'
 
 
@@ -96,12 +124,15 @@ exports.init = ->
 exports.page=page=(templatename,params=null,pageobj,startparam)->
     cdom=$("#content").get(0)
     jQuery.data(cdom,"end")?()
-    jQuery.removeData cdom,"end"
+    jQuery.removeData cdom, "end"
+    jQuery.removeData cdom, "reconnect"
     $("#content").empty()
     $(JT["#{templatename}"](params)).appendTo("#content")
     if pageobj
         pageobj.start(startparam)
         jQuery.data cdom, "end", pageobj.end
+        if pageobj.reconnect?
+            jQuery.data cdom, "reconnect", pageobj.reconnect
 # マニュアルを表示
 manualpage=(pagename)->
     resp=(tmp)->
@@ -361,72 +392,6 @@ exports.processLoginResult = processLoginResult = (uid, result, cb)->
 exports.userid=->my_userid
 exports.setUserid=(id)->my_userid=id
 
-# カラー设定を読み込む
-exports.getCurrentColorProfile=getCurrentColorProfile=->
-    p=localStorage.colorProfile || "{}"
-    obj=null
-    try
-        obj=JSON.parse p
-
-    catch e
-        # default setting
-        obj={}
-    unless obj.day?
-        obj.day=
-            bg:"#ffd953"
-            color:"#000000"
-    unless obj.night?
-        obj.night=
-            bg:"#000044"
-            color:"#ffffff"
-    unless obj.heaven?
-        obj.heaven=
-            bg:"#fffff0"
-            color:"#000000"
-    return obj
-# 保存する
-exports.setCurrentColorProfile=(cp)->
-    localStorage.colorProfile=JSON.stringify cp
-# カラー设定反映
-exports.useColorProfile=useColorProfile=(cp)->
-    console.warn "deprecated"
-    ###
-    st=$("#profilesheet").get 0
-    if st?
-        sheet=st.sheet
-        # 设定されているものを利用
-        while sheet.cssRules.length>0
-            sheet.deleteRule 0
-
-    else
-        # 新規に作る
-        st=$("<style id='profilesheet'>").appendTo(document.head).get 0
-        sheet=st.sheet
-    # 规则を定義
-    sheet.insertRule """
-body.day, #logs .day {
-    background-color: #{cp.day.bg};
-    color: #{cp.day.color};
-}""",0
-    sheet.insertRule """
-body.night, #logs .werewolf, #logs .monologue {
-    background-color: #{cp.night.bg};
-    color: #{cp.night.color};
-}""",1
-    sheet.insertRule """
-body.night:not(.heaven) a, #logs .werewolf a, #logs .monologue a{
-    color: #{cp.night.color};
-}""",2
-    sheet.insertRule """
-body.heaven, #logs .heaven, #logs .prepare {
-    background-color: #{cp.heaven.bg};
-    color: #{cp.heaven.color};
-}""",3
-    # テーマを更新
-    JinrouFront.themeStore.update cp
-    ###
-    return
-
 # Returns a Promise which resolves to the application config.
 exports.getApplicationConfig = getApplicationConfig = ()->
     if application_config?
@@ -436,7 +401,7 @@ exports.getApplicationConfig = getApplicationConfig = ()->
             application_config_callbacks.push(resolve))
 
 # Returns a Promise which resolves to an i18n instance with appropreate language setting.
-exports.getI18n = ()->
+exports.getI18n = getI18n = ()->
     Promise.all([
         getApplicationConfig()
         JinrouFront.loadI18n()
