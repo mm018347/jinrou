@@ -93,6 +93,7 @@ messages:
   Idol: "请选择一个人使其成为你的粉丝"
   XianFox: "请选择透视的对象"
   SnowLover: "请选择你的恋人"
+  DecoyWolf: "请选择你要成为诱饵的对象"
   GameMaster: "GM命令"
 
 # Texts for GameMaster form.

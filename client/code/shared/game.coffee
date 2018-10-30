@@ -55,21 +55,24 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 # 人狼ジャッジメント
 "BlackCat",
 # オリジナル
-"SantaClaus","Pyrotechnist","Patissiere","Shishimai","Idol","LurkingMad"
+"SantaClaus","Pyrotechnist","Patissiere","Shishimai","Idol","LurkingMad",
+"DecoyWolf"
 ]
-# ここには入らない役職
-# Light, Neet, MinionSelector,QuantumPlayer, HolyProtected
+# 隠されていて自分で入れることができない役職
+exports.hiddenJobs = [
+    "Light", "Neet", "MinionSelector", "QuantumPlayer", "HolyProtected"
+]
 
 # 人外
-exports.nonhumans=["Werewolf","Fox","BigWolf","TinyFox","WolfDiviner","MadWolf","Devil","Vampire","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf","EyesWolf","TongueWolf","XianFox"]
+exports.nonhumans=["Werewolf","Fox","BigWolf","TinyFox","WolfDiviner","MadWolf","Devil","Vampire","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf","EyesWolf","TongueWolf","XianFox","DecoyWolf"]
 
 # 黒が出る人
-exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub","Dog","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","MadDog","CraftyWolf","Cosplayer","EyesWolf","TongueWolf"]
+exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub","Dog","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","MadDog","CraftyWolf","Cosplayer","EyesWolf","TongueWolf","DecoyWolf"]
 
 # チームたち
 exports.teams=teams=
     Human:["Human","Diviner","Psychic","Guard","Couple","Poisoner","ToughGuy","Noble","Slave","Magician","Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Light","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Cat","Witch","Oldman","OccultMania","Dog","Dictator","SeersMama","Trapper","RedHood","Counselor","Miko","HolyMarked","WanderingGuard","TroubleMaker","FrankensteinsMonster","BloodyMary","King","SantaClaus","Phantom","DrawGirl","Pyrotechnist","Baker","SpiritPossessed","GotChocolate","Forensic","Cosplayer","TinyGhost","Ninja","Twin","Hunter","Emma","Idol"]
-    Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist","CraftyWolf","Pumpkin","MadScientist","MadHunter","MadCouple","EyesWolf","TongueWolf","BlackCat","LurkingMad"]
+    Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist","CraftyWolf","Pumpkin","MadScientist","MadHunter","MadCouple","EyesWolf","TongueWolf","BlackCat","LurkingMad","DecoyWolf"]
     Fox:["Fox","TinyFox","Immoral","Blasphemy","XianFox"]
     Devil:["Devil"]
     Friend:["Cupid","Lover","BadLady","Patissiere","SnowLover"]
@@ -82,12 +85,19 @@ exports.teams=teams=
 # カテゴリ分け(手调黑暗火锅でつかうぞ!)
 exports.categories=
     Human: teams.Human.filter((x)-> x != "GotChocolate")
-    Werewolf:["Werewolf","BigWolf","WolfDiviner","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf","EyesWolf","TongueWolf"]
+    Werewolf:["Werewolf","BigWolf","WolfDiviner","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf","EyesWolf","TongueWolf","DecoyWolf"]
     Fox:["Fox","TinyFox","XianFox"]
     Madman:["Madman","Fanatic","Spy","Spy2","Sorcerer","WhisperingMad","WolfBoy","ObstructiveMad","PsychoKiller","Bomber","Ushinotokimairi","MadDog","Hypnotist","Pumpkin","MadScientist","MadHunter","MadCouple","BlackCat","LurkingMad"]
     Immoral:["Immoral","Blasphemy"]
     Switching:["Stalker","OccultMania","Copier","Cursed","Doppleganger","BloodyMary","Phantom","Thief"]
     Others:["Devil","Cupid","Bat","CultLeader","Vampire","Tanner","Lover","Hoodlum","BadLady","Patissiere","Shishimai","SnowLover","Raven"]
+
+# 配列版のカテゴリリスト
+exports.categoryList = Object.keys(exports.categories)
+    .map (key)-> {
+        id: key
+        roles: exports.categories[key]
+    }
 
 # 役職ルールたち 役職人数一覧を返す（Humanは向こうで補完）
 normal1=(number)->
@@ -823,6 +833,8 @@ exports.jobinfo=
             color:"#38004c"
         LurkingMad:
             color:"#937930"
+        DecoyWolf:
+            color:"#cc8f2e"
 
     Fox:
         color:"#934293"
@@ -896,7 +908,9 @@ exports.new_rules=[
         type: 'group'
         label:
             id: 'yaminabe_option'
-            visible: (rule)-> isYaminabe rule
+            visible: (rule)->
+                # 闇鍋モードのみ
+                (rule.casting ? rule.jobrule) in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
         items: [
             {
                 type: 'item'
@@ -925,7 +939,7 @@ exports.new_rules=[
                 if !isEditor && rule.rules.get('yaminabe_hidejobs') != 'team'
                     # ルール表示時で配役がチームのみの設定でない場合は隠す
                     return false
-                return true if isYaminabe(rule)
+                return true if isAllJobsMode(rule)
                 if isEditor && rule.rules.get('yaminabe_hidejobs') != 'team'
                     return false
                 for job in ["Vampire","Devil","CultLeader"]
@@ -1214,7 +1228,7 @@ exports.new_rules=[
         label:
             id: "werewolf"
             visible: (rule)->
-                return true if isYaminabe rule
+                return true if isAllJobsMode rule
                 for job in exports.categories.Werewolf
                     if rule.jobNumbers[job]>0
                         return true
@@ -1243,7 +1257,7 @@ exports.new_rules=[
         label:
             id: 'diviner'
             visible:(rule)->
-                return true if isYaminabe rule
+                return true if isAllJobsMode rule
                 for job in ["Diviner","ApprenticeSeer","WolfDiviner","TinyFox"]
                     if rule.jobNumbers[job]>0
                         return true
@@ -1279,7 +1293,7 @@ exports.new_rules=[
         label:
             id: 'psychic'
             visible:(rule)->
-                return true if isYaminabe rule
+                return true if isAllJobsMode rule
                 return rule.jobNumbers.Psychic>0
         items:[
             {
@@ -1302,7 +1316,7 @@ exports.new_rules=[
             id: 'couple'
             visible:(rule)->
                 console.log 'rule!', rule
-                return true if isYaminabe rule
+                return true if isAllJobsMode rule
                 return rule.jobNumbers.Couple>0 || rule.jobNumbers.MadCouple>0
         items:[
             {
@@ -1320,7 +1334,7 @@ exports.new_rules=[
         label:
             id: 'guard'
             visible:(rule)->
-                return true if isYaminabe rule
+                return true if isAllJobsMode rule
                 for job in ["Guard","Trapper","WanderingGuard","Cosplayer"]
                     if rule.jobNumbers[job]>0
                         return true
@@ -1359,7 +1373,7 @@ exports.new_rules=[
         label:
             id: "fox"
             visible:(rule)->
-                return true if isYaminabe rule
+                return true if isAllJobsMode rule
                 return rule.jobNumbers.Fox>0
         items:[
             {
@@ -1377,7 +1391,7 @@ exports.new_rules=[
         label:
             id: 'hunter'
             visible:(rule)->
-                return true if isYaminabe rule
+                return true if isAllJobsMode rule
                 return rule.jobNumbers.Hunter > 0 || rule.jobNumbers.MadHunter > 0
         items:[
             {
@@ -1399,7 +1413,7 @@ exports.new_rules=[
         label:
             id: 'poison'
             visible:(rule)->
-                return true if isYaminabe rule
+                return true if isAllJobsMode rule
                 return rule.jobNumbers.Poisoner>0 || rule.jobNumbers.Cat>0
         items:[
             {
@@ -1421,7 +1435,7 @@ exports.new_rules=[
         label:
             id: 'lover'
             visible:(rule)->
-                return true if isYaminabe rule
+                return true if isAllJobsMode rule
                 for job in ["Cupid","Lover","BadLady","Patissiere"]
                     if rule.jobNumbers[job]>0
                         return true
@@ -1551,8 +1565,8 @@ exports.jobinfos=[
     }
 ]
 
-# 判定
-isYaminabe=(rule)->
+# 全ての役職が現れる可能性があるモードかどうか
+isAllJobsMode=(rule)->
    if (rule.casting ? rule.jobrule) in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
        return true
    if rule.rules.get("yaminabe_hidejobs") != ""
