@@ -5,6 +5,8 @@ util=require '/util'
 name_length_max=20
 
 exports.start=(user)->
+    dialog = JinrouFront.loadDialog()
+
     seticon=(url)->
         util.setHTTPSicon $("#myicon").get(0), url
         $("#changeprofile").get(0).elements["icon"].value=url
@@ -30,25 +32,46 @@ exports.start=(user)->
         je.preventDefault()
         q=Index.util.formQuery je.target
         q.userid=$("p.userid").get(0).textContent
-        Index.util.prompt "配置","请输入密码",{type:"password"},(result)->
-            if result
-                q.password=result
-                pf = ()=>
-                    ss.rpc "user.changeProfile", q,(result)->
-                        if result.error?
-                            Index.util.message "错误",result.error
-                        else
-                            app.page "user-profile",result,Index.user.profile,result
-                if q.mail?
-                    ss.rpc "user.sendConfirmMail", q,(result)->
-                        if result.error?
-                            Index.util.message "错误",result.error
-                        else
-                            pf()
-                        if result.info?
-                            Index.util.message "通知",result.info
-                else
-                    pf()
+
+        dialog.then (dialog)->
+            dialog.showPromptDialog({
+                modal: true
+                password: true
+                autocomplete: "current-password"
+                title: "配置"
+                message: "请输入密码"
+                ok: "OK"
+                cancel: "取消"
+            }).then (result)->
+                if result
+                    q.password=result
+                    pf = ()=>
+                        ss.rpc "user.changeProfile", q,(result)->
+                            if result.error?
+                                dialog.showErrorDialog {
+                                    modal: true
+                                    message: String result.error
+                                }
+                            else
+                                app.page "user-profile",result,Index.user.profile,result
+                    if q.mail?
+                        ss.rpc "user.sendConfirmMail", q,(result)->
+                            if result.error?
+                                dialog.showErrorDialog {
+                                    modal: true
+                                    message: String result.error
+                                }
+                            else
+                                pf()
+                            if result.info?
+                                dialog.showMessage {
+                                    modal: true
+                                    title: "通知"
+                                    message: result.info
+                                    ok: "OK"
+                                }
+                    else
+                        pf()
 
     $("#mailconfirmsecuritybutton").click (je)->
         je.preventDefault()
@@ -56,9 +79,19 @@ exports.start=(user)->
             mailconfirmsecurity: je.target.form.elements["mailconfirmsecurity"].checked
         }, (result)->
             if result?.error?
-                Index.util.message "错误",result.error
+                dialog.then (dialog)->
+                    dialog.showErrorDialog {
+                        modal: true
+                        message: String result.error
+                    }
             else
-                Index.util.message "通知", result.info
+                dialog.then (dialog)->
+                    dialog.showMessageDialog {
+                        modal: true
+                        title: "通知"
+                        message: result.info
+                        ok: "OK"
+                    }
                 app.page "user-profile", result, Index.user.profile, result
 
     $("#changepasswordbutton").click (je)->
@@ -67,15 +100,28 @@ exports.start=(user)->
             je.preventDefault()
             ss.rpc "user.changePassword", Index.util.formQuery(je.target),(result)->
                 if result?.error?
-                    Index.util.message "错误",result.error
+                    dialog.then (dialog)->
+                        dialog.showErrorDialog {
+                            modal: true
+                            message: String result.error
+                        }
                 else
-                    Index.util.message "通知", "密码变更成功。"
+                    dialog.then (dialog)->
+                        dialog.showMessageDialog {
+                            modal: true
+                            title: "通知"
+                            message: "密码变更成功。"
+                            ok: "OK"
+                        }
                     $("#changepassword").get(0).hidden=true
                     app.page "user-profile",result,Index.user.profile,result
 
     $("#changeprofile").get(0).elements["twittericonbutton"].addEventListener "click",((e)->
-        Index.util.iconSelectWindow $("#myicon").attr("src"),(url)->
-            seticon url
+        dialog.then (dialog)->
+            dialog.showIconSelectDialog({
+                modal: true
+            }).then (url)->
+                seticon (url ? "")
     ),false
 
     $("#changeprofile").get(0).elements["colorsettingbutton"].addEventListener "click",(e)->
@@ -90,40 +136,20 @@ exports.start=(user)->
     else
         $("#prizenumber").text user.prizenames.length
         prizesdiv=$("#prizes")
-        phs=["あいうえお","かきくけこがぎぐげご","さしすせそざじずぜぞ","たちつてとだぢづでど","なにぬねの","はひふへほばびぶべぼぱぴぷぺぽ","まみむめも","やゆよ","らりるれろ","わをん"]
-        prizedictionary={}  # 称号のidと名字対応
+        phs=[]
+        prizedictionary={}  # 称号のidと名前対応
+        # 姑且按称号id排序，考虑 https://hotoo.github.io/pinyin/ 方案，按拼音排序
         user.prizenames.sort (a,b)->
-            if a.phonetic>b.phonetic
-                1
-            else
-                -1
-        # 同じグループは横ならびで
-        pindex=-1
-        ull=null
+            return a.id.localeCompare(b.id)
+        ull=$(document.createElement "ul")
+        prizesdiv.append ull
         user.prizenames.forEach (obj)->
-            # どのグループに属するか
-            thisgarr=phs[pindex] ? ""
-            if !ull || thisgarr.indexOf(obj.phonetic.charAt 0)<0
-                # これには属していない
-                if $("#prizes ul").length >0
-                    ull=$("#prizes ul")
-                else
-                    ull=$(document.createElement "ul")
-                    prizesdiv.append ull
-                # 属す奴を探す
-                pindex=-1
-                for ph,i in phs
-                    if ph.indexOf(obj.phonetic.charAt 0)>=0
-                        # これに属している
-                        pindex=i
-                        break
-
             li=document.createElement "li"
             li.textContent=obj.name
             li.dataset.id=obj.id
             li.classList.add "prizetip"
             li.draggable=true
-            ull.append li
+            $("#prizes ul").append li
             prizedictionary[obj.id]=obj.name
         ull=$("#conjunctions")
         for te in Shared.prize.conjunctions
@@ -199,31 +225,45 @@ exports.start=(user)->
         $("#prizearea").submit (je)->
             je.preventDefault()
             que=util.formQuery je.target
-            util.prompt "配置","请输入密码",{type:"password"},(result)->
-                if result
-                    query=
-                        password:result
-                    prize=[]
-                    $("#prizeedit li").each ->
-                        if @classList.contains "prizetip"
-                            # prizeだ
-                            prize.push {
-                                type:"prize"
-                                value:@dataset.id ? null
-                            }
-                        else
-                            prize.push {
-                                type:"conjunction"
-                                value:@textContent
-                            }
-                        null
-                    query.prize=prize
+            dialog.then (dialog)->
+                dialog.showPromptDialog({
+                    modal: true
+                    password: true
+                    autocomplete: "current-password"
+                    title: "配置"
+                    message: "请输入密码"
+                    ok: "OK"
+                    cancel: "取消"
+                }).then (result)->
+                    if result
+                        query=
+                            password:result
+                        prize=[]
+                        $("#prizeedit li").each ->
+                            if @classList.contains "prizetip"
+                                # prizeだ
+                                prize.push {
+                                    type:"prize"
+                                    value:@dataset.id ? null
+                                }
+                            else
+                                prize.push {
+                                    type:"conjunction"
+                                    value:@textContent
+                                }
+                            null
+                        query.prize=prize
 
-                    ss.rpc "user.usePrize", query,(result)->
-                        if result?.error?
-                            util.message "错误",result.error
+                        ss.rpc "user.usePrize", query,(result)->
+                            if result?.error?
+                                dialog.showErrorDialog {
+                                    modal: true
+                                    message: String result.error
+                                }
 
-    Index.game.rooms.start()    # ルーム一覧を表示してもらう
+    Index.game.rooms.start({
+        noLinks: true
+    })    # ルーム一覧を表示してもらう
     # お知らせ一覧を取得する
     ss.rpc "user.getNews",(docs)->
         if docs.error?
@@ -245,3 +285,4 @@ exports.start=(user)->
             $("#newNewsNotice").remove()
 
 exports.end=->
+    Index.game.rooms.end()

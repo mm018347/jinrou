@@ -95,11 +95,14 @@ speak:
   say: "发言"
   # size of comment.
   size:
+    # description of size selection.
+    description: "发言字体大小"
     small: "小字号"
     normal: "普通"
     big: "大字号"
   # kind of speech.
   kind:
+    description: "发言种类"
     # speech before beginning of game.
     prepare: "向全员发言"
     # say to everyone.
@@ -147,6 +150,8 @@ speak:
   rule: "规则"
   # log visibility.
   logVisibility:
+    # description of log visibility of control.
+    description: "记录显示"
     # show all.
     all: "全部"
     # show today's log.
@@ -157,6 +162,13 @@ speak:
     oneday: "第{{day}}天"
   # label of refuse revival button.
   refuseRevival: "拒绝复活"
+
+# navigation shown at the bottom of view on phone.
+navigation:
+  players: "参加者一览"
+  skill: "能力・投票"
+  speak: "发言"
+
 # Game view: refuse revival.
 refuseRevival:
   # name of the refuse revival feature.

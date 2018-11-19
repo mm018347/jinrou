@@ -3,7 +3,7 @@ Are you a werewolf?
 
 [https://www.werewolf.com.cn/ 月下人狼服务器]运行中!
 == version ==
-1.13.16
+1.14.1
 
 == requirements ==
 * Redis
@@ -40,6 +40,17 @@ Building procedures are cpu- and memory- expensive. If you do not want to build 
 For development, use `npm run watch` in the `front/` directory to keey updating the front-end assets.
 
 In production mode, contents of `client/static/front-assets/` can be served with `Cache-Control: immutable`. This will increace the effect of caches.
+
+== using Docker ==
+Optionally, one can use Docker to run the jinrou service.
+
+The `Dockerfile` file and `docker` directory are only for this purpose.
+
+=== docker image ===
+To build the docker image for jinrou, run `docker build .` in the project directory. `Dockerfile` defines the image.
+
+=== docker-compose ===
+To run jinrou in an isolated environment using docker-compose, enther `docker` directory and run `docker-compose up --build`. This starts the jinrou docker image along with mongodb and redis Docker containers. The `docker/config.docker` directory contains a config file for running jinrou in this environment.
 
 == jobs ==
 全100种以上

@@ -76,3 +76,28 @@ color:
     werewolf: "人狼的会话"
     will: "遗言"
 
+# phone-ui.
+phone:
+  # title of phone-ui tab.
+  title: "手机浏览器的设定"
+  # ui for smartphone.
+  ui:
+    title: "使用手机浏览器模式显示"
+    yes: "使用"
+    no: "不使用"
+  # font size for smartphones.
+  fontSize:
+    title: "文字的大小"
+    description: "设置游戏画面中的字号大小。"
+    large: "大"
+    normal: "中"
+    small: "小"
+  # position of speak form
+  speakFormPosition:
+    title: "发言框的位置"
+    description: "设置游戏画面中发言框的位置。"
+    normal: "随页面滚动"
+    fixed: "固定于下方"
+
+
+

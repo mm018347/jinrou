@@ -12,7 +12,12 @@ const WrapperInner: React.StatelessComponent<{
    */
   team: string | undefined;
   theme: Theme;
-}> = ({ children, t, team, theme }) => {
+  /**
+   * Whether slim mode is applied.
+   */
+  slim?: boolean;
+  speakFocus: boolean;
+}> = ({ children, t, team, slim = false, speakFocus, theme }) => {
   // get the color for this team.
   const teamColor = Color(!team ? '#cccccc' : theme.teamColors[team]);
   const teamTextColor = teamColor.isDark()
@@ -20,7 +25,7 @@ const WrapperInner: React.StatelessComponent<{
     : Color('#000000');
   const backColorBase = teamColor.mix(Color('#ffffff'), 0.9).rgb();
   // if team is undefined, fade to mix to background color.
-  const backColor = team == null ? backColorBase.fade(0.4) : backColorBase;
+  const backColor = team == null ? backColorBase.fade(0.3) : backColorBase;
   const borderColor = teamColor.mix(Color('#000000'), 0.4).rgb();
 
   const teamString = team
@@ -29,13 +34,22 @@ const WrapperInner: React.StatelessComponent<{
       })
     : t('game_client:jobinfo.team.none_short');
   return (
-    <WrapperElement borderColor={borderColor} backColor={backColor}>
+    <WrapperElement
+      borderColor={borderColor}
+      backColor={backColor}
+      almostHidden={speakFocus && !slim}
+    >
       {team != null ? (
-        <WrapperHeader teamColor={teamColor} textColor={teamTextColor}>
-          {teamString}
+        <WrapperHeader
+          slim={slim}
+          teamColor={teamColor}
+          textColor={teamTextColor}
+        >
+          {/* in slim mode, team string is hidden. */}
+          {slim ? children : teamString}
         </WrapperHeader>
       ) : null}
-      <Content>{children}</Content>
+      {team == null || !slim ? <Content slim={slim}>{children}</Content> : null}
     </WrapperElement>
   );
 };

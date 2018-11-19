@@ -199,6 +199,8 @@ phase:
   night: "夜"
   additional: "犹豫"
   skill: "正在瞄准"
+  # n seconds rule is active
+  silent: "禁止发言"
 
 # Reason of death
 found:

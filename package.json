@@ -1,7 +1,7 @@
 {
   "name": "werewolf",
   "description": "You are a werewolf.",
-  "version": "1.13.16",
+  "version": "1.14.1",
   "author": "uhyo <uhyohyo@uhyohyohyo.sakura.ne.jp>",
   "private": false,
   "engines": {
@@ -38,7 +38,7 @@
     "coffee-script": "^1.9.3",
     "husky": "^0.14.3",
     "lint-staged": "^7.3.0",
-    "prettier": "^1.11.1",
+    "prettier": "^1.14.3",
     "webpack-bundle-analyzer": "^2.13.1"
   }
 }

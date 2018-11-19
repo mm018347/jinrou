@@ -1,10 +1,11 @@
 !!! 5
-html(xmlns:wb="http://open.weibo.com/wb")
+html
   head
     meta(charset="utf-8")
-    title 月下人狼
-    meta(name="application-name",content="月下人狼")
-    meta(name="description",content="一个实时的高自由度的人狼服务器。有100种以上的职业可供使用。")
+    title= Config.name
+    meta#viewport-meta(name="viewport",content="width=device-width,initial-scale=1")
+    meta(name="application-name",content=Config.name)
+    meta(name="description",content=i18n.t('description'))
     link(rel="icon",sizes="16x16",href="/favicon.ico")
     link(rel="icon",sizes="144x144",href="/icons/icon-144x144.png")
     //- script(src="https://use.fontawesome.com/e0e7afd227.js",async)
@@ -30,30 +31,35 @@ html(xmlns:wb="http://open.weibo.com/wb")
   body
     header
       h1
-        a(href="/") 月下人狼
-      br
+        a(href="/")= Config.name
       #userinfo
         span#username
-      nav
-        ul
-          li(id="login")
-            a(href="/") 登陆
-          li
-            a(href="/my") 个人页面
-          li
-            a(href="/lobby") 休息室
-          li
-            a(href="/rooms") 房间一览
-          //li
-            a(href="/logs") 历史检索
-          li
-            a(href="/manual") 参考手册
-          li
-            a(href="/backdoor/home") 返回主页
-          li
-            a(href="/manual/about") 关于月下人狼
-      #toolbar
-
+      #menu
+        .menu-back
+        nav
+          ul
+            li(id="login")
+              a(href="/") 登陆
+            li
+              a(href="/my")= i18n.t('mypage')
+            li
+              a(href="/lobby")= i18n.t('lobby')
+            li
+              a(href="/rooms")= i18n.t('rooms')
+            //li
+              a(href="/logs") 历史检索
+            li
+              a(href="/manual")= i18n.t('manual')
+            li
+              a(href="/backdoor/home")= i18n.t('home')
+            li
+              a(href="/manual/about")= i18n.t('about')
+            li
+              a(href="/my/settings")= i18n.t('settings')
+        #toolbar
+      #menu-open-icon
+        button(aria-label=i18n.t('openMenuLabel'))
+          i.fas.fa-bars.fa-2x
     script(type="text/javascript")
       if((("unknown"===typeof localStorage)||("undefined"===typeof localStorage)||(!document.body.classList)||(!document.body.dataset))&&(navigator.userAgent.indexOf("Googlebot")<0)){
         //要件を満たさない
@@ -61,3 +67,5 @@ html(xmlns:wb="http://open.weibo.com/wb")
       }
     #content
     #serverconnection
+    #dialogs-overlay
+    #menu-overlay

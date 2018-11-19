@@ -1,13 +1,14 @@
 import * as React from 'react';
 import styled from '../../util/styled';
 import { Transition } from 'react-transition-group';
+import * as Swipeable from 'react-swipeable';
 
 import { ThemeProvider, withProps } from '../../util/styled';
 import { i18n } from 'i18next';
 import { observer } from 'mobx-react';
 
 import { bind } from '../../util/bind';
-import { themeStore } from '../../theme';
+import { themeStore, UserTheme } from '../../theme';
 import { I18nProvider, I18n } from '../../i18n';
 
 import {
@@ -27,6 +28,18 @@ import { Players } from './players';
 import { RoomControls } from './room-controls';
 import { lightA } from '../../styles/a';
 import { GlobalStyle } from './global-style';
+import { phone, notPhone } from '../../common/media';
+import { computeGlobalStyle } from '../../theme/global-style';
+import { styleModeOf } from './logic/style-mode';
+import { AppStyling } from '../../styles/phone';
+import {
+  speakFormZIndex,
+  ruleZIndex,
+  jobinfoZIndex,
+} from '../../common/z-index';
+import memoizeOne from 'memoize-one';
+
+type TeamColors = Record<string, string | undefined>;
 
 interface IPropGame {
   /**
@@ -52,7 +65,7 @@ interface IPropGame {
   /**
    * Color of each team.
    */
-  teamColors: Record<string, string | undefined>;
+  teamColors: TeamColors;
   /**
    * Handle a speak event.
    */
@@ -77,6 +90,19 @@ interface IPropGame {
 
 @observer
 export class Game extends React.Component<IPropGame, {}> {
+  private ruleElement = React.createRef<HTMLElement>();
+  private playersElement = React.createRef<HTMLElement>();
+  private jobinfoElement = React.createRef<HTMLElement>();
+  private jobinfoMarkerElement = React.createRef<HTMLDivElement>();
+  private speakElement = React.createRef<HTMLElement>();
+  private speakFormRef = React.createRef<SpeakForm>();
+  /**
+   * memoized function to make theme object from user theme and colors.
+   */
+  private makeTheme = memoizeOne((user: UserTheme, teamColors: TeamColors) => ({
+    user,
+    teamColors,
+  }));
   public render() {
     const {
       i18n,
@@ -100,65 +126,72 @@ export class Game extends React.Component<IPropGame, {}> {
       players,
       roomControls,
       logPickup,
+      speakFocus,
     } = store;
 
-    const theme = {
-      user: themeStore.themeObject,
-      teamColors,
-    };
-
-    const styleMode = gameInfo.finished
-      ? null
-      : gameInfo.status === 'waiting'
-        ? 'day'
-        : roleInfo != null && roleInfo.dead
-          ? 'heaven'
-          : gameInfo.night
-            ? 'night'
-            : 'day';
+    const styleMode = styleModeOf(roleInfo, gameInfo);
+    const theme = this.makeTheme(themeStore.themeObject, teamColors);
 
     return (
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={theme} mode={styleMode}>
         <I18nProvider i18n={i18n}>
-          <div>
+          <AppWrapper>
             {/* List of players. */}
-            <Players players={players} onFilter={this.handleLogFilter} />
+            <RoomHeaderPart innerRef={this.playersElement}>
+              <Players players={players} onFilter={this.handleLogFilter} />
+            </RoomHeaderPart>
             {/* Room control buttons. */}
             {roomControls != null ? (
               <I18n>
                 {t => (
-                  <RoomControls
-                    roomControls={roomControls}
-                    t={t}
-                    roomid={roomid}
-                    players={players}
-                    handlers={roomControlHandlers}
-                  />
+                  <RoomPreludePart>
+                    <RoomControls
+                      roomControls={roomControls}
+                      t={t}
+                      roomid={roomid}
+                      players={players}
+                      handlers={roomControlHandlers}
+                    />
+                  </RoomPreludePart>
                 )}
               </I18n>
             ) : null}
+            {/* marker to jump to jobinfo. */}
+            <div ref={this.jobinfoMarkerElement} />
             {/* Information of your role. */}
-            {roleInfo != null ? <JobInfo {...roleInfo} /> : null}
+            <JobInfoPart innerRef={this.jobinfoElement}>
+              <JobInfo
+                roleInfo={roleInfo}
+                timer={timer}
+                players={players}
+                speakFocus={speakFocus}
+              />
+            </JobInfoPart>
             {/* Open forms. */}
             {gameInfo.status === 'playing' && roleInfo != null ? (
-              <JobForms forms={roleInfo.forms} onSubmit={onJobQuery} />
+              <RoomHeaderPart>
+                <JobForms forms={roleInfo.forms} onSubmit={onJobQuery} />
+              </RoomHeaderPart>
             ) : null}
             {/* Form for speak and other utilities. */}
-            <SpeakForm
-              gameInfo={gameInfo}
-              roleInfo={roleInfo}
-              players={players}
-              logVisibility={logVisibility}
-              rule={rule != null}
-              timer={timer}
-              onUpdate={this.handleSpeakUpdate}
-              onUpdateLogVisibility={this.handleLogVisibilityUpdate}
-              onSpeak={this.handleSpeak}
-              onRefuseRevival={this.handleRefuseRevival}
-              onRuleOpen={this.handleRuleOpen}
-              onWillChange={onWillChange}
-              {...speakState}
-            />
+            <SpeakFormPart innerRef={this.speakElement}>
+              <SpeakForm
+                ref={this.speakFormRef}
+                gameInfo={gameInfo}
+                roleInfo={roleInfo}
+                players={players}
+                logVisibility={logVisibility}
+                rule={rule != null}
+                onUpdate={this.handleSpeakUpdate}
+                onUpdateLogVisibility={this.handleLogVisibilityUpdate}
+                onSpeak={this.handleSpeak}
+                onRefuseRevival={this.handleRefuseRevival}
+                onRuleOpen={this.handleRuleOpen}
+                onWillChange={onWillChange}
+                onFocus={this.handleSpeakFocus}
+                {...speakState}
+              />
+            </SpeakFormPart>
             {/* Main game screen. */}
             <MainWrapper>
               {/* Rule panel if open. */}
@@ -169,36 +202,54 @@ export class Game extends React.Component<IPropGame, {}> {
                     state === 'exited' ||
                     state === 'unmounted';
                   return (
-                    <RuleWrapper closed={closed}>
-                      {rule != null ? (
-                        <RuleStickyWrapper closed={closed}>
-                          <RuleInnerWrapper>
-                            <ShowRule
-                              rule={rule}
-                              categories={categories}
-                              ruleDefs={ruleDefs}
-                            />
-                          </RuleInnerWrapper>
-                        </RuleStickyWrapper>
-                      ) : null}
-                    </RuleWrapper>
+                    <>
+                      <RuleWrapper closed={closed}>
+                        {rule != null ? (
+                          <RuleStickyWrapper closed={closed}>
+                            <RuleInnerWrapper innerRef={this.ruleElement}>
+                              <Swipeable
+                                onSwipingLeft={this.handleRuleSwipeToLeft}
+                                onSwipingRight={this.handleRuleSwipeToRight}
+                              >
+                                <ShowRule
+                                  rule={rule}
+                                  categories={categories}
+                                  ruleDefs={ruleDefs}
+                                />
+                              </Swipeable>
+                            </RuleInnerWrapper>
+                          </RuleStickyWrapper>
+                        ) : null}
+                      </RuleWrapper>
+                      {/* Logs. */}
+                      <LogsWrapper ruleOpen={!closed}>
+                        <Logs
+                          logs={store.logs}
+                          visibility={store.logVisibility}
+                          icons={store.icons}
+                          rule={store.rule}
+                          logPickup={logPickup}
+                          onResetLogPickup={this.handleResetLogPickup}
+                        />
+                      </LogsWrapper>
+                    </>
                   );
                 }}
               </Transition>
-              {/* Logs. */}
-              <LogsWrapper>
-                <Logs
-                  logs={store.logs}
-                  visibility={store.logVisibility}
-                  icons={store.icons}
-                  rule={store.rule}
-                  logPickup={logPickup}
-                  onResetLogPickup={this.handleResetLogPickup}
-                />
-              </LogsWrapper>
             </MainWrapper>
-          </div>
-          {styleMode != null ? <GlobalStyle mode={styleMode} /> : null}
+            <NavigationWrapper>
+              <NavigationButton onClick={this.handleNavigationPlayersClick}>
+                {i18n.t('game_client:navigation.players')}
+              </NavigationButton>
+              <NavigationButton onClick={this.handleNavigationSkillClick}>
+                {i18n.t('game_client:navigation.skill')}
+              </NavigationButton>
+              <NavigationButton onClick={this.handleNavigationSpeakClick}>
+                {i18n.t('game_client:navigation.speak')}
+              </NavigationButton>
+            </NavigationWrapper>
+            <GlobalStyle />
+          </AppWrapper>
         </I18nProvider>
       </ThemeProvider>
     );
@@ -247,11 +298,37 @@ export class Game extends React.Component<IPropGame, {}> {
    * handle the rule open button event.
    */
   @bind
-  protected handleRuleOpen(): void {
+  protected handleRuleOpen(scroll: boolean): void {
     const { store } = this.props;
     // toggle the rule pane.
+    const prevOpen = store.ruleOpen;
     store.update({
-      ruleOpen: !store.ruleOpen,
+      ruleOpen: !prevOpen,
+    });
+    if (!prevOpen && scroll && this.ruleElement.current != null) {
+      // if scroll request is positive,
+      // scroll to the rule pane.
+      this.ruleElement.current.scrollIntoView(true);
+    }
+  }
+  /**
+   * handle swipe of rule to left.
+   */
+  @bind
+  protected handleRuleSwipeToLeft(): void {
+    // when rule is swiped to left, it is open.
+    this.props.store.update({
+      ruleOpen: true,
+    });
+  }
+  /**
+   * handle swipe of rule to right.
+   */
+  @bind
+  protected handleRuleSwipeToRight(): void {
+    // when rule is swiped to left, rule is closed.
+    this.props.store.update({
+      ruleOpen: false,
     });
   }
   /**
@@ -272,7 +349,154 @@ export class Game extends React.Component<IPropGame, {}> {
   protected handleResetLogPickup(): void {
     this.props.store.update({ logPickup: null });
   }
+  /**
+   * Handle a focus change of speak input.
+   */
+  @bind
+  protected handleSpeakFocus(focus: boolean): void {
+    this.props.store.update({
+      speakFocus: focus,
+    });
+  }
+  /**
+   * Handle click of go to playersb button.
+   */
+  @bind
+  protected handleNavigationPlayersClick() {
+    const { current } = this.playersElement;
+    if (current != null) {
+      current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }
+  @bind
+  protected handleNavigationSkillClick() {
+    const { current } = this.jobinfoMarkerElement;
+    if (current != null) {
+      current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }
+  @bind
+  protected handleNavigationSpeakClick() {
+    const jobinfo = this.jobinfoElement.current;
+    const speak = this.speakElement.current;
+    if (jobinfo && speak) {
+      const jobinfoh = jobinfo.clientHeight;
+      const bodyBox = document.body.getBoundingClientRect();
+      const speakBox = speak.getBoundingClientRect();
+      const targeth = speakBox.top - bodyBox.top - jobinfoh;
+      // use smooth scrolling on supported platform.
+      if ('scrollBehavior' in document.body.style) {
+        window.scrollTo({
+          behavior: 'smooth',
+          top: targeth,
+          left: window.scrollX,
+        });
+      } else {
+        window.scrollTo(window.scrollX, targeth);
+      }
+      const { current } = this.speakFormRef;
+      if (current != null) {
+        current.setFocus();
+      }
+    }
+  }
 }
+
+/**
+ * Wrapper of whole app.
+ */
+const AppWrapper = styled(AppStyling)`
+  display: flex;
+  flex-flow: column nowrap;
+
+  --base-font-size: 1rem;
+  ${phone`
+    --base-font-size: ${({ theme }) => {
+      const fontSize = theme.user.phoneFontSize;
+      switch (fontSize) {
+        case 'large':
+          return '1rem';
+        case 'normal':
+          return '0.86rem';
+        case 'small':
+          return '0.7rem';
+      }
+    }}
+  `};
+`;
+
+/**
+ * Wrapper of each room control.
+ */
+const RoomHeaderPart = styled.div`
+  margin: 4px 0;
+  padding: 0 8px;
+  ${phone`
+    padding: 0;
+  `};
+`;
+
+/**
+ * Wrapper of room prelude.
+ */
+const RoomPreludePart = styled(RoomHeaderPart)`
+  display: flex;
+  flex-flow: row wrap;
+
+  > button {
+    margin: 2px;
+  }
+
+  ${phone`
+    padding: 0 8px;
+    justify-content: space-between;
+    > button {
+      margin: 3px;
+    }
+  `};
+`;
+
+/**
+ * Wrapper of speak form.
+ */
+const SpeakFormPart = styled(RoomHeaderPart)`
+  background-color: ${({ theme }) => theme.globalStyle.background};
+  ${phone`
+    ${({ theme }) =>
+      theme.user.speakFormPosition === 'fixed'
+        ? `
+      /* On phones, speak form is fixed to the bottom. */
+      order: 5;
+      position: sticky;
+      z-index: ${speakFormZIndex};
+      left: 0;
+      bottom: 0;
+      border-top: 1px solid ${theme.globalStyle.color};
+    `
+        : ''}
+
+    margin: 0;
+    padding: 4px 8px;
+  `};
+`;
+
+/**
+ * Wrapper of jobinfo form.
+ */
+const JobInfoPart = styled(RoomHeaderPart)`
+  ${phone`
+    position: sticky;
+    left: 0;
+    top: 0;
+    z-index: ${jobinfoZIndex};
+  `};
+`;
 
 /**
  * Wrapper for main game panel.
@@ -280,14 +504,26 @@ export class Game extends React.Component<IPropGame, {}> {
 const MainWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
+  ${phone`
+    margin-bottom: 2em;
+  `};
 `;
 
 /**
  * Wrapper of logs.
  */
-const LogsWrapper = styled.div`
+const LogsWrapper = withProps<{
+  /**
+   * Whether the rule pane is open.
+   */
+  ruleOpen?: boolean;
+}>()(styled.div)`
   flex: auto 1 1;
   order: 1;
+  ${phone`
+    transition: margin-left 250ms ease-out;
+    margin-left: ${({ ruleOpen }) => (ruleOpen ? '-20em' : '0)')};
+  `}
 `;
 
 interface IPropsRuleWrapper {
@@ -305,6 +541,7 @@ const RuleWrapper = withProps<IPropsRuleWrapper>()(styled.div)`
   width: ${({ closed }) => (closed ? '0' : '20em')};
   order: 2;
 
+  z-index: ${ruleZIndex};
   background-color: #ffd1f2;
   color: black;
 
@@ -326,4 +563,35 @@ const RuleInnerWrapper = styled.div`
   max-height: 100vh;
   width: 20em;
   padding: 5px;
+  ${phone`
+    max-height: 80vh;
+  `};
+`;
+
+const NavigationWrapper = styled.div`
+  display: none;
+  width: 100%;
+  background-color: ${({ theme }) => theme.globalStyle.background};
+  ${phone`
+    ${({ theme }) =>
+      theme.user.speakFormPosition === 'normal'
+        ? `
+      display: flex;
+      flex-flow: row nowrap;
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      height: 2em;
+    `
+        : ''}
+  `};
+`;
+
+const NavigationButton = styled.button`
+  flex: auto 1 1;
+  appearance: none;
+  background-color: #f3f3f3;
+  border: 1px solid #888888;
+  margin: 0;
+  color: #333333;
 `;

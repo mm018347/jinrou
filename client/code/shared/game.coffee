@@ -84,13 +84,15 @@ exports.teams=teams=
 
 # カテゴリ分け(手调黑暗火锅でつかうぞ!)
 exports.categories=
-    Human: teams.Human.filter((x)-> x != "GotChocolate")
+    Human: teams.Human.filter((x)-> x != "GotChocolate" && x != "Phantom")
     Werewolf:["Werewolf","BigWolf","WolfDiviner","LoneWolf","WolfCub","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","CautiousWolf","CraftyWolf","EyesWolf","TongueWolf","DecoyWolf"]
     Fox:["Fox","TinyFox","XianFox"]
     Madman:["Madman","Fanatic","Spy","Spy2","Sorcerer","WhisperingMad","WolfBoy","ObstructiveMad","PsychoKiller","Bomber","Ushinotokimairi","MadDog","Hypnotist","Pumpkin","MadScientist","MadHunter","MadCouple","BlackCat","LurkingMad"]
     Immoral:["Immoral","Blasphemy"]
     Switching:["Stalker","OccultMania","Copier","Cursed","Doppleganger","BloodyMary","Phantom","Thief"]
     Others:["Devil","Cupid","Bat","CultLeader","Vampire","Tanner","Lover","Hoodlum","BadLady","Patissiere","Shishimai","SnowLover","Raven"]
+    # Special category for "no category"
+    None:["Neet"]
 
 # 配列版のカテゴリリスト
 exports.categoryList = Object.keys(exports.categories)

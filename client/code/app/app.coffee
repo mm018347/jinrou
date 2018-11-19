@@ -87,7 +87,35 @@ exports.init = ->
     # ヘルプアイコン
     $("*[data-helpicon]").live "click", (je)->
         t = je.currentTarget
-        util.message "帮助", t.getAttribute 'title'
+        JinrouFront.loadDialog().then (dialog)->
+            dialog.showMessageDialog {
+                title: "帮助"
+                message: t.getAttribute 'title'
+                ok: "OK"
+            }
+    # メニューの開閉
+    $("#menu-open-icon").click (je)->
+        menu = $ "#menu"
+        unless menu.hasClass("moved")
+            # weird but move menu to the bottom of page,
+            # for rendering purpose.
+            menu.addClass "moved"
+            $("#menu-overlay").append menu
+            setTimeout(()->
+                menu.toggleClass "open"
+            , 0)
+        else
+            $("#menu").toggleClass "open"
+    $("#menu").click (je)->
+        $("#menu").removeClass "open"
+
+    # スマートフォンUIのON/OFF
+    window.addEventListener "storage", (e)->
+        if e.key == "usePhoneUI"
+            use = e.newValue != "false"
+            setPhoneUI use
+    setPhoneUI (localStorage.usePhoneUI != "false")
+
 
     # 自動ログイン
     if localStorage.userid && localStorage.password
@@ -407,6 +435,20 @@ exports.getI18n = getI18n = ()->
         JinrouFront.loadI18n()
     ])
         .then(([ac, i18n])-> i18n.getI18nFor(ac.language.value))
+
+# Dynamically set usage of phone ui.
+exports.setPhoneUI = setPhoneUI = (use)->
+    content = if use
+        "width=device-width,initial-scale=1"
+    else
+        ""
+    $("#viewport-meta").attr "content", content
+    if !use
+        # restore menu's position.
+        menu = $("#menu")
+        if menu.hasClass "moved"
+            menu.removeClass "moved"
+            menu.insertAfter "#userinfo"
 
 loadApplicationConfig = ()->
     ss.rpc "app.applicationconfig", (conf)->

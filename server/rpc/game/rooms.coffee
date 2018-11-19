@@ -16,7 +16,7 @@ room: {
   comment: String
   mode: "waiting"/"playing"/"end"
   made: Time(Number)(作成された日時）
-  blind:""/"hide"/"complete"
+  blind:""/"yes"/"complete"
   theme: String(主题房间，用于各种套皮活动)
   number: Number(プレイヤー数)
   players:[PlayerObject,PlayerObject,...]
