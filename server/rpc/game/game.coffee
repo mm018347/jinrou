@@ -30,13 +30,13 @@ Phase =
     day: 'day'
     # 昼の猶予
     day_remain: 'day_remain'
-    # 昼の投票专用时间
+    # 昼の投票専用時間
     day_voting: 'day_voting'
     # 夜の議論時間
     night: 'night'
     # 夜の猶予
     night_remain: 'night_remain'
-    # 狩猎者選択中
+    # ハンター選択中
     hunter: 'hunter'
     # フェイズ判定メソッド
     isBeforeStart: (phase)-> phase in [Phase.preparing, Phase.rolerequesting]
@@ -195,7 +195,7 @@ module.exports=
         name="#{player.name}"
         pr=""
         unless room.blind in ["complete","yes"]
-            # 匿名模式のときは称号OFF
+            # 覆面のときは称号OFF
             player.nowprize?.forEach? (x)->
                 if x.type=="prize"
                     prname=Server.prize.prizeName x.value
@@ -204,7 +204,7 @@ module.exports=
                 else
                     # 接続
                     pr+=x.value
-        #如果房间使用了主题，匿名房间也可以有称号
+        #如果ルーム使用了主题，匿名ルーム也可以有称号
         if room.blind in ["complete","yes"] && room.theme
             theme = Server.game.themes.getTheme room.theme
             if theme != null && player.tpr
@@ -217,7 +217,7 @@ module.exports=
             return
 
         if room.mode=="waiting"
-            # 开始前（ふつう）
+            # 開始前（ふつう）
             log=
                 comment: i18n.t "system.rooms.enter", {name: name}
                 userid:-1
@@ -251,7 +251,7 @@ module.exports=
                     name:player.name
                 }
                 newpl.setTarget null
-                # 头像追加
+                # アイコン追加
                 game.iconcollection[newpl.id]=player.icon
                 # playersには追加しない（翌朝追加）
                 game.participants.push newpl
@@ -387,7 +387,7 @@ class Game
         @players=[]         # 村人たち
         @participants=[]    # 参加者全て(@playersと同じ内容含む）
         @rule=null
-        @finished=false #终了したかどうか
+        @finished=false #終了したかどうか
         @day=0  #何日目か(0=準備中)
         @phase = Phase.preparing
 
@@ -403,7 +403,7 @@ class Game
         @last_time=Date.now()   # 最後に動きがあった時間
 
         @werewolf_target=[] # 人狼の襲い先
-        @werewolf_target_remain=0   #襲撃先をあと何人设定できるか
+        @werewolf_target_remain=0   #襲撃先をあと何人設定できるか
         @werewolf_flag=[] # 人狼襲撃に関するフラグ
 
         @revive_log = [] # 蘇生した人の記録
@@ -416,9 +416,9 @@ class Game
 
         @gamelogs=[]
         @iconcollection={}  #(id):(url)
-        # 决定配置（DBに入らないかも・・・）
+        # 決定配役（DBに入らないかも・・・）
         @joblist=null
-        # 游戏スタートに必要な情報
+        # ゲームスタートに必要な情報
         @startoptions=null
         @startplayers=null
         @startsupporters=null
@@ -441,7 +441,7 @@ class Game
         # 突然死の罰用のデータ
         @suddenDeathPunishment = null
 
-        # 狩猎者割り込み処理用の次の処理フラグ
+        # ハンター割り込み処理用の次の処理フラグ
         @nextScene = null
 
         # 夜能力の対象選択に対するフック
@@ -509,7 +509,7 @@ class Game
 
         game.werewolf_target=obj.werewolf_target ? []
         game.werewolf_target_remain=obj.werewolf_target_remain ? 0
-        # 开始前なら準備中を用意してあげないと！
+        # 開始前なら準備中を用意してあげないと！
         if game.day==0
             Server.game.rooms.oneRoomS game.id,(room)->
                 if room.error?
@@ -543,7 +543,7 @@ class Game
                 game.nextScene = "nextturn"
         game
     # 公開情報
-    publicinfo:(obj)->  #obj:选项
+    publicinfo:(obj)->  #obj:オプション
         {
             rule:@rule
             finished:@finished
@@ -624,17 +624,18 @@ class Game
         return null
 
     #成功:null
-    #players: 参加者 supporters: 其他
+    #players: 参加者 supporters: その他
     setplayers:(res)->
         options=@startoptions
         players=@startplayers
         supporters=@startsupporters
         jnumber=0
         joblist=@joblist
-        players=players.concat []   #模仿者
+        players=players.concat []   #コピー
         plsl=players.length #実際の参加人数（身代わり含む）
         if @rule.scapegoat=="on"
             plsl++
+
         # 必要な役職の
         jallnum = plsl
         if @rule.chemical == "on"
@@ -653,7 +654,7 @@ class Game
             res @i18n.t("error.gamestart.playerNumberInvalid2", {request: jnumber, jallnum: jallnum, players: players.length})
             return
 
-        # 名字と数を出したやつ
+        # 名前と数を出したやつ
         @jobscount={}
         unless options.yaminabe_hidejobs    # 公開モード
             for job,num of joblist
@@ -665,11 +666,11 @@ class Game
         # 盗賊の処理
         thief_jobs=[]
         if joblist.Thief>0
-            # 小偷一人につき2回抜く
+            # 盗人一人につき2回抜く
             for i in [0...(joblist.Thief*2)]
                 # 1つ抜く
                 keys=[]
-                # 数に比例した职业一览を作る
+                # 数に比例した役職一覧を作る
                 for job,num of joblist
                     unless job in Shared.game.nonhumans
                         for j in [0...num]
@@ -689,15 +690,15 @@ class Game
                 # 代わりに村人1つ入れる
                 joblist.Human ?= 0
                 joblist.Human++
-        # 1人に対していくつ职业を選出するか
+        # 1人に対していくつ役職を選出するか
         jobperpl = 1
         if @rule.chemical == "on"
             jobperpl = 2
 
-        # まず替身君を決めてあげる
+        # まず身代わりくんを決めてあげる
         if @rule.scapegoat=="on"
             # 人狼、妖狐にはならない
-            nogoat=[]   #身代わりがならない职业
+            nogoat=[]   #身代わりがならない役職
             if @rule.safety!="free"
                 nogoat=nogoat.concat Shared.game.nonhumans  #人外は除く
             if @rule.safety=="full"
@@ -710,13 +711,13 @@ class Game
                 while j<joblist[job]
                     jobss.push job
                     j++
-            # 獲得した职业
+            # 獲得した役職
             gotjs = []
             i=0 # 無限ループ防止
             while ++i<100 && gotjs.length < jobperpl
                 r=Math.floor Math.random()*jobss.length
                 continue unless joblist[jobss[r]]>0
-                # 职业はjobss[r]
+                # 役職はjobss[r]
                 gotjs.push jobss[r]
                 joblist[jobss[r]]--
                 j++
@@ -725,7 +726,7 @@ class Game
                 # 決まっていない
                 res @i18n.t "error.gamestart.castingFailed"
                 return
-            # 替身君のプロフィール
+            # 身代わりくんのプロフィール
             profile = {
                 id:"替身君"
                 realid:"替身君"
@@ -747,14 +748,14 @@ class Game
                 @players.push newpl
             else
                 # ふつーに
-                newpl=Player.factory gotjs[0], this   #替身君
+                newpl=Player.factory gotjs[0], this   #身代わりくん
                 newpl.setProfile profile
                 newpl.scapegoat = true
                 @players.push newpl
 
         if @rule.rolerequest=="on" && @rule.chemical != "on"
-            # 希望职业制ありの場合はまず希望を優先してあげる
-            # （炼成人狼のときは面倒なのでパス）
+            # 希望役職制ありの場合はまず希望を優先してあげる
+            # （ケミカル人狼のときは面倒なのでパス）
             for job,num of joblist
                 while num>0
                     # 候補を集める
@@ -777,14 +778,14 @@ class Game
                     if pl.icon
                         @iconcollection[newpl.id]=pl.icon
                     if pl.scapegoat
-                        # 替身君
+                        # 身代わりくん
                         newpl.scapegoat=true
                     num--
                 # 残った分は戻す
                 joblist[job]=num
 
 
-        # 各プレイヤーの獲得职业の一覧
+        # 各プレイヤーの獲得役職の一覧
         gotjs = []
         for i in [0...(players.length)]
             gotjs.push []
@@ -804,7 +805,7 @@ class Game
             while i++<num
                 r=Math.floor Math.random()*players.length
                 if @rule.chemical == "on" && gotjs[r].length == 1
-                    # 炼成人狼の場合調整が入る
+                    # ケミカル人狼の場合調整が入る
                     if all_wolves == 1
                         # 人狼が1人のときは人狼を消さない
                         if (gotjs[r][0] in Shared.game.categories.Werewolf && job in Shared.game.categories.Fox) || (gotjs[r][0] in Shared.game.categories.Fox && job in Shared.game.categories.Werewolf)
@@ -817,7 +818,7 @@ class Game
                            continue
                 gotjs[r].push job
                 if gotjs[r].length >= jobperpl
-                    # 必要な职业を獲得した
+                    # 必要な役職を獲得した
                     pl=players[r]
                     profile = {
                         id:pl.userid
@@ -844,10 +845,10 @@ class Game
                     if pl.icon
                         @iconcollection[newpl.id]=pl.icon
                     if pl.scapegoat
-                        # 替身君
+                        # 身代わりくん
                         newpl.scapegoat=true
         if joblist.Thief>0
-            # 小偷がいる場合
+            # 盗人がいる場合
             thieves=@players.filter (x)->x.isJobType "Thief"
             for pl in thieves
                 ts = pl.accessByJobTypeAll "Thief"
@@ -856,7 +857,7 @@ class Game
 
         # サブ系
         if options.decider
-            # 决定者を作る
+            # 決定者を作る
             r=Math.floor Math.random()*@players.length
             pl=@players[r]
 
@@ -864,7 +865,7 @@ class Game
             pl.transProfile newpl
             pl.transform @,newpl,true,true
         if options.authority
-            # 权力者を作る
+            # 権力者を作る
             r=Math.floor Math.random()*@players.length
             pl=@players[r]
 
@@ -873,7 +874,7 @@ class Game
             pl.transform @,newpl,true,true
 
         if @rule.wolfminion
-            # 狼的仆从がいる場合、子分决定者を作る
+            # 狼の子分がいる場合、子分決定者を作る
             wolves=@players.filter((x)->x.isWerewolf())
             if wolves.length>0
                 r=Math.floor Math.random()*wolves.length
@@ -886,7 +887,7 @@ class Game
                 pl.transProfile newpl
                 pl.transform @,newpl,true
         if @rule.drunk
-            # 醉鬼がいる場合
+            # 酔っ払いがいる場合
             nonvillagers= @players.filter (x)->!x.isJobType "Human"
 
             if nonvillagers.length>0
@@ -901,7 +902,7 @@ class Game
 
         # プレイヤーシャッフル
         @players=shuffle @players
-        @participants=@players.concat []    # 模仿者
+        @participants=@players.concat []    # コピー
         # ここでプレイヤー以外の処理をする
         for pl in supporters
             if pl.mode=="gm"
@@ -914,7 +915,7 @@ class Game
                 }
                 @participants.push gm
             else if result=pl.mode?.match /^helper_(.+)$/
-                # 帮手だ
+                # ヘルパーだ
                 ppl=@players.filter((x)->x.id==result[1])[0]
                 unless ppl?
                     # This is a bug!
@@ -934,7 +935,7 @@ class Game
             # パターンを初期化（最初は全パターン）
             quats=[]    # のとみquantum_patterns
             pattern_no=0    # とばす
-            # 职业を列挙した配列をつくる
+            # 役職を列挙した配列をつくる
             jobname_list=[]
             for job of jobs
                 i=@rule.quantum_joblist[job]
@@ -1011,7 +1012,7 @@ class Game
             # できた
             @quantum_patterns=quats
             if @rule.quantumwerewolf_table=="anonymous"
-                # 概率表は数字で表示するので番号をつけてあげる
+                # 確率表は数字で表示するので番号をつけてあげる
                 for pl,i in shuffle @players.concat []
                     pl.setFlag JSON.stringify {
                         number:i+1
@@ -1084,7 +1085,7 @@ class Game
 
         if @rule.jobrule=="特殊规则.量子人狼"
             # 量子人狼
-            # 全员の確率を出してあげるよーーーーー
+            # 全員の確率を出してあげるよーーーーー
             # 確率テーブルを
             probability_table={}
             numberref_table={}
@@ -1133,7 +1134,7 @@ class Game
                         #死亡確率も
                         probability_table[x.id].dead=0
                     if @rule.quantumwerewolf_diviner=="on"
-                        # 占卜师の確率も
+                        # 占い師の確率も
                         probability_table[x.id].Diviner=0
                 else
                     x.setFlag JSON.stringify {
@@ -1215,7 +1216,7 @@ class Game
                         comment: @i18n.t "system.werewolf.diseased"
                     splashlog @id,this,log
                 else if fl=="WolfCub"
-                    # 狼之子フラグが立っている（2回襲撃できる）
+                    # 狼の子フラグが立っている（2回襲撃できる）
                     @werewolf_target_remain=2
                     log=
                         mode:"wolfskill"
@@ -1268,7 +1269,7 @@ class Game
             @werewolf_target_remain=0
             # 処理
             if @rule.deathnote
-                # 死亡笔记採用
+                # デスノート採用
                 alives=@players.filter (x)->!x.dead
                 if alives.length>0
                     r=Math.floor Math.random()*alives.length
@@ -1291,7 +1292,7 @@ class Game
                         # 参加待機のひとだ
                         if !@players.some((p)->p.realid==player.realid)
                             # 本参加ではないのでOK
-                            # 职业をランダムに决定
+                            # 役職をランダムに決定
                             newjob=jobnames[Math.floor Math.random()*jobnames.length]
                             newpl=Player.factory newjob, this
                             player.transProfile newpl
@@ -1316,7 +1317,7 @@ class Game
                 # 1ターンに2人しぬとしてp(n+2)=2とおくとp=2/(n+2) 。
                 # 少し減らして人数を減少に持って行く
                 p = 2/(deads.length+3)
-                # 死者全员に対して転生判定
+                # 死者全員に対して転生判定
                 for pl in deads
                     if Math.random()<p
                         # でも参加者がいたら蘇生のかわりに
@@ -1443,13 +1444,13 @@ class Game
 
         targets.forEach (x)=>
             @ss.publish.user x.realid,"getjob",makejobinfo this,x
-    #全员寝たかチェック 寝たなら処理してtrue
-    #timeoutがtrueならば时间切れなので时间でも待たない
+    #全員寝たかチェック 寝たなら処理してtrue
+    #timeoutがtrueならば時間切れなので時間でも待たない
     checkjobs:(timeout)->
         if @phase == Phase.rolerequesting
             # 開始前（希望役職制）
             if timeout || @players.every((x)=>@rolerequesttable[x.id]?)
-                # 全员できたぞ
+                # 全員できたぞ
                 @setplayers (result)=>
                     unless result?
                         @nextturn()
@@ -1473,14 +1474,14 @@ class Game
             else
                 false
         else if @phase == Phase.hunter
-            # 狩猎者の時間だ
+            # ハンターの時間だ
             for pl in @players
                 hunters = [
                     pl.accessByJobTypeAll("Hunter")...,
                     pl.accessByJobTypeAll("MadHunter")...,
                 ]
                 if hunters.some((x)-> x.flag == "hunting" && !x.target?)
-                    # まだ選択していない狩猎者だ
+                    # まだ選択していないハンターだ
                     return false
             @hunterDo()
             true
@@ -1564,7 +1565,7 @@ class Game
                 for fl in @werewolf_flag
                     res = fl.match /^ToughWolf_(.+)$/
                     if res?
-                        # 硬汉人狼がすごい
+                        # 一途な狼がすごい
                         tw = @getPlayer res[1]
                         t=@getPlayer actTarget
                         if t?
@@ -1590,7 +1591,7 @@ class Game
                                 flg_flg=true
                                 break
                     if flg_flg
-                        # 欲張りのあれで襲撃终了
+                        # 欲張りのあれで襲撃終了
                         break
         @werewolf_flag=@werewolf_flag.filter (fl)->
             # こいつらは1夜限り
@@ -1738,14 +1739,6 @@ class Game
                 to:-1
                 comment:"#{x.name} 的死因是 #{situation}"
             splashlog @id,this,log
-            ###
-            if x.found=="punish"
-                # 处刑→灵能
-                @players.forEach (y)=>
-                    if y.isJobType "Psychic"
-                        # 灵能
-                        y.results.push x
-            ###
             if emma_alive.length > 0
                 # 閻魔用のログも出す
                 emma_log=switch x.found
@@ -1795,7 +1788,7 @@ class Game
             x.setDead x.dead,"" #発見されました
             @ss.publish.user x.realid,"refresh",{id:@id}
             if @rule.will=="die" && x.will
-                # 死んだら遗言発表
+                # 死んだら遺言発表
                 log=
                     mode:"will"
                     name:x.name
@@ -1831,7 +1824,7 @@ class Game
             @revote_num=Infinity
             @judge()
             return false
-        # 投票结果
+        # 投票結果
         log=
             mode:"voteresult"
             voteresult:table
@@ -1839,11 +1832,11 @@ class Game
         splashlog @id,this,log
 
         if mode=="runoff"
-            # 重新投票になった
+            # 再投票になった
             @dorevote "runoff"
             return false
         else if mode=="revote"
-            # 重新投票になった
+            # 再投票になった
             @dorevote "revote"
             return false
         else if mode=="none"
@@ -1862,7 +1855,7 @@ class Game
             return true
         else if mode=="punish"
             # 投票
-            # 结果が出た 死んだ!
+            # 結果が出た 死んだ!
             # だれが投票したか調べる
             for player in players
                 follower=table.filter((obj)-> obj.voteto==player.id).map (obj)->obj.id
@@ -1895,7 +1888,7 @@ class Game
                 @nextturn()
             # this judge is needed?
         return true
-    # 重新投票
+    # 再投票
     dorevote:(mode)->
         # mode:
         #   "runoff" - 決選投票による再投票
@@ -1940,15 +1933,15 @@ class Game
             # 投票猶予の場合初期化
             clearTimeout @timerid
             @timer()
-    # 狩猎者の能力による割り込みチェック
-    # 戻り値: true (狩猎者フェイズあり) / false (狩猎者フェイズなし)
+    # ハンターの能力による割り込みチェック
+    # 戻り値: true (ハンターフェイズあり) / false (ハンターフェイズなし)
     # nextScene:
     #   "nextturn": 次のターンへ
     #   "day": 昼のターン開始処理
     #   "night": 夜のターン開始処理
     #   "vote": 次の投票へ
     hunterCheck:(nextScene)->
-        # まず狩猎者を列挙
+        # まずハンターを列挙
         hunters = []
         for pl in @players
             hunters.push (pl.accessByJobTypeAll "Hunter")..., (pl.accessByJobTypeAll "MadHunter")...
@@ -1958,7 +1951,7 @@ class Game
             # 能力は発動しない
             return false
         clearTimeout @timerid
-        # 狩猎者フェイズ突入！！！
+        # ハンターフェイズ突入！！！
         @nextScene = nextScene
         @phase = Phase.hunter
         # ユーザー名を列挙（重複除く）
@@ -1981,7 +1974,7 @@ class Game
         @save()
         @timer()
         return true
-    # 狩猎者の能力実行
+    # ハンターの能力実行
     hunterDo:->
         clearTimeout @timerid
         hunters = []
@@ -2005,9 +1998,9 @@ class Game
                         else
                             null
                 if t? && !t.dead
-                    # 狩猎者の攻撃対象
+                    # ハンターの攻撃対象
                     diers.push t
-        # 狩猎者のターゲットになった人は死ぬ！！！！！！！
+        # ハンターのターゲットになった人は死ぬ！！！！！！！
         for t in diers
             if !t.dead
                 t.die this, "hunter"
@@ -2101,13 +2094,13 @@ class Game
                 # 全滅
                 team="Draw"
             else if wolves==0 && vampires==0
-                # 村人胜利
+                # 村人勝利
                 team="Human"
             else if humans<=wolves && vampires==0
-                # 人狼胜利
+                # 人狼勝利
                 team="Werewolf"
             else if humans<=vampires && wolves==0
-                # 吸血鬼胜利
+                # ヴァンパイア勝利
                 team="Vampire"
             else if alives==friendsn
                 # 恋人勝利
@@ -2220,17 +2213,17 @@ class Game
                 @players.forEach (x)=>
                     iswin=x.isWinner this,team
                     if @rule.losemode
-                        # 败北村（败北たら胜利）
+                        # 敗北村（負けたら勝ち）
                         if iswin==true
                             iswin=false
                         else if iswin==false
                             iswin=true
-                    # ただし猝死したら败北
+                    # ただし突然死したら負け
                     if @gamelogs.some((log)->
                         log.id==x.id && log.event=="found" && log.flag in ["gone-day","gone-night"]
                     )
                         iswin=false
-                    x.setWinner iswin   #胜利か
+                    x.setWinner iswin   #勝利か
                     # ユーザー情報
                     if x.winner
                         M.users.update {userid:x.realid},{$push: {win:@id}}
@@ -2239,8 +2232,8 @@ class Game
             log=
                 mode:"nextturn"
                 finished:true
-            resultstring=null#结果
-            teamstring=null #阵营
+            resultstring=null#結果
+            teamstring=null #陣営
             [resultstring,teamstring]=switch team
                 when "Human"
                     if alives>0 && aliveps.every((x)->x.isJobType "Neet")
@@ -2277,7 +2270,6 @@ class Game
             winpl = @players.filter (x)->x.winner
             if(winpl.length==1 && winpl[0].realid=="替身君")
                 resultstring="村子成了替身君的玩物。"
-            # 显示结果
             if teamstring
                 log.comment = @i18n.t "system.judge", {short: teamstring, result: resultstring}
             else
@@ -2359,7 +2351,7 @@ class Game
         time=null
         mode=null   # なんのカウントか
         timeout= =>
-            # 残り时间を知らせるぞ!
+            # 残り時間を知らせるぞ!
             @timer_start=parseInt Date.now()/1000
             @timer_remain=time
             @timer_mode=mode
@@ -2371,14 +2363,14 @@ class Game
                 @timerid=setTimeout timeout,time*1000
                 time=0
             else
-                # 时间切れ
+                # 時間切れ
                 func()
         if @phase == Phase.rolerequesting
             # 希望役職制
             time=60
             mode=@i18n.t "phase.rolerequesting"
             func= =>
-                # 強制开始
+                # 強制開始
                 @checkjobs true
         else if @phase == Phase.night
             # 夜
@@ -2395,9 +2387,9 @@ class Game
                     else
                         @players.forEach (x)=>
                             return if x.dead || x.sleeping(@)
-                            x.die this,"gone-night" # 猝死
+                            x.die this,"gone-night" # 突然死
                             x.setNorevive true
-                            # 猝死記録
+                            # 突然死記録
                             M.users.update {userid:x.realid},{$push:{gone:@id}}
                         @bury("other")
                         @checkjobs true
@@ -2411,9 +2403,9 @@ class Game
                 # ね な い こ だ れ だ
                 @players.forEach (x)=>
                     return if x.dead || x.sleeping(@)
-                    x.die this,"gone-night" # 猝死
+                    x.die this,"gone-night" # 突然死
                     x.setNorevive true
-                    # 猝死記録
+                    # 突然死記録
                     M.users.update {userid:x.realid},{$push:{gone:@id}}
                 @bury("other")
                 @checkjobs true
@@ -2481,7 +2473,7 @@ class Game
                         @phase = Phase.day_remain
                         @timer()
                     else
-                        # 猝死
+                        # 突然死
                         revoting=false
                         for x in @players
                             if x.dead || x.voted(this, @votingbox)
@@ -2520,7 +2512,7 @@ class Game
                 else
                     return
         else if @phase == Phase.hunter
-            # 狩猎者選択中
+            # ハンター選択中
             time = 45 # it's hard-coded!
             mode = @i18n.t "phase.skill"
             func = =>
@@ -2549,7 +2541,7 @@ class Game
             query={userid:{$in:pls.map (x)->x.realid}}
             M.users.find(query).each (err,doc)=>
                 return unless doc?
-                oldprize=doc.prize  # いままでの賞の一览
+                oldprize=doc.prize  # いままでの賞の一覧
                 # 差分をとる
                 newprize=obj[doc.userid].filter (x)->!(x in oldprize)
                 if newprize.length>0
@@ -2569,8 +2561,8 @@ class Game
                 return
 ###
 logs:[{
-    mode:"day"(昼) / "system"(システムメッセージ) /  "werewolf"(狼) / "heaven"(天国) / "prepare"(開始前/終了後) / "skill"(能力ログ) / "nextturn"(ゲーム進行) / "audience"(観戦者のひとりごと) / "monologue"(夜のひとりごと) / "voteresult" (投票结果） / "couple"(共有者) / "fox"(妖狐) / "will"(遺言) / "madcouple"(尖叫狂人)
-    "wolfskill"(人狼に見える) / "emmaskill"(阎魔に見える) / "eyeswolfskill"(瞳狼に見える)
+    mode:"day"(昼) / "system"(システムメッセージ) /  "werewolf"(狼) / "heaven"(天国) / "prepare"(開始前/終了後) / "skill"(能力ログ) / "nextturn"(ゲーム進行) / "audience"(観戦者のひとりごと) / "monologue"(夜のひとりごと) / "voteresult" (投票結果） / "couple"(共有者) / "fox"(妖狐) / "will"(遺言) / "madcouple"(叫迷狂人)
+    "wolfskill"(人狼に見える) / "emmaskill"(閻魔に見える) / "eyeswolfskill"(瞳狼に見える)
     comment: String
     userid:Userid
     name?:String
@@ -2594,8 +2586,8 @@ class VotingBox
         @init()
     init:->
         # 投票箱を空にする
-        @remains=1  # 残り处刑人数
-        @runoffmode=false   # 重新投票中か
+        @remains=1  # 残り処刑人数
+        @runoffmode=false   # 再投票中か
         @candidates=[]
         @start()
     start:->
@@ -2634,7 +2626,7 @@ class VotingBox
     # その人の投票オブジェクトを得る
     getHisVote:(player)->
         @votes.filter((x)->x.player.id==player.id)[0]
-    # 票のパワーを变更する
+    # 票のパワーを変更する
     votePower:(player,value,absolute=false)->
         v=@getHisVote player
         if v?
@@ -2650,7 +2642,7 @@ class VotingBox
                 v.priority=value
             else
                 v.priority+=value
-    # 处刑人数を増やす
+    # 処刑人数を増やす
     addPunishedNumber:(num)->
         @remains+=num
 
@@ -2748,7 +2740,7 @@ class VotingBox
                         else
                             return ["revote",null,tos,table]
         if @game.rule.runoff=="yes" && !@runoffmode
-            # 候補は1人だけど决胜投票をしないといけない
+            # 候補は1人だけど決選投票をしないといけない
             if tops.length<=1
                 # 候補がたりない
                 back=null
@@ -2761,7 +2753,7 @@ class VotingBox
                     else if @compareGots(gots[back],gots[id])==0
                         ok=true
                     else if flag==false
-                        # 决胜投票なので1回だけOK!
+                        # 決選投票なので1回だけOK!
                         flag=true
                         ok=true
                     else
@@ -2833,7 +2825,7 @@ class Player
             for name of sample
                 # sampleのown Propertyは一つもない
                 myComplex[name]=sample[name]
-            # 混合职业
+            # 混合役職
             p=Object.create myComplex
 
             p.main=main
@@ -2901,7 +2893,7 @@ class Player
             newpl=Player.factory null, game, base,cmpl.sub,complexes[cmpl.cmplType]
             ###
             for ok in Object.keys cmpl
-                # 自己のプロパティのみ
+                # 自分のプロパティのみ
                 unless ok=="main" || ok=="sub"
                     newpl[ok]=cmpl[ok]
             ###
@@ -2944,11 +2936,11 @@ class Player
 
     # midnightの実行順（小さいほうが先）
     midnightSort: 100
-    # 本人に見える职业名
+    # 本人に見える役職名
     getJobDisp:->@jobname
-    # 本人に見える职业タイプ
+    # 本人に見える役職タイプ
     getTypeDisp:->@type
-    # 职业名を得る
+    # 役職名を得る
     getJobname:->@jobname
     # サブ役職の情報を除いた役職名を得る
     getMainJobname:-> @getJobname()
@@ -2968,11 +2960,11 @@ class Player
     isFriend:->false
     # Complexかどうか
     isComplex:->false
-    # 教会信者かどうか
+    # カルト信者かどうか
     isCult:->false
-    # 吸血鬼かどうか
+    # ヴァンパイアかどうか
     isVampire:->false
-    # 醉鬼かどうか
+    # 酔っ払いかどうか
     isDrunk:->false
     # 蘇生可能性を秘めているか
     isReviver:->false
@@ -3041,7 +3033,7 @@ class Player
         return [@midnightSort]
     # complexのJobTypeを調べる
     isCmplType:(type)->false
-    # 投票先决定
+    # 投票先決定
     dovote:(game,target)->
         # 戻り値にも意味があるよ！
         err=game.votingbox.vote this,target,1
@@ -3079,7 +3071,7 @@ class Player
     jobdone:(game)->@sleeping game
     # 死んだ後でも仕事があるとfalse
     deadJobdone:(game)->true
-    # 狩猎者フェイズに仕事があるか?
+    # ハンターフェイズに仕事があるか?
     hunterJobdone:(game)->true
     # 昼に投票を終えたか
     voted:(game,votingbox)->
@@ -3108,15 +3100,15 @@ class Player
     formType: null
     #人狼に食われて死ぬかどうか
     willDieWerewolf:true
-    #占いの结果
+    #占いの結果
     fortuneResult: FortuneResult.human
     getFortuneResult:->@fortuneResult
-    #霊能の结果
+    #霊能の結果
     psychicResult: PsychicResult.human
     getPsychicResult:->@psychicResult
     #チーム Human/Werewolf
     team: "Human"
-    #胜利かどうか team:胜利阵营名
+    #勝利かどうか team:勝利陣営名
     isWinner:(game,team)->
         team==@getTeam() # 自分の陣営かどうか
     # 死亡させられそうな場合に耐性をチェック
@@ -3174,7 +3166,7 @@ class Player
             # 夜の能力
             jt=@job_target
             if jt>0
-                # 参加者を选择する
+                # 参加者を選択する
                 result=[]
                 for pl in game.players
                     if (pl.dead && (jt&Player.JOB_T_DEAD))||(!pl.dead && (jt&Player.JOB_T_ALIVE))
@@ -3231,7 +3223,7 @@ class Player
             }
 
         obj.job_target=@getjob_target()
-        # 选择肢を教える {name:"名字",value:"値"}
+        # 選択肢を教える {name:"名前",value:"値"}
         obj.job_selection ?= []
         obj.job_selection=obj.job_selection.concat @makeJobSelection game, false
         # 重複を取り除くのはクライアント側にやってもらおうかな…
@@ -3240,7 +3232,7 @@ class Player
     chooseJobDay:(game)->false
     # 仕事先情報を教える
     getjob_target:->@job_target
-    # 昼の发言の选择肢
+    # 昼の発言の選択肢
     getSpeakChoiceDay:(game)->
         if game.phase == Phase.day
             ["day","monologue"]
@@ -3431,7 +3423,7 @@ class Werewolf extends Player
             mode:"wolfskill"
             comment: game.i18n.t "roles:Werewolf.select", {name: @name, target: tp.name}
         if @isJobType "SolitudeWolf"
-            # 孤独的狼なら自己だけ…
+            # 孤独な狼なら自分だけ…
             log.to=@id
         splashlog game.id,game,log
         game.splashjobinfo game.players.filter (x)=>x.id!=playerid && x.isWerewolf()
@@ -3662,7 +3654,7 @@ class Guard extends Player
         # 複合させる
         newpl=Player.factory null, game, pl,null,Guarded   # 守られた人
         pl.transProfile newpl
-        newpl.cmplFlag=@id  # 护卫元cmplFlag
+        newpl.cmplFlag=@id  # 護衛元cmplFlag
         pl.transform game,newpl,true
         newpl.touched game,@id
         null
@@ -3765,7 +3757,7 @@ class Bat extends Player
     type:"Bat"
     team:""
     isWinner:(game,team)->
-        !@dead  # 生きて入ればとにかく胜利
+        !@dead  # 生きて入ればとにかく勝利
 class Noble extends Player
     type:"Noble"
     hasDeadResistance:(game)->
@@ -3798,7 +3790,7 @@ class Slave extends Player
             false
     makejobinfo:(game,result)->
         super
-        # 奴隶は贵族が分かる
+        # 奴隷は貴族が分かる
         result.nobles=game.players.filter((x)->x.isJobType "Noble").map (x)->
             x.publicinfo()
 class Magician extends Player
@@ -4232,7 +4224,7 @@ class Copier extends Player
         @setTarget null
 
     job:(game,playerid,query)->
-        # 模仿者先
+        # コピー先
         if @target?
             return game.i18n.t "error.common.alreadyUsed"
         @setTarget playerid
@@ -4296,7 +4288,7 @@ class Light extends Player
     sunset:(game)->
         @setTarget null
     job:(game,playerid,query)->
-        # 模仿者先
+        # コピー先
         if @target?
             return game.i18n.t "error.common.alreadyUsed"
         @setTarget playerid
@@ -4358,9 +4350,9 @@ class Devil extends Player
             game.addGuardLog @id, AttackKind.werewolf, GuardReason.devil
             return true
         else if found=="punish"
-            # 处刑されたぞ！
+            # 処刑されたぞ！
             if @flag=="bitten"
-                # 噛まれたあと处刑された
+                # 噛まれたあと処刑された
                 @setFlag "winner"
         return false
     isWinner:(game,team)->team==@getTeam() && @flag=="winner"
@@ -4448,7 +4440,7 @@ class Cupid extends Player
         game.splashjobinfo [game.getPlayer(@flag), game.getPlayer(@target)]
 
         null
-# 跟踪狂
+# ストーカー
 class Stalker extends Player
     type:"Stalker"
     team:""
@@ -4484,7 +4476,7 @@ class Stalker extends Player
     # ストーカー連鎖対応版
     isWinnerStalk:(game,team,ids)->
         if @id in ids
-            # ループしてるので败北
+            # ループしてるので負け
             return false
         pl=game.getPlayer @flag
         return false unless pl?
@@ -4501,20 +4493,20 @@ class Stalker extends Player
         p=game.getPlayer @flag
         if p?
             result.stalking=p.publicinfo()
-# 被诅咒者
+# 呪われた者
 class Cursed extends Player
     type:"Cursed"
     hasDeadResistance:->true
     checkDeathResistance:(game, found)->
         if found=="werewolf"
-            # 噛まれた場合人狼侧になる
+            # 噛まれた場合人狼側になる
             unless @flag
                 # まだ噛まれていない
                 @setFlag "bitten"
             game.addGuardLog @id, AttackKind.werewolf, GuardReason.cursed
             return true
         else if found=="vampire"
-            # 吸血鬼にもなる!!!
+            # ヴァンパイアにもなる!!!
             unless @flag
                 # まだ噛まれていない
                 @setFlag "vampire"
@@ -4667,7 +4659,7 @@ class Priest extends Player
 
         newpl=Player.factory null, game, pl,null,HolyProtected # 守られた人
         pl.transProfile newpl
-        newpl.cmplFlag=@id  # 护卫元
+        newpl.cmplFlag=@id # 護衛元
         pl.transform game,newpl,true
 
         null
@@ -4676,7 +4668,7 @@ class Prince extends Player
     hasDeadResistance:->true
     checkDeathResistance:(game, found)->
         if found=="punish" && !@flag?
-            # 处刑された
+            # 処刑された
             @setFlag "used"    # 能力使用済
             log=
                 mode:"system"
@@ -4944,7 +4936,7 @@ class Vampire extends Player
                     x.die game, "vampire2", @id
     makejobinfo:(game,result)->
         super
-        # 吸血鬼が分かる
+        # ヴァンパイアが分かる
         result.vampires=game.players.filter((x)->x.isVampire()).map (x)->
             x.publicinfo()
 class LoneWolf extends Werewolf
@@ -5132,7 +5124,7 @@ class Tanner extends Player
     team:""
     dying:(game, found)->
         if found in ["gone-day","gone-night"]
-            # 猝死はダメ
+            # 突然死はダメ
             @setFlag "gone"
     isWinner:(game,team)->@dead && @flag!="gone"
 class OccultMania extends Player
@@ -5163,7 +5155,7 @@ class OccultMania extends Player
     midnight:(game,midnightSort)->
         p=game.getPlayer game.skillTargetHook.get @target
         return unless p?
-        # 変化先决定
+        # 変化先決定
         type="Human"
         if p.isJobType "Diviner"
             type="Diviner"
@@ -5185,13 +5177,13 @@ class OccultMania extends Player
         # game.ss.publish.user newpl.realid,"refresh",{id:game.id}
         null
 
-# 狼之子
+# 狼の子
 class WolfCub extends Werewolf
     type:"WolfCub"
     dying:(game,found)->
         super
         game.werewolf_flag.push "WolfCub"
-# 低语狂人
+# 囁き狂人
 class WhisperingMad extends Fanatic
     type:"WhisperingMad"
 
@@ -5211,7 +5203,7 @@ class Lover extends Player
     sunset:(game)->
         unless @flag?
             if @scapegoat
-                # 替身君は求愛しない
+                # 身代わりくんは求愛しない
                 @setFlag true
                 @setTarget ""
             else
@@ -5257,7 +5249,7 @@ class Lover extends Player
         null
 
 
-# 仆从选择者
+# 子分選択者
 class MinionSelector extends Player
     type:"MinionSelector"
     team:"Werewolf"
@@ -5378,7 +5370,7 @@ class Dog extends Player
             if pl.id==@id
                 return game.i18n.t "error.common.noSelectSelf"
             pl.touched game,@id
-            # 飼い主を选择した
+            # 飼い主を選択した
             log=
                 mode:"skill"
                 to:@id
@@ -5469,7 +5461,7 @@ class Dictator extends Player
         unless pl?
             return game.i18n.t "error.common.nonexistentPlayer"
         pl.touched game,@id
-        @setTarget playerid    # 处刑する人
+        @setTarget playerid    # 処刑する人
         log=
             mode:"system"
             comment: game.i18n.t "roles:Dictator.select", {name: @name, target: pl.name}
@@ -5497,7 +5489,7 @@ class SeersMama extends Player
     sunset:(game)->
         unless @flag
             # まだ能力を実行していない
-            # 占卜师を探す
+            # 占い師を探す
             divs = game.players.filter (pl)->pl.isJobType "Diviner"
             divsstr=if divs.length>0
                 game.i18n.t "roles:SeersMama.result", {name: @name, results: divs.map((x)->x.name).join(','), count: divs.length}
@@ -5518,7 +5510,7 @@ class Trapper extends Player
     sunset:(game)->
         @setTarget null
         if game.day==1
-            # 一日目は护卫しない
+            # 一日目は護衛しない
             @setTarget ""  # 誰も守らない
         # 護衛対象がいない
         targets = game.players.filter (pl)-> !pl.dead
@@ -5549,7 +5541,7 @@ class Trapper extends Player
             return
         newpl=Player.factory null, game, pl,null,TrapGuarded   # 守られた人
         pl.transProfile newpl
-        newpl.cmplFlag=@id  # 护卫元cmplFlag
+        newpl.cmplFlag=@id  # 護衛元cmplFlag
         pl.transform game,newpl,true
         null
 class WolfBoy extends Madman
@@ -5577,7 +5569,7 @@ class WolfBoy extends Madman
             return
         newpl=Player.factory null, game, pl,null,Lycanized
         pl.transProfile newpl
-        newpl.cmplFlag=@id  # 护卫元cmplFlag
+        newpl.cmplFlag=@id  # 護衛元cmplFlag
         pl.transform game,newpl,true
         null
 class Hoodlum extends Player
@@ -5698,10 +5690,10 @@ class QuantumPlayer extends Player
         if tarobj.Diviner
             pl=game.getPlayer tarobj.Diviner
             if pl?
-                # 一旦自己が占卜师のやつ以外排除
+                # 一旦自分が占い師のやつ以外排除
                 pats=game.quantum_patterns.filter (obj)=>
                     obj[@id].jobtype=="Diviner" && obj[@id].dead==false
-                # 1つ選んで占卜结果を决定
+                # 1つ選んで占い結果を決定
                 if pats.length>0
                     index=Math.floor Math.random()*pats.length
                     j=pats[index][tarobj.Diviner].jobtype
@@ -5746,7 +5738,7 @@ class QuantumPlayer extends Player
                         if value.jobtype=="Werewolf" && value.dead==false && value.rank<min
                             min=value.rank
                     if obj[@id].jobtype=="Werewolf" && obj[@id].rank==min && obj[@id].dead==false
-                        # 自己が筆頭人狼
+                        # 自分が筆頭人狼
                         if obj[pl.id].jobtype == "Werewolf"# || obj[pl.id].dead==true
                             # 襲えない
                             false
@@ -5766,7 +5758,7 @@ class QuantumPlayer extends Player
             # 人狼がかったぞ!!!!!
             true
         else if flag.Werewolf==0 && team=="Human"
-            # 人类がかったぞ!!!!!
+            # 人間がかったぞ!!!!!
             true
         else
             # よくわからないぞ!
@@ -5813,13 +5805,13 @@ class QuantumPlayer extends Player
         # 可能性を排除する
         pats=[]
         if found=="punish"
-            # 处刑されたときは既に死んでいた可能性を排除
+            # 処刑されたときは既に死んでいた可能性を排除
             pats=game.quantum_patterns.filter (obj)=>
                 obj[@id].dead==false
         else
             pats=game.quantum_patterns
         if pats.length
-            # 1つ選んで职业を决定
+            # 1つ選んで役職を決定
             index=Math.floor Math.random()*pats.length
             tjt=pats[index][@id].jobtype
             trk=pats[index][@id].rank
@@ -6214,7 +6206,7 @@ class WanderingGuard extends Player
     sunset:(game)->
         @setTarget null
         if game.day==1
-            # 猎人は一日目护卫しない
+            # 狩人は一日目護衛しない
             @setTarget ""  # 誰も守らない
             return
 
@@ -6259,7 +6251,7 @@ class WanderingGuard extends Player
             return
         newpl=Player.factory null, game, pl,null,Guarded   # 守られた人
         pl.transProfile newpl
-        newpl.cmplFlag=@id  # 护卫元cmplFlag
+        newpl.cmplFlag=@id  # 護衛元cmplFlag
         pl.transform game,newpl,true
         null
     beforebury:(game,type)->
@@ -6267,7 +6259,7 @@ class WanderingGuard extends Player
         if type=="day"
             # 昼になったとき
             if game.players.filter((x)->x.dead && x.found).length==0
-                # 誰も死ななかった!护卫できない
+                # 誰も死ななかった!護衛できない
                 pl=game.getPlayer @target
                 if pl?
                     log=
@@ -6369,7 +6361,7 @@ class FrankensteinsMonster extends Player
     dying:(game, found)->
         super
         if found=="punish"
-            # 处刑で死んだらもうひとり处刑できる
+            # 処刑で死んだらもうひとり処刑できる
             game.votingbox.addPunishedNumber 1
     beforebury:(game,type,deads)->
         return false if @dead
@@ -6751,7 +6743,7 @@ class BadLady extends Player
     sleeping:->@flag?.set
     sunset:(game)->
         unless @flag?.set
-            # まだ恋人未设定
+            # まだ恋人未設定
             if @scapegoat
                 @setFlag {
                     set:true
@@ -6865,7 +6857,7 @@ class DrawGirl extends Player
             splashlog game.id,game,log
             @setFlag ""
             @addGamelog game,"drawgirlpower",null,null
-# 慎重的狼
+# 慎重な狼
 class CautiousWolf extends Werewolf
     type:"CautiousWolf"
     makeJobSelection:(game, isvote)->
@@ -6881,7 +6873,7 @@ class CautiousWolf extends Werewolf
         if playerid!=""
             super
             return
-        # 不袭击場合
+        # 襲撃しない場合
         game.werewolf_target.push {
             from:@id
             to:""
@@ -6893,7 +6885,7 @@ class CautiousWolf extends Werewolf
         splashlog game.id,game,log
         game.splashjobinfo game.players.filter (x)=>x.id!=playerid && x.isWerewolf()
         null
-# 烟火师
+# 花火師
 class Pyrotechnist extends Player
     type:"Pyrotechnist"
     formType: FormType.optionalOnce
@@ -6916,7 +6908,7 @@ class Pyrotechnist extends Player
         null
     checkJobValidity:(game,query)->
         if query.jobtype=="Pyrotechnist"
-            # 対象选择は不要
+            # 対象選択は不要
             return true
         return super
     makeJobSelection:(game, isvote)->
@@ -6924,18 +6916,20 @@ class Pyrotechnist extends Player
             []
         else super
 
-# 面包店
+# パン屋
 class Baker extends Player
     type:"Baker"
     sleeping:->true
     sunrise:(game)->
-        # 最初の1人が面包店ログを管理
+        # 最初の1人がパン屋ログを管理
         bakers=game.players.filter (x)->x.isJobType "Baker"
         firstBakery=bakers[0]
         if firstBakery?.id==@id
             # わ た し だ
+            innerBakers = firstBakery.accessByJobTypeAll "Baker"
+            if innerBakers[0]?.objid == @objid
             if bakers.some((x)->!x.dead)
-                # 生存面包店がいる
+                # 生存パン屋がいる
                 if @flag=="done"
                     @setFlag null
                 log=
@@ -6943,7 +6937,7 @@ class Baker extends Player
                     comment: game.i18n.t "roles:Baker.alive"
                 splashlog game.id,game,log
             else if @flag!="done"
-                # 全员死亡していてまたログを出していない
+                # 全員死亡していてまたログを出していない
                 log=
                     mode:"system"
                     comment: game.i18n.t "roles:Baker.dead"
@@ -7007,7 +7001,7 @@ class Blasphemy extends Player
         return false if @dead
         if @flag
             # まだ狐を作ってないときは耐える
-            # 狐が全员死んでいたら自殺
+            # 狐が全員死んでいたら自殺
             unless game.players.some((x)->!x.dead && x.isFox())
                 @die game,"foxsuicide"
         return false
@@ -7097,7 +7091,7 @@ class Patissiere extends Player
     sunset:(game)->
         unless @flag?
             if @scapegoat
-                # 替身君はチョコを配らない
+                # 身代わりくんはチョコを配らない
                 @setFlag true
                 @setTarget ""
             else
@@ -7671,7 +7665,7 @@ class MadScientist extends Madman
 
         pl = game.getPlayer @target
         return if pl.dead
-        # 蘇生に成功したら胜利条件を変える
+        # 蘇生に成功したら勝利条件を変える
         newpl=Player.factory null, game, pl,null,WolfMinion    # WolfMinion
         pl.transProfile newpl
         pl.transform game,newpl,true
@@ -7796,7 +7790,7 @@ class Twin extends Player
         return false
     makejobinfo:(game, result)->
         super
-        # 双胞胎が分かる
+        # 双子が分かる
         result.twins = game.players.filter((x)-> x.isJobType "Twin").map (x)-> x.publicinfo()
 
 class Hunter extends Player
@@ -7828,7 +7822,7 @@ class Hunter extends Player
     makeJobSelection:(game, isvote)->
         unless isvote
             result = super
-            # 選択中の狩猎者は除く
+            # 選択中のハンターは除く
             result = result.filter (x)->
                 pl = game.getPlayer x.value
                 hunters = [
@@ -8377,7 +8371,7 @@ class GameMaster extends Player
                         return true
                 return false
 
-# 帮手
+# ヘルパー
 class Helper extends Player
     type:"Helper"
     team:""
@@ -8393,10 +8387,10 @@ class Helper extends Player
     isListener:(game,log)->
         pl=game.getPlayer @flag
         unless pl?
-            # 自律行動帮手?
+            # 自律行動ヘルパー?
             return super
         if pl.isJobType "Helper"
-            # 帮手の帮手の場合は听不到（無限ループ防止）
+            # ヘルパーのヘルパーの場合は聞こえない（無限ループ防止）
             return false
         return pl.isListener game,log
     getSpeakChoice:(game)->
@@ -8417,7 +8411,7 @@ class Helper extends Player
             to:playerid
             comment: game.i18n.t "roles:Helper.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
-        # 自己の表記を改める
+        # 自分の表記を改める
         game.splashjobinfo [this]
         null
 
@@ -8439,7 +8433,7 @@ class Helper extends Player
             writeGlobalJobInfo game, pl, result
         null
 
-# 开始前のやつだ!!!!!!!!
+# 開始前のやつだ!!!!!!!!
 class Waiting extends Player
     type:"Waiting"
     team:""
@@ -8477,7 +8471,7 @@ class Waiting extends Player
             return result
         else super
     job:(game,target)->
-        # 希望职业
+        # 希望役職
         game.rolerequesttable[@id]=target
         if target
             log=
@@ -8509,11 +8503,11 @@ class Watching extends Player
 
 
 
-# 複合职业 Player.factoryで適切に生成されることを期待
-# superはメイン职业 @mainにメイン @subにサブ
+# 複合役職 Player.factoryで適切に生成されることを期待
+# superはメイン役職 @mainにメイン @subにサブ
 # @cmplFlag も持っていい
 class Complex
-    cmplType:"Complex"  # 複合親そのものの名字
+    cmplType:"Complex"  # 複合親そのものの名前
     isComplex:->true
     getJobname:->@main.getJobname()
     getMainJobname:->@main.getMainJobname()
@@ -8812,9 +8806,9 @@ class Friend extends Complex    # 恋人
             return @cmplFlag
         else
             return @main.getPartner()
-# 圣职者にまもられた人
+# 聖職者にまもられた人
 class HolyProtected extends Complex
-    # cmplFlag: 护卫元
+    # cmplFlag: 護衛元
     cmplType:"HolyProtected"
     checkDeathResistance:(game, found)->
         if found in ["gone-day", "gone-night"]
@@ -8845,9 +8839,9 @@ class CultMember extends Complex
             name: @game.i18n.t "roles:CultMember.name"
             type:"CultMember"
         }
-# 猎人に守られた人
+# 狩人に守られた人
 class Guarded extends Complex
-    # cmplFlag: 护卫元ID
+    # cmplFlag: 護衛元ID
     cmplType:"Guarded"
     checkDeathResistance:(game, found, from)->
         unless found in ["werewolf","vampire"]
@@ -8938,9 +8932,9 @@ class Drunk extends Complex
     isDrunk:->true
     getSpeakChoice:(game)->
         Human.prototype.getSpeakChoice.call @,game
-# 陷阱师守られた人
+# 罠師守られた人
 class TrapGuarded extends Complex
-    # cmplFlag: 护卫元ID
+    # cmplFlag: 護衛元ID
     cmplType:"TrapGuarded"
     midnight:(game,midnightSort)->
         if @main.isComplex() || @main.midnightSort == midnightSort
@@ -8948,13 +8942,13 @@ class TrapGuarded extends Complex
         if @sub?.isComplex() || @sub?.midnightSort == midnightSort
             @sub?.midnight? game,midnightSort
 
-        # 猎人とかぶったら猎人が死んでしまう!!!!!
+        # 狩人とかぶったら狩人が死んでしまう!!!!!
         # midnight: 狼の襲撃よりも前に行われることが保証されている処理
         return if midnightSort != @midnightSort
         wholepl=game.getPlayer @id  # 一番表から見る
         result=@checkGuard game,wholepl
         if result
-            # 猎人がいた!（罠も無効）
+            # 狩人がいた!（罠も無効）
             wholepl = game.getPlayer @id
             @checkTrap game, wholepl
     # midnight処理用
@@ -8971,7 +8965,7 @@ class TrapGuarded extends Complex
             return result
         else
             # あった!
-            # cmplFlag: 护卫元の猎人
+            # cmplFlag: 護衛元の狩人
             gu=game.getPlayer pl.cmplFlag
             if gu?
                 tr = game.getPlayer @cmplFlag   # 罠し
@@ -9056,7 +9050,7 @@ class Counseled extends Complex
             name: @game.i18n.t "roles:Counseled.name"
             type:"Counseled"
         }
-# 巫女のガードがある状态
+# 巫女のガードがある状態
 class MikoProtected extends Complex
     cmplType:"MikoProtected"
     checkDeathResistance:(game, found)->
@@ -9104,7 +9098,7 @@ class Threatened extends Complex
         return []
     getSpeakChoice:(game)->
         Human.prototype.getSpeakChoice.call @,game
-# 碍事的狂人に邪魔された(未完成)
+# 邪魔狂人に邪魔された(未完成)
 class DivineObstructed extends Complex
     # cmplFlag: 邪魔元ID
     cmplType:"DivineObstructed"
@@ -9186,7 +9180,7 @@ class PhantomStolen extends Complex
         super
         for key,value of @cmplFlag
             obj[key]=value
-class KeepedLover extends Complex    # 恶女に手玉にとられた（見た目は恋人）
+class KeepedLover extends Complex    # 悪女に手玉にとられた（見た目は恋人）
     # cmplFlag: 相方のid
     cmplType:"KeepedLover"
     getJobname:-> @game.i18n.t "roles:KeepedLover.jobname", {jobname: @main.getJobname()}
@@ -9210,7 +9204,7 @@ class KeepedLover extends Complex    # 恶女に手玉にとられた（見た�
             result.friends=fr
 # 花火を見ている
 class WatchingFireworks extends Complex
-    # cmplFlag: 烟火师のid
+    # cmplFlag: 花火師のid
     cmplType:"WatchingFireworks"
     sleeping:->true
     jobdone:->true
@@ -9219,7 +9213,7 @@ class WatchingFireworks extends Complex
     sunrise:(game)->
         @mcall game,@main.sunrise,game
         @sub?.sunrise? game
-        # もう终了
+        # もう終了
         @uncomplex game
     deadsunrise:(game)->
         @mcall game,@main.deadsunrise,game
@@ -9237,7 +9231,7 @@ class WatchingFireworks extends Complex
             return super
 # 爆弾魔に爆弾を仕掛けられた人
 class BombTrapped extends Complex
-    # cmplFlag: 护卫元ID
+    # cmplFlag: 護衛元ID
     cmplType:"BombTrapped"
     midnight:(game,midnightSort)->
         if @main.isComplex() || @main.midnightSort == midnightSort
@@ -9245,7 +9239,7 @@ class BombTrapped extends Complex
         if @sub?.isComplex() || @sub?.midnightSort == midnightSort
             @sub?.midnight? game,midnightSort
 
-        # 猎人とかぶったら猎人が死んでしまう!!!!!
+        # 狩人とかぶったら狩人が死んでしまう!!!!!
         # midnight: 狼の襲撃よりも前に行われることが保証されている処理
         if midnightSort != @midnightSort then return
         wholepl=game.getPlayer @id  # 一番表から見る
@@ -9272,15 +9266,15 @@ class BombTrapped extends Complex
             return result
         else
             # あった!
-            # cmplFlag: 护卫元の猎人
+            # cmplFlag: 護衛元の狩人
             gu=game.getPlayer pl.cmplFlag
             if gu?
                 tr = game.getPlayer @cmplFlag.bomber   #爆弾魔
                 if tr?
                     tr.addGamelog game,"bombTrappedGuard",null,@id
-                # 护卫元が死ぬ
+                # 護衛元が死ぬ
                 gu.die game,"bomb"
-                # 自己も死ぬ
+                # 自分も死ぬ
                 @die game,"bomb"
 
 
@@ -9292,7 +9286,7 @@ class BombTrapped extends Complex
     dying:(game, found, from)->
         super
         if found=="punish"
-            # 处刑された場合は处刑者の中から選んでしぬ
+            # 処刑された場合は処刑者の中から選んでしぬ
             # punishのときはfromがidの配列
             if from? && from.length>0
                 pls=from.map (id)->game.getPlayer id
@@ -9333,7 +9327,7 @@ class FoxMinion extends Complex
         @die game,"curse"
         player.addGamelog game,"cursekill",null,@id # 呪殺した
 
-# 丑时之女に呪いをかけられた
+# 丑刻参に呪いをかけられた
 class DivineCursed extends Complex
     cmplType:"DivineCursed"
     sunset:(game)->
@@ -9378,7 +9372,7 @@ class Whited extends Complex
     getFortuneResult:-> FortuneResult.human
     getPsychicResult:-> PsychicResult.human
 
-# 占い结果吸血鬼化
+# 占い結果ヴァンパイア化
 class VampireBlooded extends Complex
     cmplType:"VampireBlooded"
     getFortuneResult:-> FortuneResult.vampire
@@ -9398,7 +9392,7 @@ class UnderHypnosis extends Complex
     touched:(game,from)->
     divined:(game,player)->
     voteafter:(game,target)->
-# 狮子舞の加護
+# 獅子舞の加護
 class VoteGuarded extends Complex
     cmplType:"VoteGuarded"
     modifyMyVote:(game, vote)->
@@ -9410,8 +9404,8 @@ class VoteGuarded extends Complex
         if vote.votes > 0
             vote.votes--
         vote
-
-# 南瓜魔の呪い
+        
+# かぼちゃ魔の呪い
 class PumpkinCostumed extends Complex
     cmplType:"PumpkinCostumed"
     getFortuneResult:-> FortuneResult.pumpkin
@@ -9484,7 +9478,7 @@ class Decider extends Complex
         return result if result?
         game.votingbox.votePriority this,1  #優先度を1上げる
         null
-# 权力者
+# 権力者
 class Authority extends Complex
     cmplType:"Authority"
     getJobname:-> @game.i18n.t "roles:Authority.jobname", {jobname: @main.getJobname()}
@@ -9494,7 +9488,7 @@ class Authority extends Complex
         game.votingbox.votePower this,1 #票をひとつ増やす
         null
 
-# 炼成人狼の职业
+# ケミカル人狼の役職
 class Chemical extends Complex
     cmplType:"Chemical"
     getJobname:->
@@ -9682,38 +9676,33 @@ class Chemical extends Complex
     makejobinfo:(game,result)->
         @main.makejobinfo game,result
         @sub?.makejobinfo? game,result
+    getOpenForms:(game)->
+        res1 = @main.getOpenForms game
+        if @sub?
+            res2 = @sub.getOpenForms game
+            res1.push res2...
+        return res1
 
 games={}
 
-# 游戏のGC
+# ゲームのGC
 new cron.CronJob("0 0 * * * *", ->
     # いらないGameを消す
-    tm=Date.now()-3600000   # 1时间前
-
-    games_length_b = 0
-    for id,game of games
-        games_length_b++
-
+    tm=Date.now()-3600000   # 1時間前
     for id,game of games
         if game.finished
             # 終わっているやつが消す候補
             if (!game.last_time?) || (game.last_time<tm)
                 # 十分古い
-                console.log "delete game:"+id
                 delete games[id]
-
-    games_length_a = 0
-    for id,game of games
-        games_length_a++
-    console.log "length of games before:"+games_length_b
-    console.log "length of games after :"+games_length_a
+    return
 , null, true, "Asia/Shanghai")
 
 
-# 游戏を得る
+# ゲームを得る
 getGame=(id)->
 
-# 仕事一览
+# 仕事一覧
 jobs=
     Human:Human
     Werewolf:Werewolf
@@ -9833,7 +9822,7 @@ jobs=
     # 特殊
     GameMaster:GameMaster
     Helper:Helper
-    # 开始前
+    # 開始前
     Waiting:Waiting
     Watching:Watching
 
@@ -10044,7 +10033,7 @@ module.exports.actions=(req,res,ss)->
             for type of Shared.game.categories
                 joblist["category_#{type}"] = 0
             #frees=room.players.length  # 参加者の数
-            # プレイヤーと其他に分類
+            # プレイヤーとその他に分類
             players=[]
             supporters=[]
             for pl in room.players
@@ -10056,7 +10045,7 @@ module.exports.actions=(req,res,ss)->
                 else
                     supporters.push pl
             frees=players.length
-            if query.scapegoat=="on"    # 替身君
+            if query.scapegoat=="on"    # 身代わりくん
                 frees++
             playersnumber=frees
             # 人数の確認
@@ -10067,7 +10056,7 @@ module.exports.actions=(req,res,ss)->
                 # 多すぎてたえられない
                 res game.i18n.t "error.gamestart.tooManyQuantum", {count: 19}
                 return
-            # 炼成人狼の場合
+            # ケミカル人狼の場合
             if query.chemical=="on"
                 frees *= 2
                 # 黑暗火锅と量子人狼は無理
@@ -10102,7 +10091,7 @@ module.exports.actions=(req,res,ss)->
 
                 safety={
                     jingais:false   # 人外の数を調整
-                    teams:false     # 阵营の数を調整
+                    teams:false     # 陣営の数を調整
                     jobs:false      # 職どうしの数を調整
                     strength:false  # 職の強さも考慮
                     reverse:false   # 職の強さが逆
@@ -10151,7 +10140,7 @@ module.exports.actions=(req,res,ss)->
                             # これは出してはいけない指定になっている
                             exceptions.push job
                             excluded_exceptions.push job
-                # メアリーの特殊処理（安全性高じゃないとでない）
+                # メアリーの特殊処理（セーフティ高じゃないとでない）
                 if query.yaminabe_hidejobs=="" || !safety.jobs
                     exceptions.push "BloodyMary"
                     special_exceptions.push "BloodyMary"
@@ -10292,10 +10281,10 @@ module.exports.actions=(req,res,ss)->
                     nonavs[job] = true
 
                 if safety.teams
-                    # 阵营調整もする
-                    # 人狼阵营
+                    # 陣営調整もする
+                    # 人狼陣営
                     if frees>0
-                        # 望ましい人狼阵营の人数は25〜350%くらい
+                        # 望ましい人狼陣営の人数は25〜350%くらい
                         wolfteam_n = Math.round (playersnumber*(0.25 + Math.random()*0.1))
                         # ただし半数を超えない
                         plsh = Math.ceil(playersnumber/2)
@@ -10312,7 +10301,7 @@ module.exports.actions=(req,res,ss)->
                             frees -= diff
                         # 狂人の処理終了
                         addCategoryToExceptions "Madman"
-                    # 村人阵营
+                    # 村人陣営
                     if frees>0
                         # 50%〜60%くらい
                         humanteam_n =
@@ -10348,7 +10337,7 @@ module.exports.actions=(req,res,ss)->
                             exceptions.push "Immoral"
                     else
                         exceptions.push "Immoral"
-                    # 恋人阵营
+                    # 恋人陣営
                     if frees>0
                         if 17>=playersnumber>=12
                             if Math.random()<0.1 && !nonavs.Cupid
@@ -10395,8 +10384,8 @@ module.exports.actions=(req,res,ss)->
 
                 # 占い確定
                 if safety.teams || safety.jobs
-                    # 村人阵营
-                    # 占卜师いてほしい
+                    # 村人陣営
+                    # 占い師いてほしい
                     if joblist.category_Human > 0
                         if Math.random()<0.75 && !nonavs.Diviner
                             joblist.Diviner++
@@ -10450,7 +10439,7 @@ module.exports.actions=(req,res,ss)->
                         if Math.random()<0.8
                             exceptions.push "SantaClaus"
                     unless month==6 && 26<=d || month==7 && d<=16
-                        # 期間外は烟火师は出にくい
+                        # 期間外は花火師は出にくい
                         if Math.random()<0.7
                             exceptions.push "Pyrotechnist"
                     else
@@ -10503,12 +10492,12 @@ module.exports.actions=(req,res,ss)->
                             joblist.Shishimai++
                             frees--
                     else
-                        # 狮子舞がでにくい季節
+                        # 獅子舞がでにくい季節
                         if Math.random()<0.8
                             exceptions.push "Shishimai"
 
                     if month==9 && 30<=d<=31
-                        # ハロウィンなのでかぼちゃと妖怪
+                        # ハロウィンなのでかぼちゃとおばけ
                         if Math.random()<0.2 && frees>0 && !nonavs.Pumpkin
                             joblist.Pumpkin ?= 0
                             joblist.Pumpkin++
@@ -10544,7 +10533,7 @@ module.exports.actions=(req,res,ss)->
                         return true
                     return false
 
-                # 安全性超用
+                # セーフティ超用
                 trial_count=0
                 trial_max=if safety.strength then 40 else 1
                 best_list=null
@@ -10615,9 +10604,9 @@ module.exports.actions=(req,res,ss)->
                             # 職どうしの兼ね合いを考慮
                             switch job
                                 when "Psychic","RedHood"
-                                    # 1人のとき灵能は意味ない
+                                    # 1人のとき霊能は意味ない
                                     if countCategory("Werewolf")==1
-                                        # 狼1人だと灵能が意味ない
+                                        # 狼1人だと霊能が意味ない
                                         continue
                                 when "Couple"
                                     # 共有者はひとりだと寂しい
@@ -10626,7 +10615,7 @@ module.exports.actions=(req,res,ss)->
                                             #共有者が入る隙間はない
                                             continue
                                 when "Twin"
-                                    # 双胞胎も
+                                    # 双子も
                                     if joblist.Twin==0
                                         unless init "Twin","Human"
                                             continue
@@ -10637,7 +10626,7 @@ module.exports.actions=(req,res,ss)->
                                             #共有者が入る隙間はない
                                             continue
                                 when "Noble"
-                                    # 贵族は奴隶がほしい
+                                    # 貴族は奴隷がほしい
                                     if joblist.Slave==0
                                         unless init "Slave","Human"
                                             continue
@@ -10647,7 +10636,7 @@ module.exports.actions=(req,res,ss)->
                                             continue
                                 when "OccultMania"
                                     if joblist.Diviner==0 && Math.random()<0.5
-                                        # 占卜师いないと出现確率低い
+                                        # 占い師いないと出現確率低い
                                         continue
                                 when "QueenSpectator"
                                     # 2人いたらだめ
@@ -10656,15 +10645,15 @@ module.exports.actions=(req,res,ss)->
                                     if Math.random()>0.1
                                         # 90%の確率で弾く
                                         continue
-                                    # 女王观战者はガードがないと不安
+                                    # 女王観戦者はガードがないと不安
                                     if joblist.Guard==0 && joblist.Priest==0 && joblist.Trapper==0
                                         unless Math.random()<0.4 && init "Guard","Human"
                                             unless Math.random()<0.5 && init "Priest","Human"
                                                 unless init "Trapper","Human"
-                                                    # 护卫がいない
+                                                    # 護衛がいない
                                                     continue
                                 when "Spy2"
-                                    # 间谍IIは2人いるとかわいそうなので入れない
+                                    # スパイIIは2人いるとかわいそうなので入れない
                                     if joblist.Spy2>0 || joblist.QueenSpectator>0
                                         continue
                                     else if Math.random()>0.1
@@ -10679,15 +10668,15 @@ module.exports.actions=(req,res,ss)->
                                     if joblist.Diviner==0 && joblist.ApprenticeSeer==0 && joblist.PI==0
                                         continue
                                 when "LoneWolf","FascinatingWolf","ToughWolf","WolfCub"
-                                    # 魅惑的女狼はほかに人狼がいないと効果発揮しない
-                                    # 硬汉人狼はほかに狼いないと微妙、一匹狼は1人だけででると狂人が絶望
+                                    # 誘惑する女狼はほかに人狼がいないと効果発揮しない
+                                    # 一途な狼はほかに狼いないと微妙、一匹狼は1人だけででると狂人が絶望
                                     if countCategory("Werewolf")-(if category? then 1 else 0)==0
                                         continue
                                 when "BigWolf"
                                     # 強いので狼2以上
                                     if countCategory("Werewolf")-(if category? then 1 else 0)==0
                                         continue
-                                    # 灵能を出す
+                                    # 霊能を出す
                                     unless Math.random()<0.15 ||  init "Psychic","Human"
                                         continue
                                 when "BloodyMary"
@@ -10765,7 +10754,7 @@ module.exports.actions=(req,res,ss)->
                                 #console.log best_list
 
                 if safety.strength && best_list?
-                    # 安全性超
+                    # セーフティ超
                     joblist=best_list
 
                 if query.divineresult=="immediate" && DIVINER_NOIMMEDIATE_JOBS.some((job)-> joblist[job] > 0)
@@ -10804,7 +10793,7 @@ module.exports.actions=(req,res,ss)->
 
 
             else if query.jobrule!="特殊规则.自由配置"
-                # 配置に従ってアレする
+                # 配役に従ってアレする
                 func=Shared.game.getrulefunc query.jobrule
                 unless func
                     res game.i18n.t "error.gamestart.unknownCasting"
@@ -10824,7 +10813,7 @@ module.exports.actions=(req,res,ss)->
                 joblist.Human = frees - sum
                 ruleinfo_str = getrulestr game.i18n, query.jobrule, joblist
             if query.yaminabe_hidejobs!="" && !(query.jobrule in ["特殊规则.黑暗火锅", "特殊规则.手调黑暗火锅", "特殊规则.Endless黑暗火锅"])
-                # 闇鍋以外で配役情報を公開しないときはアレする
+                # 黑暗火锅以外で配役情報を公開しないときはアレする
                 ruleinfo_str = ""
             if query.yaminabe_hidejobs != "" && query.jobrule == "特殊规则.自由配置"
                 # ルール名のみ
@@ -10833,7 +10822,7 @@ module.exports.actions=(req,res,ss)->
                 # ケミカル人狼の場合は表示
                 ruleinfo_str = "#{game.i18n.t "common.chemicalWerewolf"}　" + (ruleinfo_str ? "")
                 
-            if query.divineresult=="immediate" && ["WolfBoy", "ObstructiveMad", "Pumpkin", "Patissiere", "Hypnotist"].some((job)-> joblist[job] > 0)
+            if query.divineresult=="immediate" && DIVINER_NOIMMEDIATE_JOBS.some((job)-> joblist[job] > 0)
                 query.divineresult="sunrise"
                 log=
                     mode:"system"
@@ -10856,15 +10845,15 @@ module.exports.actions=(req,res,ss)->
 
 
             if query.yaminabe_hidejobs=="team"
-                # 阵营のみ公開モード
-                # 各阵营
+                # 陣営のみ公開モード
+                # 各陣営
                 teaminfos=[]
                 teamcount={}
                 for team of Shared.game.jobinfo
                     teamcount[team] = 0
                 for team,obj of Shared.game.jobinfo
                     for job,num of joblist
-                        #出现职业チェック
+                        #出現役職チェック
                         continue if num==0
                         if obj[job]?
                             # この陣営だ
@@ -10911,7 +10900,7 @@ module.exports.actions=(req,res,ss)->
                 ruleobj._jobquery["category_#{type}"] = query["category_#{type}"]
 
             game.setrule ruleobj
-            # 配置リストをセット
+            # 配役リストをセット
             game.joblist=joblist
             game.startoptions=options
             game.startplayers=players
@@ -10978,12 +10967,12 @@ module.exports.actions=(req,res,ss)->
                     logs:game.makelogs (doc.logs ? []), player
                 result=makejobinfo game,player,result
                 result.timer=if game.timerid?
-                    game.timer_remain-(Date.now()/1000-game.timer_start)    # 全体 - 経過时间
+                    game.timer_remain-(Date.now()/1000-game.timer_start)    # 全体 - 経過時間
                 else
                     null
                 result.timer_mode=game.timer_mode
                 if game.day==0
-                    # 开始前はプレイヤー情報配信しない
+                    # 開始前はプレイヤー情報配信しない
                     delete result.game.players
                 res result
 
@@ -11035,15 +11024,15 @@ module.exports.actions=(req,res,ss)->
                     log.mode="gm"
                     #log.name="游戏管理员"
             else
-                # 游戏している
+                # ゲームしている
                 unless player?
-                    # 观战者
+                    # 観戦者
                     log.mode="audience"
 
                 else if player.dead
                     # 天国
                     if player.isJobType "Spy" && player.flag=="spygone"
-                        # 间谍なら会話に参加できない
+                        # スパイなら会話に参加できない
                         log.mode="monologue"
                         log.to=player.id
                     else if query.mode=="monologue"
@@ -11067,13 +11056,13 @@ module.exports.actions=(req,res,ss)->
                         query.mode="monologue"
                     log.mode=query.mode
                 else
-                    # 狩猎者時間
+                    # ハンター時間
                     log.mode = "monologue"
 
 
             switch log.mode
                 when "monologue","heavenmonologue","helperwhisper"
-                    # helperwhisper:守り先が決まっていない帮手
+                    # helperwhisper:守り先が決まっていないヘルパー
                     log.to=player.id
                 when "heaven"
                     # 霊界の発言は悪霊憑きの発言になるかも
@@ -11125,7 +11114,7 @@ module.exports.actions=(req,res,ss)->
             log.userid=player.id
             dosp()
         else
-            # 房间情報から探す
+            # ルーム情報から探す
             Server.game.rooms.oneRoomS roomid,(room)=>
                 pl=room.players.filter((x)=>x.realid==req.session.userId)[0]
                 if pl?
@@ -11240,7 +11229,7 @@ module.exports.actions=(req,res,ss)->
             return
         player.setWill will
         res null
-    #拒绝复活
+    #蘇生辞退
     norevive:(roomid)->
         game=games[roomid]
         unless game?
@@ -11262,7 +11251,7 @@ module.exports.actions=(req,res,ss)->
             comment: game.i18n.t "system.declineRevival", {name: player.name}
             to:player.id
         splashlog roomid,game,log
-        # 全员に通知
+        # 全員に通知
         game.splashjobinfo()
         res null
 
@@ -11282,7 +11271,7 @@ splashlog=(roomid,game,log)->
         # GM
         #if game.gm&&!rev
         #   game.ss.publish.channel "room#{roomid}_gamemaster","log",log
-        # 其他
+        # その他
         game.participants.forEach (pl)->
             ls = makelogsFor game, pl, log
             for x in ls
@@ -11307,7 +11296,7 @@ makelogsFor=(game,player,log)->
         return [log]
 
     if log.mode=="werewolf" && game.rule.wolfsound=="aloud"
-        # 狼的远吠が能听到
+        # 狼の遠吠えが聞こえる
         otherslog=
             mode:"werewolf"
             comment: game.i18n.t "logs.werewolf.comment"
@@ -11339,23 +11328,23 @@ makelogsFor=(game,player,log)->
 # プレイヤーにログを見せてもよいか
 islogOK=(game,player,log)->
     # player: Player / null
-    return true if game.finished    # 终了ならtrue
+    return true if game.finished    # 終了ならtrue
     return true if player?.isJobType "GameMaster"
     unless player?
-        # 观战者
+        # 観戦者
         if log.mode in ["day","system","prepare","nextturn","audience","will","gm","gmaudience","probability_table"]
-            !log.to?    # 观战者にも公開
+            !log.to?    # 観戦者にも公開
         else if log.mode=="voteresult"
-            game.rule.voteresult!="hide"    # 投票结果公開なら公開
+            game.rule.voteresult!="hide"    # 投票結果公開なら公開
         else
-            false   # 其他は非公開
+            false   # その他は非公開
     else if log.mode=="gmmonologue"
-        # GM自言自语はGMにしか見えない
+        # GMの独り言はGMにしか見えない
         false
     else if player.dead && game.heavenview
         true
     else if log.mode=="heaven" && log.possess_name?
-        # 恶灵凭依についている霊界発言
+        # 悪霊憑きについている霊界発言
         false
     else if log.to? && !isLogTarget(log.to, player)
         # I'm not the target of this log
@@ -11415,7 +11404,7 @@ makejobinfo = (game,player,result={})->
         # voteopen is for old forms
         result.voteopen=false
         result.sleeping=true
-        # 投票が终了したかどうか（表单表示するかどうか判断）
+        # 投票が終了したかどうか（フォーム表示するかどうか判断）
         if plpl?
             # 参加者として
 
@@ -11483,7 +11472,7 @@ getrulestr = (i18n, rule, jobs={})->
             catName = i18n.t "roles:categoryName.#{type}"
             text+="#{catName}#{num} "
     return text
-# 闇鍋用の役職一覧ログを作成
+# 黑暗火锅用の役職一覧ログを作成
 getIncludedRolesStr = (i18n, joblist)->
     jobinfos = []
     for obj in Shared.game.categoryList
