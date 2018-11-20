@@ -216,6 +216,37 @@ found:
   goneDay: "{{name}} 因为没有及时投票猝死了。猝死是十分令人困扰的行为，请务必不要再犯。"
   goneNight: "{{name}} 因为没有及时使用夜间技能猝死了。猝死是十分令人困扰的行为，请务必不要再犯。"
   fallback: "{{name}} 死了。"
+
+# Detailed reason of death
+foundDetail:
+  werewolf: "人狼的袭击"
+  werewolf2: "人狼的袭击"
+  poison: "毒药"
+  hinamizawa: "雏见泽症候群发作"
+  vampire: "吸血鬼的袭击"
+  vampire2: "吸血鬼的袭击"
+  witch: "魔女的毒药"
+  dog: "犬的袭击"
+  trap: "陷阱"
+  bomb: "炸弹"
+  marycurse: "玛丽的诅咒"
+  psycho: "变态杀人狂"
+  curse: "咒杀"
+  punish: "处刑"
+  spygone: "间谍失踪"
+  deathnote: "心梗"
+  foxsuicide: "追随妖狐自尽"
+  friendsuicide: "追随恋人自尽"
+  twinsuicide: "追随双胞胎自尽"
+  infirm: "老死"
+  hunter: "被猎枪射杀"
+  gmpunish: "被GM处死"
+  gone-day: "昼间猝死"
+  crafty: "假死"
+  gone-night: "夜间猝死"
+  fallback: "未知原因"
+  situation: "{{name}} 的死因是 {{detail}}。"
+
 # Result of Game
 judge:
   human: "村子里的人狼已经被赶尽杀绝。"

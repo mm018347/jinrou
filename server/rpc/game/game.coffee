@@ -1685,61 +1685,21 @@ class Game
                 comment:situation
             splashlog @id,this,log
 
-            situation=switch x.found
-                #死因
-                when "werewolf","werewolf2"
-                    "人狼的袭击"
-                when "poison"
-                    "毒药"
-                when "hinamizawa"
-                    "雏见泽症候群发作"
-                when "vampire","vampire2"
-                    "吸血鬼的袭击"
-                when "witch"
-                    "魔女的毒药"
-                when "dog"
-                    "犬的袭击"
-                when "trap"
-                    "陷阱"
-                when "bomb"
-                    "炸弹"
-                when "marycurse"
-                    "玛丽的诅咒"
-                when "psycho"
-                    "变态杀人狂"
-                when "curse"
-                    "咒杀"
-                when "punish"
-                    "处刑"
-                when "spygone"
-                    "失踪"
-                when "deathnote"
-                    "心梗"
-                when "foxsuicide"
-                    "追随妖狐自尽"
-                when "friendsuicide"
-                    "追随恋人自尽"
-                when "twinsuicide"
-                    "追随双胞胎自尽"
-                when "infirm"
-                    "老死"
-                when "hunter"
-                    "被猎枪射杀"
-                when "gmpunish"
-                    "被GM处死"
-                when "gone-day"
-                    "昼间猝死"
-                when "crafty"
-                    "假死"
-                when "gone-night"
-                    "夜间猝死"
-                else
-                    "未知原因"
+            # Show invisible detail of death
+            if ["werewolf","werewolf2","poison","hinamizawa",
+                "vampire","vampire2","witch","dog","trap","bomb",
+                "marycurse","psycho","curse","punish","spygone","deathnote",
+                "foxsuicide","friendsuicide","twinsuicide","infirm","hunter",
+                "gmpunish","gone-day","gone-night","crafty"].includes x.found
+                detail = @i18n.t "foundDetail.#{x.found}"
+            else
+                detail = @i18n.t "foundDetail.fallback"
             log=
                 mode:"system"
                 to:-1
-                comment:"#{x.name} 的死因是 #{situation}"
+                comment: @i18n.t "foundDetail.situation",{name: x.name, detail: detail}
             splashlog @id,this,log
+
             if emma_alive.length > 0
                 # 閻魔用のログも出す
                 emma_log=switch x.found
@@ -3721,6 +3681,11 @@ class Poisoner extends Player
         pl=canbedead[r] # 被害者
         pl.die game,"poison"
         @addGamelog game,"poisonkill",null,pl.id
+        log=
+            mode:"skill"
+            to:-1
+            comment: game.i18n.t "roles:Poisoner.select", {name: @name, target: pl.name}
+        splashlog game.id,game,log
 
 class BigWolf extends Werewolf
     type:"BigWolf"
@@ -8831,6 +8796,12 @@ class HolyProtected extends Complex
             comment: game.i18n.t "roles:HolyProtected.guarded", {name: @name}
         splashlog game.id,game,log
         game.getPlayer(@cmplFlag).addGamelog game,"holyGJ",found,@id
+        # show invisible detail
+        log=
+            mode:"system"
+            to:-1
+            comment: game.i18n.t "roles:Priest.protected", {name: @name, found: game.i18n.t "foundDetail.#{found}"}
+        splashlog game.id,game,log
         if found == "werewolf"
             game.addGuardLog @id, AttackKind.werewolf, GuardReason.holy
 
@@ -9071,6 +9042,12 @@ class MikoProtected extends Complex
             return false
         # 耐える
         game.getPlayer(@id).addGamelog game,"mikoGJ",found
+        # show invisible detail
+        log=
+            mode:"system"
+            to:-1
+            comment: game.i18n.t "roles:Miko.protected", {name: @name, found: game.i18n.t "foundDetail.#{found}"}
+        splashlog game.id,game,log
         # 襲撃失敗理由を保存
         if found == "werewolf"
             game.addGuardLog @id, AttackKind.werewolf, GuardReason.holy
