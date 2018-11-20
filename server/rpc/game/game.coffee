@@ -1556,7 +1556,8 @@ class Game
                     continue
                 runners = x.accessByJobTypeAll "Fugitive"
                 for pl in runners
-                    if @skillTargetHook.get(pl.target) == actTarget
+                    if pl.flag?.day == @day && pl.flag?.id == actTarget
+                        # 今夜この家に逃亡している逃亡者だ
                         x.die this, "werewolf2", target.from
 
             if !t.dead
@@ -4013,7 +4014,9 @@ class Fugitive extends Player
     hasDeadResistance:->true
     sunset:(game)->
         @setTarget null
-        if game.day<=1 #&& game.rule.scapegoat!="off"    # 一日目は逃げない
+        # 実際に逃亡したフラグを立てる
+        @setFlag null
+        if game.day<=1 && game.rule.scapegoat!="off"    # 一日目は逃げない
             @setTarget ""
         # 可能な逃走先がいない場合
         als=game.players.filter (x)=>!x.dead && x.id!=@id
@@ -4050,6 +4053,11 @@ class Fugitive extends Player
         # 人狼の家に逃げていたら即死
         pl=game.getPlayer game.skillTargetHook.get @target
         return unless pl?
+        # 今夜の逃亡先を記録
+        @setFlag {
+            day: game.day
+            id: pl.id
+        }
         if pl.isWerewolf() && pl.getTeam() != "Human"
             @die game,"werewolf2"
         else if pl.isVampire() && pl.getTeam() != "Human"
@@ -6928,21 +6936,21 @@ class Baker extends Player
             # わ た し だ
             innerBakers = firstBakery.accessByJobTypeAll "Baker"
             if innerBakers[0]?.objid == @objid
-            if bakers.some((x)->!x.dead)
-                # 生存パン屋がいる
-                if @flag=="done"
-                    @setFlag null
-                log=
-                    mode:"system"
-                    comment: game.i18n.t "roles:Baker.alive"
-                splashlog game.id,game,log
-            else if @flag!="done"
-                # 全員死亡していてまたログを出していない
-                log=
-                    mode:"system"
-                    comment: game.i18n.t "roles:Baker.dead"
-                splashlog game.id,game,log
-                @setFlag "done"
+                if bakers.some((x)->!x.dead)
+                    # 生存パン屋がいる
+                    if @flag=="done"
+                        @setFlag null
+                    log=
+                        mode:"system"
+                        comment: game.i18n.t "roles:Baker.alive"
+                    splashlog game.id,game,log
+                else if @flag!="done"
+                    # 全員死亡していてまたログを出していない
+                    log=
+                        mode:"system"
+                        comment: game.i18n.t "roles:Baker.dead"
+                    splashlog game.id,game,log
+                    @setFlag "done"
 
     deadsunrise:(game)->
         Baker::sunrise.call this, game
