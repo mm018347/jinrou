@@ -128,7 +128,7 @@ export class Logs extends React.Component<IPropLogs, IStateLogs> {
           );
         })}
         {renderingState.pendingLogNumber > 0 ? (
-          <PendingLogMessage>読み込み中...</PendingLogMessage>
+          <PendingLogMessage>正在读取...</PendingLogMessage>
         ) : null}
       </LogWrapper>
     );
