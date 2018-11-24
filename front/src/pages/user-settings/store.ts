@@ -1,7 +1,6 @@
 import { observable, action } from 'mobx';
 import { i18n } from '../../i18n';
 import { deepClone } from '../../util/deep-clone';
-import { TranslationFunction } from 'i18next';
 import {
   ColorProfileData,
   defaultColorProfile1,
@@ -18,7 +17,7 @@ export class UserSettingsStore {
    * Current tab.
    */
   @observable
-  public tab: Tab = initTab('color');
+  public tab: Tab = initTab('phone');
   /**
    * Current profile of colors.
    */

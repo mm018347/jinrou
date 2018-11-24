@@ -1626,8 +1626,12 @@ class Game
         while safety_counter++ < 100
             next_loop_flag = false
             newdeads=@players.filter (x)->
-                x.dead && x.found && deads.every((y)-> x.id != y.id)
-            deads.push newdeads...
+                x.dead && x.found && deads.every((y)-> x.id != y.pl.id)
+            for x in newdeads
+                deads.push {
+                    pl: x
+                    found: x.found
+                }
 
             alives=@players.filter (x)->!x.dead
             @players.forEach (x)=>
@@ -1635,7 +1639,7 @@ class Game
                 if res
                     next_loop_flag = true
             newdeads=@players.filter (x)->
-                x.dead && x.found && deads.every((y)-> x.id != y.id)
+                x.dead && x.found && deads.every((y)-> x.id != y.pl.id)
             if newdeads.length == 0 && !next_loop_flag
                 # もう新しく死んだ人はいない
                 break
@@ -1650,8 +1654,9 @@ class Game
             else
                 @heavenview=false
         deads=shuffle deads # 順番バラバラ
-        deads.forEach (x)=>
-            situation=switch x.found
+        deads.forEach (obj)=>
+            x = obj.pl
+            situation=switch obj.found
                 #死因
                 when "werewolf","werewolf2","poison","hinamizawa","vampire","vampire2","witch","dog","trap","bomb","marycurse","psycho","crafty"
                     @i18n.t "found.normal", {name: x.name}
@@ -1702,7 +1707,7 @@ class Game
 
             if emma_alive.length > 0
                 # 閻魔用のログも出す
-                emma_log=switch x.found
+                emma_log=switch obj.found
                     when "werewolf","werewolf2","crafty"
                         "werewolf"
                     when "poison","witch"
@@ -1744,7 +1749,7 @@ class Game
                 id:x.id
                 type:x.type
                 event:"found"
-                flag:x.found
+                flag:obj.found
             }
             x.setDead x.dead,"" #発見されました
             @ss.publish.user x.realid,"refresh",{id:@id}
@@ -2906,6 +2911,7 @@ class Player
     # サブ役職の情報を除いた役職名を得る
     getMainJobname:-> @getJobname()
     # getMainJobnameのjobDisp版
+    # @param chemicalLeft {boolean}: ケミカル役職で左側のみにするかどうか
     getMainJobDisp:-> @getJobDisp()
     # 村人かどうか
     isHuman:->!@isWerewolf()
@@ -5131,11 +5137,13 @@ class OccultMania extends Player
         p=game.getPlayer game.skillTargetHook.get @target
         return unless p?
         # 変化先決定
-        type="Human"
-        if p.isJobType "Diviner"
-            type="Diviner"
-        else if p.isWerewolf()
-            type="Werewolf"
+        type = "Human"
+        # OccultMania prefers Werewolf to Diviner,
+        # so that selecting Werewolf with Diviner set leads to Werewolf.
+        if p.isWerewolf()
+            type = "Werewolf"
+        else if p.isJobType "Diviner"
+            type = "Diviner"
 
         newpl=Player.factory type, game
         @transProfile newpl
@@ -6416,7 +6424,11 @@ class BloodyMary extends Player
                 after = game.i18n.t "roles:jobname.BloodyMary"
                 top = game.getPlayer @id
                 if top?
-                    top.setOriginalJobname top.originalJobname.replace(after,before).replace(before,after)
+                    top.setOriginalJobname replaceAll(
+                        replaceAll(top.originalJobname,after,before),
+                        before,after
+                    )
+
         super
     sunset:(game)->
         @setTarget null
@@ -6660,7 +6672,7 @@ class Phantom extends Player
         log=
             mode:"skill"
             to:@id
-            comment: game.i18n.t "roles:Phantom.select", {name: @name, target: pl.name, jobname: pl.getMainJobDisp()}
+            comment: game.i18n.t "roles:Phantom.select", {name: @name, target: pl.name, jobname: pl.getMainJobDisp(true)}
         splashlog game.id,game,log
         @addGamelog game,"phantom",pl.type,playerid
         null
@@ -8487,7 +8499,7 @@ class Complex
     getJobname:->@main.getJobname()
     getMainJobname:->@main.getMainJobname()
     getJobDisp:->@main.getJobDisp()
-    getMainJobDisp:->@main.getMainJobDisp()
+    getMainJobDisp:(chemicalLeft)->@main.getMainJobDisp(chemicalLeft)
     midnightSort: 100
 
     #@mainのやつを呼ぶ
@@ -9494,8 +9506,8 @@ class Chemical extends Complex
             @game.i18n.t "roles:Chemical.jobname", {left: @main.getJobDisp(), right: @sub.getJobDisp()}
         else
             @main.getJobDisp()
-    getMainJobDisp:->
-        if @sub?
+    getMainJobDisp:(chemicalLeft)->
+        if @sub? && !chemicalLeft
             @game.i18n.t "roles:Chemical.jobname", {left: @main.getMainJobDisp(), right: @sub.getMainJobDisp()}
         else
             @main.getMainJobDisp()
@@ -11604,7 +11616,9 @@ playerIsJobDone = (game, player)->
     else
         true
 
-
+# replace all occurences of given string with new string.
+replaceAll = (str, before, after)->
+    str.split(before).join(after)
 
 
 

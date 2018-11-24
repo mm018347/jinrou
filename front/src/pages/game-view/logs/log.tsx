@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { autolink } from 'my-autolink';
+import { autolink, compile } from 'my-autolink';
 import styled, { withProps, withTheme } from '../../../util/styled';
 import { Log } from '../defs';
 import { Rule } from '../../../defs';
@@ -7,6 +7,7 @@ import { TranslationFunction } from '../../../i18n';
 import { phone } from '../../../common/media';
 import { Theme } from '../../../theme';
 import memoizeOne from 'memoize-one';
+import { FixedSizeLogRow } from './elements';
 
 export interface IPropOneLog {
   /**
@@ -19,6 +20,10 @@ export interface IPropOneLog {
    * Class name attached to each log.
    */
   logClass: string;
+  /**
+   * Whether logs are rendered in fixed-size mode.
+   */
+  fixedSize: boolean;
   /**
    * Log to show.
    */
@@ -33,6 +38,40 @@ export interface IPropOneLog {
   rule: Rule | undefined;
 }
 
+const autolinkSetting = compile(
+  [
+    'url',
+    {
+      pattern() {
+        return /#(\d+)/g;
+      },
+      transform(_1, _2, num) {
+        return {
+          href: `/room/${num}`,
+        };
+      },
+    },
+  ],
+  {
+    url: {
+      attributes: {
+        rel: 'external',
+      },
+      text: url => {
+        // Convert any room URL to room number syntax.
+        const orig = location.origin;
+        if (url.slice(0, orig.length) === orig) {
+          const r = url.slice(orig.length).match(/^\/room\/(\d+)$/);
+          if (r != null) {
+            return `#${r[1]}`;
+          }
+        }
+        return url;
+      },
+    },
+  },
+);
+
 /**
  * A component which shows one log.
  */
@@ -41,48 +80,19 @@ class OneLogInner extends React.PureComponent<IPropOneLog, {}> {
    * Function to memoize high-cost autolink computation
    */
   private autolink = memoizeOne((comment: string) =>
-    autolink(
-      comment,
-      [
-        'url',
-        {
-          pattern() {
-            return /#(\d+)/g;
-          },
-          transform(_1, _2, num) {
-            return {
-              href: `/room/${num}`,
-            };
-          },
-        },
-      ],
-      {
-        url: {
-          attributes: {
-            rel: 'external',
-          },
-          text: url => {
-            // Convert any room URL to room number syntax.
-            const orig = location.origin;
-            if (url.slice(0, orig.length) === orig) {
-              const r = url.slice(orig.length).match(/^\/room\/(\d+)$/);
-              if (r != null) {
-                return `#${r[1]}`;
-              }
-            }
-            return url;
-          },
-        },
-      },
-    ),
+    autolink(comment, autolinkSetting),
   );
   public render() {
-    const { t, theme, logClass, log, rule, icons } = this.props;
+    const { t, theme, logClass, fixedSize, log, rule, icons } = this.props;
+
+    const LogLineWrapper = fixedSize ? FixedSizeLogRow : React.Fragment;
+
     if (log.mode === 'voteresult') {
       // log of vote result table
       const logStyle = computeLogStyle('voteresult', theme);
+
       return (
-        <>
+        <LogLineWrapper>
           <Icon noName logStyle={logStyle} className={logClass} />
           <Name noName logStyle={logStyle} className={logClass} />
           <Main noName logStyle={logStyle} className={logClass}>
@@ -112,13 +122,13 @@ class OneLogInner extends React.PureComponent<IPropOneLog, {}> {
             logStyle={logStyle}
             className={logClass}
           />
-        </>
+        </LogLineWrapper>
       );
     } else if (log.mode === 'probability_table') {
       // log of probability table for Quantum Werewwolf
       const logStyle = computeLogStyle('probability_table', theme);
       return (
-        <>
+        <LogLineWrapper>
           <Icon noName logStyle={logStyle} className={logClass} />
           <Name noName logStyle={logStyle} className={logClass} />
           <Main noName logStyle={logStyle} className={logClass}>
@@ -171,7 +181,7 @@ class OneLogInner extends React.PureComponent<IPropOneLog, {}> {
               </tbody>
             </LogTable>
           </Main>
-        </>
+        </LogLineWrapper>
       );
     } else {
       const logStyle = computeLogStyle(log.mode, theme);
@@ -193,7 +203,7 @@ class OneLogInner extends React.PureComponent<IPropOneLog, {}> {
         'data-userid': 'userid' in log ? log.userid : undefined,
       };
       return (
-        <>
+        <LogLineWrapper>
           {/* icon */}
           <Icon noName={noName} {...props}>
             {icon != null ? <img src={icon} alt="" /> : null}
@@ -213,7 +223,7 @@ class OneLogInner extends React.PureComponent<IPropOneLog, {}> {
             logStyle={logStyle}
             className={logClass}
           />
-        </>
+        </LogLineWrapper>
       );
     }
   }
@@ -574,14 +584,18 @@ const TimeInner = ({ time, noName, className, logStyle }: IPropTime) => {
  */
 const Time = styled(TimeInner)`
   grid-column: 4;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-end;
+  padding-left: 2px;
+  padding-right: 1ex;
+  padding-bottom: 1px;
+
   white-space: nowrap;
   font-size: xx-small;
-  padding-left: 2px;
   text-align: right;
-  padding-right: 1ex;
 
-  ${({ noName }) =>
-    noName ? 'line-height: var(--base-font-size);' : ''} ${phone`
+  ${phone`
     grid-column: 3;
     font-size: xx-small;
     ${({ noName }) => (noName ? '' : 'border-bottom: none;')}
