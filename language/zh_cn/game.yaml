@@ -242,8 +242,9 @@ foundDetail:
   hunter: "被猎枪射杀"
   gmpunish: "被GM处死"
   gone-day: "昼间猝死"
-  crafty: "假死"
   gone-night: "夜间猝死"
+  crafty: "假死"
+  lunaticlover: "狂爱者的袭击"
   fallback: "未知原因"
   situation: "{{name}} 的死因是 {{detail}}。"
 

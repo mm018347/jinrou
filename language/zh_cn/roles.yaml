@@ -117,6 +117,7 @@ jobname:
   SnowLover: "雪女"
   Raven: "乌鸦"
   DecoyWolf: "囮狼"
+  LunaticLover: "狂爱者"
   GameMaster: "游戏管理员"
   Helper: "帮手"
   Waiting: "尚未分配"
@@ -671,6 +672,8 @@ Emma:
     curse: "{{name}} 被咒杀了。"
     # Killed by a PsychoKiller
     psycho: "{{name}} 被变态杀人狂杀死了。"
+    # Killed a LunaticLover
+    lunaticlover: "{{name}} 被狂爱者杀死了。"
     # Suicided after fox
     foxsuicide: "{{name}} 追随着妖狐自尽了。"
     # Suicided after friend
@@ -734,6 +737,10 @@ Raven:
 DecoyWolf:
   # Use skill.
   select: "{{name}} 潜入 {{target}} 的家里变成了诱饵。"
+
+LunaticLover:
+  # Select a target of lunatic love.
+  select: "{{name}} 把 {{target}} 选为自己疯狂爱慕的对象。"
 
 GameMaster:
   # Failed to revive.
