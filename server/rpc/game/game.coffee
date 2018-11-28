@@ -1462,6 +1462,7 @@ class Game
             @players.forEach (pl)=>
                 if pl.scapegoat && !pl.dead && !pl.sleeping(@)
                     pl.sunset(@)
+                    scapegoatRunJobs this, pl.id
             # 夜時間
             if @players.every( (x)=>x.dead || x.sleeping(@))
                 # 全員寝たが……
@@ -1658,7 +1659,7 @@ class Game
             x = obj.pl
             situation=switch obj.found
                 #死因
-                when "werewolf","werewolf2","poison","hinamizawa","vampire","vampire2","witch","dog","trap","marycurse","psycho","crafty","lunaticlover"
+                when "werewolf","werewolf2","poison","hinamizawa","vampire","vampire2","witch","dog","trap","bomb","marycurse","psycho","crafty","lunaticlover"
                     @i18n.t "found.normal", {name: x.name}
                 when "curse"    # 呪殺
                     if @rule.deadfox=="obvious"
@@ -1694,7 +1695,7 @@ class Game
             # but do not show for obvious type of death.
             unless (obj.found in ["punish", "infirm", "hunter", "gm", "gone-day", "gone-night"]) || (obj.found == "curse" && @rule.deadfox == "obvious")
                 if ["werewolf","werewolf2","poison","hinamizawa",
-                    "vampire","vampire2","witch","dog","trap","bomb"
+                    "vampire","vampire2","witch","dog","trap","bomb",
                     "marycurse","psycho","curse","punish","spygone","deathnote",
                     "foxsuicide","friendsuicide","twinsuicide","infirm","hunter",
                     "gmpunish","gone-day","gone-night","crafty","lunaticlover"
@@ -3877,7 +3878,7 @@ class WolfDiviner extends Werewolf
         }
         super
     sleeping:(game)->game.werewolf_target_remain<=0 # 占いは必須ではない
-    jobdone:(game)->game.werewolf_target_remain<=0 && @flag.target?
+    jobdone:(game)->game.werewolf_target_remain<=0 && @flag?.target?
     job:(game,playerid,query)->
         if query.jobtype!="WolfDiviner"
             # 人狼の仕事
@@ -8761,6 +8762,9 @@ class Complex
     divined:(game,player)->
         @mcall game,@main.divined,game,player
         @sub?.divined? game,player
+    touched:(game, from)->
+        @mcall game, @main.touched, game, from
+        @sub?.touched game, from
     getjob_target:->
         if @sub?
             @main.getjob_target() | @sub.getjob_target()    # ビットフラグ
@@ -9792,9 +9796,6 @@ class Chemical extends Complex
             # 人狼に対する襲撃耐性で耐えた
             game.addGuardLog @id, AttackKind.werewolf, GuardReason.tolerance
         return result
-    touched:(game, from)->
-        @mcall game, @main.touched, game, from
-        @sub?.touched game, from
     makejobinfo:(game,result)->
         @main.makejobinfo game,result
         @sub?.makejobinfo? game,result
