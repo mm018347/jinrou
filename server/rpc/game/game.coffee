@@ -1694,7 +1694,7 @@ class Game
             # but do not show for obvious type of death.
             unless (obj.found in ["punish", "infirm", "hunter", "gm", "gone-day", "gone-night"]) || (obj.found == "curse" && @rule.deadfox == "obvious")
                 if ["werewolf","werewolf2","poison","hinamizawa",
-                    "vampire","vampire2","witch","dog","trap",
+                    "vampire","vampire2","witch","dog","trap","bomb"
                     "marycurse","psycho","curse","punish","spygone","deathnote",
                     "foxsuicide","friendsuicide","twinsuicide","infirm","hunter",
                     "gmpunish","gone-day","gone-night","crafty","lunaticlover"
