@@ -46,6 +46,11 @@ gamestart:
       rangeSuggestionMin: "{{min}}以上"
       rangeSuggestionMax: "{{max}}以下"
       rangeSuggestionMinMax: "{{min}}以上{{max}}以下"
+  # error message.
+  error:
+    # rule value is invalid.
+    ruleInvalid: "房间选项「{{name}}」的内容无效。"
+    ruleTooSmall: "房间选项「{{name}}」的值过小。"
 
 # game-view: job info control.
 jobinfo:
@@ -204,6 +209,8 @@ log:
     dead: "死亡"
   # 自言自语
   monologue: "{{name}}的自言自语"
+  # 遺言
+  will: "{{name}}的遗言"
 # Game view: player box.
 playerbox:
   # Alt for the dead image.

@@ -263,6 +263,7 @@ judge:
   lonewolf: "人狼吃掉了最后一个村民，向着下一个住满了猎物的村庄前进了…"
   raven: "村子被乌鸦支配了。"
   draw: "平局。"
+  scapegoat: "村子成了替身君的玩物。"
   # short summary
   short:
     human: "村人胜利"

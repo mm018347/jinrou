@@ -230,7 +230,10 @@ function loadSavedRules(
     ) {
       continue;
     }
-    store.updateRule(key, String(rule[key]));
+    if (rule[key] != null) {
+      // if not saved, leave it as initial.
+      store.updateRule(key, String(rule[key]));
+    }
   }
   // XXX we are following old query-based formats.
   const jobs = rule._jobquery;

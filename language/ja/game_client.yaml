@@ -46,6 +46,11 @@ gamestart:
       rangeSuggestionMin: "{{min}}以上"
       rangeSuggestionMax: "{{max}}以下"
       rangeSuggestionMinMax: "{{min}}以上{{max}}以下"
+  # error message.
+  error:
+    # rule value is invalid.
+    ruleInvalid: "ルール「{{name}}」の設定内容が正しくありません。"
+    ruleTooSmall: "ルール「{{name}}」の値が小さすぎます。"
 
 # game-view: job info control.
 jobinfo:
@@ -204,6 +209,8 @@ log:
     dead: "死亡"
   # 独り言
   monologue: "{{name}}の独り言"
+  # 遺言
+  will: "{{name}}の遺言"
 # Game view: player box.
 playerbox:
   # Alt for the dead image.

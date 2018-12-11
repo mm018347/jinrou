@@ -23,6 +23,18 @@ error:
     # Cannot make a room because banned
     banned: "您的账号受限，不能创建房间。"
 
+  theme:
+    # nonexistent theme
+    noTheme: "该主题不存在。"
+    # This theme is unavailable right now.
+    notAvailable: "主题「{{name}}」当前不可用。"
+    # This theme cannot be locked.
+    notLockable: "主题「{{name}}」不允许房间设置密码。"
+    # A room with theme must be blind.
+    notBlind: "主题房间必须为匿名。"
+    # The number of players cannot be greater than the number of built-in skins of the theme. 
+    playerTooMuch: "主题「{{name}}」的房间人数不能多于「{{length}}」。"
+
   join:
     # Cannot join because banned
     banned: "您的账号受限，不能加入房间。"

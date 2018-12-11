@@ -4,7 +4,7 @@ import styled, { withProps, withTheme } from '../../../util/styled';
 import { Log } from '../defs';
 import { Rule } from '../../../defs';
 import { TranslationFunction } from '../../../i18n';
-import { phone } from '../../../common/media';
+import { phone, notPhone } from '../../../common/media';
 import { Theme } from '../../../theme';
 import memoizeOne from 'memoize-one';
 import { FixedSizeLogRow } from './elements';
@@ -163,7 +163,7 @@ class OneLogInner extends React.PureComponent<IPropOneLog, {}> {
                 {Object.keys(log.probability_table).map(id => {
                   const obj = log.probability_table[id];
                   return (
-                    <ProbabilityTr dead={obj.dead === 1}>
+                    <ProbabilityTr dead={obj.dead === 1} key={id}>
                       <td>{obj.name}</td>
                       <ProbTd prob={obj.Human} />
                       {rule &&
@@ -181,6 +181,12 @@ class OneLogInner extends React.PureComponent<IPropOneLog, {}> {
               </tbody>
             </LogTable>
           </Main>
+          <Time
+            noName
+            time={new Date(log.time)}
+            logStyle={logStyle}
+            className={logClass}
+          />
         </LogLineWrapper>
       );
     } else {
@@ -195,7 +201,9 @@ class OneLogInner extends React.PureComponent<IPropOneLog, {}> {
           ? null
           : log.mode === 'monologue' || log.mode === 'heavenmonologue'
             ? t('log.monologue', { name: log.name }) + ':'
-            : log.name + ':';
+            : log.mode === 'will'
+              ? t('log.will', { name: log.name }) + ':'
+              : log.name + ':';
       const noName = icon == null && !nameText;
       const props = {
         logStyle,
@@ -490,6 +498,8 @@ const LogPart = withProps<{
 
   line-height: 1;
   word-break: break-all;
+  overflow-wrap: break-word;
+  word-break: break-word;
   padding: 1px 0;
   font-size: var(--base-font-size);
 `;
@@ -606,6 +616,9 @@ const Time = styled(TimeInner)`
     grid-column: 3;
     font-size: xx-small;
     ${({ noName }) => (noName ? '' : 'border-bottom: none;')}
+  `};
+  ${notPhone`
+    line-height: var(--base-font-size);
   `};
 `;
 

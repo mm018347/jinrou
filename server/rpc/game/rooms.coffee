@@ -51,7 +51,7 @@ Server=
     oauth:require '../../oauth.coffee'
     log:require '../../log.coffee'
 crypto=require 'crypto'
-# 帮手セット処理
+# ヘルパーセット処理
 sethelper=(ss,roomid,userid,id,res)->
     Server.game.rooms.oneRoomS roomid,(room)->
         if !room || room.error?
@@ -244,21 +244,24 @@ module.exports.actions=(req,res,ss)->
             if room.theme
                 theme = Server.game.themes.getTheme room.theme
                 unless theme
-                    res {error: "不存在该活动"}
+                    res {error: i18n.t "error.theme.noTheme"}
                     return
                 if !theme.isAvailable?()
-                    res {error: "活动「#{theme.name}」当前不可用"}
+                    res {error: i18n.t "error.theme.notAvailable", {name: theme.name}}
                     return
                 if !theme.lockable && room.password
-                    res {error: "活动「#{theme.name}」不允许房间加锁"}
+                    res {error: i18n.t "error.theme.notLockable", {name: theme.name}}
                     return
                 if room.blind == ""
-                    res {error: "活动房间必须为匿名"}
+                    res {error: i18n.t "error.theme.notBlind"}
                     return
 
                 skins = Object.keys theme.skins
                 if room.number > skins.length
-                    res {error: "活动「#{theme.name}」的房间人数不能多于「#{skins.length}」"}
+                    res {error: i18n.t "error.theme.playerTooMuch", {
+                        name: theme.name
+                        length: skins.length
+                    }}
                     return
             room.comment=query.comment ? ""
             #unless room.blind
@@ -379,10 +382,10 @@ module.exports.actions=(req,res,ss)->
             if room.theme
                 theme = Server.game.themes.getTheme room.theme
                 if theme == null
-                    res {error: "不存在该活动"}
+                    res {error: i18n.t "error.theme.noTheme"}
                     return
                 if !theme.isAvailable?()
-                    res {error: "活动「#{theme.name}」当前不可用"}
+                    res {error: i18n.t "error.theme.notAvailable", {name: theme.name}}
                     return
                 
             if room.blind

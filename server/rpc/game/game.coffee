@@ -8,6 +8,7 @@ libblacklist = require '../../libs/blacklist.coffee'
 libuserlogs  = require '../../libs/userlogs.coffee'
 libsavelogs  = require '../../libs/savelogs.coffee'
 libi18n      = require '../../libs/i18n.coffee'
+libgame      = require '../../libs/game.coffee'
 
 cron=require 'cron'
 i18n = libi18n.getWithDefaultNS "game"
@@ -204,7 +205,7 @@ module.exports=
                 else
                     # 接続
                     pr+=x.value
-        #如果ルーム使用了主题，匿名ルーム也可以有称号
+        # theme may have built-in prize.
         if room.blind in ["complete","yes"] && room.theme
             theme = Server.game.themes.getTheme room.theme
             if theme != null && player.tpr
@@ -1311,7 +1312,7 @@ class Game
                         else
                             @participants=@participants.filter (x)->x!=player
                 # たまに転生
-                deads=shuffle @players.filter (x)->x.dead && !x.norevive
+                deads=shuffle @players.filter (x)->x.dead && !x.norevive && !x.scapegoat
                 # 転生確率
                 # 1人の転生確率をpとすると死者n人に対して転生人数の期待値はpn人。
                 # 1ターンに2人しぬとしてp(n+2)=2とおくとp=2/(n+2) 。
@@ -1464,8 +1465,8 @@ class Game
                     pl.sunset(@)
                     scapegoatRunJobs this, pl.id
             # 夜時間
-            if @players.every( (x)=>x.dead || x.sleeping(@))
-                # 全員寝たが……
+            if (Phase.isRemain(@phase) && timeout) || @players.every((x)=>x.dead || x.sleeping(@))
+                # 全員寝た or 強制的に進む
                 if Phase.isRemain(@phase) || timeout || !@rule.night || @rule.waitingnight!="wait" #夜に時間がある場合は待ってあげる
                     @midnight()
                     @nextturn()
@@ -2244,7 +2245,7 @@ class Game
             # 替身君单独胜利
             winpl = @players.filter (x)->x.winner
             if(winpl.length==1 && winpl[0].realid=="替身君")
-                resultstring="村子成了替身君的玩物。"
+                resultstring = @i18n.t("judge.scapegoat")
             if teamstring
                 log.comment = @i18n.t "system.judge", {short: teamstring, result: resultstring}
             else
@@ -5453,7 +5454,7 @@ class Dictator extends Player
         pl=game.getPlayer playerid
         unless pl?
             return game.i18n.t "error.common.nonexistentPlayer"
-        pl.touched game,@id
+        # pl.touched game,@id
         @setTarget playerid    # 処刑する人
         log=
             mode:"system"
@@ -6144,7 +6145,7 @@ class ThreateningWolf extends Werewolf
         unless Phase.isDay(game.phase)
             return game.i18n.t "error.common.cannotUseSkillNow"
         pl=game.getPlayer playerid
-        pl.touched game,@id
+        # pl.touched game,@id
         unless pl?
             return game.i18n.t "error.common.nonexistentPlayer"
         @setTarget playerid
@@ -6179,7 +6180,7 @@ class ThreateningWolf extends Werewolf
         super
     getOpenForms:(game)->
         res = super
-        if Phase.isDay(game.phase) && !@flag?
+        if Phase.isDay(game.phase) && !@dead && !@flag?
             #昼の能力選択可能
             res.push {
                 type: "ThreateningWolf"
@@ -6693,20 +6694,21 @@ class Phantom extends Player
         pl=game.getPlayer game.skillTargetHook.get @target
         unless pl?
             return
-        savedobj={}
-        pl.makejobinfo game,savedobj
-        flagobj={}
-        # jobinfo表示をセーブ
-        for value in Shared.game.jobinfos
-            if savedobj[value.name]?
-                flagobj[value.name]=savedobj[value.name]
-
         # 盗んだ役職
         newtype = pl.type
         # ただし既に怪盗に盗まれていたら怪盗を盗んだことにする
         newch = constructMainChain pl
         if newch?[0].some((cm)-> cm.cmplType == "PhantomStolen")
             newtype = "Phantom"
+
+        savedobj={}
+        newch?[1].makejobinfo game,savedobj
+        flagobj={}
+        # jobinfo表示をセーブ
+        for value in Shared.game.jobinfos
+            if savedobj[value.name]?
+                flagobj[value.name]=savedobj[value.name]
+
 
         # 自分はその役職に変化する
         newpl=Player.factory newtype, game
@@ -7808,7 +7810,7 @@ class Hunter extends Player
             return game.i18n.t "error.common.alreadyDead"
         unless @flag == "hunting"
             return game.i18n.t "error.common.cannotUseSkillNow"
-        pl.touched game, @id
+        # pl.touched game, @id
         @setTarget playerid
         log=
             mode: "skill"
@@ -8271,7 +8273,7 @@ class DecoyWolf extends Werewolf
             @setFlag "done"
     getOpenForms:(game)->
         res = super
-        if !@dead && Phase.isNight(game.phase) && !@flag
+        if !@dead && Phase.isNight(game.phase) && !@flag && game.day > 1
             # まだ能力を使用可能
             res.push {
                 type: "DecoyWolf"
@@ -9219,6 +9221,8 @@ class DivineObstructed extends Complex
             obstmad.addGamelog game,"divineObstruct",null,@id
 class PhantomStolen extends Complex
     cmplType:"PhantomStolen"
+    # 怪盗化したので霊能結果を変更
+    getPsychicResult:-> PsychicResult.human
     # cmplFlag: 保存されたアレ
     sunset:(game)->
         # 夜になると怪盗になってしまう!!!!!!!!!!!!
@@ -10129,7 +10133,10 @@ module.exports.actions=(req,res,ss)->
             if room.gm!=true && query.yaminabe_hidejobs!="" && !(query.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"])
                 res game.i18n.t "error.gamestart.noHiddenRole"
                 return
-
+            ruleValidationError = libgame.validateGameStartQuery game, query
+            if ruleValidationError?
+                res ruleValidationError
+                return
 
             # ルールオブジェクト用意
             ruleobj={
@@ -10142,7 +10149,7 @@ module.exports.actions=(req,res,ss)->
                 remain: parseInt query.remain
                 voting: parseInt query.voting
                 # (n=15)秒ルール
-                silentrule: parseInt(query.silentrule) ? 0
+                silentrule: parseInt(query.silentrule) || 0
             }
             # 不正なアレははじく
             unless Number.isFinite(ruleobj.day) && Number.isFinite(ruleobj.night) && Number.isFinite(ruleobj.remain) && Number.isFinite(ruleobj.voting)
@@ -10466,47 +10473,56 @@ module.exports.actions=(req,res,ss)->
                     # 恋人陣営
                     if frees>0
                         if 17>=playersnumber>=12
-                            if Math.random()<0.1 && !nonavs.Cupid
+                            if Math.random()<0.08 && !nonavs.Cupid
                                 joblist.Cupid++
                                 frees--
-                            else if Math.random()<0.04 && !nonavs.Lover
+                            else if Math.random()<0.03 && !nonavs.Lover
                                 joblist.Lover++
                                 frees--
-                            else if Math.random()<0.06 && !nonavs.SnowLover
+                            else if Math.random()<0.05 && !nonavs.SnowLover
                                 joblist.SnowLover++
                                 frees--
-                            else if Math.random()<0.06 && !nonavs.BadLady
+                            else if Math.random()<0.04 && !nonavs.BadLady
                                 joblist.BadLady++
                                 frees--
+                            else if Math.random()<0.06 && !nonavs.LunaticLover
+                                joblist.LunaticLover++
+                                frees--
                         else if 12>=playersnumber>=8
-                            if Math.random()<0.06 && !nonavs.Lover
+                            if Math.random()<0.045 && !nonavs.Lover
                                 joblist.Lover++
                                 frees--
-                            else if Math.random()<0.035 && !nonavs.SnowLover
+                            else if Math.random()<0.025 && !nonavs.SnowLover
                                 joblist.SnowLover++
                                 frees--
-                            else if Math.random()<0.015 && !nonavs.Cupid
+                            else if Math.random()<0.01 && !nonavs.Cupid
                                 joblist.Cupid++
+                                frees--
+                            else if Math.random()<0.03 && !nonavs.LunaticLover
+                                joblist.LunaticLover++
                                 frees--
                         else if playersnumber>=17
                             rval = 1
                             while Math.random() < rval
-                                if Math.random()<0.13 && !nonavs.Cupid
+                                if Math.random()<0.12 && !nonavs.Cupid
                                     joblist.Cupid++
                                     frees--
-                                else if Math.random()<0.08 && !nonavs.Lover
+                                else if Math.random()<0.06 && !nonavs.Lover
                                     joblist.Lover++
                                     frees--
-                                else if Math.random()<0.09 && !nonavs.SnowLover
+                                else if Math.random()<0.07 && !nonavs.SnowLover
                                     joblist.SnowLover++
                                     frees--
-                                else if Math.random()<0.06 && !nonavs.BadLady
+                                else if Math.random()<0.04 && !nonavs.BadLady
                                     joblist.BadLady++
+                                    frees--
+                                else if Math.random()<0.08 && !nonavs.LunaticLover
+                                    joblist.LunaticLover++
                                     frees--
                                 else
                                     break
                                 rval *= 0.6
-                    exceptions.push "Cupid", "Lover", "BadLady", "Patissiere", "SnowLover"
+                    exceptions.push "Cupid", "Lover", "BadLady", "Patissiere", "SnowLover", "LunaticLover"
 
                 # 占い確定
                 if safety.teams || safety.jobs
@@ -11066,7 +11082,7 @@ module.exports.actions=(req,res,ss)->
                         ss.publish.channel "room#{roomid}","refresh",{id:roomid}
                     else
                         res result
-            #如果房间使用了主题
+            # theme may have custom opening
             if room.blind in ["complete","yes"] && room.theme
                 theme = Server.game.themes.getTheme room.theme
                 if theme != null && theme.opening
