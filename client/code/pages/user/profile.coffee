@@ -113,7 +113,7 @@ exports.start=(user)->
                             message: "密码变更成功。"
                             ok: "OK"
                         }
-                    $("#changepassword").get(0).hidden=true
+                    $("#changepassword").get(0)?.hidden=true
                     app.page "user-profile",result,Index.user.profile,result
 
     $("#changeprofile").get(0).elements["twittericonbutton"].addEventListener "click",((e)->
@@ -130,136 +130,13 @@ exports.start=(user)->
     ,false
 
     # 称号
-    unless user.prizenames?.length>0
-        # 称号がない
-        $("#prizearea").html "<p>没有获得称号。</p>"
+    if user.prizeNumber > 0
+        $("#prizenumber").text user.prizeNumber
+    if user.nowprizeData
+        nowprizeb = $("<b />").text user.nowprizeData
+        $("#current-prize").text("现在的头衔是：").append nowprizeb
     else
-        $("#prizenumber").text user.prizenames.length
-        prizesdiv=$("#prizes")
-        phs=[]
-        prizedictionary={}  # 称号のidと名前対応
-        # 姑且按称号id排序，考虑 https://hotoo.github.io/pinyin/ 方案，按拼音排序
-        user.prizenames.sort (a,b)->
-            return a.id.localeCompare(b.id)
-        ull=$(document.createElement "ul")
-        prizesdiv.append ull
-        user.prizenames.forEach (obj)->
-            li=document.createElement "li"
-            li.textContent=obj.name
-            li.dataset.id=obj.id
-            li.classList.add "prizetip"
-            li.draggable=true
-            $("#prizes ul").append li
-            prizedictionary[obj.id]=obj.name
-        ull=$("#conjunctions")
-        for te in Shared.prize.conjunctions
-            li=document.createElement "li"
-            li.textContent=te
-            li.classList.add "conjtip"
-            li.draggable=true
-            ull.append li
-        # 消すやつを追加
-        li=document.createElement "li"
-        li.textContent="删除"
-        li.classList.add "deleter"
-        li.draggable=true
-        ull.append li
-
-        # 編集部分
-        ull=$("#prizeedit")
-        unless user.nowprize?   # 無い場合はデフォルト
-            for te in Shared.prize.getPrizesComposition user.prizenames.length
-                li=document.createElement "li"
-                li.classList.add (if te=="prize" then "prizetip" else "conjtip")
-                ull.append li
-        else
-            coms=Shared.prize.getPrizesComposition user.prizenames.length
-            for type in coms
-                li=document.createElement "li"
-                if type=="prize"
-                    li.classList.add "prizetip"
-                else
-                    li.classList.add "conjtip"
-
-                obj=user.nowprize[0]
-                if obj?.type==type
-                    # 一致するので入れる
-                    if type=="prize"
-                        if obj.value?
-                            li.dataset.id=obj.value
-                        li.textContent=prizedictionary[obj.value] ? ""
-                    else
-                        li.textContent=obj.value
-                    user.nowprize.shift()
-                ull.append li
-        $("#prizeedit li").each ->
-            @dropzone="copy"
-
-        # dragstart
-        dragstart=(e)->
-            e.dataTransfer.setData 'Text',JSON.stringify {id:e.target.dataset.id, value:e.target.textContent,deleter:e.target.classList.contains "deleter"}
-        $("#pdragzone").get(0).addEventListener "dragstart",dragstart,false
-        ull.get(0).addEventListener "dragover",((e)->
-            if e.target.tagName=="LI"
-                e.preventDefault()  # ドロップできる
-        ),false
-        ull.get(0).addEventListener "drop",((e)->
-            t=e.target
-            if t.tagName=="LI"
-                e.preventDefault()
-                obj=JSON.parse e.dataTransfer.getData("Text")
-                if obj.deleter  #消す
-                    delete t.dataset.id
-                    t.textContent=""
-                    return
-                if obj.id   # prizeだ
-                    if t.classList.contains "prizetip"
-                        t.dataset.id=obj.id
-                        t.textContent=obj.value
-                else
-                    if t.classList.contains "conjtip"
-                        t.textContent=obj.value
-        ),false
-
-
-        $("#prizearea").submit (je)->
-            je.preventDefault()
-            que=util.formQuery je.target
-            dialog.then (dialog)->
-                dialog.showPromptDialog({
-                    modal: true
-                    password: true
-                    autocomplete: "current-password"
-                    title: "配置"
-                    message: "请输入密码"
-                    ok: "OK"
-                    cancel: "取消"
-                }).then (result)->
-                    if result
-                        query=
-                            password:result
-                        prize=[]
-                        $("#prizeedit li").each ->
-                            if @classList.contains "prizetip"
-                                # prizeだ
-                                prize.push {
-                                    type:"prize"
-                                    value:@dataset.id ? null
-                                }
-                            else
-                                prize.push {
-                                    type:"conjunction"
-                                    value:@textContent
-                                }
-                            null
-                        query.prize=prize
-
-                        ss.rpc "user.usePrize", query,(result)->
-                            if result?.error?
-                                dialog.showErrorDialog {
-                                    modal: true
-                                    message: String result.error
-                                }
+        $("#current-prize").text "尚未设定头衔。"
 
     Index.game.rooms.start({
         noLinks: true
@@ -271,6 +148,9 @@ exports.start=(user)->
             console.error docs.error
             return
         table=$("#newslist").get 0
+        unless table?
+            # page may already have gone.
+            return
         docs.forEach (doc)->
             r=table.insertRow -1
             cell=r.insertCell 0

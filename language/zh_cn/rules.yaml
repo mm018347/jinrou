@@ -226,7 +226,7 @@ rule:
     yes: "能听到"
     no: "听不到"
   guardmyself:
-    name: "是否允许猎人保护自己"
+    name: "是否允许猎人系保护自身"
     label: "对猎人・游荡猎人・Cosplayer生效。"
     yes: "允许"
     no: ""

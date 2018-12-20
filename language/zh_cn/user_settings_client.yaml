@@ -47,7 +47,7 @@ color:
     cancel: "取消"
   # delete profile dialog.
   deleteProfileDialog:
-    title: "删除设定設定の消去"
+    title: "删除设定"
     message: "确认要删除设定「{{name}}」？"
     ok: "删除"
     cancel: "取消"

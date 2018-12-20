@@ -259,6 +259,18 @@ exports.showUrl=showUrl=(url,query={},nohistory=false)->
             # ユーザー設定
             page "user-settings", {
             }, Index.user.settings, null
+        when "/my/prize"
+            # 称号設定
+            ss.rpc "user.getMyPrizes", (result)->
+                if result?.error?
+                    # TODO
+                    Index.util.message "错误",result.error
+                    return
+
+                page "user-prize", {}, Index.user.prize, {
+                    prizes: result?.prizes ? []
+                    nowprize: result?.nowprize ? []
+                }
         when "/reset"
             # 重置密码
             page "reset",null,Index.reset, null
@@ -295,7 +307,14 @@ exports.showUrl=showUrl=(url,query={},nohistory=false)->
             }
         when "/newroom"
             # 新しい部屋
-            page "game-newroom",null,Index.game.newroom,null
+            ss.rpc "game.themes.getThemeList", (docs)->
+                if docs.error?
+                    # ?
+                    console.error docs.error
+                    docs = []
+                page "game-newroom", null, Index.game.newroom, {
+                    themes: docs
+                }
         when "/lobby"
             # ロビー
             page "lobby",null,Index.lobby,null
