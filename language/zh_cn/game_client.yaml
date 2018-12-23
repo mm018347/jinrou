@@ -93,6 +93,7 @@ jobinfo:
     dogOwner: "你的饲主是 {{name}}"
     quantumwerewolfNumber: "你的玩家编号是 {{number}}"
     fanof: "你是 {{name}} 的粉丝"
+    hooligans: "现在的暴动者有 {{names}}"
 
 
 # game-view: speak form.

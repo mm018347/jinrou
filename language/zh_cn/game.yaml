@@ -66,6 +66,8 @@ error:
     unknownCasting: "不存在此配置。"
     # Helper target does not exist
     helperNotExist: "{{name}} 的帮助对象已不存在。"
+    # for 一部闇鍋: selected category is empty (all jobs in it are excluded)
+    categoryAllExcluded: "「{{category}}」的全部职业均被排除，这样的配置无法开始游戏。"
   # Error during sudden death punishment
   suddenDeathPunish:
     # You are not a valid voter
@@ -245,6 +247,7 @@ foundDetail:
   gone-night: "夜间猝死"
   crafty: "假死"
   lunaticlover: "狂爱者的袭击"
+  hooligan: "暴动者的暴行"
   fallback: "未知原因"
   situation: "{{name}} 的死因是 {{detail}}。"
 
@@ -262,6 +265,7 @@ judge:
   vampire: "吸血鬼饮尽了最后一个村民的鲜血，向着下一个住满了猎物的村庄前进了…"
   lonewolf: "人狼吃掉了最后一个村民，向着下一个住满了猎物的村庄前进了…"
   raven: "村子被乌鸦支配了。"
+  hooligan: "村子被暴徒引发的暴乱破坏殆尽了。"
   draw: "平局。"
   scapegoat: "村子成了替身君的玩物。"
   # short summary
@@ -275,6 +279,7 @@ judge:
     vampire: "吸血鬼胜利"
     lonewolf: "一匹狼胜利"
     raven: "乌鸦胜利"
+    hooligan: "暴徒胜利"
 
 
 # Terms for quantum werewolf

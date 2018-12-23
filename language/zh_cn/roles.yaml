@@ -118,6 +118,9 @@ jobname:
   Raven: "乌鸦"
   DecoyWolf: "囮狼"
   LunaticLover: "狂爱者"
+  Hooligan: "暴徒"
+  HooliganAttacker: "暴动者"
+  HooliganGuard: "保安"
   GameMaster: "游戏管理员"
   Helper: "帮手"
   Waiting: "尚未分配"
@@ -144,6 +147,7 @@ teamName:
   Vampire: "吸血鬼阵营"
   Cult: "邪教主阵营"
   Raven: "乌鸦阵营"
+  Hooligan: "暴徒阵营"
   Neet: "NEET"
   Others: "其他"
 
@@ -681,6 +685,8 @@ Emma:
     friendsuicide: "{{name}} 追随着恋人自尽了。"
     # Suicided after his twin
     twinsuicide: "{{name}} 追随着双胞胎自尽了。"
+    # Killed by hooligan
+    hooligan: "{{name}} 被暴动者杀死了。"
 
 EyesWolf:
   # EyesWolf result strings
@@ -742,6 +748,32 @@ DecoyWolf:
 LunaticLover:
   # Select a target of lunatic love.
   select: "{{name}} 把 {{target}} 选为自己疯狂爱慕的对象。"
+  
+Hooligan:
+  # Select a new member of hooligan.
+  select: "{{name}} 鼓动 {{target}} 加入了暴动。"
+  # Become a HooliganMember.
+  become: "{{name}} 加入了暴动。"
+  # Found a guard.
+  foundGuard: "{{name}} 试图鼓动 {{target}} 加入暴动，却发现 {{target}} 是保安。"
+
+HooliganAttacker:
+  # name of HooliganMember.
+  jobname: "{{jobname}}（暴动者）"
+  # select a target of attack.
+  select: "{{name}} 向 {{target}} 施加暴行。"
+  # HooliganMember was arrested (for original Hooligan)
+  arrested: "{{name}} 由于被保安逮捕，没能成功的施加暴行。"
+  # HooliganMember was uncomplexed
+  uncomplex: "{{name}} 由于被保安逮捕，退出了暴动。"
+
+HooliganGuard:
+  # name of HooliganGuardComplex.
+  jobname: "{{jobname}}（保安）"
+  # become a guard at first night.
+  become: "由于村子里潜入了暴徒，{{name}} 被任命为保安。"
+  # select a target of arrest.
+  select: "{{name}} 逮捕了 {{target}}。"
 
 GameMaster:
   # Failed to revive.
