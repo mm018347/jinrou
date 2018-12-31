@@ -98,6 +98,7 @@ messages:
   Hooligan: "请选择加入暴动的对象"
   HooliganAttacker: "请选择施加暴行的对象"
   HooliganGuard: "请选择你要逮捕的对象"
+  Illusionist: "请选择你要替换成人狼袭击目标的对象"
   GameMaster: "GM命令"
 
 # Texts for GameMaster form.
@@ -122,7 +123,10 @@ Merchant:
     Psychic: "灵能套装"
     Guard: "守护套装"
   # description.
-  description: "请选择商品的收件人"
+  description: "请选择商品及其收件人"
+# Texts for HomeComer form (extends Merchant).
+HomeComer:
+  description: "请选择伴手礼及其赠送的对象"
 # Texts for Witch form.
 Witch:
   description: "请选择使用的魔药和使用对象"

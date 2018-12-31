@@ -98,6 +98,7 @@ messages:
   Hooligan: "暴動に参加させる相手を選択してください"
   HooliganAttacker: "暴行を加える相手を選択してください"
   HooliganGuard: "拘束する対象を選択してください"
+  Illusionist: "襲撃のすり替え対象を選択してください"
   GameMaster: "GM用コマンド"
 
 # Texts for GameMaster form.
@@ -123,6 +124,9 @@ Merchant:
     Guard: "狩人セット"
   # description.
   description: "商品と発送先を選択してください"
+# Texts for HomeComer form (extends Merchant).
+HomeComer:
+  description: "おみやげの中身と贈る相手を選択してください"
 # Texts for Witch form.
 Witch:
   description: "使用する薬と対象を選択してください"

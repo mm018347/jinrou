@@ -121,6 +121,8 @@ jobname:
   Hooligan: "暴徒"
   HooliganAttacker: "暴动者"
   HooliganGuard: "保安"
+  HomeComer: "探亲者"
+  Illusionist: "奇术师"
   GameMaster: "游戏管理员"
   Helper: "帮手"
   Waiting: "尚未分配"
@@ -774,6 +776,14 @@ HooliganGuard:
   become: "由于村子里潜入了暴徒，{{name}} 被任命为保安。"
   # select a target of arrest.
   select: "{{name}} 逮捕了 {{target}}。"
+  
+HomeComer:
+  # select a target of gift.
+  select: "{{name}} 向 {{target}} 赠送了 {{kit}}。"
+
+Illusionist:
+  # select a target of illusion.
+  select: "{{name}} 把今晚人狼的袭击目标改变成了 {{target}}。"
 
 GameMaster:
   # Failed to revive.
