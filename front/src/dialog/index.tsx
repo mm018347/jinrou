@@ -20,8 +20,7 @@ import { MessageDialog } from './components/message';
 import { ConfirmDialog } from './components/confirm';
 import { PlayerDialog } from './components/player';
 import { IconSelectDialog } from './components/icon-select';
-import { I18nProvider, getI18nFor } from '../i18n';
-import { i18n } from 'i18next';
+import { I18nProvider, getI18nFor, i18n } from '../i18n';
 import { SelectDialog } from './components/select';
 import { KickDialog, KickResult } from './components/kick';
 import { ChecklistDialog } from './components/checklist';
@@ -56,7 +55,7 @@ export async function showErrorDialog(d: IErrorDialog): Promise<void> {
     const dialog = (
       <MessageDialog
         {...d}
-        title={i18n.t('common:errorDialog.title')}
+        title={i18n.t('common:errorDialog.title') as string}
         ok={i18n.t('common:errorDialog.close')}
         onClose={close}
       />
@@ -166,7 +165,7 @@ export async function showSuddenDeathPunishDialog({
       <ChecklistDialog
         modal={modal}
         options={Promise.resolve(options)}
-        title={i18n.t('game_client:suddenDeathPunish.title')}
+        title={i18n.t('game_client:suddenDeathPunish.title') as string}
         message={i18n.t('game_client:suddenDeathPunish.message', {
           count: time,
         })}

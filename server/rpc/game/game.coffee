@@ -1308,6 +1308,8 @@ class Game
                             newpl=Player.factory newjob, this
                             player.transProfile newpl
                             player.transferData newpl, true
+                            # originalTypeを最初の役職に修正（戦績に残るため）
+                            newpl.setOriginalType newpl.type
                             # 観戦者を除去
                             @participants=@participants.filter (x)->x!=player
                             # プレイヤーとして追加
@@ -2939,6 +2941,8 @@ class Player
     getJobDisp:->@jobname
     # 本人に見える役職タイプ
     getTypeDisp:->@type
+    # 役職をコピーするときに得られるタイプ
+    getCopiableType:->@type
     # 役職名を得る
     getJobname:->@jobname
     # サブ役職の情報を除いた役職名を得る
@@ -3499,7 +3503,7 @@ class Diviner extends Player
 
         if @type == "Diviner" && game.day == 1 && game.rule.firstnightdivine == "auto"
             # 自動白通知
-            targets2 = targets.filter (x)=> x.id != @id && x.getFortuneResult() == FortuneResult.human && x.id != "替身君" && !x.isJobType("Fox")
+            targets2 = targets.filter (x)=> x.id != @id && x.getFortuneResult() == FortuneResult.human && x.id != "替身君" && !x.isJobType("Fox") && !x.isJobType("XianFox")
             if targets2.length > 0
                 # ランダムに決定
                 log=
@@ -3584,6 +3588,14 @@ class Psychic extends Player
         super
         unless game.rule.psychicresult=="sunset"
             @showpsychicresult game
+    deadsunset:(game)->
+        if game.rule.psychicresult=="sunset"
+            # Delete logs which could not be shown
+            @setFlag ""
+    deadsunrise:(game)->
+        unless game.rule.psychicresult=="sunset"
+            @setFlag ""
+
 
     showpsychicresult:(game)->
         return unless @flag?
@@ -4834,10 +4846,9 @@ class Doppleganger extends Player
             p=game.getPlayer targetid  # その人
 
             newplmain=Player.factory p.type, game
-            @transProfile newplmain
-            @transferData newplmain, true
-
             top = game.getPlayer @id
+            top.transProfile newplmain
+
             # まだドッペルゲンガーできる
             sub = null
             unless top?.isCmplType "PhantomStolen"
@@ -4865,10 +4876,12 @@ class Doppleganger extends Player
                 unless transpl?
                     # ???
                     return
+                transpl.transferData newplmain, true
                 transpl.transform game, newpl, false
                 @uncomplex game, true
             else
                 # 初めてなので自分が変化する
+                @transferData newplmain, true
                 @transform game, newpl, false
 
             log=
@@ -5166,7 +5179,7 @@ class Tanner extends Player
     isWinner:(game,team)->@dead && @flag!="gone"
 class OccultMania extends Player
     type:"OccultMania"
-    midnightSort:100
+    midnightSort:102
     formType: FormType.required
     sleeping:(game)->@target? || game.day<2
     sunset:(game)->
@@ -6262,6 +6275,10 @@ class WanderingGuard extends Player
         if alives.length == 0
             # もう護衛対象がいない
             @setTarget ""
+    deadsunset:(game)->
+        # 死んだ状態で夜になったら前の選択状態を初期化
+        # （蘇生時に参照されないように）
+        @setTarget null
     job:(game,playerid)->
         fl=JSON.parse(@flag ? "[null]")
         if playerid==@id && game.rule.guardmyself!="ok"
@@ -6411,16 +6428,8 @@ class FrankensteinsMonster extends Player
         for pl in founds
             # extract absorbable jobs.
             extracted = []
-            rec = (pl)->
-                if pl.isComplex()
-                    # main is absorbable.
-                    rec pl.main
-                    # if Chemical, absorb both.
-                    if pl.cmplType == "Chemical" && pl.sub?
-                        rec pl.sub
-                else
-                    extracted.push pl.type
-            rec pl
+            for p in pl.accessMainLevel(false)
+                extracted.push p.getCopiableType()
             # List up name of extracted jobs.
             jobnames = extracted.map((e)-> game.i18n.t "roles:jobname.#{e}").join(game.i18n.t "roles:FrankensteinsMonster.separator")
             log=
@@ -6743,11 +6752,9 @@ class Phantom extends Player
         unless pl?
             return
         # 盗んだ役職
-        newtype = pl.type
+        newtype = pl.getCopiableType()
         # ただし既に怪盗に盗まれていたら怪盗を盗んだことにする
         newch = constructMainChain pl
-        if newch?[0].some((cm)-> cm.cmplType == "PhantomStolen")
-            newtype = "Phantom"
 
         savedobj={}
         newch?[1].makejobinfo game,savedobj
@@ -7578,9 +7585,7 @@ class Shishimai extends Player
         # 獅子舞に噛まれた人を集計
         bitten = []
         for pl in game.players
-            console.log "accessbyjobtypeall", pl.id
             ps = pl.accessByJobTypeAll("Shishimai")
-            console.log "accessed", ps
             if ps.length > 0
                 bitten.push pl.id
             for p in ps
@@ -7776,6 +7781,7 @@ class Forensic extends Player
 class Cosplayer extends Guard
     type:"Cosplayer"
     fortuneResult: FortuneResult.werewolf
+    psychicResult: PsychicResult.werewolf
 
 class TinyGhost extends Player
     type:"TinyGhost"
@@ -8000,6 +8006,11 @@ class BlackCat extends Madman
             pl = canbedead[r]
             pl.die game, "poison", @id
             @addGamelog game, "poisonkill", null, pl.id
+            log=
+                mode:"hidden"
+                to:-1
+                comment: game.i18n.t "roles:Poisoner.select", {name: @name, target: pl.name}
+            splashlog game.id,game,log
 
 class Idol extends Player
     type:"Idol"
@@ -8451,17 +8462,17 @@ class Hooligan extends Player
                 # すでに任命されていた
                 return
             # 警備員候補
-            pls = game.players.filter (x)-> !x.scapegoat && !x.isCmplType("HooliganMember") && !x.isJobType("Hooligan")
+            pls = game.players.filter (x)-> !x.scapegoat && !x.dead && !x.isCmplType("HooliganMember") && !x.isJobType("Hooligan")
             pls = shuffle pls
             # 警備員の数
-            num = Math.ceil(game.players.length / 8)
+            num = Math.ceil(game.players.filter((x)-> !x.dead).length / 8)
             num = Math.min num, pls.length
             for i in [0 ... num]
                 newguard = pls[i]
                 sub = Player.factory "HooliganGuard", game
                 newguard.transProfile sub
-                # 最初の夜は行動しない
-                sub.setTarget ""
+                # 最初の夜がいつか記録
+                sub.setFlag game.day
                 newpl = Player.factory null, game, newguard, sub, HooliganGuardComplex
                 newguard.transProfile newpl
                 newguard.transform game, newpl, true
@@ -8597,13 +8608,16 @@ class HooliganGuard extends Player
     team: ""
     formType: FormType.optional
     midnightSort: 90
-    jobdone:-> @target?
+    constructor:->
+        super
+        @setFlag null
+    jobdone:(game)-> @target? || @flag == game.day
     isWinner:(game, team)->
         !@dead
     sunset:(game)->
         @setTarget null
     job:(game, playerid)->
-        if @target?
+        if @target? || @flag == game.day
             return game.i18n.t "error.common.alreadyUsed"
 
         pl = game.getPlayer playerid
@@ -8827,7 +8841,7 @@ class Helper extends Player
         pl=game.getPlayer playerid
         unless pl?
             return game.i18n.t "error.common.nonexistentPlayer"
-        @flag=playerid
+        @setFlag playerid
         log=
             mode:"skill"
             to:playerid
@@ -9151,7 +9165,8 @@ class Complex
     getSpeakChoiceDay:(game)->
         result=@mcall game,@main.getSpeakChoiceDay,game
         if @sub?
-            for obj in @sub.getSpeakChoiceDay game
+            subresult = @sub.getSpeakChoiceDay game
+            for obj in subresult
                 unless result.some((x)->x==obj)
                     result.push obj
         result
@@ -9606,7 +9621,10 @@ class PhantomStolen extends Complex
     # 怪盗のふりをする
     isJobType:(type)-> type == "Phantom"
     isMainJobType:(type)-> type == "Phantom"
-    #team:"Human" #女王との兼ね合いで
+    getCopiableType:-> "Phantom"
+    getTeam:-> "Human"
+    # 女王との兼ね合いで
+    getTeamDisp:-> @main.getTeamDisp()
     isWinner:(game,team)->
         team=="Human"
     checkDeathResistance:(game, found, from)->
@@ -10581,9 +10599,14 @@ module.exports.actions=(req,res,ss)->
                     joblist["category_#{type}"]=parseInt(query["category_#{type}"]) || 0
                 ruleinfo_str = getrulestr game.i18n, query.jobrule, joblist
             if query.jobrule in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
+                # 内部用にチームによる役職指定
+                for team of Shared.game.teams
+                    joblist["team_#{team}"] = 0
                 # カテゴリ内の人数の合計がわかる関数
                 countCategory=(categoryname)->
                     Shared.game.categories[categoryname].reduce(((prev,curr)->prev+(joblist[curr] ? 0)),0)+joblist["category_#{categoryname}"]
+                countTeam=(teamname)->
+                    Shared.game.categories[teamname].reduce(((prev,curr)->prev+(joblist[curr] ? 0)),0)+joblist["team_#{teamname}"]
 
                 # 黑暗火锅のときはランダムに決める
                 plsh=Math.floor playersnumber/2   # 過半数
@@ -10650,10 +10673,13 @@ module.exports.actions=(req,res,ss)->
                 addCategoryToExceptions = (category)->
                     for job in Shared.game.categories[category]
                         exceptions.push job
+                addTeamToExceptions = (team)->
+                    for job in Shared.game.teams[team]
+                        exceptions.push job
 
                 # チェックボックスが外れてるやつは登場しない
                 if query.jobrule=="特殊规则.手调黑暗火锅"
-                    for job in Shared.game.jobs
+                    for job in libgame.categorySortedJobs()
                         if query["job_use_#{job}"] != "on"
                             # これは出してはいけない指定になっている
                             exceptions.push job
@@ -10683,7 +10709,16 @@ module.exports.actions=(req,res,ss)->
                                 category: game.i18n.t "roles:categoryName.#{type}"
                             }
                             return
-
+                # 人狼系は全除外してはいけない
+                for cat in ["Werewolf"]
+                    jobset = new Set Shared.game.categories[cat]
+                    for job in excluded_exceptions
+                        jobset.delete job
+                    if jobset.size == 0
+                        res game.i18n.t "error.gamestart.implicitCategoryAllExcluded", {
+                            category: game.i18n.t "roles:categoryName.#{cat}"
+                        }
+                        return
 
 
 
@@ -10726,7 +10761,7 @@ module.exports.actions=(req,res,ss)->
                     # ランダム調整
                     if wolf_number>1 && Math.random()<0.1
                         wolf_number--
-                    else if playersnumber>0 && playersnumber>=10 && Math.random()<0.2
+                    else if playersnumber>=12 && Math.random()<0.2
                         wolf_number++
                     if fox_number>1 && Math.random()<0.15
                         fox_number--
@@ -10813,6 +10848,23 @@ module.exports.actions=(req,res,ss)->
                 nonavs = {}
                 for job in exceptions
                     nonavs[job] = true
+                # Choose one job from given list of jobs,
+                # following given probabilities for each job.
+                selectJob = (candidates, probabilities)->
+                    p = Math.random()
+                    current = 0
+                    for i in [0 ... candidates.length]
+                        job = candidates[i]
+                        prob = probabilities[i]
+                        if current <= p < current + prob
+                            # random p selects this job.
+                            if !nonavs[job]
+                                # this job is not excluded.
+                                return job
+                            current += prob
+                    # none was selected.
+                    return null
+
 
                 if safety.teams
                     # 陣営調整もする
@@ -10844,12 +10896,15 @@ module.exports.actions=(req,res,ss)->
                                 Math.round (playersnumber*(1.28 + Math.random()*0.12))
                             else
                                 Math.round (playersnumber*(0.48 + Math.random()*0.12))
-                        diff = Math.min(frees, humanteam_n) - countCategory("Human")
+                        # count current number of Human team.
+                        # we rely on the fact that Human category is a subset of Human team.
+                        currentHuman = countTeam("Human") + joblist["category_Human"]
+                        diff = Math.min(frees, humanteam_n) - currentHuman
                         if diff > 0
-                            joblist.category_Human += diff
+                            joblist.team_Human += diff
                             frees -= diff
 
-                        addCategoryToExceptions "Human"
+                        addTeamToExceptions "Human"
 
                     # 妖狐陣営
                     if frees>0 && (joblist.Fox>0 || joblist.TinyFox > 0 || joblist.XianFox > 0)
@@ -10929,43 +10984,31 @@ module.exports.actions=(req,res,ss)->
                 if safety.teams || safety.jobs
                     # 村人陣営
                     # 占い師いてほしい
-                    if joblist.category_Human > 0
-                        if Math.random()<0.75 && !nonavs.Diviner
-                            joblist.Diviner++
+                    selected = if safety.jobs then selectJob ["Diviner", "ApprenticeSeer"], [0.75, 0.05]
+                    else selectJob ["Diviner"], [0.75]
+                    if selected?
+                        if joblist.category_Human > 0
+                            joblist[selected]++
                             joblist.category_Human--
-                        else if !safety.jobs && Math.random()<0.2 && !nonavs.ApprenticeSeer
-                            joblist.ApprenticeSeer++
-                            joblist.category_Human--
-                    else if frees>0
-                        if Math.random()<0.75 && !nonavs.Diviner
-                            joblist.Diviner++
-                            frees--
-                        else if !safety.jobs && Math.random()<0.2 && !nonavs.ApprenticeSeer
-                            joblist.ApprenticeSeer++
+                        else if joblist.team_Human > 0
+                            joblist[selected]++
+                            joblist.team_Human--
+                        else if frees > 0
+                            joblist[selected]++
                             frees--
                 if safety.teams
                     # できれば狩人も
-                    if joblist.category_Human > 0
-                        if joblist.Diviner>0
-                            if Math.random()<0.4 && !nonavs.Guard
-                                joblist.Guard++
-                                joblist.category_Human--
-                            else if Math.random()<0.17 && !nonavs.WanderingGuard
-                                joblist.WanderingGuard++
-                                joblist.category_Human--
-                        else if Math.random()<0.4 && !nonavs.Guard
-                            joblist.Guard++
+                    selected = if joblist.Diviner > 0 then selectJob ["Guard", "WanderingGuard"], [0.4, 0.1]
+                    else selectJob ["Guard"], [0.4]
+                    if selected?
+                        if joblist.category_Human > 0
+                            joblist[selected]++
                             joblist.category_Human--
-                    else if frees>0
-                        if joblist.Diviner>0
-                            if Math.random()<0.4 && !nonavs.Guard
-                                joblist.Guard++
-                                frees--
-                            else if Math.random()<0.17 && !nonavs.WanderingGuard
-                                joblist.WanderingGuard++
-                                frees--
-                        else if Math.random()<0.4 && !nonavs.Guard
-                            joblist.Guard++
+                        else if joblist.team_Human > 0
+                            joblist[selected]++
+                            joblist.team_Human--
+                        else if frees > 0
+                            joblist[selected]++
                             frees--
                 ((date)->
                     month=date.getMonth()
@@ -11087,13 +11130,17 @@ module.exports.actions=(req,res,ss)->
                     possibility.push "Human"
 
                 # 強制的に入れる関数
-                init=(jobname,categoryname)->
+                init=(jobname, categoryname, teamname)->
                     unless jobname in possibility
                         return false
                     if categoryname? && joblist["category_#{categoryname}"]>0
                         # あった
                         joblist[jobname]++
                         joblist["category_#{categoryname}"]--
+                        return true
+                    if teamname? && joblist["team_#{teamname}"] > 0
+                        joblist[jobname]++
+                        joblist["team_#{teamname}"]--
                         return true
                     if frees>0
                         # あった
@@ -11130,14 +11177,18 @@ module.exports.actions=(req,res,ss)->
                     frees=first_frees
                     category = null
                     job = null
+                    team = null
                     while true
+                        # 前のループで確保したものが残っていたら返す
                         if category?
-                            # 前のループで確保したものが残っていたら返す
                             joblist[category]++
+                        if team?
+                            joblist[team]++
                         else if job?
                             # jobが決まったけど使われなかった
                             frees++
                         category = null
+                        team = null
                         job = null
                         #カテゴリ役職がまだあるか探す
                         for type,arr of Shared.game.categories
@@ -11155,6 +11206,20 @@ module.exports.actions=(req,res,ss)->
                                     # これもう無理だわ
                                     frees += joblist["category_#{type}"]
                                     joblist["category_#{type}"] = 0
+                        # same for teams
+                        unless job?
+                            for type,arr of Shared.game.teams
+                                if joblist["team_#{type}"]>0
+                                    arr2 = arr.filter (x)->!(x in excluded_exceptions) && !(x in special_exceptions)
+                                    if arr2.length > 0
+                                        r=Math.floor Math.random()*arr2.length
+                                        job=arr2[r]
+                                        team="team_#{type}"
+                                        joblist[team]--
+                                        break
+                                    else
+                                        frees += joblist["team_#{type}"]
+                                        joblist["team_#{type}"] = 0
                         unless job?
                             # もうカテゴリがない
                             if frees<=0
@@ -11180,28 +11245,28 @@ module.exports.actions=(req,res,ss)->
                                 when "Couple"
                                     # 共有者はひとりだと寂しい
                                     if joblist.Couple==0
-                                        unless init "Couple","Human"
+                                        unless init "Couple","Human","Human"
                                             #共有者が入る隙間はない
                                             continue
                                 when "Twin"
                                     # 双子も
                                     if joblist.Twin==0
-                                        unless init "Twin","Human"
+                                        unless init "Twin","Human","Human"
                                             continue
                                 when "MadCouple"
                                     # 叫迷も
                                     if joblist.MadCouple==0
-                                        unless init "MadCouple","Madman"
+                                        unless init "MadCouple","Madman","Werewolf"
                                             #共有者が入る隙間はない
                                             continue
                                 when "Noble"
                                     # 貴族は奴隷がほしい
                                     if joblist.Slave==0
-                                        unless init "Slave","Human"
+                                        unless init "Slave","Human","Human"
                                             continue
                                 when "Slave"
                                     if joblist.Noble==0
-                                        unless init "Noble","Human"
+                                        unless init "Noble","Human","Human"
                                             continue
                                 when "OccultMania"
                                     if joblist.Diviner==0 && Math.random()<0.5
@@ -11216,9 +11281,9 @@ module.exports.actions=(req,res,ss)->
                                         continue
                                     # 女王観戦者はガードがないと不安
                                     if joblist.Guard==0 && joblist.Priest==0 && joblist.Trapper==0
-                                        unless Math.random()<0.4 && init "Guard","Human"
+                                        unless Math.random()<0.4 && init "Guard","Human", "Human"
                                             unless Math.random()<0.5 && init "Priest","Human"
-                                                unless init "Trapper","Human"
+                                                unless init "Trapper","Human", "Human"
                                                     # 護衛がいない
                                                     continue
                                 when "Spy2"
@@ -11262,11 +11327,11 @@ module.exports.actions=(req,res,ss)->
                                 when "Raven"
                                     # 鴉は最低2人セット
                                     if joblist.Raven == 0
-                                        unless init "Raven","Others"
+                                        unless init "Raven","Others", "Raven"
                                             continue
                                         if playersnumber >= 16
                                             # 16人以上だと3人セットにしちゃう
-                                            init "Raven", "Others"
+                                            init "Raven", "Others", "Raven"
 
 
                         joblist[job]++
@@ -11282,6 +11347,8 @@ module.exports.actions=(req,res,ss)->
                         if category?
                             # カテゴリの消費に成功した
                             category = null
+                        if team?
+                            team = null
                         # 追加に成功した
                         job = null
 
@@ -11326,13 +11393,6 @@ module.exports.actions=(req,res,ss)->
                 if safety.strength && best_list?
                     # セーフティ超
                     joblist=best_list
-
-                if query.divineresult=="immediate" && DIVINER_NOIMMEDIATE_JOBS.some((job)-> joblist[job] > 0)
-                    query.divineresult="sunrise"
-                    log=
-                        mode:"system"
-                        comment: game.i18n.t "system.gamestart.divinerModeChanged"
-                    splashlog game.id,game,log
 
             else if query.jobrule=="特殊规则.量子人狼"
                 # 量子人狼のときは全員量子人間だけど役職はある
@@ -11382,8 +11442,16 @@ module.exports.actions=(req,res,ss)->
                 # 残りは村人だ！
                 joblist.Human = frees - sum
                 ruleinfo_str = getrulestr game.i18n, query.jobrule, joblist
+
+            if query.divineresult=="immediate" && DIVINER_NOIMMEDIATE_JOBS.some((job)-> joblist[job] > 0)
+                query.divineresult="sunrise"
+                log=
+                    mode:"system"
+                    comment: game.i18n.t "system.gamestart.divinerModeChanged"
+                splashlog game.id,game,log
+
             if query.yaminabe_hidejobs!="" && !(query.jobrule in ["特殊规则.黑暗火锅", "特殊规则.手调黑暗火锅", "特殊规则.Endless黑暗火锅"])
-                # 黑暗火锅以外で配役情報を公開しないときはアレする
+                # 闇鍋以外で配役情報を公開しないときはアレする
                 ruleinfo_str = ""
             if query.yaminabe_hidejobs != "" && query.jobrule == "特殊规则.自由配置"
                 # ルール名のみ
@@ -11937,7 +12005,7 @@ writeGlobalJobInfo = (game, player, result={})->
     unless Phase.isBeforeStart(game.phase)
         result.myteam = player.getTeamDisp()
         # 女王観戦者の情報
-        if player.getTeam() == "Human"
+        if player.getTeam() == "Human" && player.getTeamDisp() == "Human"
             result.queens = game.players.filter((x)-> x.isJobType "QueenSpectator").map (x)->
                 x.publicinfo()
 
@@ -12005,7 +12073,7 @@ makejobinfo = (game,player,result={})->
         result.winner=player.winner
         if player.dead
             result.speak = processSpeakChoice player.getSpeakChoiceHeaven game
-        else if is_gm || is_helper
+        else if !plpl? && (is_gm || is_helper)
             result.speak = processSpeakChoice player.getSpeakChoice game
         else if Phase.isNight(game.phase) || game.phase == Phase.rolerequesting
             result.speak = processSpeakChoice player.getSpeakChoice game

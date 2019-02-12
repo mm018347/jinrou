@@ -3,9 +3,8 @@ import { IIconSelectDialog } from '../defs';
 import { Dialog } from './base';
 import { NoButton, YesButton, FormTable, FormInput } from './parts';
 import bind from 'bind-decorator';
-import { I18n } from '../../i18n';
+import { I18n, TranslationFunction } from '../../i18n';
 import { getTwitterIcon } from '../../api/twitter-icon';
-import { TranslationFunction } from 'i18next';
 import { showMessageDialog } from '..';
 
 export interface IPropIconSelectDialog extends IIconSelectDialog {
@@ -69,7 +68,7 @@ export class IconSelectDialog extends React.PureComponent<
                       <th>{t('iconSelect.url')}</th>
                       <td>
                         <FormInput
-                          innerRef={this.urlRef}
+                          ref={this.urlRef}
                           type="text"
                           disabled={urlDisabled}
                           required
@@ -81,7 +80,7 @@ export class IconSelectDialog extends React.PureComponent<
                       <th>{t('iconSelect.twitter')}</th>
                       <td>
                         <FormInput
-                          innerRef={this.twitterRef}
+                          ref={this.twitterRef}
                           type="text"
                           disabled={twitterDisabled}
                           required

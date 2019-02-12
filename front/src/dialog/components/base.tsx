@@ -1,11 +1,12 @@
 import * as React from 'react';
 import Draggable from 'react-draggable';
-import styled, { keyframes, withProps } from '../../util/styled';
+import styled, { keyframes } from '../../util/styled';
 import { WithRandomIds } from '../../util/with-ids';
 import { bind } from '../../util/bind';
 import { IconProp, FontAwesomeIcon } from '../../util/icon';
 import { phone } from '../../common/media';
 import { AppStyling } from '../../styles/phone';
+import { dialogZIndex } from '../../common/z-index';
 
 interface IPropDialogWrapper {
   modal?: boolean;
@@ -26,23 +27,24 @@ const opacityAnimation = keyframes`
 /**
  * Wrapper of dialog.
  */
-const DialogWrapper = withProps<IPropDialogWrapper>()(styled(AppStyling))`
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
+const DialogWrapper = styled(AppStyling)<IPropDialogWrapper>`
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: ${dialogZIndex};
 
-    background-color: ${({ modal }) =>
-      modal ? 'rgba(0, 0, 0, 0.48)' : 'transparent'};
-    pointer-events: ${({ modal }) => (modal ? 'auto' : 'none')};
+  background-color: ${({ modal }) =>
+    modal ? 'rgba(0, 0, 0, 0.48)' : 'transparent'};
+  pointer-events: ${({ modal }) => (modal ? 'auto' : 'none')};
 
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
 
-    animation: ${opacityAnimation} ease-out 0.1s;
+  animation: ${opacityAnimation} ease-out 0.1s;
 `;
 
 interface IPropDialogBase {
@@ -91,7 +93,7 @@ const DialogMain = styled.div`
  * Wrapper of buttons in the bottom line of a dialog.
  */
 export const Buttons = styled.div`
-  margin: 1em 6px 0 6px;
+  margin: 0.5em 6px 0 6px;
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-end;
@@ -169,6 +171,11 @@ const DialogBase = styled(DialogBaseInner)`
   }
 `;
 
+const DialogMainContents = styled.div`
+  max-height: 70vh;
+  overflow-y: auto;
+`;
+
 export type IPropDialog = IPropDialogWrapper &
   IPropDialogBase & {
     /**
@@ -221,7 +228,9 @@ export function Dialog({
               onSubmit={onSubmit}
             >
               {message != null ? <p>{message}</p> : null}
-              {contents ? contents() : null}
+              {contents ? (
+                <DialogMainContents>{contents()}</DialogMainContents>
+              ) : null}
               <Buttons>{buttons()}</Buttons>
               {afterButtons ? afterButtons() : null}
             </DialogBase>
