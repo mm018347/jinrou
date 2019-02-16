@@ -76,7 +76,7 @@ jobinfo:
   # Info of peers.
   peers:
     wolves: "同伴的人狼是 {{names}}"
-    peers: "共有者是 {{names}}"
+    peers: "同伴的共有者是 {{names}}"
     madpeers: "同伴的尖叫狂人是 {{names}}"
     foxes: "同伴的妖狐是 {{names}}"
     nobles: "贵族是 {{names}}"
@@ -84,8 +84,8 @@ jobinfo:
     spy2s: "间谍Ⅱ是 {{names}}"
     friends: "恋人是 {{names}}"
     cultmembers: "教会信者是 {{names}}"
-    vampires: "吸血鬼是 {{names}}"
-    twins: "双胞胎是 {{names}}"
+    vampires: "同伴的吸血鬼是 {{names}}"
+    twins: "同伴的双胞胎是 {{names}}"
     myfans: "粉丝是 {{names}}"
     ravens: "乌鸦是 {{names}}"
     stalking: "你是 {{name}} 的跟踪狂"
