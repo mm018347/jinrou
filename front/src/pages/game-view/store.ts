@@ -75,6 +75,9 @@ export class GameStore {
     kind: '',
     multiline: false,
     willOpen: false,
+    widePage: JSON.parse(
+      localStorage.widepage == undefined ? true : localStorage.widepage,
+    ),
   };
   /**
    * Which day is shown to user?

@@ -58,4 +58,8 @@ export interface SpeakState {
    * Whether will form is open.
    */
   willOpen: boolean;
+  /**
+   * Whether use wide page.
+   */
+  widePage: boolean;
 }

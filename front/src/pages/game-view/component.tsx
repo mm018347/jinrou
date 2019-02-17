@@ -188,6 +188,11 @@ export class Game extends React.Component<IPropGame, {}> {
                 onRuleOpen={this.handleRuleOpen}
                 onWillChange={onWillChange}
                 onFocus={this.handleSpeakFocus}
+                widePage={JSON.parse(
+                  localStorage.widepage == undefined
+                    ? true
+                    : localStorage.widepage,
+                )}
                 {...speakState}
               />
             </SpeakFormPart>

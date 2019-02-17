@@ -344,7 +344,6 @@ exports.showUrl=showUrl=(url,query={},nohistory=false)->
                 # preload game-start-control assets.
                 JinrouFront.loadGameStartControl()
                 page "game-game",null,Index.game.game,parseInt result[1]
-                $("#content").css "max-width","95%"
             else if result=url.match /^\/user\/(\w+|替身君|%E6%9B%BF%E8%BA%AB%E5%90%9B)$/
                 userid = result[1]
                 if userid == "%E6%9B%BF%E8%BA%AB%E5%90%9B"
@@ -383,7 +382,7 @@ exports.showUrl=showUrl=(url,query={},nohistory=false)->
     unless nohistory
         pushState url, query
     unless url.match /^\/room\/-?(\d+)$/
-        $("#content").removeAttr "style"
+        $("#content").removeClass "wide"
 exports.pushState=pushState=(url, query)->
     history.pushState null, null, "#{url}#{util.hashSearch query}"
 
@@ -494,6 +493,8 @@ loadApplicationConfig = ()->
                     a.appendChild(document.createTextNode "前往 #{m.name}")
                     span.appendChild a
                     $("#toolbar").append span
+        else
+            $("#toolbar").hide()
         # preload front-end assets
         JinrouFront.loadI18n()
             .then((i18n)-> i18n.preload conf.language.value)

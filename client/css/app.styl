@@ -72,7 +72,7 @@ input[type="number"]
 #content
   padding 0
   clear both
-  max-width 800px
+  max-width 980px
   margin-left auto
   margin-right auto
 
@@ -88,6 +88,7 @@ body > header
   color #ffffff
   display flex
   flex-flow row wrap
+  justify-content center
   align-items center
   line-height 1.05
   h1
@@ -108,7 +109,7 @@ body > header
   display contents
   nav
     display inline-block
-    vertical-align 40%
+    //vertical-align 40%
   nav li
     display inline-block
     white-space nowrap
@@ -120,7 +121,7 @@ body > header
       background-color rgba(0,0,0,.4)
       box-shadow 0 0 5px 5px rgba(0,0,0,.4)
   #toolbar
-    margin-left auto
+    //margin-left auto
     text-align right
     span.tool-button
       display inline-block
@@ -191,7 +192,14 @@ body > header
 
 // class to cancel the padding of body.
 .whole-page
-  margin-left -20px
+  margin-left -15px
+  margin-right -15px
+.whole-page.wide
+  //max-width unset
+  margin-left -15px
+  margin-right -15px
+#content.wide
+  max-width unset
 
 //おしらせ
 body > .notice

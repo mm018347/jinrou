@@ -211,11 +211,16 @@ exports.start=(roomid)->
                         document.body.appendChild a
                         a.click()
                         document.body.removeChild a
-
-
             }
+            handleWidePage = ()->
+                if $("#widepagecheck").is(':checked')
+                    $("#content,.game.whole-page").addClass "wide"
+                else
+                    $("#content,.game.whole-page").removeClass "wide"
+            handleWidePage()
+            $("#widepagecheck").click handleWidePage
             ss.rpc "game.rooms.enter", roomid,sessionStorage.roompassword ? null,getenter
-            )
+        )
 
     initroom=([gv, dialog, i18n], room)->
         unless room?

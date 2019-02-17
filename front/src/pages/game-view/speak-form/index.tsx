@@ -82,6 +82,10 @@ export interface IPropSpeakForm extends SpeakState {
    * Focus/unfocus the speak input.
    */
   onFocus: (focus: boolean) => void;
+  /**
+   * Whether use wide page.
+   */
+  widePage: boolean;
 }
 /**
  * Speaking controls.
@@ -119,6 +123,7 @@ export class SpeakForm extends React.PureComponent<
       willOpen,
       logVisibility,
       rule,
+      widePage,
     } = this.props;
     const { additionalControlsShown } = this.state;
 
@@ -256,6 +261,20 @@ export class SpeakForm extends React.PureComponent<
                       >
                         {t('game_client:speak.refuseRevival')}
                       </button>
+                      {/* Wide page checkbox. */}
+                      {isPhone ? (
+                        ''
+                      ) : (
+                        <label>
+                          <input
+                            type="checkbox"
+                            id="widepagecheck"
+                            checked={widePage}
+                            onChange={this.handleWidepageChange}
+                          />
+                          {t('game_client:speak.widepage')}
+                        </label>
+                      )}
                     </OthersArea>
                     <ButtonArea>
                       <ExpandButton
@@ -370,6 +389,18 @@ export class SpeakForm extends React.PureComponent<
     this.props.onUpdate({
       multiline: e.currentTarget.checked,
     });
+  }
+  /**
+   * Handle a change of wide page checkbox.
+   */
+  @bind
+  protected handleWidepageChange(
+    e: React.SyntheticEvent<HTMLInputElement>,
+  ): void {
+    this.props.onUpdate({
+      widePage: e.currentTarget.checked,
+    });
+    localStorage.setItem('widepage', String(e.currentTarget.checked));
   }
   /**
    * Handle a click of will button.

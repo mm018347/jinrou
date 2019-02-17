@@ -139,6 +139,8 @@ speak:
     gmreply: "→{{target}}"
   # label of multiline checkbox.
   multiline: "多行"
+  # label of wide page checkbox.
+  widepage: "宽页面"
   # will button.
   will:
     # click to open button.

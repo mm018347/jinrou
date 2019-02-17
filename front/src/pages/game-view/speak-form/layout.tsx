@@ -96,6 +96,9 @@ export const SpeakInput = styled.input`
   ${phone`
     width: 100%;
   `};
+  ${notPhone`
+    width: 396px;
+  `};
 `;
 
 /**
@@ -107,6 +110,10 @@ export const SpeakTextArea = styled.textarea`
   max-width: 100%;
   ${phone`
     width: 100%;
+  `};
+  ${notPhone`
+    max-width: unset;
+    width: 394px;
   `};
 `;
 
