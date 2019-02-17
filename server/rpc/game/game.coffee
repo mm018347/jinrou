@@ -1740,7 +1740,7 @@ class Game
                         "vampire"
                     when "dog"
                         "dog"
-                    when "trap"
+                    when "trap","bomb"
                         "trap"
                     when "marycurse"
                         "curse"
@@ -11459,14 +11459,7 @@ module.exports.actions=(req,res,ss)->
             if query.chemical == "on"
                 # ケミカル人狼の場合は表示
                 ruleinfo_str = "#{game.i18n.t "common.chemicalWerewolf"}　" + (ruleinfo_str ? "")
-                
-            if query.divineresult=="immediate" && DIVINER_NOIMMEDIATE_JOBS.some((job)-> joblist[job] > 0)
-                query.divineresult="sunrise"
-                log=
-                    mode:"system"
-                    comment: game.i18n.t "system.gamestart.divinerModeChanged"
-                splashlog game.id,game,log
-                
+
             if ruleinfo_str != ""
                 # 表示すべき情報がない場合は表示しない
                 log=
