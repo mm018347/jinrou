@@ -21,7 +21,8 @@ room: {
   number: Number(プレイヤー数)
   players:[PlayerObject,PlayerObject,...]
   gm: Booelan(trueならオーナーGM)
-  jobrule: String   //開始後はなんの配役か（エンドレス黑暗火锅用）
+  watchspeak: Boolean (trueなら観戦者の発言可）
+  jobrule: String   //開始後はなんの配役か（エンドレス闇鍋用）
   ban: [String]  // kicked userid
 }
 PlayerObject.start=Boolean
@@ -273,6 +274,7 @@ module.exports.actions=(req,res,ss)->
                 userid:req.session.user.userid
                 name:req.session.user.name
             room.gm = query.ownerGM=="yes"
+            room.watchspeak = query.watchspeak == "on"
             if query.ownerGM=="yes"
                 # GMがいる
                 su=req.session.user
@@ -328,6 +330,14 @@ module.exports.actions=(req,res,ss)->
                 error: i18n.t "error.join.banned"
             }
             return
+        
+        #Function to sanitize log text.
+        #Removes Unicode bidi characters.
+        sanitizeName = (name)->
+            return name.replace(/[\u200b-\u200f\u202a-\u202e\u2066-\u2069]/g, '')
+
+        opt.name = sanitizeName opt.name
+
         Server.game.rooms.oneRoomS roomid,(room)=>
             if !room || room.error?
                 res error: i18n.t "error.noSuchRoom"
@@ -362,7 +372,7 @@ module.exports.actions=(req,res,ss)->
             user=
                 userid:req.session.userId
                 realid:req.session.userId
-                name:su.name.trim()
+                name:sanitizeName su.name.trim()
                 ip:su.ip
                 icon:su.icon
                 start:false
@@ -387,7 +397,7 @@ module.exports.actions=(req,res,ss)->
                 if !theme.isAvailable?()
                     res {error: i18n.t "error.theme.notAvailable", {name: theme.name}}
                     return
-                
+
             if room.blind
                 unless opt?.name || room.theme
                     res error: i18n.t "error.join.nameNeeded"
@@ -430,7 +440,7 @@ module.exports.actions=(req,res,ss)->
                             if room.players.some((x)->x.userid==re)
                                 re=""
                         re
-                    user.name=opt.name.trim()
+                    user.name=sanitizeName opt.name.trim()
                     user.userid=makeid()
                     user.icon= opt.icon ? null
                     

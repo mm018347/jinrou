@@ -299,6 +299,7 @@ exports.start=(roomid)->
                                 "finished"
                             else
                                 "playing"
+                            watchspeak: obj.game.watchspeak
                         }
                     else
                         undefined

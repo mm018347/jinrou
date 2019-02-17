@@ -170,6 +170,8 @@ speak:
     oneday: "第{{day}}天"
   # label of refuse revival button.
   refuseRevival: "拒绝复活"
+  # text shown when watch speak is not allowed.
+  noWatchSpeak: "观战者不能发言。"
 
 # navigation shown at the bottom of view on phone.
 navigation:
