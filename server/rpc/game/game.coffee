@@ -10539,7 +10539,7 @@ module.exports.actions=(req,res,ss)->
             # ルールオブジェクト用意
             ruleobj={
                 number: room.players.length
-                maxnumber:room.maxnumber
+                maxnumber:room.number
                 blind:room.blind
                 gm:room.gm
                 watchspeak:room.watchspeak
