@@ -61,3 +61,9 @@ watchSpeak:
 
 # label of create button.
 create: "建成房间"
+
+# confirmation dialog-related text.
+confirm:
+  message: "确认按这样的配置建成房间吗？"
+  yes: "建成房间"
+  no: "取消"

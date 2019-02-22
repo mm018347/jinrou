@@ -245,6 +245,7 @@ foundDetail:
   foxsuicide: "追随妖狐自尽"
   friendsuicide: "追随恋人自尽"
   twinsuicide: "追随双胞胎自尽"
+  dragonknightsuicide: "龙骑士自尽"
   infirm: "老死"
   hunter: "被猎枪射杀"
   gmpunish: "被GM处死"
@@ -253,6 +254,7 @@ foundDetail:
   crafty: "假死"
   lunaticlover: "狂爱者的袭击"
   hooligan: "暴动者的暴行"
+  dragon: "龙息"
   fallback: "未知原因"
   situation: "{{name}} 的死因是 {{detail}}。"
 

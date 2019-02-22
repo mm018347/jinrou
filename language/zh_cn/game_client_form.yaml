@@ -99,6 +99,7 @@ messages:
   HooliganAttacker: "请选择施加暴行的对象"
   HooliganGuard: "请选择你要逮捕的对象"
   Illusionist: "请选择你要替换成人狼袭击目标的对象"
+  Satori: "请选择你要使用读心术的对象"
   GameMaster: "GM命令"
 
 # Texts for GameMaster form.
@@ -134,4 +135,12 @@ Witch:
   drug:
     kill: "毒药"
     revive: "复活药"
-
+# Texts for DragonKnight form.
+DragonKnight:
+  description: "请选择使用的能力和使用对象"
+  # normal guard button.
+  guardButton: "护卫"
+  # kill button.
+  killButton: "杀害（只限一次）"
+  # kill button (already used)
+  killButtonUsed: "杀害（已经使用）"
