@@ -1282,6 +1282,9 @@ class Game
                     if @rule.scapegoat=="on" && @day==1 && player.isWerewolf() && player.isAttacker()
                         # 身代わり襲撃は例外的にtrue
                         @ninja_data[player.id] = true
+                    if @rule.firstnightdivine == "auto" && @day == 1 && player.isJobType "Diviner"
+                        # 初日白通知ありの占い師もtrue
+                        @ninja_data[player.id] = true
         else
             # 誤爆防止
             @werewolf_target_remain=0
@@ -6628,7 +6631,7 @@ class PsychoKiller extends Madman
         PsychoKiller::midnight.call this, game, midnightSort
 class SantaClaus extends Player
     type:"SantaClaus"
-    midnightSort:100
+    midnightSort:101
     formType: FormType.required
     sleeping:->@target?
     constructor:->
@@ -8882,6 +8885,9 @@ class Satori extends Diviner
             to:@id
             comment: game.i18n.t "roles:Satori.select", {name: @name, target: pl.name}
         splashlog game.id,game,log
+        if game.rule.divineresult=="immediate"
+            @dodivine game
+            @showdivineresult game, playerid
         null
     dodivine:(game)->
         origpl = game.getPlayer @target
@@ -9811,6 +9817,7 @@ class PhantomStolen extends Complex
     getJobname:-> @game.i18n.t "roles:jobname.Phantom" #霊界とかでは既に怪盗化
     getMainJobname:-> @getJobname()
     # 勝利条件関係は村人化（昼の間だけだし）
+    isHuman:->true
     isWerewolf:->false
     isFox:->false
     isVampire:->false
@@ -11500,7 +11507,7 @@ module.exports.actions=(req,res,ss)->
                                     if Math.random()>0.1
                                         # 90%の確率で弾く（レア）
                                         continue
-                                when "Lycan","SeersMama","Sorcerer","WolfBoy","ObstructiveMad"
+                                when "Lycan","SeersMama","Sorcerer","WolfBoy","ObstructiveMad","Satori"
                                     # 占い系がいないと入れない
                                     if joblist.Diviner==0 && joblist.ApprenticeSeer==0 && joblist.PI==0
                                         continue
