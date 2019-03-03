@@ -6,6 +6,8 @@ roominfo:
   blind: "匿名（结束后公开ID）"
   # complete blind mode
   blindComplete: "强匿名（结束后不公开ID）"
+  # no watchspeak
+  noWatchSpeak: "禁止观战者发言"
 # Game start control.
 gamestart:
   # information shown to an owner.

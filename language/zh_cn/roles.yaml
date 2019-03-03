@@ -796,6 +796,8 @@ DragonKnight:
   killSelect: "{{name}} 袭击了 {{target}}。"
 
 Satori:
+  # Today's target is automatically chosen.
+  auto: "{{name}} 今天将会随机选择一个人进行读心。"
   # select a target of mind reading.
   select: "{{name}} 对 {{target}} 使用了读心术。"
   # log of result.
