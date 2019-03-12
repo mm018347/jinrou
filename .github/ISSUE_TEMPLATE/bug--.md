@@ -1,6 +1,9 @@
 ---
 name: Bug报告
 about: Create a report to help us improve
+title: ''
+labels: ''
+assignees: ''
 
 ---
 
@@ -22,6 +25,7 @@ about: Create a report to help us improve
 
 **截屏**
 如果能够提供有效的截屏，能够更好地协助我修复bug。
+将图片文件拖动至此处，或截图后按Ctrl+V即可。
 
 **更多内容**
 如果有更多能够协助修复bug的内容，请填写在这里。
