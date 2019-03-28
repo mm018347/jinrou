@@ -125,6 +125,9 @@ jobname:
   Illusionist: "奇术师"
   DragonKnight: "龙骑士"
   Satori: "觉"
+  Samurai: "武士"
+  Dracula: "德古拉"
+  VampireClan: "吸血鬼的眷属"
   GameMaster: "游戏管理员"
   Helper: "帮手"
   Waiting: "尚未分配"
@@ -691,10 +694,14 @@ Emma:
     twinsuicide: "{{name}} 追随着双胞胎自尽了。"
     # DragonKnight's suicide
     dragonknightsuicide: "{{name}} 由于自责选择了自杀。"
+    # Suicided after vampires
+    vampiresuicide: "{{name}} 追随着吸血鬼自尽了。"
     # Killed by hooligan
     hooligan: "{{name}} 被暴动者杀死了。"
     # Killed by DragonKnight
     dragon: "{{name}} 被炽热的龙息烧死了。"
+    # Killed by Samurai
+    samurai: "{{name}} 被武士一刀两断了。"
 
 EyesWolf:
   # EyesWolf result strings
@@ -802,6 +809,16 @@ Satori:
   select: "{{name}} 对 {{target}} 使用了读心术。"
   # log of result.
   resultlog: "根据 {{name}} 的读心结果，{{target}} 是 {{result}}。"
+
+Dracula:
+  # select today's target of Dracula
+  select: "{{name}} 想要试试看吸 {{target}} 的血。"
+  # decided target
+  decide: "德古拉吸了 {{target}} 的血。"
+  # there was a dracula attack.
+  attackLog: "德古拉成功吸血了。"
+  # there was no attack.
+  noAttackLog: "德古拉吸血失败了。"
 
 GameMaster:
   # Failed to revive.
