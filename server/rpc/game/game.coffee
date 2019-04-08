@@ -4469,12 +4469,15 @@ class Copier extends Player
         splashlog game.id,game,log
         p=game.getPlayer playerid
         newpl=Player.factory p.type, game
-        # TODO: we want to apply sunset to only newly-craeted role,
-        # ideally after it is in role tree.
         @transProfile newpl
         @transferData newpl, true
-        newpl.sunset game   # 初期化してあげる
         @transform game,newpl,false
+        newtop = game.getPlayer @id
+        # コピー後役職にsunsetを実行
+        if newtop?
+            newtree = searchPlayerInTree newtop, newpl
+            if newtree?
+                newtree[3].sunset.call newtree[1], game
         # 身代わりくんの場合を考えて対象選択を入れる
         if @scapegoat
             scapegoatRunJobs game, @id
@@ -9732,7 +9735,7 @@ class Complex
         if @sub?.hasDeadResistance game
             return true
         return false
-    geteAttribute:(attr, game)->
+    getAttribute:(attr, game)->
         if @main.getAttribute attr, game
             return true
         if @sub?.getAttribute attr, game
@@ -12677,7 +12680,7 @@ writeGlobalJobInfo = (game, player, result={})->
             result.draculas = game.players.filter((x)->x.isJobType "Dracula").map (x)->
                 x.publicinfo()
         if vq.draculaBitten
-            result.draculaBitten = game.players.filter((x)->x.getAttribute PlayerAttribute.draculaBitten).map (x)->
+            result.draculaBitten = game.players.filter((x)->x.getAttribute PlayerAttribute.draculaBitten, game).map (x)->
                 x.publicinfo()
 
 #job情報を
