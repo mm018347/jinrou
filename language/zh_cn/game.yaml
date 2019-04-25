@@ -259,6 +259,7 @@ foundDetail:
   hooligan: "暴动者的暴行"
   dragon: "龙息"
   samurai: "武士的反击"
+  elemental: "暴走的精灵之力"
   fallback: "未知原因"
   situation: "{{name}} 的死因是 {{detail}}。"
 

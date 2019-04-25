@@ -128,6 +128,7 @@ jobname:
   Samurai: "武士"
   Dracula: "德古拉"
   VampireClan: "吸血鬼的眷属"
+  Elementaler: "精灵术士"
   GameMaster: "游戏管理员"
   Helper: "帮手"
   Waiting: "尚未分配"
@@ -702,6 +703,8 @@ Emma:
     dragon: "{{name}} 被炽热的龙息烧死了。"
     # Killed by Samurai
     samurai: "{{name}} 被武士一刀两断了。"
+    # Killed by Elementaler
+    elemental: "{{name}} 被暴走的精灵杀死了。"
 
 EyesWolf:
   # EyesWolf result strings
@@ -819,6 +822,10 @@ Dracula:
   attackLog: "德古拉成功吸血了。"
   # there was no attack.
   noAttackLog: "德古拉吸血失败了。"
+
+Elementaler:
+  # select target of guard
+  select: "{{name}} 使用精灵的力量守护了 {{target}}。"
 
 GameMaster:
   # Failed to revive.

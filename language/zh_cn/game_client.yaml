@@ -21,7 +21,7 @@ gamestart:
   # game start control.
   control:
     # legend: "roles"
-    roles: 配置
+    roles: 职业・配置
     # legend: "rules"
     rules: 规则设定
     # minutes

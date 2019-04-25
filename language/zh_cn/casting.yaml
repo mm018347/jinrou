@@ -32,6 +32,7 @@ castingName:
     手调黑暗火锅: "手调黑暗火锅"
     量子人狼: "量子人狼"
     Endless黑暗火锅: "Endless黑暗火锅"
+    easyYaminabe: "简易黑暗火锅"
 
 # title of casting.
 castingTitle:
@@ -65,6 +66,7 @@ castingTitle:
     手调黑暗火锅: "一部分角色由房主分配，其他角色随机分配。"
     量子人狼: "全员的的真实职业以概率表示。只有村人・人狼・占卜师。"
     Endless黑暗火锅: "可以中途参加・死亡后有可能转生的黑暗火锅。"
+    easyYaminabe: "能够轻松参与的黑暗火锅。大体上是在普通村的基础上，随机1-2个职业用特殊职业进行替换。"
 
 # name of casting group.
 # "_name" field holds the name because
