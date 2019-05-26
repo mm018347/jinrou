@@ -56,7 +56,7 @@ confirmMail:
   # Mail address is deleted
   deleted: "邮箱解除认证成功。"
   # Password is reset
-  passwordReset: "密码重置成功，请重新登陆。"
+  passwordReset: "密码重置成功，请重新登录。"
   # Setting is changed
   settingChanged: "密码·邮箱地址已经解除锁定。"
 
