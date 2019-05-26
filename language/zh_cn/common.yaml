@@ -3,7 +3,7 @@ error:
   # Common heading indicating error.
   error: "错误"
   # You need to log in.
-  needLogin: "请先登陆。"
+  needLogin: "请先登录。"
   # Input is invalid.
   invalidInput: "输入的内容无效。"
 
@@ -22,9 +22,9 @@ errorDialog:
 # Text for login form.
 loginForm:
   # title of login form.
-  title: "登陆"
+  title: "登录"
   # button to login.
-  ok: "登陆"
+  ok: "登录"
   # cancel button.
   cancel: "取消"
   # label for userid input.
