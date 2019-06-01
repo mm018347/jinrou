@@ -12,15 +12,15 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 "Poisoner","BigWolf","TinyFox","Cat",
 # るる鯖で見つけた职业
 "Fanatic","Immoral"
-# 特殊职业2
-"Devil","ToughGuy","Stalker","OccultMania","WhisperingMad","Lover","Dog",
+# 特殊役職2
+"Devil","Stalker","WhisperingMad","Dog",
 # 桃栗基本特殊役職
 "Bat","Noble","Slave","Magician","Spy","WolfDiviner",
 # 桃栗期間限定役職
 "Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Spy2","Copier",
-# 究极人狼的职业
-"Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Sorcerer",
-"Doppleganger","CultLeader","Vampire","LoneWolf","Witch","Oldman","Tanner","WolfCub","Thief",
+# 究極の人狼の役職
+"ToughGuy","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Sorcerer",
+"Doppleganger","CultLeader","Vampire","LoneWolf","Witch","Oldman","Tanner","OccultMania","WolfCub","Thief",
 "Hoodlum","TroubleMaker","FrankensteinsMonster",
 "BloodyMary",
 # うそつき人狼の役職
@@ -30,6 +30,7 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 # 人狼物語（瓜科国）
 "MadCouple",
 # 天国系の役職
+"Lover", # 人狼天国
 "ObstructiveMad", # 人狼天国
 "WanderingGuard", # 錠前天国
 "BadLady", # 苍汁天国、人狼天国
@@ -62,7 +63,7 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 "Elementaler",
 # オリジナル
 "SantaClaus","Pyrotechnist","Patissiere","Shishimai","Idol","LurkingMad",
-"DecoyWolf","Hooligan","HomeComer","DragonKnight"
+"DecoyWolf","Hooligan","HomeComer","DragonKnight","Poet"
 ]
 # 隠されていて自分で入れることができない役職
 exports.hiddenJobs = [
@@ -77,7 +78,7 @@ exports.blacks=["Werewolf","WolfDiviner","MadWolf","Lycan","LoneWolf","WolfCub",
 
 # チームたち
 exports.teams=teams=
-    Human:["Human","Diviner","Psychic","Guard","Couple","Poisoner","ToughGuy","Noble","Slave","Magician","Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Light","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Cat","Witch","Oldman","OccultMania","Dog","Dictator","SeersMama","Trapper","RedHood","Counselor","Miko","HolyMarked","WanderingGuard","TroubleMaker","FrankensteinsMonster","BloodyMary","King","SantaClaus","Phantom","DrawGirl","Pyrotechnist","Baker","SpiritPossessed","GotChocolate","Forensic","Cosplayer","TinyGhost","Ninja","Twin","Hunter","Emma","Idol","HomeComer","Illusionist","DragonKnight","Samurai","Elementaler"]
+    Human:["Human","Diviner","Psychic","Guard","Couple","Poisoner","ToughGuy","Noble","Slave","Magician","Fugitive","Merchant","QueenSpectator","MadWolf","Liar","Light","Cursed","ApprenticeSeer","Diseased","Spellcaster","Lycan","Priest","Prince","PI","Cat","Witch","Oldman","OccultMania","Dog","Dictator","SeersMama","Trapper","RedHood","Counselor","Miko","HolyMarked","WanderingGuard","TroubleMaker","FrankensteinsMonster","BloodyMary","King","SantaClaus","Phantom","DrawGirl","Pyrotechnist","Baker","SpiritPossessed","GotChocolate","Forensic","Cosplayer","TinyGhost","Ninja","Twin","Hunter","Emma","Idol","HomeComer","Illusionist","DragonKnight","Samurai","Elementaler","Poet"]
     Werewolf:["Werewolf","Madman","BigWolf","Fanatic","Spy","WolfDiviner","Spy2","Sorcerer","LoneWolf","MinionSelector","WolfCub","WhisperingMad","WolfBoy","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf","ObstructiveMad","PsychoKiller","CautiousWolf","Bomber","Ushinotokimairi","MadDog","Hypnotist","CraftyWolf","Pumpkin","MadScientist","MadHunter","MadCouple","EyesWolf","TongueWolf","BlackCat","LurkingMad","DecoyWolf","Satori"]
     Fox:["Fox","TinyFox","Immoral","Blasphemy","XianFox"]
     Devil:["Devil"]
@@ -785,6 +786,8 @@ exports.jobinfo=
             color:"#000d80"
         Elementaler:
             color:"#46f17f"
+        Poet:
+            color:"#f1a0a2"
 
     Werewolf:
         color:"#DD0000"

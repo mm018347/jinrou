@@ -220,6 +220,9 @@ log:
   monologue: "{{name}}的自言自语"
   # 遺言
   will: "{{name}}的遗言"
+  # poem sent by Poet
+  poem:
+    description: "{{target}} 收到了来自 {{name}} 的赠诗。"
 # Game view: player box.
 playerbox:
   # Alt for the dead image.
@@ -352,4 +355,24 @@ suddenDeathPunish:
   message: "以下玩家在本局游戏中猝死，请投票选择对其中的某些人进行处罚，每人每票将为其带来{{count}}分钟封禁。"
   ok: "投票"
   cancel: "关闭"
+
+# report form (only applicable when report form is enabled via setting)
+reportForm:
+  title: "上报"
+  # description shown at the top of form.
+  description: |
+    如发现系统bug或恶意用户，请于此处报告。
+    ※对于来自此处的报告不会一一回复邮件。如果状况十分紧急或者需要回信，请通过其他手段联系管理者。
+  # legend of kind select.
+  kind: "报告类型"
+  # legend of report content.
+  content: "报告内容"
+  # placeholder of report content.
+  contentPlaceHolder: "请输入详细内容"
+  # label of send button.
+  send: "发送"
+  # message when report is sent.
+  thankyou: "报告发送成功。感谢您的协助。"
+  # button to close message sent dialog.
+  close: "关闭"
 

@@ -129,6 +129,7 @@ jobname:
   Dracula: "德古拉"
   VampireClan: "吸血鬼的眷属"
   Elementaler: "精灵术士"
+  Poet: "诗人"
   GameMaster: "游戏管理员"
   Helper: "帮手"
   Waiting: "尚未分配"
@@ -826,6 +827,12 @@ Dracula:
 Elementaler:
   # select target of guard
   select: "{{name}} 使用精灵的力量守护了 {{target}}。"
+
+Poet:
+  # select destination of poem.
+  select: "{{name}} 向 {{target}} 赠诗。"
+  # received from someone.
+  become: "{{name}} 收到了来自 {{sender}} 的赠诗，变成了诗人。"
 
 GameMaster:
   # Failed to revive.

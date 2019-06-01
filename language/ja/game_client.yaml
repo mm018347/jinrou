@@ -218,6 +218,9 @@ log:
   monologue: "{{name}}の独り言"
   # 遺言
   will: "{{name}}の遺言"
+  # poem sent by Poet
+  poem:
+    description: "{{target}}に{{name}}からの歌が届きました。"
 # Game view: player box.
 playerbox:
   # Alt for the dead image.
@@ -350,4 +353,24 @@ suddenDeathPunish:
   message: "以下の参加者はこのゲームで突然死しました。処罰すべきだと考える参加者に投票してください。1票は{{count}}分間の参加禁止に相当します。"
   ok: "投票"
   cancel: "閉じる"
+
+# report form (only applicable when report form is enabled via setting)
+reportForm:
+  title: "報告"
+  # description shown at the top of form.
+  description: |
+    システムのバグや悪質なユーザーを発見した場合、こちらからご報告ください。
+    ※報告に対して個別の返信はしておりません。緊急性が高い場合や返信が必要な場合は、他の手段で管理者にご連絡ください。
+  # legend of kind select.
+  kind: "報告の種類"
+  # legend of report content.
+  content: "報告の内容"
+  # placeholder of report content.
+  contentPlaceHolder: "報告の詳細を入力してください"
+  # label of send button.
+  send: "送信"
+  # message when report is sent.
+  thankyou: "報告を送信しました。ご協力いただきありがとうございました。"
+  # button to close message sent dialog.
+  close: "閉じる"
 

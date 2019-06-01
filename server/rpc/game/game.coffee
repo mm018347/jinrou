@@ -10,6 +10,7 @@ libsavelogs  = require '../../libs/savelogs.coffee'
 libi18n      = require '../../libs/i18n.coffee'
 libgame      = require '../../libs/game.coffee'
 libcasting   = require '../../libs/casting.coffee'
+libtime      = require '../../libs/time.coffee'
 
 cron=require 'cron'
 i18n = libi18n.getWithDefaultNS "game"
@@ -141,12 +142,16 @@ FormType =
 Found =
     # whether this is a guardable werewolf attack.
     isGuardableWerewolfAttack: (found)->
-        found in ["werewolf", "trickedWerewolf"]
+        found in ["werewolf"]
     # whether this is a guardable attack.
     isGuardableAttack:(found)->
         found == "vampire" || Found.isGuardableWerewolfAttack(found)
     # whether this is a werewolf attack.
-    isWerewolfAttack: (found)->
+    isNormalWerewolfAttack: (found)->
+        found in ["werewolf", "trickedWerewolf"]
+    # whether this is a vampire attack.
+    isNormalVampireAttack: (found)->
+        found == "vampire"
 
 # getAttributeで使用可能なattr
 PlayerAttribute =
@@ -467,8 +472,8 @@ class Game
         # 投票箱を用意しておく
         @votingbox=new VotingBox this
 
-        # New Year Messageのためだけの変数
-        @currentyear = null
+        # 特殊ログイベント
+        @timeBasedEvent = null
 
         # 保存用の時間
         @finish_time=null
@@ -484,6 +489,43 @@ class Game
 
         # 夜能力の対象選択に対するフック
         @skillTargetHook = new SkillTargetHook this
+
+        @initTimeBasedEvent()
+
+    initTimeBasedEvent:->
+        @timeBasedEvent = new libtime.TimeKeeper "newyear", ->
+            # 来年になる瞬間
+            d = new Date
+            # 来年の1月1日にセット
+            d.setFullYear d.getFullYear() + 1, 0, 1
+            # 時刻を0時にセット
+            d.setHours 0, 0, 0, 0
+            d
+    # 時刻イベントを処理
+    # phase:
+    #   "nextturn" if called on nextturn
+    #   "day" if called during day
+    handleTimeBasedEvent:(event, phase)->
+        switch event.type
+            when "newyear"
+                # 新年メッセージ
+                if phase == "nextturn"
+                    log=
+                        mode: "nextturn"
+                        day: @day
+                        night: Phase.isNight @phase
+                        userid: -1
+                        name: null
+                        comment: @i18n.t "system.phase.newyear", {year: event.goal.getFullYear()}
+                    splashlog @id, this, log
+                else
+                    log=
+                        mode:"system"
+                        comment: @i18n.t "system.phase.newyear", {year: event.goal.getFullYear()}
+                    splashlog @id, this, log
+
+
+
 
         ###
         さまざまな出来事
@@ -1084,12 +1126,14 @@ class Game
     #次のターンに進む
     nextturn:->
         clearTimeout @timerid
+        @timeBasedEvent?.clearTimer()
         if @day<=0
             # はじまる前
             @day=1
             @phase = Phase.night
-            # ゲーム開始時の年を記録
-            @currentyear = (new Date).getFullYear()
+
+            # 部屋作成から時間が経過していたときのためにtimeBasedEventを再初期化
+            @initTimeBasedEvent()
         else if Phase.isNight(@phase)
             @day++
             @phase = Phase.day
@@ -1098,17 +1142,10 @@ class Game
 
         night = Phase.isNight @phase
 
-        if @phase == Phase.day && @currentyear+1 == (new Date).getFullYear()
-            # 新年メッセージ
-            @currentyear++
-            log=
-                mode:"nextturn"
-                day:@day
-                night:night
-                userid:-1
-                name:null
-                comment: @i18n.t "system.phase.newyear", {year: @currentyear}
-            splashlog @id,this,log
+        if @phase == Phase.day && @timeBasedEvent.isOver()
+            # 夜時間中に時刻が過ぎていた
+            @handleTimeBasedEvent @timeBasedEvent, "nextturn"
+            @initTimeBasedEvent()
         else
             # 普通メッセージ
             log=
@@ -1427,25 +1464,13 @@ class Game
             # New year messageの処理
             end_date = new Date
             end_date.setTime(end_date.getTime() + @rule.day * 1000)
-            if (new Date).getFullYear() == @currentyear && end_date.getFullYear() > @currentyear
-                # 昼時間中に変わるので専用タイマー
-                end_date.setMonth 0
-                end_date.setDate 1
-                end_date.setHours 0
-                end_date.setMinutes 0
-                end_date.setSeconds 0
-                end_date.setMilliseconds 0
-                # debug
-                # end_date.setTime(end_date.getTime() - 145*60*1000)
-                current_day = @day
-                setTimeout (()=>
-                    if !@finished && @day == current_day && @phase in [Phase.day, Phase.day_remain, Phase.day_voting]
-                        @currentyear++
-                        log=
-                            mode:"system"
-                            comment: @i18n.t "system.phase.newyear", {year: @currentyear}
-                        splashlog @id,this,log
-                ), end_date.getTime() - Date.now()
+            # 昼時間中にイベント時刻が過ぎそうなときの処理
+            if @timeBasedEvent.isOver(@rule.day)
+                @timeBasedEvent.setTimer (event)=>
+                    currentyear = event.goal.getFullYear()
+                    if !@finished
+                        @handleTimeBasedEvent event, "day"
+                        @initTimeBasedEvent()
 
         @splashjobinfo()
         if !night
@@ -2459,6 +2484,7 @@ class Game
             M.rooms.update {id:@id},{$set:{mode:"end"}}
             @ss.publish.channel "room#{@id}","refresh",{id:@id}
             clearTimeout @timerid
+            @timeBasedEvent?.clearTimer()
             @save()
             @saveUserRawLogs()
             @prize_check()
@@ -2754,6 +2780,7 @@ logs:[{
     "wolfskill"(人狼に見える) / "emmaskill"(閻魔に見える) / "eyeswolfskill"(瞳狼に見える)
     "draculaskill"(ドラキュラに見える)
     "hidden"(終了後/霊界のみ見える追加情報)
+    "poem"(Poetが送ったpoem)
     comment: String
     userid:Userid
     name?:String
@@ -3114,7 +3141,7 @@ class Player
 
     # ログが見えるかどうか（通常のゲーム中、個人宛は除外）
     isListener:(game,log)->
-        if log.mode in ["day","system","nextturn","prepare","monologue","heavenmonologue","skill","will","voteto","gm","gmreply","helperwhisper","probability_table","userinfo"]
+        if log.mode in ["day","system","nextturn","prepare","monologue","heavenmonologue","skill","will","voteto","gm","gmreply","helperwhisper","probability_table","userinfo","poem"]
             # 全員に見える
             true
         else if log.mode in ["heaven","gmheaven"]
@@ -3898,7 +3925,7 @@ class Fox extends Player
     isFoxVisible:->true
     hasDeadResistance:->true
     checkDeathResistance:(game, found)->
-        if Found.isGuardableWerewolfAttack found
+        if Found.isNormalWerewolfAttack found
             # 襲撃耐性
             game.addGuardLog @id, AttackKind.werewolf, GuardReason.tolerance
             return true
@@ -3927,7 +3954,7 @@ class Poisoner extends Player
         super
         # 埋毒者の逆襲
         canbedead = game.players.filter (x)->!x.dead    # 生きている人たち
-        if Found.isGuardableWerewolfAttack found
+        if Found.isNormalWerewolfAttack found
             # 噛まれた場合は狼のみ
             if game.rule.poisonwolf == "selector"
                 # 襲撃者を道連れにする
@@ -3992,7 +4019,7 @@ class Noble extends Player
         slaves = game.players.filter (x)->!x.dead && x.isJobType "Slave"
         return slaves.length > 0
     checkDeathResistance:(game, found, from)->
-        if Found.isGuardableWerewolfAttack found
+        if Found.isNormalWerewolfAttack found
             # 奴隷がいれば耐える
             slaves = game.players.filter (x)->!x.dead && x.isJobType "Slave"
             if slaves.length == 0
@@ -4272,9 +4299,9 @@ class Fugitive extends Player
         null
     checkDeathResistance:(game, found)->
         # 狼の襲撃・ヴァンパイアの襲撃・魔女の毒薬は回避
-        if Found.isGuardableAttack(found) || found in ["witch"]
+        if Found.isNormalWerewolfAttack(found) || Found.isNormalVampireAttack(found) || found in ["witch"]
             if @target!=""
-                if Found.isGuardableWerewolfAttack found
+                if Found.isNormalWerewolfAttack found
                     game.addGuardLog @id, AttackKind.werewolf, GuardReason.absent
                 return true
         return false
@@ -4584,7 +4611,7 @@ class Devil extends Player
     psychicResult: PsychicResult.werewolf
     hasDeadResistance:->true
     checkDeathResistance:(game, found)->
-        if Found.isGuardableWerewolfAttack found
+        if Found.isNormalWerewolfAttack found
             # 死なないぞ！
             unless @flag
                 # まだ噛まれていない
@@ -4608,7 +4635,7 @@ class ToughGuy extends Player
     type:"ToughGuy"
     hasDeadResistance:->true
     checkDeathResistance:(game, found)->
-        if Found.isGuardableWerewolfAttack found
+        if Found.isNormalWerewolfAttack found
             # 狼の襲撃に耐える
             unless @flag?
                 @setFlag "bitten"
@@ -4746,7 +4773,7 @@ class Cursed extends Player
     type:"Cursed"
     hasDeadResistance:->true
     checkDeathResistance:(game, found)->
-        if Found.isGuardableWerewolfAttack found
+        if Found.isNormalWerewolfAttack found
             # 噛まれた場合人狼側になる
             unless @flag
                 # まだ噛まれていない
@@ -4814,7 +4841,7 @@ class Diseased extends Player
     type:"Diseased"
     dying:(game,found)->
         super
-        if Found.isGuardableWerewolfAttack found
+        if Found.isNormalWerewolfAttack found
             # 噛まれた場合次の日人狼襲撃できない！
             game.werewolf_flag.push "Diseased"   # 病人フラグを立てる
 class Spellcaster extends Player
@@ -6098,7 +6125,7 @@ class RedHood extends Player
     isReviver:->!@dead || @flag?
     dying:(game,found,from)->
         super
-        if Found.isGuardableWerewolfAttack found
+        if Found.isNormalWerewolfAttack found
             # 狼に襲われた
             # 誰に襲われたか覚えておく
             @setFlag from
@@ -6710,7 +6737,7 @@ class BloodyMary extends Player
             true
 
     dying:(game,found,from)->
-        if found == "punish" || Found.isGuardableWerewolfAttack(found)
+        if found == "punish" || Found.isNormalWerewolfAttack(found)
             # 能力が…
             orig_jobname=@getJobname()
             if found == "punish"
@@ -6971,7 +6998,7 @@ class Phantom extends Player
         log=
             mode:"skill"
             to:@id
-            comment: game.i18n.t "roles:Phantom.select", {name: @name, target: pl.name, jobname: pl.getMainJobname()}
+            comment: game.i18n.t "roles:Phantom.select", {name: @name, target: pl.name, jobname: pl.getMainJobname(true)}
         splashlog game.id,game,log
         @addGamelog game,"phantom",pl.type,playerid
         null
@@ -7128,7 +7155,7 @@ class DrawGirl extends Player
     type:"DrawGirl"
     sleeping:->true
     dying:(game,found)->
-        if Found.isGuardableWerewolfAttack found
+        if Found.isNormalWerewolfAttack found
             # 狼に噛まれた
             @setFlag "bitten"
         else
@@ -9320,7 +9347,7 @@ class Elementaler extends Player
     dying:(game, found, from)->
         super
         # 人狼の襲撃で死亡したときは護衛先を道連れにする
-        unless Found.isGuardableWerewolfAttack found
+        unless Found.isNormalWerewolfAttack found
             return
         unless @flag?.day == game.day
             # 今晩護衛していない
@@ -9332,6 +9359,173 @@ class Elementaler extends Player
         @addGamelog game, "elementalkill", null, guarded.id
         guarded.die game, "elemental", from
 
+class Poet extends Player
+    type:"Poet"
+    formType: FormType.optional
+    midnightSort: 100
+    jobdone:->@flag?.status in ["waiting", undefined] || @flag?.selected
+    sleeping:->true
+    constructor:->
+        super
+        @flag = {
+            # status: "init" | "available" | "waiting"
+            status: "init"
+            partner: null
+            poem: ""
+            selected: false
+        }
+    sunset:(game)->
+        switch @flag?.status
+            when "available"
+                @setFlag {
+                    status: "available"
+                    partner: @flag.partner
+                    poem: ""
+                    selected: false
+                }
+            when "waiting"
+                @setFlag {
+                    status: "waiting"
+                    partner: @flag.partner
+                    poem: ""
+                    selected: true
+                }
+            else
+                @setFlag {
+                    status: "init"
+                    poem: ""
+                    selected: false
+                }
+    job:(game, playerid, query)->
+        if @flag?.selected != false
+            return game.i18n.t "error.common.cannotUseSkillNow"
+        pl = null
+        if @flag?.status == "init"
+            pl = game.getPlayer playerid
+        else
+            pl = game.getPlayer @flag?.partner
+        unless pl?
+            return game.i18n.t "error.common.nonexistentPlayer"
+        if pl.dead
+            return game.i18n.t "error.common.alreadyDead"
+        if pl.id == @id
+            return game.i18n.t "error.common.noSelectSelf"
+        # perform easy check for large string
+        unless typeof query.poem == "string" && query.poem.length < Config.maxlength.game.comment
+            return game.i18n.t "error.common.invalidQuery"
+        log=
+            mode: "skill"
+            to: @id
+            comment: game.i18n.t "roles:Poet.select", {
+                name: @name
+                target: pl.name
+            }
+        splashlog game.id, game, log
+
+        @setTarget pl.id
+        @setFlag Object.assign(@flag, {
+            poem: query.poem
+            selected: true
+        })
+        null
+    midnight:(game)->
+        unless @flag?.status in ["init", "available"]
+            return
+        unless @flag.selected
+            return
+        pl = game.getPlayer game.skillTargetHook.get @target
+        unless pl?
+            return
+        log=
+            mode:"poem"
+            to:pl.id
+            name: @name
+            target: pl.name
+            comment: @flag.poem
+        splashlog game.id, game, log
+        switch @flag.status
+            when "init"
+                # If init poem was sent to a player, make that player a Poet.
+                poet = Player.factory "Poet", game
+                poet.setFlag {
+                    status: "available"
+                    partner: @id
+                    poem: ""
+                    selected: false
+                }
+                pl.transProfile poet
+                newpl = Player.factory null, game, pl, poet, Complex
+                pl.transProfile newpl
+                pl.transform game, newpl, true
+
+                @setFlag {
+                    status: "waiting"
+                    partner: pl.id
+                    poem: ""
+                    selected: false
+                }
+
+                log=
+                    mode: "skill"
+                    to: pl.id
+                    comment: game.i18n.t "roles:Poet.become", {
+                        name: pl.name
+                        sender: @name
+                    }
+                splashlog game.id, game, log
+            when "available"
+                @setFlag {
+                    status: "waiting"
+                    partner: pl.id
+                    poem: ""
+                    selected: false
+                }
+                # update target Poet's status.
+                poets = pl.accessByJobTypeAll "Poet"
+                for poet in poets
+                    if poet.flag?.partner == @id
+                        poet.setFlag {
+                            status: "available"
+                            partner: @id
+                            poem: ""
+                            selected: false
+                        }
+    isFormTarget:(jobtype)->
+        (jobtype in ["Poet1", "Poet2"]) || super
+    getOpenForms:(game)->
+        if Phase.isNight(game.phase) && !@dead && !@jobdone(game)
+            switch @flag?.status
+                when "init"
+                    # select poem target and poem contents.
+                    return [{
+                        type: "Poet1"
+                        options: @makeJobSelection game, false
+                        formType: FormType.optional
+                        objid: @objid
+                        data:
+                            poemStyle: Config.game.Poet.poemStyle
+                    }]
+                when "available"
+                    # target player is already decided.
+                    target = game.getPlayer @flag.partner
+                    if target? && !target.dead
+                        return [{
+                            type: "Poet2"
+                            options: []
+                            formType: FormType.optional
+                            objid: @objid
+                            data:
+                                target: target.name
+                                poemStyle: Config.game.Poet.poemStyle
+                        }]
+                    else
+                        return []
+        return []
+    checkJobValidity:(game,query)->
+        if @flag?.status == "init"
+            return super
+        else
+            return true
 
 # ============================
 # 処理上便宜的に使用
@@ -9558,7 +9752,7 @@ class Complex
     cmplType:"Complex"  # 複合親そのものの名前
     isComplex:->true
     getJobname:->@main.getJobname()
-    getMainJobname:->@main.getMainJobname()
+    getMainJobname:(chemicalLeft)->@main.getMainJobname(chemicalLeft)
     getJobDisp:->@main.getJobDisp()
     getMainJobDisp:(chemicalLeft)->@main.getMainJobDisp(chemicalLeft)
     midnightSort: 100
@@ -9900,7 +10094,7 @@ class HolyProtected extends Complex
             to:-1
             comment: game.i18n.t "roles:Priest.protected", {name: @name, found: game.i18n.t "foundDetail.#{found}"}
         splashlog game.id,game,log
-        if Found.isGuardableWerewolfAttack found
+        if Found.isNormalWerewolfAttack found
             game.addGuardLog @id, AttackKind.werewolf, GuardReason.holy
 
         @uncomplex game
@@ -10153,7 +10347,7 @@ class MikoProtected extends Complex
             comment: game.i18n.t "roles:Miko.protected", {name: @name, found: game.i18n.t "foundDetail.#{found}"}
         splashlog game.id,game,log
         # 襲撃失敗理由を保存
-        if Found.isGuardableWerewolfAttack found
+        if Found.isNormalWerewolfAttack found
             game.addGuardLog @id, AttackKind.werewolf, GuardReason.holy
         return true
     sunsetAlways:(game)->
@@ -10414,7 +10608,7 @@ class FoxMinion extends Complex
     getJobname:-> @game.i18n.t "roles:FoxMinion.jobname", {jobname: @main.getJobname()}
     # 襲撃耐性
     checkDeathResistance:(game, found, from)->
-        if Found.isGuardableWerewolfAttack found
+        if Found.isNormalWerewolfAttack found
             # 襲撃耐性
             game.addGuardLog @id, AttackKind.werewolf, GuardReason.tolerance
             return true
@@ -10555,12 +10749,12 @@ class SnowGuarded extends Complex
     cmplType:"SnowGuarded"
     checkDeathResistance:(game, found, from)->
         # 一回耐える 死なない代わりに元に戻る
-        unless Found.isGuardableAttack found
+        unless Found.isNormalWerewolfAttack(found) || Found.isNormalVampireAttack(found)
             return super
         else
             # 襲撃に1回耐える
             game.getPlayer(@cmplFlag).addGamelog game,"snowGJ", found, @id
-            if Found.isGuardableWerewolfAttack found
+            if Found.isNormalWerewolfAttack found
                 game.addGuardLog @id, AttackKind.werewolf, GuardReason.snow
 
             @uncomplex game
@@ -10694,8 +10888,8 @@ class Chemical extends Complex
         else
             @main.getJobname()
     # same as above but uses getMainJobname.
-    getMainJobname:->
-        if @sub?
+    getMainJobname:(chemicalLeft)->
+        if @sub? && !chemicalLeft
             @game.i18n.t "roles:Chemical.jobname", {left: @main.getMainJobname(), right: @sub.getMainJobname()}
         else
             @main.getMainJobname()
@@ -11027,6 +11221,7 @@ jobs=
     Dracula:Dracula
     VampireClan:VampireClan
     Elementaler:Elementaler
+    Poet:Poet
     # 特殊
     GameMaster:GameMaster
     Helper:Helper
@@ -11200,6 +11395,7 @@ jobStrength=
     Dracula:30
     VampireClan:20
     Elementaler:23
+    Poet:11
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
@@ -11417,6 +11613,10 @@ module.exports.actions=(req,res,ss)->
                 if safety.jingais || safety.jobs
                     exceptions.push "SpiritPossessed"
                     special_exceptions.push "SpiritPossessed"
+                # ニートは隠し役職（出現率低）
+                if Math.random()<0.4
+                    exceptions.push "Neet"
+                    special_exceptions.push "Neet"
 
                 # 一部闇鍋で固定されているやつが全て除外されていないかチェック
                 for type, categoryjobs of Shared.game.categories
@@ -12713,7 +12913,14 @@ islogOK=(game,player,log)->
     # player: Player / null
     return true if game.finished    # 終了ならtrue
     return true if player?.isJobType "GameMaster"
-    unless player?
+    # ヘルパーの場合はヘルパー先
+    # TODO: playerとactplが混在
+    actpl =
+        if player? && player.isJobType("Helper")
+            game.getPlayer player.flag
+        else
+            player
+    unless actpl?
         # 観戦者
         if log.mode in ["day","system","prepare","nextturn","audience","will","gm","gmaudience","probability_table"]
             !log.to?    # 観戦者にも公開
@@ -12724,7 +12931,7 @@ islogOK=(game,player,log)->
     else if log.mode=="gmmonologue"
         # GMの独り言はGMにしか見えない
         false
-    else if player.dead && game.heavenview
+    else if actpl.dead && game.heavenview
         true
     else if log.mode=="heaven" && log.possess_name?
         # 悪霊憑きについている霊界発言

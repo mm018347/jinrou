@@ -18,6 +18,8 @@ specialName:
   BadLady1: "恶女的能力"
   BadLady2: "恶女的能力"
   CraftyWolf2: "狡猾的狼的能力"
+  Poet1: "诗人的能力"
+  Poet2: "诗人的能力"
   _Quantum_Diviner: "占卜师的能力"
   _Quantum_Werewolf: "人狼的袭击"
 
@@ -113,10 +115,10 @@ GameMaster:
   time: "时间延长/缩短"
   longer: "延长{{count}}秒"
   shorter: "缩短{{count}}秒"
-  
+
 # Texts for _Werewolf form.
 _Werewolf:
-  description: "请选择要杀死的对象"
+  description: "请选择一个要袭击的对象"
   remains: "剩余的可袭击人数：{{count}}"
 
 # Texts for Merchant form.
@@ -136,7 +138,7 @@ Witch:
   description: "请选择使用的魔药和使用对象"
   # name of drugs.
   drug:
-    kill: "毒药"
+    kill: "魔女的毒药"
     revive: "复活药"
 # Texts for DragonKnight form.
 DragonKnight:
@@ -147,3 +149,14 @@ DragonKnight:
   killButton: "杀害（只限一次）"
   # kill button (already used)
   killButtonUsed: "杀害（已经使用）"
+
+# Texts for Poet form.
+Poet:
+  # description for initial form.
+  descriptionInit: "请输入赠诗的内容并选择送出的对象。诗的内容最大为17字。"
+  # description for normal form.
+  descriptionReply: "请输入送给 {{name}} 的赠诗的内容。诗的内容最大为17字。"
+  poemPlaceholder: "请于此处输入诗的内容"
+  # label for target selection
+  targetSelectionLabel: "选择送出的对象："
+  selectButton: "赠诗"
