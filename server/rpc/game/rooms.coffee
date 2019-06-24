@@ -214,6 +214,10 @@ module.exports.actions=(req,res,ss)->
         if query.comment && query.comment.length > Config.maxlength.room.comment
             res {error: i18n.t "error.newRoom.commentTooLong"}
             return
+        maxNumber = parseInt query.number, 10
+        if maxNumber < 5
+            res {error: i18n.t "error.newRoom.maxNumberTooSmall"}
+            return
         unless query.blind in ['', 'yes', 'complete']
             res {error: i18n.t "error.newRoom.invalidParameter"}
             return
@@ -233,7 +237,7 @@ module.exports.actions=(req,res,ss)->
             room=
                 id:id   #ID連番
                 name: query.name.trim()
-                number:parseInt query.number
+                number: maxNumber
                 mode:"waiting"
                 players:[]
                 made:Date.now()
@@ -679,7 +683,7 @@ module.exports.actions=(req,res,ss)->
     # 部屋ルームに入る
     enter: (roomid,password)->
         #unless req.session.userId
-        #   res {error:"请登陆"}
+        #   res {error:"请登录"}
         #   return
         Server.game.rooms.oneRoomS roomid,(room)=>
             if !room?

@@ -22,6 +22,8 @@ error:
     invalidParameter: "参数无效"
     # Cannot make a room because banned
     banned: "您的账号受限，不能创建房间。"
+    # max player number is too small
+    maxNumberTooSmall: "房间的最大人数过少。"
 
   theme:
     # nonexistent theme

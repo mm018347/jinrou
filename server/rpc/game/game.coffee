@@ -9527,6 +9527,12 @@ class Poet extends Player
         else
             return true
 
+class Amanojaku extends Player
+    type:"Amanojaku"
+    team:""
+    isWinner:(game, team)->
+        team != "Human"
+
 # ============================
 # 処理上便宜的に使用
 class GameMaster extends Player
@@ -11222,6 +11228,7 @@ jobs=
     VampireClan:VampireClan
     Elementaler:Elementaler
     Poet:Poet
+    Amanojaku:Amanojaku
     # 特殊
     GameMaster:GameMaster
     Helper:Helper
@@ -11396,6 +11403,7 @@ jobStrength=
     VampireClan:20
     Elementaler:23
     Poet:11
+    Amanojaku:10
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
@@ -12594,6 +12602,9 @@ module.exports.actions=(req,res,ss)->
             log.size=query.size
         # ログを流す
         dosp=->
+            # ルールに縛られずに発言できる役職
+            isSpecialSpeaker = player? && (player.isJobType("GameMaster") || player.isJobType("Helper") || player.isJobType("Watching"))
+
             if game.day<=0 || game.finished #準備中
                 unless log.mode=="audience"
                     log.mode="prepare"
@@ -12617,7 +12628,7 @@ module.exports.actions=(req,res,ss)->
                         log.mode="heavenmonologue"
                     else
                         log.mode="heaven"
-                else if Phase.isRemain(game.phase) && !player.isJobType("GameMaster") && !player.isJobType("Helper")
+                else if Phase.isRemain(game.phase) && !isSpecialSpeaker
                     # 猶予時間は独り言のみ
                     log.mode = "monologue"
                 else if Phase.isDay(game.phase)
@@ -12630,7 +12641,7 @@ module.exports.actions=(req,res,ss)->
                         # まだ発言できない（15秒ルール）
                         res null
                         return
-                else if Phase.isNight(game.phase) || player.isJobType("GameMaster") || player.isJobType("Helper")
+                else if Phase.isNight(game.phase) || isSpecialSpeaker
                     # 夜
                     unless query.mode in processSpeakChoice player.getSpeakChoice game
                         query.mode="monologue"

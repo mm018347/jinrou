@@ -1,4 +1,10 @@
 # Common language fragments.
+
+# basic information of app.
+app:
+  # name of app.
+  name: "月下人狼"
+
 error:
   # Common heading indicating error.
   error: "错误"
@@ -35,5 +41,7 @@ loginForm:
   signup: "注册"
   # link to help page.
   help: "帮助"
+  # link to password reset page.
+  passwordReset: "忘记密码"
   # error when login failed.
   error: "账号或密码错误。"

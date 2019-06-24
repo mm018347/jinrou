@@ -1,0 +1,32 @@
+# Languae file for top page
+
+# description of app at the top.
+app:
+  # description of app
+  description: "完全無料・リアルタイムチャット・高い自由度が特徴の人狼サーバーです。"
+  # link to features.
+  featuresLink: "この人狼の特徴を見る"
+  # error message shown on login failure.
+  loginError: "ユーザーIDまたはパスワードが違います。"
+
+# sign up form
+signup:
+  title: "新規登録"
+  description1: "まだ月下人狼のアカウントを持っていない方はこちらから新規登録できます。"
+  description2: "新規登録はユーザーIDとパスワードを決めるだけで終わります。"
+  # submit button
+  submit: "登録"
+  # notices
+  notice:
+    summaryOpen: "注意事項を閉じる"
+    summaryClosed: "注意事項を開く"
+    notice1: "ユーザーIDには半角英数とアンダーバーを使用できます。"
+    notice2: "ユーザーIDは一度決めたら変更できません。"
+    notice3: "マニュアルの{{link}}もご覧ください。"
+    manualLink: "禁止行為・注意事項"
+
+footer:
+  # footer text.
+  text: "© 2011-2019 うひょ"
+  # GitHub label
+  github: "GitHub"

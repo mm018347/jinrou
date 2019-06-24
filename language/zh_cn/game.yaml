@@ -33,7 +33,7 @@ error:
     # Such game does not exist.
     noSuchGame: "此游戏不存在。"
     # Login is needed.
-    needLogin: "请先登陆。"
+    needLogin: "请先登录。"
     # given query is invalid.
     invalidQuery: "无效的操作。"
     # Game has already finished.
