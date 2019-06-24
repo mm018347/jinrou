@@ -1,11 +1,11 @@
 # Language file for server connection information box.
 
 # unconnected message
-unconnected: "サーバーに接続されていません。"
+unconnected: "已失去与服务器的连接。"
 # connected message
-connected: "サーバーに接続されました"
+connected: "已连接到服务器。"
 
 # message that says reconnection is attemted.
-connecting: "再接続されるまでお待ちください……"
+connecting: "正在尝试重新连接，请稍候……"
 # message that internet connection itself is offline.
-offline: "インターネットに接続されていません"
+offline: "未连接到因特网。"

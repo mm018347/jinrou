@@ -7,41 +7,41 @@ app:
 
 error:
   # Common heading indicating error.
-  error: "エラー"
+  error: "错误"
   # You need to log in.
-  needLogin: "ログインしてください。"
+  needLogin: "请先登录。"
   # Input is invalid.
-  invalidInput: "入力が不正です。"
+  invalidInput: "输入的内容无效。"
 
 # Message dialog.
 messageDialog:
   # close button.
-  close: "閉じる"
+  close: "关闭"
 
 # Error dialog.
 errorDialog:
   # title.
-  title: "エラー"
+  title: "错误"
   # close button.
-  close: "閉じる"
+  close: "关闭"
 
 # Text for login form.
 loginForm:
   # title of login form.
-  title: "ログイン"
+  title: "登录"
   # button to login.
-  ok: "ログイン"
+  ok: "登录"
   # cancel button.
-  cancel: "キャンセル"
+  cancel: "取消"
   # label for userid input.
-  userid: "ユーザーID"
+  userid: "账号"
   # label for password.
-  password: "パスワード"
+  password: "密码"
   # link to sign up form.
-  signup: "新規登録"
+  signup: "注册"
   # link to help page.
-  help: "ヘルプ"
+  help: "帮助"
   # link to password reset page.
-  passwordReset: "パスワードの再発行"
+  passwordReset: "忘记密码"
   # error when login failed.
-  error: "ユーザーIDまたはパスワードが違います。"
+  error: "账号或密码错误。"

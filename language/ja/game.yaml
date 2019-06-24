@@ -1,115 +1,115 @@
 # Common terms
 common:
   # 身代わりくん
-  scapegoat: "身代わりくん"
+  scapegoat: "替身君"
   # Penalty for sudden death
-  suddenDeathPenalty: "突然死の罰"
+  suddenDeathPenalty: "猝死惩罚"
   # Chemical werewolf
-  chemicalWerewolf: "ケミカル人狼"
+  chemicalWerewolf: "炼成人狼"
 # Error messages
 error:
   # Common error message
   common:
     ## game-related
     # That player does not exist
-    nonexistentPlayer: "そのプレイヤーは存在しません。"
+    nonexistentPlayer: "这个玩家不存在。"
     # That player is already dead
-    alreadyDead: "そのプレイヤーは既に死亡しています。"
+    alreadyDead: "这个玩家已经死亡。"
     # You are not a player
-    notPlayer: "あなたは参加していません。"
+    notPlayer: "你没有加入游戏。"
     # Cannot use a skill now
-    cannotUseSkillNow: "今は能力を使用できません。"
+    cannotUseSkillNow: "现在还不能发动技能。"
     # Skill is already used
-    alreadyUsed: "既に能力を使用しています。"
+    alreadyUsed: "当前技能已经用尽。"
     # Selection is invalid
-    invalidSelection: "選択が不正です。"
+    invalidSelection: "选择的对象无效。"
     # Cannot target myself
-    noSelectSelf: "自分を対象に選択することはできません。"
+    noSelectSelf: "不能选择自己。"
     # That player is not dead
-    notDead: "そのプレイヤーは死亡していません。"
+    notDead: "这个玩家尚未死亡。"
     # Do not select scapegoat.
-    noScapegoat: "身代わりくんは選べません。"
+    noScapegoat: "不能选择替身君。"
     ## others
     # Such game does not exist.
-    noSuchGame: "そのゲームは存在しません。"
+    noSuchGame: "此游戏不存在。"
     # Login is needed.
-    needLogin: "ログインしてください。"
+    needLogin: "请先登录。"
     # given query is invalid.
-    invalidQuery: "不正な操作です。"
+    invalidQuery: "无效的操作。"
     # Game has already finished.
-    alreadyFinished: "そのゲームはすでに終了しています。"
+    alreadyFinished: "此游戏已经结束。"
   # Error during gamestart operation
   gamestart:
     # Player number is invalid (invalid number is passed as a number of a role)
-    playerNumberInvalid1: "プレイヤー数が不正です（{{job}}: {{num}}）。このエラーは数回やり直せば直る場合があります。"
+    playerNumberInvalid1: "职业数不是有效数字（{{job}}:{{num}}）。多次重试可能解决这个错误。"
     # Player number is invalid (sum of requested jobs is not the same as number of players)
-    playerNumberInvalid2: "プレイヤー数が不正です（{{request}}/{{jallnum}}/{{players}}）。このエラーは数回やり直せば直る場合があります。"
+    playerNumberInvalid2: "玩家总数与职业总数不相等（职业数：{{request}}/玩家数：{{jallnum}}/房间人数：{{players}}）。多次重试可能解决这个错误。"
     # Failed to process Thief
-    thiefFailed: "盗人の処理に失敗しました。"
+    thiefFailed: "小偷处理失败。"
     # Casting is failed
-    castingFailed: "配役に失敗しました。"
+    castingFailed: "角色分配失败。"
     # That game is already started.
-    alreadyStarted: "そのゲームは既に開始しています。"
+    alreadyStarted: "游戏已经开始。"
     # Not all players are ready
-    notReady: "まだ全員の準備ができていません。"
+    notReady: "全员尚未全部准备好。"
     # Role-hiding rule is only for gm.
-    noHiddenRole: "「配役公開」オプションは闇鍋またはGMありのときだけ利用できます。"
+    noHiddenRole: "「配置公开」选项在黑暗火锅模式下，只有在有GM的房间才能使用。"
     # Time parameter is invalid.
-    invalidTime: "時間の選択が不正です。"
+    invalidTime: "时间长度不是有效数字。"
     # Players number is not enough.
-    playerNotEnough: "人数が少なすぎるので開始できません。身代わりくんを含めて{{count}}人必要です。"
+    playerNotEnough: "人数不足，不能开始。含替身君最少要有{{count}}人。"
     # Too many for quantum werewolf.
-    tooManyQuantum: "人数が多すぎます。量子人狼では人数を{{count}}人以下にしてください。"
+    tooManyQuantum: "人数过多。量子人狼的人数应当在{{count}}人以下。"
     # Chemical werewolf is not available under this rule.
-    noChemical: "このルールでケミカル人狼はできません。"
+    noChemical: "本规则下无法使用炼成人狼。"
     # unknown casting name is given
-    unknownCasting: "不明な配役です。"
+    unknownCasting: "不存在此配置。"
     # Helper target does not exist
-    helperNotExist: "{{name}}さんのヘルパー対象が存在しませんでした。"
+    helperNotExist: "{{name}} 的帮助对象已不存在。"
     # for 一部闇鍋: selected category is empty (all jobs in it are excluded)
-    categoryAllExcluded: "「{{category}}」は当該役職が全て除外されているため固定できません。"
+    categoryAllExcluded: "「{{category}}」的全部职业均被排除，这样的配置无法开始游戏。"
     # for 一部闇鍋: do not exclude all jobs in category (Werewolf)
-    implicitCategoryAllExcluded: "「{{category}}」の役職が全て除外されているためゲームを開始できません。"
+    implicitCategoryAllExcluded: "「{{category}}」的全部职业均被排除，这样的配置无法开始游戏。"
   # Error during sudden death punishment
   suddenDeathPunish:
     # You are not a valid voter
-    notvoter: "投票できません"
+    notvoter: "不能投票。"
     # Invalid voting target
-    invalid: "投票先が不正です"
+    invalid: "投票对象无效。"
   # Error of Votingbox
   voting:
     # You have already voted
-    voted: "あなたは既に投票しています。"
+    voted: "你已经投过票了。"
     # You are voting to yourself
-    self: "自分には投票できません。"
+    self: "不能向自己投票。"
     # Target is not selected.
-    noTarget: "投票の対象を選択してください。"
+    noTarget: "请选择投票对象。"
     # Voting is not available yet.
-    notNow: "まだ投票できません。"
+    notNow: "尚未进入投票阶段，现在不能投票。"
   # Error during speaking
   speak:
     # no comment
-    tooLong: "発言が長すぎます。"
+    tooLong: "发言过长。"
     # Access restriction.
-    ban: "アクセス制限により、発言できません。"
+    ban: "您的账号受限，不能在此处发言。"
     # Watchspeak is not allowed
-    noWatchSpeak: "観戦者は発言できません。"
+    noWatchSpeak: "观战者不能发言。"
   # Error during job
   job:
     # Invalid target selection.
-    invalid: "対象選択が不正です。"
+    invalid: "对象选择无效。"
     # Job is already done.
-    done: "既に能力を行使しています。"
+    done: "已经使用了能力。"
   # Will setting.
   will:
     # Will is not enabled in this game.
-    noWill: "遺言は使えません。"
+    noWill: "此房间不能使用遗言。"
     # You are already dead.
-    alreadyDead: "お前は既に死んでいる"
+    alreadyDead: "你已经死了。"
   # norevive setting.
   norevive:
     # Norevive is already set.
-    done: "既に蘇生辞退しています。"
+    done: "已经拒绝复活。"
 
 
 # System Logs
@@ -117,197 +117,198 @@ system:
   # Room state changed logs
   rooms:
     # A user has entered a room
-    enter: "{{name}}さんが訪れました。"
+    enter: "{{name}} 加入了游戏。"
     # A user is goint to enter an エンドレス闇鍋 room
-    entering: "{{name}}さんが参加しようとしています。"
+    entering: "{{name}} 加入了游戏。"
     # A user has left a room
-    leave: "{{name}}さんが去りました。"
+    leave: "{{name}} 离开了游戏。"
     # A user got kicked out a room
-    kicked: "{{name}}さんが追い出されました。"
+    kicked: "{{name}} 被踢出了游戏。"
     # A user became a helper of another user
-    helper: "{{helper}}さんが{{target}}さんのヘルパーになりました。"
+    helper: "{{helper}}成为了 {{target}} 的帮手。"
     # A user stopped being a helper.
-    stophelper: "{{name}}さんがヘルパーをやめました。"
+    stophelper: "{{name}} 放弃做帮手了。"
     # This room is abandoned.
-    abandoned: "この部屋は廃村になりました。"
+    abandoned: "这个房间已经废弃。"
     # A user has joined to a running room.
-    join: "{{name}}さんが参加しました。"
+    join: "{{name}} 加入了游戏。"
     # A rebirth of user.
-    rebirth: "{{name}}は転生しました。"
+    rebirth: "{{name}} 转生了。"
   # gameStart-related logs
   gamestart:
     # Diviner result mode is changed
-    divinerModeChanged: "占い結果に影響する役職が存在するので、占い結果が「すぐ分かる」から「翌朝分かる」に変更されました。"
+    divinerModeChanged: "由于存在能够左右占卜结果的职业，占卜结果从「立刻知道」变更为「天亮才知道」。"
     # Excluded jobs
-    excluded: "除外役職：{{jobnames}}"
+    excluded: "除外职业：{{jobnames}}"
     # This game has the role requesting mode.
-    roleRequesting: "このゲームは希望役職制です。希望の役職を選択してください。"
+    roleRequesting: "本场游戏采取了希望役职制，请选择想要的职业。"
     # Show casting
-    casting: "配役: {{casting}}"
+    casting: "配置:{{casting}}"
     # Show info of teams
-    teams: "出現陣営情報: {{info}}"
+    teams: "出场阵营信息:{{info}}"
     # Show info of roles
-    roles: "出現役職: {{info}}"
+    roles: "出场职业:{{info}}"
   # Phase transitions
   phase:
     # Special new year message
-    newyear: "{{year}}年になりました。"
+    newyear: "现在是{{year}}年了。"
     # It's day now
-    day: "{{day}}日目の昼になりました。"
+    day: "第{{day}}天的白天到来了。"
     # It's night now
-    night: "{{day}}日目の夜になりました。"
+    night: "第{{day}}天的夜晚到来了。"
     # The debate has ended
-    debateEnd: "昼の議論時間が終了しました。投票してください。"
+    debateEnd: "白天的讨论时间到此结束。请投票决定要处死的人。"
   # Logs related to werewolves' phase
   werewolf:
-    diseased: "人狼たちは病気になりました。今日は襲撃できません。"
-    wolfcub: "狼の子の力で、今日は2人襲撃できます。"
+    diseased: "人狼们染病了。今天无法出击。"
+    wolfcub: "为狼之子复仇吧，今天可以袭击两个人。"
     # A user is notified to be attacked by a werewolf.
-    attacked: "{{name}}は人狼に襲われました。"
+    attacked: "{{name}} 被人狼袭击了。"
   # Logs related to voting
   voting:
     # No player was punished.
-    nopunish: "誰も処刑されませんでした。"
+    nopunish: "没有人被处刑。"
     # Voting entered to a runoff.
-    runoff: "決選投票になりました。"
+    runoff: "出现了得票数相同的玩家，现在进行决胜投票。"
     # Vote again!
-    revote: "再投票になりました。あと{{count}}回の投票で結論が出なければ引き分けになります。"
+    revote: "现在重新进行投票。如果在接下来的{{count}}轮投票中无法达成一致，本场游戏将以平局处理。"
     # We have more chances of punishment
-    more: "今日はあと{{count}}人処刑します。もう一度投票してください。"
+    more: "今天还有{{count}}人将被处刑。请继续投票。"
   # Logs related to voting box
   votingbox:
-    voted: "{{name}}は{{target}}に投票しました。"
+    voted: "{{name}} 向 {{target}} 投票了。"
   # Quantum werewolf logs
   quantum:
-    breakdown: "世界が崩壊し、確率が定義できなくなりました。"
+    breakdown: "世界崩坏，概率无法定义。"
   # Revival of a user
-  revive: "{{name}}は蘇生しました。"
+  revive: "{{name}} 复活了。"
   # Role of a player changed
-  changeRole: "{{name}}は{{result}}になりました。"
+  changeRole: "{{name}} 变成了 {{result}}。"
   # Role of a player changed (with old job)
-  changeRoleFrom: "{{name}}は{{old}}から{{result}}になりました。"
+  changeRoleFrom: "{{name}} 从{{old}}变成了 {{result}}。"
   # GM霊能
-  gmPsychic: "処刑された{{name}}の霊能結果は{{result}}でした。"
+  gmPsychic: "根据灵能的结论，被处刑的 {{name}} 是 {{result}}。"
   # A Hunter is preparing a last attack.
-  hunterPrepare: "{{names}}は最期の力で銃を構えました。銃撃対象を選択してください。"
+  hunterPrepare: "{{names}} 用最后的力量举起了猎枪，枪口指向了——"
   # A user declied to be revived.
-  declineRevival: "{{name}}は蘇生を辞退しました。"
+  declineRevival: "{{name}} 拒绝复活。"
   # Game result
   judge: "【{{short}}】{{result}}"
   # A user got prizes
-  prize: "{{name}}は称号{{prize}}を獲得しました。"
+  prize: "{{name}} 获得了称号{{prize}}。"
 
 # User-shown name of phases
 phase:
-  rolerequesting: "希望選択"
+  rolerequesting: "希望选择"
   day: "昼"
   voting: "投票"
   night: "夜"
-  additional: "猶予"
-  skill: "対象選択中"
+  additional: "犹豫"
+  skill: "正在瞄准"
   # n seconds rule is active
-  silent: "発言禁止"
+  silent: "禁止发言"
 
 # Reason of death
 found:
-  normal: "{{name}}は無残な姿で発見されました。"
-  curse: "{{name}}は呪殺されました。"
-  punish: "{{name}}は処刑されました。"
-  leave: "{{name}}は村を去りました。"
-  body: "{{name}}は死体で発見されました。"
-  suicide: "{{name}}は誰かの後を追って自ら死を選びました。"
-  infirm: "{{name}}は老衰で死亡しました。"
-  hunter: "{{name}}は銃弾を受けて死亡しました。"
-  gm: "{{name}}はGMによって死亡しました。"
-  goneDay: "{{name}}は投票しなかったため突然死しました。突然死は重大な迷惑行為なので絶対にしないようにしましょう。"
-  goneNight: "{{name}}は夜に能力を発動しなかったため突然死しました。突然死は重大な迷惑行為なので絶対にしないようにしましょう。"
-  fallback: "{{name}}は死にました。"
+  normal: "{{name}} 不成样子的尸体被发现了。"
+  curse: "{{name}} 被咒杀了。"
+  punish: "{{name}} 被处刑了。"
+  leave: "{{name}} 离开了村子。"
+  body: "{{name}} 的尸体被发现了。"
+  suicide: "{{name}} 追随着某个人自尽了。"
+  infirm: "{{name}} 衰老而死了。"
+  hunter: "{{name}} 被猎枪射杀了。"
+  gm: "{{name}} 被GM处死了。"
+  goneDay: "{{name}} 因为没有及时投票猝死了。猝死是十分令人困扰的行为，请务必不要再犯。"
+  goneNight: "{{name}} 因为没有及时使用夜间技能猝死了。猝死是十分令人困扰的行为，请务必不要再犯。"
+  fallback: "{{name}} 死了。"
 
 # Detailed reason of death
 foundDetail:
-  werewolf: "人狼の襲撃"
-  werewolf2: "人狼の襲撃"
-  trickedWerewolf: "人狼の襲撃"
-  poison: "毒"
-  hinamizawa: "感染症"
-  vampire: "ヴァンパイアの襲撃"
-  vampire2: "ヴァンパイアの襲撃"
-  witch: "毒薬"
-  dog: "犬の襲撃"
-  trap: "罠"
-  marycurse: "メアリーの呪い"
-  psycho: "サイコキラー"
-  curse: "呪殺"
-  punish: "処刑"
-  spygone: "失踪"
-  deathnote: "心臓麻痺"
-  foxsuicide: "妖狐の後追い自殺"
-  friendsuicide: "恋人の後追い自殺"
-  twinsuicide: "双子の後追い自殺"
-  dragonknightsuicide: "竜騎士の後追い自殺"
-  vampiresuicide: "ヴァンパイアの後追い自殺"
-  infirm: "老衰"
-  hunter: "銃殺"
-  gmpunish: "ゲームマスターの宣告"
-  gone-day: "昼間突然死"
-  gone-night: "夜間突然死"
-  crafty: "死んだふり"
-  greedy: "強欲の報い"
-  tough: "捨て身"
-  lunaticlover: "狂愛者の襲撃"
-  hooligan: "暴動者による暴行"
-  dragon: "竜の炎"
-  samurai: "侍の反撃"
-  elemental: "暴走した精霊の力"
-  fallback: "不明"
-  situation: "{{name}}の死因は{{detail}}でした。"
+  werewolf: "人狼的袭击"
+  werewolf2: "人狼的袭击"
+  trickedWerewolf: "人狼的袭击"
+  poison: "毒药"
+  hinamizawa: "雏见泽症候群发作"
+  vampire: "吸血鬼的袭击"
+  vampire2: "吸血鬼的袭击"
+  witch: "魔女的毒药"
+  dog: "犬的袭击"
+  trap: "陷阱"
+  bomb: "炸弹"
+  marycurse: "玛丽的诅咒"
+  psycho: "变态杀人狂"
+  curse: "咒杀"
+  punish: "处刑"
+  spygone: "行踪不明"
+  deathnote: "心梗"
+  foxsuicide: "追随妖狐自尽"
+  friendsuicide: "追随恋人自尽"
+  twinsuicide: "追随双胞胎自尽"
+  dragonknightsuicide: "龙骑士自尽"
+  vampiresuicide: "追随吸血鬼自尽"
+  infirm: "老死"
+  hunter: "被猎枪射杀"
+  gmpunish: "被GM处死"
+  gone-day: "昼间猝死"
+  gone-night: "夜间猝死"
+  crafty: "假死"
+  greedy: "贪婪的报应"
+  tough: "舍身的同归于尽"
+  lunaticlover: "狂爱者的袭击"
+  hooligan: "暴动者的暴行"
+  dragon: "龙息"
+  samurai: "武士的反击"
+  elemental: "暴走的精灵之力"
+  fallback: "未知原因"
+  situation: "{{name}} 的死因是 {{detail}}。"
 
 # Result of Game
 judge:
-  human: "村民達の知恵と勇気により村は平穏を取り戻しました。"
-  neet: "村はニートの楽園になりました。"
-  werewolf: "人狼は最後の村人を喰い殺すと次の獲物を求めて去っていった……"
-  fox: "村は妖狐に支配されました。"
-  devil: "村は悪魔に支配されました。"
-  friendsNormal: "{{count}}人の愛の力には何者も敵わないのでした。"
-  friendsSpecial: "{{count}}人の禁断の愛の力には何者も敵わないのでした。"
-  friendsAll: "村は恋人たちに支配されました。"
-  cult: "村はカルトに支配されました。"
-  vampire: "ヴァンパイアは最後の村人を喰い殺すと次の獲物を求めて去っていった……"
-  lonewolf: "人狼は最後の村人を喰い殺すと次の獲物を求めて独り去っていくのだった……"
-  raven: "村は鴉に支配されました。"
-  hooligan: "村は暴徒によって破壊し尽くされました。"
-  draw: "引き分けになりました。"
-  scapegoat: "村は身代わりくんに支配されました。"
+  human: "村子里的人狼已经被赶尽杀绝。"
+  neet: "村子变成了NEET的乐园。"
+  werewolf: "人狼吃掉了最后一个村民，向着下一个住满了猎物的村庄前进了…"
+  fox: "村子成了妖狐的玩物。"
+  devil: "村子成了恶魔的玩物。"
+  friendsNormal: "在{{count}}人爱的力量面前，所有阻碍都无法与之匹敌。"
+  friendsSpecial: "在主仆{{count}}人跨越世俗禁忌的爱情面前，所有阻碍都无法与之匹敌。"
+  friendsAll: "村子被恋人们支配了。"
+  cult: "村子被教会支配了。"
+  vampire: "吸血鬼饮尽了最后一个村民的鲜血，向着下一个住满了猎物的村庄前进了…"
+  lonewolf: "人狼吃掉了最后一个村民，向着下一个住满了猎物的村庄前进了…"
+  raven: "村子被乌鸦支配了。"
+  hooligan: "村子被暴徒引发的暴乱破坏殆尽了。"
+  draw: "平局。"
+  scapegoat: "村子成了替身君的玩物。"
   # short summary
   short:
-    human: "村人勝利"
-    werewolf: "人狼勝利"
-    fox: "妖狐勝利"
-    devil: "悪魔くん勝利"
-    friends: "恋人勝利"
-    cult: "カルトリーダー勝利"
-    vampire: "ヴァンパイア陣営勝利"
-    lonewolf: "一匹狼勝利"
-    raven: "鴉勝利"
-    hooligan: "暴徒勝利"
+    human: "村人胜利"
+    werewolf: "人狼胜利"
+    fox: "妖狐胜利"
+    devil: "恶魔胜利"
+    friends: "恋人胜利"
+    cult: "邪教主胜利"
+    vampire: "吸血鬼胜利"
+    lonewolf: "一匹狼胜利"
+    raven: "乌鸦胜利"
+    hooligan: "暴徒胜利"
 
 
 # Terms for quantum werewolf
 quantum:
   # Player called by a number
-  player: "プレイヤー{{num}}"
+  player: "玩家{{num}}"
 
 # Crafted logs.
 logs:
   werewolf:
-    name: "狼の遠吠え"
-    comment: "アオォーーン・・・"
+    name: "狼的远吠"
+    comment: "嗷呜・・・"
   couple:
-    name: "共有者の小声"
-    comment: "ヒソヒソ・・・"
+    name: "模糊的低语声"
+    comment: "沙沙・・・"
 
 # Tweet.
 tweet:
   # Tweet when game ended
-  gameend: "「{{roomname}}」の結果：{{result}} #月下人狼村建て通知"
+  gameend: "「{{roomname}}」的结果:{{result}} #月下人狼"

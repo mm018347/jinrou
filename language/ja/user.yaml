@@ -1,65 +1,65 @@
 # Error messages
 error:
   # User authentication has failed.
-  authFail: "ユーザー認証に失敗しました。"
+  authFail: "用户认证失败。"
   # Mail address is invalid.
-  invalidMailAddress: "メールアドレスの形式が正しくありません。"
+  invalidMailAddress: "请输入有效的邮箱地址。"
   # Two passwords does not match
-  passwordInconsistent: "パスワードが一致しません。"
+  passwordInconsistent: "两次输入的密码不一致。"
   # no such user
-  noSuchUser: "そのユーザーは存在しません。"
+  noSuchUser: "用户不存在。"
 
   newentry:
     # Account creation is restricted
-    banned: "アクセス制限により、アカウントを作成できません。"
+    banned: "您的连接受限，不允许创建账号。"
     # User ID is invalid
-    useridInvalid: "ユーザーIDが不正です。"
+    useridInvalid: "ID包含了非法字符。"
     # Password is invalid
-    passwordInvalid: "パスワードが不正です。"
+    passwordInvalid: "密码包含了非法字符。"
     # This user ID is already Used
-    alreadyUsed: "そのユーザーIDは既に使用されています。"
+    alreadyUsed: "这个ID已被使用。"
 
   changeProfile:
     # Name is empty
-    nameEmpty: "ニックネームを入力してください。"
+    nameEmpty: "请输入昵称。"
     # Name is too long
-    nameTooLong: "ニックネームが長すぎます。"
+    nameTooLong: "昵称过长。"
     # Comment is too long
-    commentTooLong: "コメントが長すぎます。"
+    commentTooLong: "简介过长。"
     # Icon URL is too long
-    iconTooLong: "アイコンURLが長すぎます。"
+    iconTooLong: "头像URL过长。"
 
   confirmMail:
     # Mail address is too long
-    mailAddressTooLong: "メールアドレスが長すぎます。"
+    mailAddressTooLong: "邮箱地址过长。"
     # This link is expired
-    expired: "このリンクは無効か、有効期限が切れています。"
+    expired: "验证链接无效或已经过期。"
 
   resetPassword:
     # Userid or e-mail does not match
-    userNoExist: "ユーザーIDかメールアドレスが間違っています。"
+    userNoExist: "账号或邮箱不正确。"
 
   changePassword:
     # Password is locked
-    locked: "パスワードがロックされているため、変更できません。"
+    locked: "当前密码被锁定，变更失败。"
 
   mailConfirmSecurity:
     # Need to add e-mail address to enable this setting.
-    nomail: "この設定を有効にするにはメールアドレスを登録する必要があります。"
+    nomail: "必须先认证一个邮箱才能使用此功能。"
   dataOpenSetting:
     # You do not have enough history.
-    history: "戦績が足りません。"
+    history: "战绩不足。"
 
 confirmMail:
   # Mail address is confirmed
-  confirmed: "メールアドレス「{{address}}」が確認されました。"
+  confirmed: "邮箱「{{address}}」认证成功。"
   # Mail address is deleted
-  deleted: "メールアドレスの削除に成功しました。"
+  deleted: "邮箱解除认证成功。"
   # Password is reset
-  passwordReset: "パスワードを再設定しました。新しいパスワードでログインしてください。"
+  passwordReset: "密码重置成功，请重新登录。"
   # Setting is changed
-  settingChanged: "設定を変更しました。"
+  settingChanged: "密码·邮箱地址已经解除锁定。"
 
 mailConfirmSecurity:
   # Setting is saved.
-  saved: "保存しました。"
+  saved: "保存成功。"

@@ -1,47 +1,47 @@
 # room info bar.
 roominfo:
   # has room password
-  password: "パスワードあり"
+  password: "有密码"
   # blind mode
-  blind: "覆面（終了後に公開）"
+  blind: "匿名（结束后公开ID）"
   # complete blind mode
-  blindComplete: "覆面（終了後も非公開）"
+  blindComplete: "强匿名（结束后不公开ID）"
   # no watchspeak
-  noWatchSpeak: "観戦者発言禁止"
+  noWatchSpeak: "禁止观战者发言"
 # Game start control.
 gamestart:
   # information shown to an owner.
   info:
     # Current number of players.
-    playerNumber: "現在の人数: {{count}}人"
+    playerNumber: "现在的人数: {{count}}人"
     # Players are too few.
-    playerTooFew: "人数が足りません。この配役は最低{{count}}人必要です。"
+    playerTooFew: "人数不足。这个配置的人数最低为{{count}}人。"
     # Players are too many.
-    playerTooMany: "人数が多すぎます。この配役は最高{{count}}人です。"
+    playerTooMany: "人数过多。这个配置的人数最高为{{count}}人。"
   # game start control.
   control:
     # legend: "roles"
-    roles: 役職・配役
+    roles: 职业・配置
     # legend: "rules"
-    rules: ルール設定
+    rules: 规则设定
     # minutes
     minutes: 分
     # seconds
     seconds: 秒
     # Game start button
-    start: 開始
+    start: 开始
     # Legend of category query.
-    categorySelection: 一部闇鍋用
+    categorySelection: 手调黑暗火锅选项
   # confirmation messages.
   confirm:
     # suggestion of rule based on casting.
     ruleSuggestion:
       # confirmation message
-      message: "この配役ではオプション「{{name}}」を{{suggestion}}にすることが推奨されています。このまま開始してもよろしいですか？"
+      message: "此配置中的选项「{{name}}」推荐为{{suggestion}}。确定就这样开始吗？"
       # yes: rearrange rule setting.
-      yes: "戻る"
+      yes: "返回"
       # no: continue.
-      no: "このまま開始する"
+      no: "就这样开始"
       # value suggestion.
       valueSuggestion: "「{{value}}」"
       # range-based suggestions
@@ -51,190 +51,192 @@ gamestart:
   # error message.
   error:
     # rule value is invalid.
-    ruleInvalid: "ルール「{{name}}」の設定内容が正しくありません。"
-    ruleTooSmall: "ルール「{{name}}」の値が小さすぎます。"
+    ruleInvalid: "房间选项「{{name}}」的内容无效。"
+    ruleTooSmall: "房间选项「{{name}}」的值过小。"
 
 # game-view: job info control.
 jobinfo:
   # your status.
-  status: "あなたは{{job}}です（{{details}}）"
+  status: "你的身份是 {{job}}（{{details}}）"
   # you won.
-  win: "勝利しました"
+  win: "胜利了"
   # you lose.
-  lose: "敗北しました"
+  lose: "败北了"
   # show your team.
   team:
     # message when no team.
-    none: "あなたの陣営はありません"
+    none: "你没有初始阵营"
     # other.
-    message: "あなたの陣営は{{team}}です"
+    message: "你的初始阵营是 {{team}}"
     # short message for no team.
-    none_short: "陣営：なし"
+    none_short: "阵营：无"
     # short message for usual team.
-    message_short: "陣営：{{team}}"
+    message_short: "阵营：{{team}}"
   # detail of jobs.
-  detail_one: "詳細"
-  detail: "{{job}}の詳細"
+  detail_one: "详细"
+  detail: "{{job}}的详细"
   # Info of peers.
   peers:
-    wolves: "仲間の人狼は{{names}}です"
-    peers: "仲間の共有者は{{names}}です"
-    madpeers: "仲間の叫迷狂人は{{names}}です"
-    foxes: "仲間の妖狐は{{names}}です"
-    nobles: "貴族は{{names}}です"
-    queens: "女王観戦者は{{names}}です"
-    spy2s: "スパイⅡは{{names}}です"
-    friends: "恋人は{{names}}です"
-    cultmembers: "カルトの信者は{{names}}です"
-    vampires: "仲間のヴァンパイアは{{names}}です"
-    twins: "仲間の双子は{{names}}です"
-    myfans: "ファンは{{names}}です"
-    ravens: "鴉は{{names}}です"
-    stalking: "あなたは{{name}}のストーカーです"
-    supporting: "あなたは{{name}}（{{job}}）をサポートしています"
-    dogOwner: "あなたの飼い主は{{name}}です"
-    quantumwerewolfNumber: "あなたのプレイヤー番号は{{number}}です"
-    fanof: "あなたは{{name}}のファンです"
-    hooligans: "現在の暴動者は{{names}}です"
-    draculas: "仲間のドラキュラは{{names}}です"
-    draculaBitten: "吸血済みの相手は{{names}}です"
+    wolves: "同伴的人狼是 {{names}}"
+    peers: "同伴的共有者是 {{names}}"
+    madpeers: "同伴的尖叫狂人是 {{names}}"
+    foxes: "同伴的妖狐是 {{names}}"
+    nobles: "贵族是 {{names}}"
+    queens: "女王观战者是 {{names}}"
+    spy2s: "间谍Ⅱ是 {{names}}"
+    friends: "恋人是 {{names}}"
+    cultmembers: "教会信者是 {{names}}"
+    vampires: "同伴的吸血鬼是 {{names}}"
+    twins: "同伴的双胞胎是 {{names}}"
+    myfans: "粉丝是 {{names}}"
+    ravens: "乌鸦是 {{names}}"
+    stalking: "你是 {{name}} 的跟踪狂"
+    supporting: "向 {{name}}（{{job}}）提供帮助"
+    dogOwner: "你的饲主是 {{name}}"
+    quantumwerewolfNumber: "你的玩家编号是 {{number}}"
+    fanof: "你是 {{name}} 的粉丝"
+    hooligans: "现在的暴动者有 {{names}}"
+    draculas: "同伴的德古拉是 {{names}}"
+    draculaBitten: "吸过血的对象有 {{names}}"
 
 
 # game-view: speak form.
 speak:
-  say: "発言"
+  say: "发言"
   # size of comment.
   size:
     # description of size selection.
-    description: "発言の大きさ"
-    small: "小さく"
+    description: "发言字体大小"
+    small: "小字号"
     normal: "普通"
-    big: "大きく"
+    big: "大字号"
   # kind of speech.
   kind:
-    description: "発言の種類"
+    description: "发言种类"
     # speech before beginning of game.
-    prepare: "全員に発言"
+    prepare: "向全员发言"
     # say to everyone.
-    day: "全員に発言"
+    day: "向全员发言"
     # speech among audience.
-    audience: "観戦者の会話"
+    audience: "观战者的会话"
     # monologue in day and night.
-    monologue: "独り言"
+    monologue: "自言自语"
     # talk between werewolves.
-    werewolf: "人狼の会話"
+    werewolf: "人狼的会话"
     # talk between couples.
-    couple: "共有者の会話"
+    couple: "共有者的会话"
     # talk between MadCouples.
-    madcouple: "叫迷狂人の会話"
+    madcouple: "尖叫狂人的会话"
     # talk between foxes.
-    fox: "妖狐の会話"
+    fox: "妖狐的会话"
     # announce from GM to everyone.
-    gm: "全員へ"
+    gm: "致全员"
     # announce from GM to the heaven.
-    gmheaven: "霊界へ"
+    gmheaven: "致灵界"
     # announce from GM to audience.
-    gmaudience: "観戦者へ"
+    gmaudience: "致观战者"
     # monologue of GM.
-    gmmonologue: "独り言"
+    gmmonologue: "自言自语"
     # talk of helpers.
-    helperwhisper: "助言"
+    helperwhisper: "建议"
     # reply from GM to someone.
     gmreply: "→{{target}}"
   # label of multiline checkbox.
-  multiline: "複数行"
+  multiline: "多行"
+  # label of wide page checkbox.
+  widepage: "宽页面"
   # will button.
   will:
     # click to open button.
-    open: "遺言"
+    open: "遗言"
     # click to close button.
-    close: "遺言を隠す"
+    close: "折叠遗言"
     # "Input your will" message,
-    message: "遺言を入力"
+    message: "输入遗言"
     # save will button.
-    save: "遺言を保存"
+    save: "保存遗言"
     # Message shown when a change is made to will
     # "Press save button to save your new will"
-    changed: "変更を保存するには保存ボタンを押してください"
+    changed: "请点击保存按钮以更新你的遗言"
   # show rule button.
-  rule: "ルール"
+  rule: "规则"
   # log visibility.
   logVisibility:
     # description of log visibility of control.
-    description: "ログの表示"
+    description: "记录显示"
     # show all.
     all: "全部"
     # show today's log.
     today: "今日"
     # label of one-day options.
-    onedayLabel: "一日ずつ"
+    onedayLabel: "单日"
     # show one day.
-    oneday: "{{day}}日目"
+    oneday: "第{{day}}天"
   # label of refuse revival button.
-  refuseRevival: "蘇生辞退"
+  refuseRevival: "拒绝复活"
   # text shown when watch speak is not allowed.
-  noWatchSpeak: "観戦者は発言することができません。"
+  noWatchSpeak: "观战者不能发言。"
 
 # navigation shown at the bottom of view on phone.
 navigation:
-  players: "参加者一覧"
+  players: "参加者一览"
   skill: "能力・投票"
-  speak: "発言"
+  speak: "发言"
 
 # Game view: refuse revival.
 refuseRevival:
   # name of the refuse revival feature.
-  title: "蘇生辞退"
+  title: "拒绝复活"
   # Confirm whether one really wants to refuse revival.
-  confirm: "一度蘇生辞退をすると解除することができません。よろしいですか？"
+  confirm: "一旦拒绝复活将不能撤销。确定要这样做吗？"
   # result of logic.
-  result: "蘇生を辞退しました。"
+  result: "成功拒绝复活。"
   # yes/no
   yes: "OK"
-  no: "キャンセル"
+  no: "取消"
 # Game view: text related to logs.
 log:
   # ote result log.
   voteResult:
     # Caption of vote result table.
-    caption: "投票結果"
+    caption: "投票结果"
     # Count of votes.
     count: "{{count}}票"
   # Probability table.
   probabilityTable:
     # Caption of probability table.
-    caption: "確率表"
+    caption: "概率表"
     # Name of player.
-    name: "名前"
+    name: "名字"
     # Villager column.
     Villager: "村人"
     # Diviner column,
-    Diviner: "占い師"
+    Diviner: "占卜师"
     # Human column.
-    Human: "人間"
+    Human: "人类"
     Werewolf: "人狼"
     dead: "死亡"
-  # 独り言
-  monologue: "{{name}}の独り言"
+  # 自言自语
+  monologue: "{{name}}的自言自语"
   # 遺言
-  will: "{{name}}の遺言"
+  will: "{{name}}的遗言"
   # poem sent by Poet
   poem:
-    description: "{{target}}に{{name}}からの歌が届きました。"
+    description: "{{target}} 收到了来自 {{name}} 的赠诗。"
 # Game view: player box.
 playerbox:
   # Alt for the dead image.
   dead: "死亡"
   # Indication of winner.
-  win: "勝利"
+  win: "胜利"
   # Indication of loser.
-  lose: "敗北"
+  lose: "败北"
   # Labels for flag.
   flags:
     ready: "ready"
     gm: "GM"
     helper: "helper"
-    norevive: "蘇生辞退"
+    norevive: "拒绝复活"
   # label for alive numbers.
   aliveNum: "生存: {{count}}人"
   # label for dead numbers.
@@ -243,134 +245,134 @@ playerbox:
 # Room control buttons.
 room:
   # join button
-  join: "ゲームに参加"
+  join: "加入游戏"
   # unjoin button
-  unjoin: "ゲームから脱退"
+  unjoin: "退出游戏"
   # ready/unready button.
-  ready: "準備完了/準備中"
+  ready: "准备/取消准备"
   # description of ready/unready button.
-  readyDescription: "全員が準備完了になるとゲームを開始できます。"
+  readyDescription: "全员准备好后即可开始游戏。"
   # helper button.
-  helper: "ヘルパー"
+  helper: "帮手"
   # description of helper button.
-  helperDescription: "ヘルパーになると、ゲームに参加せずに助言役になります。"
+  helperDescription: "成为他人的帮手后，将不会直接参与游戏，而是向帮助的对象提供建议。"
   # open game start control button.
-  openGameStart: "ゲーム開始画面を開く"
+  openGameStart: "展开游戏开始界面"
   # kick player button.
-  kick: "参加者を追い出す"
+  kick: "将参加者踢出游戏"
   # reset ready button.
-  resetReady: "[ready]を初期化する"
+  resetReady: "重置[ready]状态"
   # Discard this room button.
-  discard: "この部屋を廃村にする"
+  discard: "废弃这个房间"
   # open a new room with same setting button.
-  newRoom: "同じ設定で次の部屋を建てる"
+  newRoom: "以相同设定建立新房间"
   # that room does not exist.
-  roomDoesNotExist: "その部屋は存在しません。"
+  roomDoesNotExist: "这个房间不存在。"
   # Player information dialog.
   playerDialog:
     # title of player dialog.
-    title: "ゲームに参加"
+    title: "加入游戏"
     # message of player dialog.
-    message: "この部屋で使用する名前を入力してください。"
+    message: "请输入昵称。"
     # ok button
-    ok: "部屋に入る"
+    ok: "加入"
     # cancel button
-    cancel: "キャンセル"
+    cancel: "取消"
   # helper select dialog.
   helperDialog:
-    title: "ヘルパー"
-    message: "ヘルパーになる相手を選択してください。"
-    ok: "選択"
-    cancel: "キャンセル"
+    title: "帮手"
+    message: "想要成为谁的帮手？"
+    ok: "选择"
+    cancel: "取消"
     # label for no helper.
-    nohelper: "ヘルパーをやめる"
+    nohelper: "停止做帮手"
   # reset ready confirmation dialog.
   resetReadyDialog:
-    title: "[ready]初期化"
-    message: "全員の[ready]を解除しますか？"
-    yes: "解除する"
-    no: "キャンセル"
+    title: "重置[ready]状态"
+    message: "要解除全员的[ready]状态吗？"
+    yes: "解除"
+    no: "取消"
   # discard room confirmation dialog.
   discardDialog:
-    title: "廃村"
-    message: "本当に部屋を廃村にしますか？"
-    yes: "廃村にする"
-    no: "キャンセル"
+    title: "废弃房间"
+    message: "确定要废弃这个房间吗？"
+    yes: "废弃"
+    no: "取消"
   # room password dialog.
   enterPasswordDialog:
-    title: "部屋に入室"
-    message: "この部屋のパスワードを入力してください。"
-    ok: "入室"
-    cancel: "キャンセル"
+    title: "房间"
+    message: "房间已加密，请输入密码。"
+    ok: "进入"
+    cancel: "取消"
 
 # Icon select dialog.
 iconSelect:
   # title of icon select dialog.
-  title: "アイコン選択"
+  title: "头像选择"
   # message for icon select dialog.
-  message: "画像のURLを直接入力するか、Twitterのアカウントを入力してください。"
+  message: "直接输入图片的URL，或者输入Twitter账号获取Twitter头像。"
   # button for no icon.
-  no: "キャンセル"
+  no: "取消"
   # save button.
   save: "OK"
   # label for url.
   url: "URL"
   # label for twitter account
-  twitter: "Twitterアカウント"
+  twitter: "Twitter账号"
   # message when icon could not be found with API.
-  apiFail: "アイコンを取得できませんでした。しばらく時間をあけてからお試しください。"
+  apiFail: "头像获取失败，请稍后再试。"
 
 # kick user dialog
 kick:
   # title of kick user dialog.
-  title: "追い出す"
+  title: "将参加者踢出游戏"
   # message for the dialog.
-  message: "追い出す人を選択してください。"
+  message: "请选择要踢出的人。"
   # cancel button.
-  cancel: "キャンセル"
+  cancel: "取消"
   # ok button.
-  ok: "選択"
+  ok: "选择"
   # Label for no re-entry button.
-  noentry: "再入室を禁止"
+  noentry: "禁止再次加入"
   manager:
     # Name of kick manager.
-    title: "追い出しを管理"
+    title: "踢出管理"
     # Message shown at kick manager.
-    message: "参加禁止を解除したい人を全て選択してください。"
+    message: "请选中想要解除禁止的参与者。"
     # message when kicked list user is empty.
-    empty: "現在参加禁止になっている人はいません。"
+    empty: "现在没有被禁止参加的人。"
 
 # role description dialog
 roleDesc:
   # title of role description dialog.
-  title: "役職説明 - {{role}}"
+  title: "职业说明 - {{role}}"
   # close button
-  close: "閉じる"
+  close: "关闭"
 
 # sudden death punishment dialog.
 suddenDeathPunish:
-  title: "突然死の罰"
-  message: "以下の参加者はこのゲームで突然死しました。処罰すべきだと考える参加者に投票してください。1票は{{count}}分間の参加禁止に相当します。"
+  title: "猝死惩罚"
+  message: "以下玩家在本局游戏中猝死，请投票选择对其中的某些人进行处罚，每人每票将为其带来{{count}}分钟封禁。"
   ok: "投票"
-  cancel: "閉じる"
+  cancel: "关闭"
 
 # report form (only applicable when report form is enabled via setting)
 reportForm:
-  title: "報告"
+  title: "上报"
   # description shown at the top of form.
   description: |
-    システムのバグや悪質なユーザーを発見した場合、こちらからご報告ください。
-    ※報告に対して個別の返信はしておりません。緊急性が高い場合や返信が必要な場合は、他の手段で管理者にご連絡ください。
+    如发现系统bug或恶意用户，请于此处报告。
+    ※对于来自此处的报告不会一一回复邮件。如果状况十分紧急或者需要回信，请通过其他手段联系管理者。
   # legend of kind select.
-  kind: "報告の種類"
+  kind: "报告类型"
   # legend of report content.
-  content: "報告の内容"
+  content: "报告内容"
   # placeholder of report content.
-  contentPlaceHolder: "報告の詳細を入力してください"
+  contentPlaceHolder: "请输入详细内容"
   # label of send button.
-  send: "送信"
+  send: "发送"
   # message when report is sent.
-  thankyou: "報告を送信しました。ご協力いただきありがとうございました。"
+  thankyou: "报告发送成功。感谢您的协助。"
   # button to close message sent dialog.
-  close: "閉じる"
+  close: "关闭"
 
