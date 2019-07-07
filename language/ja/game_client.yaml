@@ -8,6 +8,10 @@ roominfo:
   blindComplete: "强匿名（结束后不公开ID）"
   # no watchspeak
   noWatchSpeak: "禁止观战者发言"
+  # using theme
+  theme: "使用主题「{{fullname}}」"
+  # theme has been removed
+  themeRemoved: "此主题已被移除"
 # Game start control.
 gamestart:
   # information shown to an owner.
