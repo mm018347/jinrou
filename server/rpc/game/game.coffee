@@ -9410,6 +9410,7 @@ class Poet extends Player
             return game.i18n.t "error.common.alreadyDead"
         if pl.id == @id
             return game.i18n.t "error.common.noSelectSelf"
+        pl.touched game, @id
         # perform easy check for large string
         unless typeof query.poem == "string" && query.poem.length < Config.maxlength.game.comment
             return game.i18n.t "error.common.invalidQuery"
@@ -9531,7 +9532,33 @@ class Amanojaku extends Player
     type:"Amanojaku"
     team:""
     isWinner:(game, team)->
-        team != "Human"
+        team != "Human" && team != ""
+        
+class Ascetic extends Player
+    type: "Ascetic"
+    team: "Raven"
+    isWinner:(game, team)->
+        ravens = game.players.filter (x)-> x.isJobType "Raven"
+        aliver = ravens.filter (x)->!x.dead
+        if ravens.length > 1
+            # 鴉2配役以上で鴉勝利
+            team == @team
+        else if ravens.length == 1
+            # 鴉がちょうど1配役時はその鴉を生存させる
+            if aliver.length == 1
+                true
+            else
+                false
+        else
+            # 鴉は配役されず修験者単独の場合は生存でOK
+            !@dead
+
+    makejobinfo:(game, result)->
+        # 鴉の一覧を知ることができる
+        super
+        result.ravens =
+            game.players.filter((x)-> x.isJobType "Raven").map (x)->
+                x.publicinfo()
 
 # ============================
 # 処理上便宜的に使用
@@ -11018,11 +11045,11 @@ class Chemical extends Complex
         win = false
         maint = @main.getTeam()
         subt = @sub?.getTeam()
-        if maint == myt || maint == "Devil" || @main.type == "Stalker"
+        if maint == myt || maint == "Devil" || @main.type == "Stalker" || @main.type == "Amanojaku"
             win = win || @main.isWinner(game,team)
         # if it has team-independent winningness, adopt it.
         win = win || @main.isWinner(game, "")
-        if subt == myt || subt == "Devil" || @sub?.type == "Stalker"
+        if subt == myt || subt == "Devil" || @sub?.type == "Stalker" || @sub?.type == "Amanojaku"
             win = win || @sub.isWinner(game,team)
         if @sub?
             win = win || @sub.isWinner(game, "")
@@ -11229,6 +11256,7 @@ jobs=
     Elementaler:Elementaler
     Poet:Poet
     Amanojaku:Amanojaku
+    Ascetic:Ascetic
     # 特殊
     GameMaster:GameMaster
     Helper:Helper
@@ -11404,6 +11432,7 @@ jobStrength=
     Elementaler:23
     Poet:11
     Amanojaku:10
+    Ascetic:20
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
@@ -11542,6 +11571,7 @@ module.exports.actions=(req,res,ss)->
 
                 safety={
                     jingais:false   # 人外の数を調整
+                    ppcheck:false   # ほぼteamsの処理をするだけ
                     teams:false     # 陣営の数を調整
                     jobs:false      # 職どうしの数を調整
                     strength:false  # 職の強さも考慮
@@ -11555,6 +11585,9 @@ module.exports.actions=(req,res,ss)->
                     when "low"
                         # 低い
                         safety.jingais=true
+                    when "lowlow"
+                        safety.jingais=true
+                        safety.ppcheck=true
                     when "middle"
                         safety.jingais=true
                         safety.teams=true
@@ -11621,8 +11654,12 @@ module.exports.actions=(req,res,ss)->
                 if safety.jingais || safety.jobs
                     exceptions.push "SpiritPossessed"
                     special_exceptions.push "SpiritPossessed"
+                # 狂人狼（人気がないので出ない）
+                if safety.jingais || safety.jobs
+                    exceptions.push "MadWolf"
+                    special_exceptions.push "MadWolf"
                 # ニートは隠し役職（出現率低）
-                if Math.random()<0.4
+                if query.losemode == "on" || Math.random()<0.4
                     exceptions.push "Neet"
                     special_exceptions.push "Neet"
 
@@ -11801,7 +11838,7 @@ module.exports.actions=(req,res,ss)->
                     return null
 
 
-                if safety.teams
+                if safety.teams || safety.ppcheck
                     # 陣営調整もする
                     # 人狼陣営
                     if frees>0
@@ -12182,7 +12219,7 @@ module.exports.actions=(req,res,ss)->
                             job=possibility[r]
                             # 一般枠を使ったのでfreesを消費
                             frees--
-                        if safety.teams && !category?
+                        if (safety.teams || safety.ppcheck) && !category?
                             if job in Shared.game.teams.Werewolf
                                 if wolf_teams+1>=plsh
                                     # 人狼が過半数を越えた（PP）
@@ -12285,6 +12322,10 @@ module.exports.actions=(req,res,ss)->
                                         if playersnumber >= 16
                                             # 16人以上だと3人セットにしちゃう
                                             init "Raven", "Others", "Raven"
+                                when "Ascetic"
+                                    # 鴉がいないと出ない（実質鴉が2配役以上で出現条件を満たす）
+                                    if joblist.Raven==0
+                                        continue
 
 
                         joblist[job]++
@@ -12293,7 +12334,7 @@ module.exports.actions=(req,res,ss)->
                             possibility = possibility.filter (x)-> x != "MadWolf"
                             special_exceptions.push "MadWolf"
 
-                        if safety.teams && (job in Shared.game.teams.Werewolf)
+                        if (safety.teams || safety.ppcheck) && (job in Shared.game.teams.Werewolf)
                             wolf_teams++    # 人狼陣営が増えた
 
                         # ひとつ追加
@@ -12409,6 +12450,9 @@ module.exports.actions=(req,res,ss)->
             if query.yaminabe_hidejobs != "" && query.jobrule == "特殊规则.自由配置"
                 # ルール名のみ
                 ruleinfo_str = game.i18n.t "casting:castingName.#{query.jobrule}"
+            if query.losemode == "on"
+                # 敗北村の場合は表示
+                ruleinfo_str = "#{game.i18n.t "common.losemode"}　" + (ruleinfo_str ? "")    
             if query.chemical == "on"
                 # ケミカル人狼の場合は表示
                 ruleinfo_str = "#{game.i18n.t "common.chemicalWerewolf"}　" + (ruleinfo_str ? "")

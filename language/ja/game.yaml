@@ -6,6 +6,8 @@ common:
   suddenDeathPenalty: "猝死惩罚"
   # Chemical werewolf
   chemicalWerewolf: "炼成人狼"
+  # 敗北村
+  losemode: "败北村"
 # Error messages
 error:
   # Common error message
