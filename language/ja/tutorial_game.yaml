@@ -1,0 +1,115 @@
+# metadata of tutorial room
+room:
+  title: '练习房间'
+
+# guide NPC
+guide:
+  # main guide
+  name: '替身君'
+  # other npcs
+  npc1: '格鲁特'
+  npc2: '奥托'
+  npc3: '瓦尔特'
+  npc4: '托马斯'
+  npc5: '莉莎'
+
+# common data
+common:
+  messageDialog:
+    title: '练习房间'
+    ok: '下一步'
+  # error message shown when this tool is not taught.
+  notTaughtMessage: '替身君「教程尚未涉及此功能！」'
+# reset dialog
+resetDialog:
+  message: '已经完成练习房间的教程，要再来一次吗？'
+  ok: '再来一次'
+  cancel: '取消'
+
+# phase 0: initialState
+phase0:
+  stepMessage: '欢迎进入练习房间！　在这个房间内的操作其他人是看不到的。首先请尝试发言吧。'
+
+# phase 1: speak as audience
+phase1:
+  # message by guide after speaking as audience
+  stepMessage1: |
+    做得很好！　就像这样，即使是观战者也可以发言（除非房间规则中特别禁止了观战者发言）。
+
+    我是在练习房间担任辅导职务的替身君，请多多指教。
+  stepMessage2: |
+    想要参与到游戏中，首先需要加入房间。请点击上方的「加入游戏」按钮。
+
+# phase 2: enter the room
+phase2:
+  # message by guide after entering the room
+  stepMessage1: |
+    成功地加入到游戏中了！
+    加入游戏后发言的颜色会有所不同，请尝试一下吧。
+  stepMessage2: |
+    如果做好了进行游戏的准备，请单击「准备/取消准备」按钮，把自己标记为[ready]的状态。
+    如果需要暂时离开游戏，请再单击一次此按钮，以取消准备。
+
+    如果准备好进入下一步的练习，请在[ready]状态下稍候。
+# phase 4: start game
+phase4:
+  # message by guide before game start
+  stepMessage1: |
+    在集齐了参加者，并全员准备完成后，请等待建立房间的人开始游戏。
+    游戏是自第1天的夜间开始的。
+# phase 5: first night
+phase5:
+  # message by guide after game start
+  stepMessage1: |
+    游戏开始了。你现在是一名村人。
+    村人在夜间没有什么事可做，请通过自言自语来打发时间，等待白天到来吧。
+    夜间的发言都会变成自言自语，而让其他人无法看到。但是人狼与共有者等一部分职业能够进行夜间对话。
+
+    顺便一提，游戏管理员的发言颜色是这样的。
+  # message by guide right after getting day 2
+  stepMessage2: |
+    白天到来了。白天的发言对所有人都是可见的，请积极参与讨论。
+    此时，通过把发言种类选为「自言自语」，仍然可以使用他人看不到的自言自语。
+  stepMessage3: |
+    在白天的讨论结束后，请向想要处刑的对象投票。
+    虽然在讨论时间结束前就可以投票（除非房间规则中特别分配了专门用于投票的时间），
+    但是一旦把票投出就不能再修改，所以慎重的选择吧。
+# phase 6: 2nd day
+phase6:
+  # message by guide after user voted
+  stepMessage1: |
+    成功投票了！　投票的系统消息只对自己可见。
+    在处刑结束之前，其他人是无法知道你的投票目标的，对于这点敬请放心。
+
+    所有人都投票结束后，将会执行处刑并进入夜间。
+# phase 7: 2nd night
+phase7:
+  # message by guide after changed to 2nd night
+  stepMessage1: |
+    第2天的夜间到来了，现在来练习能力的使用吧。
+    虽然一般情况下职业是不会改变的，不过这次为了练习特别把你的职业变成了占卜师。
+  stepMessage2: |
+    占卜师可以在夜间选择1名对象，并得知此对象是否为人狼。
+    请仔细思考一下要占卜的对象。
+
+    与投票相同，能力的使用对象一旦决定就无法更改，请慎重选择。
+# phase 8: used diviner skill
+phase8:
+  # message by guide after using Diviner skill
+  stepMessage1: |
+    成功地使用了占卜师的能力。在使用能力时，会像这样显示只有自己能够看到的系统信息。
+    占卜师能力的结果会在次日早上发表（默认的设置）。
+  # message after moving to day 3
+  stepMessage2: |
+    第3天到来了。作为占卜师就会看到像这样的只有自己可见的占卜结果。
+
+    今天没有特别的教导内容了，请像昨天一样进行讨论与投票吧！
+
+# phase 9: day 3
+phase9:
+  # message after the end of the game
+  stepMessage1: |
+    人狼已被处死，你获胜了！
+
+    练习至此就全部结束了，感谢你的努力。
+    接下来请去菜单的「房间一览」里寻找能够加入的村子，并结识一起享受人狼游戏的朋友吧！

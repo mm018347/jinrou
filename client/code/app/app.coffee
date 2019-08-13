@@ -90,7 +90,7 @@ exports.init = ->
         JinrouFront.loadDialog().then (dialog)->
             dialog.showMessageDialog {
                 title: "帮助"
-                message: t.getAttribute 'title'
+                message: t.getAttribute("data-title") || t.getAttribute('title')
                 ok: "OK"
             }
     # メニューの開閉
@@ -338,6 +338,9 @@ exports.showUrl=showUrl=(url,query={},nohistory=false)->
         when "/logs"
             # ログ検索
             page "logs",null,Index.logs,null
+        when "/tutorial/game"
+            # ゲーム画面のチュートリアル
+            page "tutorial-game", null, Index.tutorial.game, null
         else
             if result=url.match /^\/room\/-?(\d+)$/
                 # ルーム
