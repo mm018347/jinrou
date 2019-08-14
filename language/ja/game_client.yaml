@@ -308,6 +308,12 @@ room:
     message: "房间已加密，请输入密码。"
     ok: "进入"
     cancel: "取消"
+  # unjoin theme room confirmation dialog.
+  unjoinThemeRoomDialog:
+    title: "退出主题房间"
+    message: "一旦退出主题房间，在20秒内将无法再次加入此房间。确定要退出吗？"
+    quit: "退出"
+    stay: "取消"
 
 # Icon select dialog.
 iconSelect:

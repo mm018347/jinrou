@@ -145,14 +145,27 @@ exports.start=(roomid)->
                         processJoin()
                     unjoin: ()->
                         # 脱退
-                        ss.rpc "game.rooms.unjoin", roomid,(result)->
-                            if result?
-                                dialog.showErrorDialog {
-                                    modal: true
-                                    message: String result
-                                }
-                            else
+                        processUnjoin = (quitThemeRoom)->
+                            ss.rpc "game.rooms.unjoin", roomid,quitThemeRoom,(result)->
+                                if result?.confirm == "quitThemeRoom"
+                                    dialog.showConfirmDialog({
+                                        modal: true,
+                                        title: i18n.t 'game_client:room.unjoinThemeRoomDialog.title'
+                                        message: i18n.t 'game_client:room.unjoinThemeRoomDialog.message'
+                                        yes: i18n.t 'game_client:room.unjoinThemeRoomDialog.quit'
+                                        no: i18n.t 'game_client:room.unjoinThemeRoomDialog.stay'
+                                    }).then (res)->
+                                        if res
+                                            processUnjoin(true)
+                                    return
+                                if result?
+                                    dialog.showErrorDialog {
+                                        modal: true
+                                        message: String result
+                                    }
+                                    return
                                 Index.app.refresh()
+                        processUnjoin(false)
                     ready: ()->
                         ss.rpc "game.rooms.ready", roomid,(result)->
                             if result?

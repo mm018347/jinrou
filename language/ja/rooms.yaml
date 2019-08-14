@@ -36,6 +36,8 @@ error:
     notBlind: "主题房间必须为匿名。"
     # The number of players cannot be greater than the number of built-in skins of the theme. 
     playerTooMuch: "主题「{{name}}」的房间人数不能多于「{{length}}」。"
+    # Forbid players to quit and join too frequent.
+    tooFrequent: "不能频繁地退出、加入主题房间，请等待{{time}}秒。"
 
   join:
     # Cannot join because banned

@@ -196,6 +196,7 @@ module.exports.actions=(req,res,ss)->
                 unless result.blind == "" || pl?.mode == "gm"
                     delete p.realid
                 delete p.ip
+            delete result.quitfromtheme
             # ふるいかどうか
             if result.made < Date.now()-Config.rooms.fresh*3600000
                 result.old=true
@@ -417,6 +418,9 @@ module.exports.actions=(req,res,ss)->
                 if !theme.isAvailable?()
                     res {error: i18n.t "error.theme.notAvailable", {name: theme.name}}
                     return
+                if room.quitfromtheme? && room.quitfromtheme[req.session.userId]? && room.quitfromtheme[req.session.userId] + 20*1000 > Date.now()
+                    res {error: i18n.t "error.theme.tooFrequent", {time: 20 + Math.floor((room.quitfromtheme[req.session.userId] - Date.now())/1000)}}
+                    return
 
             if room.blind
                 unless opt?.name || room.theme
@@ -509,7 +513,7 @@ module.exports.actions=(req,res,ss)->
                     if room.mode!="playing"
                         ss.publish.channel "room#{roomid}", "join", user
     # 部屋から出る
-    unjoin: (roomid)->
+    unjoin: (roomid,quitThemeRoom)->
         unless req.session.userId
             res i18n.t "common:error.needLogin"
             return
@@ -527,6 +531,9 @@ module.exports.actions=(req,res,ss)->
             unless room.mode=="waiting"
                 res i18n.t "error.alreadyStarted"
                 return
+            if room.theme && !quitThemeRoom
+                res confirm:"quitThemeRoom"
+                return
             libready.unregister roomid, pl
             # consistencyのためにplayersをまるごとアップデートする
             room.players = room.players.filter (x)=> x.realid != req.session.userId
@@ -538,7 +545,15 @@ module.exports.actions=(req,res,ss)->
                     if p.start
                         ss.publish.channel "room#{roomid}", "ready", {userid: p.userid, start: false}
                         p.start = false
-            M.rooms.update {id:roomid},{$set: {players: room.players}},(err)=>
+            update = {
+                $set: {
+                    players: room.players
+                }
+            }
+            # record players who quit from theme room
+            update.$set.quitfromtheme = {}
+            update.$set.quitfromtheme[req.session.userId] = Date.now()
+            M.rooms.update {id:roomid},update,(err)=>
                 if err?
                     res String err
                 else
