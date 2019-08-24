@@ -1839,7 +1839,7 @@ class Game
             x = obj.pl
             situation=switch obj.found
                 #死因
-                when "werewolf","werewolf2","trickedWerewolf","poison","hinamizawa","vampire","vampire2","witch","dog","trap","marycurse","psycho","crafty","greedy","tough","lunaticlover","hooligan","dragon","samurai","elemental"
+                when "werewolf","werewolf2","trickedWerewolf","poison","hinamizawa","vampire","vampire2","witch","dog","trap","marycurse","psycho","crafty","greedy","tough","lunaticlover","hooligan","dragon","samurai","elemental","sacrifice"
                     @i18n.t "found.normal", {name: x.name}
                 when "bomb"
                     @i18n.t "found.normal", {name: x.name}
@@ -1882,7 +1882,7 @@ class Game
                     "foxsuicide","friendsuicide","twinsuicide","dragonknightsuicide","vampiresuicide",
                     "infirm","hunter",
                     "gmpunish","gone-day","gone-night","crafty","greedy","tough","lunaticlover",
-                    "hooligan","dragon","samurai","elemental"
+                    "hooligan","dragon","samurai","elemental","sacrifice"
                 ].includes obj.found
                     detail = @i18n.t "foundDetail.#{obj.found}"
                 else
@@ -1937,6 +1937,8 @@ class Game
                         "samurai"
                     when "elemental"
                         "elemental"
+                    when "sacrifice"
+                        "sacrifice"
                     else
                         null
                 if emma_log?
@@ -2280,9 +2282,17 @@ class Game
             else if wolves==0 && vampires==0
                 # 村人勝利
                 team="Human"
+                # 道化生存時は勝敗反転
+                aliveClowns = @players.filter((x)-> x.isJobType("DarkClown") && !x.dead).length
+                if aliveClowns >= 1
+                    team="Werewolf"
             else if humans<=wolves && vampires==0
                 # 人狼勝利
                 team="Werewolf"
+                # 道化生存時は勝敗反転
+                aliveClowns = @players.filter((x)-> x.isJobType("DarkClown") && !x.dead).length
+                if aliveClowns >= 1
+                    team="Human"
             else if humans<=vampires && wolves==0
                 # ヴァンパイア勝利
                 team="Vampire"
@@ -4899,7 +4909,7 @@ class Lycan extends Player
     fortuneResult: FortuneResult.werewolf
 class Priest extends Player
     type:"Priest"
-    midnightSort:70
+    midnightSort:69
     formType: FormType.optionalOnce
     hasDeadResistance:->true
     sleeping:->true
@@ -9535,8 +9545,8 @@ class Amanojaku extends Player
         team != "Human" && team != ""
         
 class Ascetic extends Player
-    type: "Ascetic"
-    team: "Raven"
+    type:"Ascetic"
+    team:"Raven"
     isWinner:(game, team)->
         ravens = game.players.filter (x)-> x.isJobType "Raven"
         aliver = ravens.filter (x)->!x.dead
@@ -9559,7 +9569,126 @@ class Ascetic extends Player
         result.ravens =
             game.players.filter((x)-> x.isJobType "Raven").map (x)->
                 x.publicinfo()
+                
+class DarkClown extends Bat
+    type:"DarkClown"
+    sleeping:->true
+    sunrise:(game)->
+        # 最初の1人がログを管理
+        clowns=game.players.filter (x)->x.isJobType "DarkClown"
+        firstClown=clowns[0]
+        if firstClown?.id==@id
+            # わ た し だ
+            innerClowns = firstClown.accessByJobTypeAll "DarkClown"
+            if innerClowns[0]?.objid == @objid
+                if clowns.some((x)->!x.dead) 
+                    if @flag != "reverse"
+                        # 道化が生存し、まだログを出していない
+                        log=
+                            mode:"system"
+                            comment: game.i18n.t "roles:DarkClown.alive"
+                        splashlog game.id,game,log
+                        # ログは1度きり
+                        @setFlag "reverse"
+                else if @flag!="normal"
+                    # 全員死亡していてまたログを出していない
+                    log=
+                        mode:"system"
+                        comment: game.i18n.t "roles:DarkClown.dead"
+                    splashlog game.id,game,log
+                    @setFlag "normal"
 
+    deadsunrise:(game)->
+        DarkClown::sunrise.call this, game
+
+class DualPersonality extends Player
+    type:"DualPersonality"
+    team:""
+    isWinner:(game, team)->
+        if @flag == "human"
+            team == "Human" && team != ""
+        else if @flag == "werewolf"
+            team == "Werewolf" && team != ""
+        else
+            false
+    sunset:(game)->
+        unless @flag?
+            # 初期陣営の決定＆初回だけ夜に通知
+            r = Math.random()
+            if r<=0.5
+                log=
+                    mode:"skill"
+                    to:@id
+                    comment: game.i18n.t "roles:DualPersonality.human", {name: @name}
+                splashlog game.id,game,log
+                @setFlag "human"
+            else
+                log=
+                    mode:"skill"
+                    to:@id
+                    comment: game.i18n.t "roles:DualPersonality.werewolf", {name: @name}
+                splashlog game.id,game,log
+                @setFlag "werewolf"
+    sunrise:(game)->
+        # 1日毎に陣営を変える
+        if @flag == "human"
+            log=
+                mode:"skill"
+                to:@id
+                comment: game.i18n.t "roles:DualPersonality.werewolf", {name: @name}
+            splashlog game.id,game,log
+            @setFlag "werewolf"
+        else if @flag == "werewolf"
+            log=
+                mode:"skill"
+                to:@id
+                comment: game.i18n.t "roles:DualPersonality.human", {name: @name}
+            splashlog game.id,game,log
+            @setFlag "human"
+ 
+class Sacrifice extends Player
+    type:"Sacrifice"
+    midnightSort:70
+    formType: FormType.optionalOnce
+    hasDeadResistance:->true
+    sleeping:->true
+    jobdone:->@flag?
+    sunset:(game)->
+        @setTarget null
+    job:(game,playerid,query)->
+        if @flag?
+            return game.i18n.t "error.common.alreadyUsed"
+        if @target?
+            return game.i18n.t "error.common.alreadyUsed"
+        pl=game.getPlayer playerid
+        unless pl?
+            return game.i18n.t "error.common.nonexistentPlayer"
+        if playerid==@id
+            return game.i18n.t "error.common.noSelectSelf"
+        pl.touched game,@id
+
+        @setTarget playerid
+        @setFlag "done"    # すでに能力を発動している
+        log=
+            mode:"skill"
+            to:@id
+            comment: game.i18n.t "roles:Sacrifice.select", {name: @name, target: pl.name}
+        splashlog game.id,game,log
+        null
+    midnight:(game,midnightSort)->
+        # 複合させる
+        pl = game.getPlayer game.skillTargetHook.get @target
+        unless pl?
+            return
+        # 村人陣営以外は何も起こらない
+        if pl.getTeam() != "Human"
+            return
+        newpl=Player.factory null, game, pl,null,SacrificeProtected # 守られた人
+        pl.transProfile newpl
+        newpl.cmplFlag=@id # 護衛元
+        pl.transform game,newpl,true
+        null
+            
 # ============================
 # 処理上便宜的に使用
 class GameMaster extends Player
@@ -10893,6 +11022,38 @@ class DraculaBitten extends Complex
             return true
         return super
 
+# 生贄によって守られている人
+class SacrificeProtected extends Complex
+    cmplType:"SacrificeProtected"
+    checkDeathResistance:(game, found)->
+        if found in ["gone-day","gone-night"]
+            # If this is a gone death, do not guard.
+            return false
+        if @getTeam() != "Human"
+            return false
+        # その他の死因は耐える
+        game.getPlayer(@cmplFlag).addGamelog game,"SacrificeGJ",found,@id
+        # show invisible detail
+        log=
+            mode:"hidden"
+            to:-1
+            comment: game.i18n.t "roles:Sacrifice.protected", {name: @name, found: game.i18n.t "foundDetail.#{found}"}
+        splashlog game.id,game,log
+        # 襲撃失敗理由を保存（cover or holy...）
+        if Found.isNormalWerewolfAttack found
+            game.addGuardLog @id, AttackKind.werewolf, GuardReason.cover
+        # イケニエ
+        guard=game.getPlayer @cmplFlag
+        guard.die game, "sacrifice", guard?.id
+        # 1回のみ耐える	
+        @uncomplex game
+        return true
+    sunsetAlways:(game)->
+        # 一日しか効かない
+        @mcall game, @main.sunsetAlways, game
+        @sub?.sunsetAlways? game
+        @uncomplex game
+
 # 決定者
 class Decider extends Complex
     cmplType:"Decider"
@@ -11045,11 +11206,11 @@ class Chemical extends Complex
         win = false
         maint = @main.getTeam()
         subt = @sub?.getTeam()
-        if maint == myt || maint == "Devil" || @main.type == "Stalker" || @main.type == "Amanojaku"
+        if maint == myt || maint == "Devil" || @main.type == "Stalker" || @main.type == "Amanojaku" || @main.type == "DualPersonality"
             win = win || @main.isWinner(game,team)
         # if it has team-independent winningness, adopt it.
         win = win || @main.isWinner(game, "")
-        if subt == myt || subt == "Devil" || @sub?.type == "Stalker" || @sub?.type == "Amanojaku"
+        if subt == myt || subt == "Devil" || @sub?.type == "Stalker" || @sub?.type == "Amanojaku" || @sub?.type == "DualPersonality"
             win = win || @sub.isWinner(game,team)
         if @sub?
             win = win || @sub.isWinner(game, "")
@@ -11257,6 +11418,10 @@ jobs=
     Poet:Poet
     Amanojaku:Amanojaku
     Ascetic:Ascetic
+    DarkClown:DarkClown
+    DualPersonality:DualPersonality
+    Sacrifice:Sacrifice
+
     # 特殊
     GameMaster:GameMaster
     Helper:Helper
@@ -11303,6 +11468,7 @@ complexes=
     HooliganGuardComplex:HooliganGuardComplex
     SamuraiGuarded:SamuraiGuarded
     DraculaBitten:DraculaBitten
+    SacrificeProtected:SacrificeProtected
 
     # 役職ごとの強さ
 jobStrength=
@@ -11433,6 +11599,9 @@ jobStrength=
     Poet:11
     Amanojaku:10
     Ascetic:20
+    DarkClown:15
+    DualPersonality:10
+    Sacrifice:14
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'

@@ -105,6 +105,7 @@ messages:
   Samurai: "请选择要护卫的对象"
   Dracula: "请选择要吸血的对象"
   Elementaler: "请选择要护卫的对象"
+  Sacrifice: "请选择要守护的对象"
   GameMaster: "GM命令"
 
 # Texts for GameMaster form.
