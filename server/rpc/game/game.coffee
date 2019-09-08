@@ -1340,7 +1340,7 @@ class Game
                     r = Math.floor Math.random()*onewolf.length
                     @werewolf_target.push {
                         from: onewolf[r].id
-                        to: "身代わりくん"    # みがわり
+                        to: "替身君"    # みがわり
                         found: null
                     }
                 @werewolf_target_remain=0
@@ -9125,7 +9125,7 @@ class Satori extends Diviner
 
         if @type == "Satori" && game.day == 1 && game.rule.firstnightdivine == "auto"
             # 自動白通知
-            targets2 = targets.filter (x)=> x.id != @id && x.getFortuneResult() == FortuneResult.human && x.id != "身代わりくん" && !x.isJobType("Fox") && !x.isJobType("XianFox") && !x.isJobType("BigWolf") && !x.isJobType("Diviner")
+            targets2 = targets.filter (x)=> x.id != @id && x.getFortuneResult() == FortuneResult.human && x.id != "替身君" && !x.isJobType("Fox") && !x.isJobType("XianFox") && !x.isJobType("BigWolf") && !x.isJobType("Diviner")
             if targets2.length > 0
                 # ランダムに決定
                 log=
