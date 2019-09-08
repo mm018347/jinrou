@@ -305,6 +305,7 @@ exports.start=(roomid)->
                             hooligans: obj.hooligans
                             draculas: obj.draculas
                             draculaBitten: obj.draculaBitten
+                            absolutewolves: obj.absolutewolves
                         }
                     else
                         null

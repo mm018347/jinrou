@@ -102,7 +102,7 @@ jobinfo:
     hooligans: "现在的暴动者有 {{names}}"
     draculas: "同伴的德古拉是 {{names}}"
     draculaBitten: "吸过血的对象有 {{names}}"
-
+    absolutewolves: "绝对狼是 {{names}}"
 
 # game-view: speak form.
 speak:

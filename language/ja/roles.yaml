@@ -135,6 +135,8 @@ jobname:
   DarkClown: "暗小丑"
   DualPersonality: "二重人格"
   Sacrifice: "活祭品"
+  AbsoluteWolf: "绝对狼"
+  Oracle: "预言者"
   GameMaster: "游戏管理员"
   Helper: "帮手"
   Waiting: "尚未分配"
@@ -857,6 +859,14 @@ Sacrifice:
   # Selected a target.
   select: "{{name}} 为了守护 {{target}} 而甘愿成为活祭品。"
   protected: "{{name}} 献上了活祭品，成功抵抗了 {{found}}。"
+
+AbsoluteWolf:
+  protected: "{{name}} 凭借自身的绝对实力抵抗了 {{found}}。"
+
+Oracle:
+  friend: "{{name}} 得到了神谕。恋人阵营马上就要获胜了。"
+  fox: "{{name}} 得到了神谕。妖狐阵营马上就要获胜了。"
+  werewolf: "{{name}} 得到了神谕。人狼阵营马上就要获胜了。"
 
 GameMaster:
   # Failed to revive.

@@ -20,7 +20,7 @@ SAFETY_EXCLUDED_JOBS = Shared.game.SAFETY_EXCLUDED_JOBS
 # jobs that not welcome while rebirth
 REBIRTH_EXCLUDED_JOBS = ["MinionSelector","Thief","GameMaster","Helper","QuantumPlayer","Waiting","Watching","GotChocolate","HooliganGuard","HooliganAttacker"]
 # 冒涜者によって冒涜されない役職
-BLASPHEMY_DEFENCE_JOBS = ["Fugitive","QueenSpectator","Liar","Spy2","LoneWolf"]
+BLASPHEMY_DEFENCE_JOBS = ["Fugitive","QueenSpectator","Liar","Spy2","LoneWolf","AbsoluteWolf"]
 # 占い結果すぐに分かるを無効化する役職
 DIVINER_NOIMMEDIATE_JOBS = ["WolfBoy", "ObstructiveMad", "Pumpkin", "Patissiere", "Hypnotist", "DecoyWolf"]
 
@@ -1280,18 +1280,7 @@ class Game
             @werewolf_target=[]
             unless @day==1 && @rule.scapegoat!="off"
                 @werewolf_target_remain=1
-            else if @rule.scapegoat=="on"
-                # 誰が襲ったかはランダム
-                onewolf=@players.filter (x)->x.isWerewolf()
-                if onewolf.length>0
-                    r=Math.floor Math.random()*onewolf.length
-                    @werewolf_target.push {
-                        from: onewolf[r].id
-                        to: "替身君"    # みがわり
-                        found: null
-                    }
-                @werewolf_target_remain=0
-            else
+            else if @rule.scapegoat!="on"
                 # 誰も襲わない
                 @werewolf_target_remain=0
 
@@ -1342,6 +1331,19 @@ class Game
             return if @judge()
 
             @runScapegoatJobs()
+
+            # 1日目は身代わりくんへの襲撃が発生
+            if @day == 1 && @rule.scapegoat == "on"
+                # 誰が襲ったかはランダム
+                onewolf = @players.filter (x)->x.isWerewolf() && x.isAttacker()
+                if onewolf.length > 0
+                    r = Math.floor Math.random()*onewolf.length
+                    @werewolf_target.push {
+                        from: onewolf[r].id
+                        to: "身代わりくん"    # みがわり
+                        found: null
+                    }
+                @werewolf_target_remain=0
 
             # 忍者のデータを作る
             @ninja_data = {}
@@ -2124,6 +2126,9 @@ class Game
         hunters = hunters.filter (x)-> x.flag == "hunting"
         if hunters.length == 0
             # 能力は発動しない
+            return false
+        if @players.every((pl)-> pl.dead)
+            # if all players are dead, no hunter phase.
             return false
         clearTimeout @timerid
         # ハンターフェイズ突入！！！
@@ -3970,7 +3975,7 @@ class Poisoner extends Player
                 # 襲撃者を道連れにする
                 canbedead = canbedead.filter (x)->x.id==from
             else
-                canbedead=canbedead.filter (x)->x.isWerewolf()
+                canbedead=canbedead.filter (x)->x.isWerewolf() && x.isAttacker()
         else if found=="vampire"
             canbedead=canbedead.filter (x)->x.id==from
         return if canbedead.length==0
@@ -8704,7 +8709,7 @@ class LunaticLover extends Player
             }
 
         # 狂愛対象が死亡したら後を追う
-        if pl.dead
+        if !@dead && pl.dead
             @die game, "friendsuicide"
             res = true
         return res
@@ -9543,7 +9548,7 @@ class Amanojaku extends Player
     team:""
     isWinner:(game, team)->
         team != "Human" && team != ""
-        
+
 class Ascetic extends Player
     type:"Ascetic"
     team:"Raven"
@@ -9569,7 +9574,7 @@ class Ascetic extends Player
         result.ravens =
             game.players.filter((x)-> x.isJobType "Raven").map (x)->
                 x.publicinfo()
-                
+
 class DarkClown extends Bat
     type:"DarkClown"
     sleeping:->true
@@ -9581,7 +9586,7 @@ class DarkClown extends Bat
             # わ た し だ
             innerClowns = firstClown.accessByJobTypeAll "DarkClown"
             if innerClowns[0]?.objid == @objid
-                if clowns.some((x)->!x.dead) 
+                if clowns.some((x)->!x.dead)
                     if @flag != "reverse"
                         # 道化が生存し、まだログを出していない
                         log=
@@ -9630,6 +9635,12 @@ class DualPersonality extends Player
                 splashlog game.id,game,log
                 @setFlag "werewolf"
     sunrise:(game)->
+        unless @flag?
+            r = Math.random()
+            if r<=0.5
+                @setFlag "human"
+            else
+                @setFlag "werewolf"
         # 1日毎に陣営を変える
         if @flag == "human"
             log=
@@ -9645,7 +9656,7 @@ class DualPersonality extends Player
                 comment: game.i18n.t "roles:DualPersonality.human", {name: @name}
             splashlog game.id,game,log
             @setFlag "human"
- 
+
 class Sacrifice extends Player
     type:"Sacrifice"
     midnightSort:70
@@ -9688,7 +9699,98 @@ class Sacrifice extends Player
         newpl.cmplFlag=@id # 護衛元
         pl.transform game,newpl,true
         null
-            
+
+class AbsoluteWolf extends Werewolf
+    type:"AbsoluteWolf"
+    checkDeathResistance:(game, found)->
+        if found in ["gone-day","gone-night"]
+            # If this is a gone death, do not guard.
+            return false
+        # 陣営変化していたら喪失
+        if @getTeam() != "Werewolf"
+            return false
+        # 追加勝利も許さない
+        me = game.getPlayer @id
+        if me.isCmplType("HooliganMember") || me.isCmplType("LunaticLoved")
+            return false
+        # 残りの狼の数と絶対狼の数が一致していたら喪失
+        wolves=game.players.filter (x)->x.isWerewolf() && !x.dead
+        awolves=wolves.filter (x)->x.isJobType "AbsoluteWolf"
+        if wolves.length == awolves.length
+            return false
+        # その他の死因は耐える
+        # show invisible detail
+        log=
+            mode:"hidden"
+            to:-1
+            comment: game.i18n.t "roles:AbsoluteWolf.protected", {name: @name, found: game.i18n.t "foundDetail.#{found}"}
+        splashlog game.id,game,log
+        return true
+
+class Oracle extends Player
+    type:"Oracle"
+    getTypeDisp:->
+        if @flag?
+            @type
+        else
+            "Human"
+    getJobDisp:->
+        # 何らかのフラグがあれば解放
+        # "none" は一度預言者として解放済み
+        if @flag?
+            @game.i18n.t "roles:jobname.Oracle"
+        else
+            @game.i18n.t "roles:jobname.Human"
+    sunrise:(game)->
+        aliveps=game.players.filter (x)->!x.dead
+        alives=aliveps.length
+        humans=aliveps.map((x)->x.humanCount()).reduce(((a,b)->a+b), 0)
+        wolves=aliveps.map((x)->x.werewolfCount()).reduce(((a,b)->a+b), 0)
+        foxes=aliveps.map((x)->x.isFox()).reduce(((a,b)->a+b), 0)
+        friendsn=aliveps.map((x)->x.isFriend()).reduce(((a,b)->a+b), 0)
+        nfriendsn=aliveps.map((x)->!x.isFriend()).reduce(((a,b)->a+b), 0)
+        # 恋人が生存
+        if friendsn > 0
+            if nfriendsn <= 2
+                @setFlag "friend"
+        # 人カウントと人狼系の差が2名以下
+        else if humans - wolves <= 2
+            if friendsn > 0
+                @setFlag "friend"
+            else if foxes > 0
+                @setFlag "fox"
+            else
+                @setFlag "werewolf"
+        # 人狼系の数が1名
+        else if wolves == 1
+            if friendsn > 0
+                @setFlag "friend"
+            else if foxes > 0
+                @setFlag "fox"
+            else if alives <= 4
+                @setFlag "werewolf"
+            else if alives > 4 && @flag?
+                @setFlag "none"
+        else if @flag?
+            @setFlag "none"
+        if @flag == "friend"
+            log=
+                mode:"skill"
+                to:@id
+                comment: game.i18n.t "roles:Oracle.friend", {name: @name}
+        else if @flag == "fox"
+            log=
+                mode:"skill"
+                to:@id
+                comment: game.i18n.t "roles:Oracle.fox", {name: @name}
+        else if @flag == "werewolf"
+            log=
+                mode:"skill"
+                to:@id
+                comment: game.i18n.t "roles:Oracle.werewolf", {name: @name}
+        if @flag? && @flag != "none"
+            splashlog game.id,game,lo
+
 # ============================
 # 処理上便宜的に使用
 class GameMaster extends Player
@@ -10450,7 +10552,7 @@ class TrapGuarded extends Complex
             if found == "vampire"
                 canbedead=game.players.filter (x)->!x.dead && x.id==from
             else
-                canbedead=game.players.filter (x)->!x.dead && x.isWerewolf()
+                canbedead=game.players.filter (x)->!x.dead && x.isWerewolf() && x.isAttacker()
             if canbedead.length > 0
                 r=Math.floor Math.random()*canbedead.length
                 pl=canbedead[r] # 被害者
@@ -11031,6 +11133,10 @@ class SacrificeProtected extends Complex
             return false
         if @getTeam() != "Human"
             return false
+        # 生贄先が生存していないとダメ
+        sacrifice=game.getPlayer @cmplFlag
+        if sacrifice.dead
+            return false
         # その他の死因は耐える
         game.getPlayer(@cmplFlag).addGamelog game,"SacrificeGJ",found,@id
         # show invisible detail
@@ -11042,10 +11148,9 @@ class SacrificeProtected extends Complex
         # 襲撃失敗理由を保存（cover or holy...）
         if Found.isNormalWerewolfAttack found
             game.addGuardLog @id, AttackKind.werewolf, GuardReason.cover
-        # イケニエ
-        guard=game.getPlayer @cmplFlag
-        guard.die game, "sacrifice", guard?.id
-        # 1回のみ耐える	
+        #生贄
+        sacrifice.die game, "sacrifice", sacrifice?.id
+        # 1回のみ耐える
         @uncomplex game
         return true
     sunsetAlways:(game)->
@@ -11421,6 +11526,8 @@ jobs=
     DarkClown:DarkClown
     DualPersonality:DualPersonality
     Sacrifice:Sacrifice
+    AbsoluteWolf:AbsoluteWolf
+    Oracle:Oracle
 
     # 特殊
     GameMaster:GameMaster
@@ -11602,6 +11709,8 @@ jobStrength=
     DarkClown:15
     DualPersonality:10
     Sacrifice:14
+    AbsoluteWolf:70
+    Oracle:15
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
@@ -11811,6 +11920,11 @@ module.exports.actions=(req,res,ss)->
                             # これは出してはいけない指定になっている
                             exceptions.push job
                             excluded_exceptions.push job
+
+                # 村人だと思い込むシリーズは村人除外で出現しない
+                if excluded_exceptions.some((x)->x=="Human")
+                    exceptions.push "Oracle"
+                    special_exceptions.push "Oracle"
                 # メアリーの特殊処理（セーフティ高じゃないとでない）
                 if query.yaminabe_hidejobs=="" || (!safety.jobs && query.yaminabe_safety!="none")
                     exceptions.push "BloodyMary"
@@ -11984,6 +12098,7 @@ module.exports.actions=(req,res,ss)->
                     # 吸血鬼の眷属も
                     if joblist.Vampire == 0 && joblist.Dracula == 0
                         exceptions.push "VampireClan"
+                        special_exceptions.push "VampireClan"
 
 
                 nonavs = {}
@@ -12496,6 +12611,18 @@ module.exports.actions=(req,res,ss)->
                                     if joblist.Raven==0
                                         continue
 
+                        # 絶対狼はセーフティに関わらず処理を実施する
+                        if job == "AbsoluteWolf"
+                            # 人狼系が2以上（この処理で人狼系の数と絶対狼の数が一致することはなくなる）
+                            if countCategory("Werewolf")==0
+                                continue
+                            # 一匹狼とは共存できない
+                            if joblist.LoneWolf>0
+                                continue
+                        if job == "LoneWolf"
+                            # 絶対狼とは共存できない
+                            if joblist.AbsoluteWolf>0
+                                continue
 
                         joblist[job]++
                         if job == "MadWolf"
@@ -12621,7 +12748,7 @@ module.exports.actions=(req,res,ss)->
                 ruleinfo_str = game.i18n.t "casting:castingName.#{query.jobrule}"
             if query.losemode == "on"
                 # 敗北村の場合は表示
-                ruleinfo_str = "#{game.i18n.t "common.losemode"}　" + (ruleinfo_str ? "")    
+                ruleinfo_str = "#{game.i18n.t "common.losemode"}　" + (ruleinfo_str ? "")
             if query.chemical == "on"
                 # ケミカル人狼の場合は表示
                 ruleinfo_str = "#{game.i18n.t "common.chemicalWerewolf"}　" + (ruleinfo_str ? "")
@@ -12672,7 +12799,7 @@ module.exports.actions=(req,res,ss)->
                     # 闇鍋用の役職公開ログ
                     log=
                         mode:"system"
-                        comment: game.i18n.t "system.gamestart.roles", {info: getIncludedRolesStr game.i18n, joblist}
+                        comment: game.i18n.t "system.gamestart.roles", {info: getIncludedRolesStr game.i18n, joblist, false}
                     splashlog game.id,game,log
 
             for x in ["jobrule",
@@ -13180,6 +13307,9 @@ isLogTarget = (to, player)->
 writeGlobalJobInfo = (game, player, result={})->
     unless Phase.isBeforeStart(game.phase)
         result.myteam = player.getTeamDisp()
+        # 絶対狼は全員に公開
+        result.absolutewolves = game.players.filter((x)-> x.isJobType "AbsoluteWolf").map (x)->
+                x.publicinfo()
         # 女王観戦者の情報
         if player.getTeam() == "Human" && player.getTeamDisp() == "Human"
             result.queens = game.players.filter((x)-> x.isJobType "QueenSpectator").map (x)->
@@ -13301,7 +13431,7 @@ getrulestr = (i18n, rule, jobs={})->
     text = "#{ruleName} / "
 
     # write numbers of each role.
-    text += getIncludedRolesStr i18n, jobs
+    text += getIncludedRolesStr i18n, jobs, true
     text += " "
 
     # write number of categories.
@@ -13311,14 +13441,24 @@ getrulestr = (i18n, rule, jobs={})->
             catName = i18n.t "roles:categoryName.#{type}"
             text+="#{catName}#{num} "
     return text
-# 黑暗火锅用の役職一覧ログを作成
-getIncludedRolesStr = (i18n, joblist)->
+# 闇鍋用の役職一覧ログを作成
+# accurate: 思い込み系役職も正確に表示する
+getIncludedRolesStr = (i18n, joblist, accurate)->
     jobinfos = []
+    humannum = 0
     for obj in Shared.game.categoryList
         for job in obj.roles
             num = joblist[job]
             if num > 0
-                jobinfos.push "#{i18n.t "roles:jobname.#{job}"}#{num}"
+                # 村人思い込み系シリーズ含む村人をカウント
+                if !accurate && (job in ["Human","Oracle"])
+                    humannum += num
+                else
+                    jobinfos.push "#{i18n.t "roles:jobname.#{job}"}#{num}"
+    if !accurate
+        # ループ後に最終的な村人を配列の先頭に加える
+        if humannum > 0
+            jobinfos.unshift "#{i18n.t "roles:jobname.Human"}#{humannum}"
     jobinfos.join " "
 
 # getSpeakChoice系メソッドの結果を処理
