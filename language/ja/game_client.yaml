@@ -366,6 +366,10 @@ suddenDeathPunish:
   ok: "投票"
   cancel: "关闭"
 
+# share button
+share:
+  title: '分享'
+
 # report form (only applicable when report form is enabled via setting)
 reportForm:
   title: "上报"

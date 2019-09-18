@@ -96,6 +96,8 @@ error:
     ban: "您的账号受限，不能在此处发言。"
     # Watchspeak is not allowed
     noWatchSpeak: "观战者不能发言。"
+    # too many special command is used.
+    tooManyCommands: "特殊命令过多。"
   # Error during job
   job:
     # Invalid target selection.

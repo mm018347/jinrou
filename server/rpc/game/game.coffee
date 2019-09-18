@@ -11,6 +11,7 @@ libi18n      = require '../../libs/i18n.coffee'
 libgame      = require '../../libs/game.coffee'
 libcasting   = require '../../libs/casting.coffee'
 libtime      = require '../../libs/time.coffee'
+libspeak     = require '../../libs/speak.coffee'
 
 cron=require 'cron'
 i18n = libi18n.getWithDefaultNS "game"
@@ -2308,7 +2309,7 @@ class Game
             if team=="Werewolf" && wolves==1
                 # 一匹狼判定
                 lw=aliveps.filter((x)->x.isWerewolf())[0]
-                if lw?.isJobType "LoneWolf"
+                if lw?.getTeam() == "LoneWolf"
                     team="LoneWolf"
 
             if team?
@@ -9789,7 +9790,14 @@ class Oracle extends Player
                 to:@id
                 comment: game.i18n.t "roles:Oracle.werewolf", {name: @name}
         if @flag? && @flag != "none"
-            splashlog game.id,game,lo
+            splashlog game.id,game,log
+
+class NightRabbit extends Fox
+    type:"NightRabbit"
+    isListener:(game,log)->
+        if log.mode=="werewolf"
+            true
+        else super
 
 # ============================
 # 処理上便宜的に使用
@@ -11528,6 +11536,7 @@ jobs=
     Sacrifice:Sacrifice
     AbsoluteWolf:AbsoluteWolf
     Oracle:Oracle
+    NightRabbit:NightRabbit
 
     # 特殊
     GameMaster:GameMaster
@@ -11711,6 +11720,7 @@ jobStrength=
     Sacrifice:14
     AbsoluteWolf:70
     Oracle:15
+    NightRabbit:32
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
@@ -12048,14 +12058,17 @@ module.exports.actions=(req,res,ss)->
                         if frees <= 0
                             break
                         r = Math.random()
-                        if r<0.35 && !nonavs.Fox
+                        if r<0.3 && !nonavs.Fox
                             joblist.Fox++
                             frees--
-                        else if r < 0.55 && !nonavs.XianFox
+                        else if r < 0.5 && !nonavs.XianFox
                             joblist.XianFox++
                             frees--
-                        else if r<0.85 && !nonavs.TinyFox
+                        else if r<0.75 && !nonavs.TinyFox
                             joblist.TinyFox++
+                            frees--
+                        else if r<0.9 && !nonavs.NightRabbit
+                            joblist.NightRabbit++
                             frees--
                         else if !nonavs.Blasphemy
                             joblist.Blasphemy++
@@ -12932,12 +12945,19 @@ module.exports.actions=(req,res,ss)->
                 res game.i18n.t "error.speak.noWatchSpeak"
                 return
 
-        #console.log query,player
+        # process speak commands
+        supplement = libspeak.processSpeakCommand comment
+        if supplement.error?
+            # "tooManyCommands"
+            res game.i18n.t "error.speak.#{supplement.error}"
+            return
+
         log =
             comment:comment
             userid:req.session.userId
             name:player?.name ? req.session.user.name
             to:null
+            supplement: if supplement.length > 0 then supplement else undefined
         if query.size in ["big","small"]
             log.size=query.size
         # ログを流す
