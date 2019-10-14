@@ -519,6 +519,7 @@ const SpeakFormPart = styled(RoomHeaderPart)`
 
     margin: 0;
     padding: 4px 8px;
+    padding: 4px 8px calc(4px + env(safe-area-inset-bottom));
   `};
 `;
 
@@ -623,6 +624,7 @@ const NavigationWrapper = styled.div`
       left: 0;
       bottom: 0;
       height: 2em;
+      height: calc(2em + env(safe-area-inset-bottom));
     `
         : ''}
   `};

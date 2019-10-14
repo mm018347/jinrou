@@ -138,6 +138,8 @@ jobname:
   AbsoluteWolf: "绝对狼"
   Oracle: "预言者"
   NightRabbit: "夜兔"
+  GachaAddicted: "课金者"
+  Fate: "命运之子"
   GameMaster: "游戏管理员"
   Helper: "帮手"
   Waiting: "尚未分配"
@@ -868,6 +870,16 @@ Oracle:
   friend: "{{name}} 得到了神谕。恋人阵营马上就要获胜了。"
   fox: "{{name}} 得到了神谕。妖狐阵营马上就要获胜了。"
   werewolf: "{{name}} 得到了神谕。人狼阵营马上就要获胜了。"
+
+GachaAddicted:
+  type:
+    normal: "普通抽卡"
+    premium: "稀有抽卡"
+  gacha: "{{name}} 在 {{gachaType}} 抽卡后获得了 {{rarity}}【{{jobname}}】。"
+  commit: "{{name}} 决定使用抽到的【{{jobname}}】。"
+
+Fate:
+  changeRole: "{{name}} 明悉了自己乃是命运之子，决意作为一名 {{result}} 生存下去。"
 
 GameMaster:
   # Failed to revive.

@@ -27,6 +27,63 @@ signup:
 
 footer:
   # footer text.
-  text: "© 2011-2019 うひょ"
+  text: '© 2011-2019 うひょ'
   # GitHub label
-  github: "GitHub"
+  github: 'GitHub'
+
+featuresTitle: 月下人狼的特点
+# contents of top page.
+# it is a list of objects, and are used programatically.
+features:
+  - icon: hand-holding-usd
+    title: 完全免费・不设限
+    description:
+      - 月下人狼是完全免费的。所有服务器机能都不需要额外付费。
+  - icon: comments
+    title: 聊天式人狼
+    description:
+      - 月下人狼是沉默的、聊天室形式的游戏。尝试只凭文字的破绽来看破对手的谎言吧。
+  - icon: file-signature
+    title: 瞬间注册
+    description:
+      - 虽然在使用月下人狼时必须注册账号，但只需输入账号ID与密码即可完成注册。账号ID是对所有人可见的，请慎重决定。
+      - 作为不强制使用的功能，也可以通过绑定邮箱地址来避免遗忘账号ID与密码。
+      - 并且，如果只是观战，连注册也不需要。
+  - icon: hat-wizard
+    title: 丰富的职业
+    description:
+      - 月下人狼以职业数量之丰富喂主要特征。
+      - 人狼・占卜师这些固定职业自然不必多说，月下人狼中还搜罗了超过100种以上的职业。
+      - 不必说，如此大量的职业也可以由你选择来进行组合。来尝试搭配职业打造自己的村子吧。
+  - icon: cog
+    title: 丰富的设定项目
+    description:
+      - 可以按照偏好来设定十分详细的规则。例如占卜师的结果就能够在「普通」与「初日白」之间选择。
+      - 如果对规则有特别的执着的话，请来月下人狼打造理想的规则吧。
+  - icon: user-friends
+    title: 「帮手」功能
+    description:
+      - 帮手功能是与其他人结队，一同参加游戏的功能。
+      - 如果成为了帮手，就能够共享自己队友的视野，并向队友提出只有对方能够看到的机密建议。
+      - 初学者刚开始参与游戏时，如果有人志愿成为帮手的话，想必会踏实很多。
+  - icon: mortar-pestle
+    title: 黑暗火锅
+    description:
+      - 「黑暗火锅」模式在月下人狼具有非常的人气。此模式中出场的职业将随机安排，每次都能够享受不同村子的不同乐趣。
+      - 面向中上级玩家，还有开场后不告知出场职业的更加混沌的模式。
+  - icon: lock
+    title: 亲友房间OK
+    description:
+      - 月下人狼的房间中是可以设置密码的。不知道密码的人不能够窥视内容、更不能加入游戏。
+      - 但是，一旦这个房间的游戏结束了，密码的封锁就会被解除。请注意不要在房间里提及个人隐私信息。
+  - icon: user-secret
+    title: 匿名房间
+    description:
+      - 在一般的房间里，玩家们都是使用自行设置的用户名加入游戏的，所以能够互相辨别。
+      - 然而在匿名房间里，玩家们可以在隐瞒自己身份的同时加入游戏。自己的假名字只需要在加入游戏时临时决定就可以了。
+      - 若想要尝试这种新奇的感觉，就召集朋友们来一场匿名的人狼吧。
+  - icon: award
+    title: 搜集称号
+    description:
+      - 对应玩过的村子的数量、各个职业的胜利数·败北数，大多能够获得特定的称号。
+      - 多多地搜集称号，来组成自己豪华的头衔吧。

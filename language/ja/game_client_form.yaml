@@ -20,6 +20,9 @@ specialName:
   CraftyWolf2: "狡猾的狼的能力"
   Poet1: "诗人的能力"
   Poet2: "诗人的能力"
+  GachaAddicted_Normal: "课金者的能力"
+  GachaAddicted_Premium: "课金者的能力"
+  GachaAddicted_Commit: "课金者的能力"
   _Quantum_Diviner: "占卜师的能力"
   _Quantum_Werewolf: "人狼的袭击"
 
@@ -161,3 +164,12 @@ Poet:
   # label for target selection
   targetSelectionLabel: "选择送出的对象："
   selectButton: "赠诗"
+
+# Texts for GachaAddicted form.
+GachaAddicted:
+  descriptionNormal: "现在可以抽取今天的普通卡池了"
+  normalButton: "抽取普通卡"
+  descriptionPremium: "现在还可以在稀有卡池抽卡{{votes}}次"
+  premiumButton: "抽取稀有卡"
+  descriptionCommit: "目前持有下列职业【{{jobname}}】"
+  commitButton: "将变成 {{jobname}}"
