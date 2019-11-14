@@ -129,7 +129,7 @@ system:
     # A user got kicked out a room
     kicked: "{{name}} 被踢出了游戏。"
     # A user became a helper of another user
-    helper: "{{helper}}成为了 {{target}} 的帮手。"
+    helper: "{{helper}} 成为了 {{target}} 的帮手。"
     # A user stopped being a helper.
     stophelper: "{{name}} 放弃做帮手了。"
     # This room is abandoned.
