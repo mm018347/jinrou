@@ -6717,9 +6717,11 @@ class FrankensteinsMonster extends Player
             for newtype in extracted
                 subpl = Player.factory newtype, game
                 @transProfile subpl
+                @transferData subpl
 
                 newpl=Player.factory null, game, targetpl, subpl, Complex    # 合成する
                 @transProfile newpl
+                @transferData newpl
 
                 # 置き換える
                 targetpl = newpl
@@ -8294,6 +8296,7 @@ class BlackCat extends Madman
 class Idol extends Player
     type:"Idol"
     formType: FormType.required
+    midnightSort:80
     sunset:(game)->
         super
         if !@flag
@@ -10035,6 +10038,71 @@ class Fate extends Player
                 comment: game.i18n.t "roles:Fate.changeRole", {name: @name, result: newpl.getJobDisp()}
             splashlog game.id,game,log
             null
+
+class Synesthete extends Player
+    type: "Synesthete"
+    midnightSort: 100
+    formType: FormType.required
+    job_target:Player.JOB_T_ALIVE | Player.JOB_T_DEAD
+    constructor:->
+        super
+        # Known set of colors initially empty
+        colorListLength = 15
+        @setFlag {
+            colorDict: {}
+            colorList: shuffle [0...colorListLength]
+        }
+    sunset:(game)->
+        @setTarget null
+    sleeping:-> @target?
+    job:(game, playerid)->
+        if @target?
+            return game.i18n.t "error.common.alreadyUsed"
+
+        pl = game.getPlayer playerid
+        unless pl?
+            return game.i18n.t "error.common.nonexistentPlayer"
+        if pl.id == @id
+            return game.i18n.t "error.common.noSelectSelf"
+
+        @setTarget playerid
+        pl.touched game, @id
+
+        log=
+            mode: "skill"
+            to: @id
+            comment: game.i18n.t "roles:Synesthete.select", {
+                name: @name
+                target: pl.name
+            }
+        splashlog game.id, game, log
+        return null
+    midnight:(game)->
+        p = game.getPlayer game.skillTargetHook.get @target
+        origpl = game.getPlayer @target
+        unless p? && origpl?
+            return
+        unless @flag?
+            return
+
+        team = p.getTeam()
+        colorIndex = @flag.colorDict[team]
+        unless colorIndex?
+            # まだ色が定義されていない
+            colorIndex = @flag.colorList[0]
+            @flag.colorList = @flag.colorList.slice 1
+            @flag.colorDict[team] = colorIndex
+
+        log=
+            mode: "skill"
+            to: @id
+            comment: game.i18n.t "roles:Synesthete.result", {
+                name: @name
+                target: origpl.name
+                result: game.i18n.t "roles:Synesthete.color.#{colorIndex}"
+            }
+        splashlog game.id, game, log
+
 
 # ============================
 # 処理上便宜的に使用
@@ -11795,6 +11863,7 @@ jobs=
     NightRabbit:NightRabbit
     GachaAddicted:GachaAddicted
     Fate:Fate
+    Synesthete:Synesthete
 
     # 特殊
     GameMaster:GameMaster
@@ -11982,6 +12051,7 @@ jobStrength=
     NightRabbit:32
     GachaAddicted:10
     Fate:6
+    Synesthete:11
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
