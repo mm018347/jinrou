@@ -141,6 +141,7 @@ jobname:
   GachaAddicted: '课金者'
   Fate: '命运之子'
   Synesthete: '通感者'
+  Reindeer: '驯鹿'
   GameMaster: '游戏管理员'
   Helper: '帮手'
   Waiting: '尚未分配'
@@ -702,6 +703,8 @@ Emma:
     dragonknightsuicide: '{{name}} 由于自责选择了自杀。'
     # Suicided after vampires
     vampiresuicide: '{{name}} 追随着吸血鬼自尽了。'
+    # Suicided after Santaclause
+    santasuicide: '{{name}} 追随着圣诞老人自尽了。'
     # Killed by hooligan
     hooligan: '{{name}} 被暴动者杀死了。'
     # Killed by DragonKnight

@@ -1857,7 +1857,7 @@ class Game
                     @i18n.t "found.leave", {name: x.name}
                 when "deathnote"
                     @i18n.t "found.body", {name: x.name}
-                when "foxsuicide", "friendsuicide", "twinsuicide", "dragonknightsuicide","vampiresuicide"
+                when "foxsuicide", "friendsuicide", "twinsuicide", "dragonknightsuicide","vampiresuicide","santasuicide"
                     @i18n.t "found.suicide", {name: x.name}
                 when "infirm"
                     @i18n.t "found.infirm", {name: x.name}
@@ -1882,7 +1882,7 @@ class Game
                 if ["werewolf","werewolf2","trickedWerewolf","poison","hinamizawa",
                     "vampire","vampire2","witch","dog","trap","bomb",
                     "marycurse","psycho","curse","punish","spygone","deathnote",
-                    "foxsuicide","friendsuicide","twinsuicide","dragonknightsuicide","vampiresuicide",
+                    "foxsuicide","friendsuicide","twinsuicide","dragonknightsuicide","vampiresuicide","santasuicide"
                     "infirm","hunter",
                     "gmpunish","gone-day","gone-night","crafty","greedy","tough","lunaticlover",
                     "hooligan","dragon","samurai","elemental","sacrifice"
@@ -1932,6 +1932,8 @@ class Game
                         "dragonknightsuicide"
                     when "vampiresuicide"
                         "vampiresuicide"
+                    when "santasuicide"
+                        "santasuicide"
                     when "hooligan"
                         "hooligan"
                     when "dragon"
@@ -3219,6 +3221,8 @@ class Player
         draculas: false
         # ドラキュラに吸血された人
         draculaBitten: false
+        # サンタクロース
+        santaclauses: false
     }
     # 汎用的な役職属性取得関数 (Existential)
     getAttribute:(attr, game)->false
@@ -6881,6 +6885,28 @@ class SantaClaus extends Player
         super
         @setFlag "[]"
     isWinner:(game,team)->@flag=="gone" || super
+    hasDeadResistance:(game)->
+        # トナカイがいれば死亡耐性あり
+        reindeers = game.players.filter (x)-> !x.dead && x.isJobType "Reindeer"
+        return reindeers.length > 0
+    checkDeathResistance:(game, found, from)->
+        # 狼の襲撃・ヴァンパイアの襲撃・魔女の毒薬はトナカイが身代わり可能
+        if Found.isNormalWerewolfAttack(found) || Found.isNormalVampireAttack(found) || found in ["witch"]
+            reindeers = game.players.filter (x)-> !x.dead && x.isJobType "Reindeer"
+            if reindeers.length > 0
+                reindeers = shuffle reindeers
+                victim = reindeers[0]
+                if Found.isNormalWerewolfAttack found
+                    victim.die game, "werewolf2", from
+                    game.addGuardLog @id, AttackKind.werewolf, GuardReason.cover
+                else if Found.isNormalVampireAttack(found)
+                    victim.die game, "vampire2", from
+                else
+                    victim.die game, found, from
+                victim.addGamelog game, "reindeervictim"
+                @addGamelog game, "santaavoid"
+                return true
+        return false
     sunset:(game)->
         # まだ届けられる人がいるかチェック
         if @flag == "gone"
@@ -10103,6 +10129,32 @@ class Synesthete extends Player
             }
         splashlog game.id, game, log
 
+class Reindeer extends Player
+    type: "Reindeer"
+    isWinner:(game, team)->
+        if team == @getTeam()
+            # 村人陣営勝利なら勝利
+            return true
+        # サンタ勝利でも勝利
+        for pl in game.players
+            santas = pl.accessByJobTypeAll "SantaClaus"
+            if santas.some((pl)-> pl.flag == "gone")
+                return true
+        return false
+
+    beforebury:(game)->
+        return false if @dead
+        santas = game.players.filter (pl)-> pl.isJobType "SantaClaus"
+        return unless santas.length
+        # サンタクロースが全滅していたら後追い
+        unless santas.some((x)->!x.dead)
+            @die game, "santasuicide"
+        return false
+    # トナカイはサンタクロースを把握
+    getVisibilityQuery:->
+        res = super
+        res.santaclauses = true
+        res
 
 # ============================
 # 処理上便宜的に使用
@@ -11864,6 +11916,7 @@ jobs=
     GachaAddicted:GachaAddicted
     Fate:Fate
     Synesthete:Synesthete
+    Reindeer:Reindeer
 
     # 特殊
     GameMaster:GameMaster
@@ -12052,6 +12105,7 @@ jobStrength=
     GachaAddicted:10
     Fate:6
     Synesthete:11
+    Reindeer:7
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
@@ -12282,6 +12336,21 @@ module.exports.actions=(req,res,ss)->
                 if safety.jingais || safety.jobs
                     exceptions.push "MadWolf"
                     special_exceptions.push "MadWolf"
+                # 闇道化
+                if safety.jingais || safety.jobs
+                    exceptions.push "DarkClown"
+                    special_exceptions.push "DarkClown"
+                # 絶対狼
+                if Math.random()<0.4
+                    exceptions.push "AbsoluteWolf"
+                    special_exceptions.push "AbsoluteWolf"
+                # 村人表記シリーズ
+                if Math.random()<0.3
+                    exceptions.push "Oracle"
+                    special_exceptions.push "Oracle"
+                if Math.random()<0.3
+                    exceptions.push "Fate"
+                    special_exceptions.push "Fate"
                 # ニートは隠し役職（出現率低）
                 if query.losemode == "on" || Math.random()<0.4
                     exceptions.push "Neet"
@@ -12637,6 +12706,11 @@ module.exports.actions=(req,res,ss)->
                             joblist.SantaClaus ?= 0
                             joblist.SantaClaus++
                             frees--
+                            # トナカイもいるぞ
+                            if Math.random() < 0.4 && frees > 0 && !nonavs.Reindeer
+                                joblist.Reindeer ?= 0
+                                joblist.Reindeer++
+                                frees--
                     else
                         # サンタは出にくい
                         if Math.random()<0.8
@@ -12966,6 +13040,10 @@ module.exports.actions=(req,res,ss)->
                         if job == "LoneWolf"
                             # 絶対狼とは共存できない
                             if joblist.AbsoluteWolf>0
+                                continue
+                        if job == "Reindeer"
+                            # トナカイはサンタ無しで出さない
+                            if joblist.SantaClaus == 0
                                 continue
 
                         joblist[job]++
@@ -13688,6 +13766,10 @@ writeGlobalJobInfo = (game, player, result={})->
                 x.publicinfo()
         if vq.draculaBitten
             result.draculaBitten = game.players.filter((x)->x.getAttribute PlayerAttribute.draculaBitten, game).map (x)->
+                x.publicinfo()
+        # サンタクロースが分かる
+        if vq.santaclauses
+            result.santaclauses = game.players.filter((x)->x.isJobType "SantaClaus").map (x)->
                 x.publicinfo()
 
 #job情報を

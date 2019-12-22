@@ -103,6 +103,7 @@ jobinfo:
     draculas: "同伴的德古拉是 {{names}}"
     draculaBitten: "吸过血的对象有 {{names}}"
     absolutewolves: "绝对狼是 {{names}}"
+    santaclauses: "同伴的圣诞老人是 {{names}}"
 
 # game-view: speak form.
 speak:
