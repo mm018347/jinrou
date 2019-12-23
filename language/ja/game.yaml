@@ -265,6 +265,7 @@ foundDetail:
   samurai: "武士的反击"
   elemental: "暴走的精灵之力"
   sacrifice: "献祭"
+  santasuicide: "追随圣诞老人自尽"
   fallback: "未知原因"
   situation: "{{name}} 的死因是 {{detail}}。"
 
