@@ -11018,8 +11018,8 @@ class DivineObstructed extends Complex
     cmplType:"DivineObstructed"
     sunsetAlways:(game)->
         # 一日しか守られない
-        @mcall game,@main.sunset,game
-        @sub?.sunset? game
+        @mcall game,@main.sunsetAlways,game
+        @sub?.sunsetAlways? game
         @uncomplex game
     # 占いの影響なし
     divineeffect:(game)->
@@ -11253,8 +11253,8 @@ class DivineCursed extends Complex
     cmplType:"DivineCursed"
     sunsetAlways:(game)->
         # 1日で消える
-        @mcall game,@main.sunset,game
-        @sub?.sunset? game
+        @mcall game,@main.sunsetAlways,game
+        @sub?.sunsetAlways? game
         @uncomplex game
     divined:(game,player)->
         @mcall game,@main.divined,game,player
