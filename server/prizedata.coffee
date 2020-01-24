@@ -280,6 +280,31 @@ makeOtherPrize=(result)->
                     1
                 else
                     0
+        happychinesenewyear2020:
+            names:
+                1:[
+                    "庚子年/庚子年"
+                    "谨贺新春/谨贺新春"
+                ]
+                5:[
+                    "鼠年/鼠年"
+                    "鼠你好运/鼠你好运"
+                ]
+                20:[
+                    "Jerry/Jerry"
+                ]
+                50:[
+                    "Tom/Tom"
+                ]
+            func:(game,pl)->
+                date = new Date()
+                month=date.getMonth()
+                year=date.getFullYear()
+                d=date.getDate()
+                if month==0 && 24<=d<=31 && year==2020
+                    1
+                else
+                    0
     result.ownprizesprize=
         prizecount:
             names: prizedata.ownprizes.prizecount
