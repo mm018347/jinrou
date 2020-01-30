@@ -25,6 +25,11 @@ BLASPHEMY_DEFENCE_JOBS = ["Fugitive","QueenSpectator","Liar","Spy2","LoneWolf","
 # 占い結果すぐに分かるを無効化する役職
 DIVINER_NOIMMEDIATE_JOBS = ["WolfBoy", "ObstructiveMad", "Pumpkin", "Patissiere", "Hypnotist", "DecoyWolf"]
 
+# 配信者が獲得できる役職
+STREAMER_AVAILABLE_JOBS = [
+    "Diviner","Liar","PI","Forensic","Ninja","Synesthete",
+    "Guard","Spellcaster","Priest","Witch","Counselor","Cosplayer",
+]
 
 # フェイズの一覧
 Phase =
@@ -2799,6 +2804,7 @@ logs:[{
     "draculaskill"(ドラキュラに見える)
     "hidden"(終了後/霊界のみ見える追加情報)
     "poem"(Poetが送ったpoem)
+    "streaming"(配信者の配信)
     comment: String
     userid:Userid
     name?:String
@@ -3159,7 +3165,7 @@ class Player
 
     # ログが見えるかどうか（通常のゲーム中、個人宛は除外）
     isListener:(game,log)->
-        if log.mode in ["day","system","nextturn","prepare","monologue","heavenmonologue","skill","will","voteto","gm","gmreply","helperwhisper","probability_table","userinfo","poem"]
+        if log.mode in ["day","system","nextturn","prepare","monologue","heavenmonologue","skill","will","voteto","gm","gmreply","helperwhisper","probability_table","userinfo","poem","streaming"]
             # 全員に見える
             true
         else if log.mode in ["heaven","gmheaven"]
@@ -3169,6 +3175,8 @@ class Player
             game.rule.voteresult!="hide"    # 隠すかどうか
         else
             false
+    # 他の人に向けたログが見えるかどうか
+    isPrivateLogListener:(game, log)-> false
 
     # midnightの実行順（小さいほうが先）
     midnightSort: 100
@@ -10156,6 +10164,81 @@ class Reindeer extends Player
         res.santaclauses = true
         res
 
+class Streamer extends Player
+    type: "Streamer"
+    getSpeakChoice:(game)->
+        ["streaming", "-monologue"].concat super
+    sunset:(game)->
+        unless @flag?
+            # equip self with StreamerTrial
+            @setFlag "equipped"
+            pl = game.getPlayer @id
+            newpl = Player.factory null, game, pl, null, StreamerTrial
+            pl.transProfile newpl
+            pl.transferData newpl
+            pl.transform game, newpl, true
+            # choose Listeners
+            listenerNumber = Math.floor(game.players.length / 4)
+            alives = game.players.filter (pl)=> !pl.dead && !pl.scapegoat && pl.id != @id
+            listeners = (shuffle alives).slice 0, listenerNumber
+
+            for ls in listeners
+                sub = Player.factory "Listener", game
+                sub.flag = @id
+                ls.transProfile sub
+                ls.transferData sub
+                newpl = Player.factory null, game, ls, sub, Complex
+                ls.transProfile newpl
+                ls.transferData newpl
+                ls.transform game, newpl, true
+
+                log=
+                    mode: "skill"
+                    to: newpl.id
+                    comment: game.i18n.t "roles:Streamer.becomeListener", {
+                        name: newpl.name
+                        target: @name
+                    }
+                splashlog game.id, game, log
+            return
+    makejobinfo:(game, result)->
+        super
+        if @dead
+            result.listenerNumber = 0
+        else
+            # Count my listeners
+            listenerNumber = 0
+            for pl in game.players
+                if pl.dead
+                    continue
+                listeners = pl.accessByJobTypeAll "Listener"
+                for l in listeners
+                    if l.flag == @id
+                        listenerNumber++
+            result.listenerNumber = listenerNumber
+
+
+
+# 視聴者（配信者の処理用）
+# @flag: 配信者のid
+class Listener extends Player
+    type: "Listener"
+    isPrivateLogListener:(game, log)->
+        unless log.mode in ["skill", "streaming"]
+            return false
+        # 配信者のskillログは見える
+        if Array.isArray log.to
+            return @flag in log.to
+        else
+            return @flag == log.to
+    sunset:(game)->
+        target = game.getPlayer @flag
+        unless target?
+            return
+        unless target.isJobType "Streamer"
+            # 配信者でなくなったので視聴をやめる
+            @uncomplex game
+
 # ============================
 # 処理上便宜的に使用
 class GameMaster extends Player
@@ -10203,13 +10286,13 @@ class GameMaster extends Player
                 return null
             when "longer"
                 # 時間延長
-                remains = game.timer_start + game.timer_remain - Date.now()/1000
+                remains = game.timer_start + game.timer_remain - Date.now()/ 1000
                 clearTimeout game.timerid
                 game.timer remains+30
                 return null
             when "shorter"
                 # 時間短縮
-                remains = game.timer_start + game.timer_remain - Date.now()/1000
+                remains = game.timer_start + game.timer_remain - Date.now()/ 1000
                 if remains <= 30 || Phase.isRemain(game.phase) && remains <= 60
                     return game.i18n.t "roles:GameMaster.shortenFail"
                 clearTimeout game.timerid
@@ -10617,6 +10700,8 @@ class Complex
         result
     isListener:(game,log)->
         @mcall(game,@main.isListener,game,log) || @sub?.isListener(game,log)
+    isPrivateLogListener:(game,log)->
+        @mcall(game,@main.isPrivateLogListener,game,log) || @sub?.isPrivateLogListener(game,log)
     isReviver:->@main.isReviver() || @sub?.isReviver()
     isHuman:->@main.isHuman()
     isWerewolf:->@main.isWerewolf()
@@ -11540,6 +11625,54 @@ class SpentVotesForGacha extends Complex
         @sub?.sunset? game
         @uncomplex game
 
+# 配信者のサブ役職管理
+class StreamerTrial extends Complex
+    cmplType: "StreamerTrial"
+    sunset:(game)->
+        # Count my listeners
+        hasListeners = false
+        for pl in game.players
+            if pl.dead
+                continue
+            listeners = pl.accessByJobTypeAll "Listener"
+            if listeners.some((pl)=> pl.flag == @id)
+                hasListeners = true
+        if hasListeners
+            @mcall game, @main.sunset, game
+            # サブ役職を交換
+            job = STREAMER_AVAILABLE_JOBS[Math.floor Math.random() * STREAMER_AVAILABLE_JOBS.length]
+            newSub = Player.factory job, game
+            @transProfile newSub
+            @transferData newSub
+            @sub = newSub
+
+            log=
+                mode: "skill"
+                to: @id
+                comment: game.i18n.t "roles:Streamer.getJob", {
+                    name: @name
+                    job: @sub.getJobDisp()
+                }
+            splashlog game.id, game, log
+            @sub.sunset game
+        else
+            # no alive listener. retire and change myself to Human.
+            newpl = Player.factory "Human", game
+            @transProfile newpl
+            @transferData newpl
+            @uncomplex game, false
+            top = game.getPlayer @id
+            top.transform game, newpl, false
+            log=
+                mode: "skill"
+                to: @id
+                comment: game.i18n.t "roles:Streamer.retire", {
+                    name: @name
+                    job: newpl.getJobDisp()
+                }
+            splashlog game.id, game, log
+
+
 
 
 
@@ -11917,6 +12050,8 @@ jobs=
     Fate:Fate
     Synesthete:Synesthete
     Reindeer:Reindeer
+    Streamer:Streamer
+    Listener:Listener
 
     # 特殊
     GameMaster:GameMaster
@@ -11966,6 +12101,7 @@ complexes=
     DraculaBitten:DraculaBitten
     SacrificeProtected:SacrificeProtected
     SpentVotesForGacha:SpentVotesForGacha
+    StreamerTrial:StreamerTrial
 
     # 役職ごとの強さ
 jobStrength=
@@ -12230,7 +12366,7 @@ module.exports.actions=(req,res,ss)->
                     Shared.game.categories[teamname].reduce(((prev,curr)->prev+(joblist[curr] ? 0)),0)+joblist["team_#{teamname}"]
 
                 # 黑暗火锅のときはランダムに決める
-                plsh=Math.floor playersnumber/2   # 過半数
+                plsh=Math.floor playersnumber/ 2   # 過半数
 
                 if query.jobrule in ["特殊规则.手调黑暗火锅", "特殊规则.easyYaminabe"]
                     # 配役が既に部分的に決定している場合は残りだけ担当する
@@ -12542,7 +12678,7 @@ module.exports.actions=(req,res,ss)->
                         # 望ましい人狼陣営の人数は25〜350%くらい
                         wolfteam_n = Math.round (playersnumber*(0.25 + Math.random()*0.1))
                         # ただし半数を超えない
-                        plsh = Math.ceil(playersnumber/2)
+                        plsh = Math.ceil(playersnumber/ 2)
                         if wolfteam_n >= plsh
                             wolfteam_n = plsh-1
                         # 人狼系を数える
@@ -13314,7 +13450,7 @@ module.exports.actions=(req,res,ss)->
                     logs:game.makelogs (doc.logs ? []), player
                 result=makejobinfo game,player,result
                 result.timer=if game.timerid?
-                    game.timer_remain-(Date.now()/1000-game.timer_start)    # 全体 - 経過時間
+                    game.timer_remain-(Date.now()/ 1000-game.timer_start)    # 全体 - 経過時間
                 else
                     null
                 result.timer_mode=game.timer_mode
@@ -13421,8 +13557,9 @@ module.exports.actions=(req,res,ss)->
 
 
             switch log.mode
-                when "monologue","heavenmonologue","helperwhisper"
+                when "monologue","heavenmonologue","helperwhisper","streaming"
                     # helperwhisper:守り先が決まっていないヘルパー
+                    # streamingの場合は自分と配信者に聞こえる
                     log.to=player.id
                 when "heaven"
                     # 霊界の発言は悪霊憑きの発言になるかも
@@ -13718,7 +13855,7 @@ islogOK=(game,player,log)->
         false
     else if log.to? && !isLogTarget(log.to, player)
         # I'm not the target of this log
-        false
+        actpl.isPrivateLogListener game, log
     else
         player.isListener game,log
 # check whether player is a target of log.

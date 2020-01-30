@@ -142,6 +142,8 @@ jobname:
   Fate: '命运之子'
   Synesthete: '通感者'
   Reindeer: '驯鹿'
+  Streamer: '主播'
+  Listener: '直播观众'
   GameMaster: '游戏管理员'
   Helper: '帮手'
   Waiting: '尚未分配'
@@ -897,6 +899,11 @@ Synesthete:
     - 金色
     - 银色
     - 灰色
+
+Streamer:
+  becomeListener: '{{name}} 变成了 {{target}} 的直播观众。'
+  getJob: '{{name}} 在今晚将要尝试 {{job}} 的职业。'
+  retire: '{{name}} 因为失去了直播观众而引退了，现在变成了 {{job}}。'
 
 GameMaster:
   # Failed to revive.
