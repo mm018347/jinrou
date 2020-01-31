@@ -303,6 +303,8 @@ makeOtherPrize=(result)->
                 d=date.getDate()
                 if month==0 && 24<=d<=31 && year==2020
                     1
+                else if month==1 && 1<=d<=8 && year==2020
+                    1
                 else
                     0
     result.ownprizesprize=
