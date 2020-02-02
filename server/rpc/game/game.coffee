@@ -10176,6 +10176,7 @@ class Streamer extends Player
             newpl = Player.factory null, game, pl, null, StreamerTrial
             pl.transProfile newpl
             pl.transferData newpl
+            newpl.cmplFlag = @objid
             pl.transform game, newpl, true
             # choose Listeners
             listenerNumber = Math.floor(game.players.length / 4)
@@ -11626,6 +11627,7 @@ class SpentVotesForGacha extends Complex
         @uncomplex game
 
 # 配信者のサブ役職管理
+# cmplFlag: 本体のobjid
 class StreamerTrial extends Complex
     cmplType: "StreamerTrial"
     sunset:(game)->
@@ -11662,7 +11664,8 @@ class StreamerTrial extends Complex
             @transferData newpl
             @uncomplex game, false
             top = game.getPlayer @id
-            top.transform game, newpl, false
+            main = top.accessByObjid @cmplFlag
+            main?.transform game, newpl, false
             log=
                 mode: "skill"
                 to: @id
