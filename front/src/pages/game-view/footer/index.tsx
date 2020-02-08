@@ -27,25 +27,28 @@ export const GameFooter: React.FunctionComponent<GameFooterProps> = observer(
       [onSubmit],
     );
 
-    if (reportForm.enable) {
-      return (
-        <>
-          <ButtonContainer>
+    return (
+      <>
+        <ButtonContainer>
+          {shareButton.twitter ? (
             <ShareButton shareButton={shareButton} roomName={roomName} />
+          ) : null}
+          {reportForm.enable ? (
             <Button onClick={() => setReportFormOpen(state => !state)}>
               <FontAwesomeIcon icon={['far', 'paper-plane']} />{' '}
               {t('reportForm.title')}
             </Button>
-          </ButtonContainer>
+          ) : null}
+        </ButtonContainer>
+        {reportForm.enable ? (
           <ReportForm
             open={reportFormOpen}
             reportForm={reportForm}
             onSubmit={submitHandler}
           />
-        </>
-      );
-    }
-    return null;
+        ) : null}
+      </>
+    );
   },
 );
 
