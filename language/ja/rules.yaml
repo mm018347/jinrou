@@ -28,7 +28,7 @@ rule:
       reverse: "以破坏平衡为目标的游戏，适当调整人狼・妖狐的数量。"
   hide_singleton_teams:
     name: "是否隐藏单独阵营"
-    label: "如果选择隐藏，恶魔・吸血鬼・邪教主在阵营一览中将被计入「其他阵营」。"
+    label: "如果选择隐藏，恶魔・吸血鬼阵营・邪教主阵营・鸦阵营・暴徒阵营在阵营一览中将被计入「其他阵营」。"
     yes: "隐藏"
     no: "显示"
   decider:
@@ -237,17 +237,17 @@ rule:
     no: "听不到"
   guardmyself:
     name: "是否允许猎人系保护自身"
-    label: "对猎人・游荡猎人・Cosplayer生效。"
+    label: "对猎人・游荡猎人・Cosplayer・陷阱师・武士・精灵术士生效。"
     yes: "允许"
     no: ""
   gjmessage:
     name: "护卫成功通知"
-    label: "设为「有」的时候，在猎人·游荡猎人・Cosplayer成功保护他人时，该猎人会收到通知。"
+    label: "设为「有」的时候，在成功保护他人时，该猎人会收到通知。"
     yes: "有"
     no: ""
   consecutiveguard:
     name: "连续护卫"
-    label: "是否允许猎人・游荡猎人・Cosplayer连续守护同一个人。"
+    label: "是否允许猎人・游荡猎人・Cosplayer・武士・精灵术士连续守护同一个人。"
     labels:
       yes: "允许"
       no: "禁止"
