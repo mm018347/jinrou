@@ -551,7 +551,10 @@ module.exports.actions=(req,res,ss)->
                 }
             }
             # record players who quit from theme room
-            update.$set.quitfromtheme = {}
+            if room.quitfromtheme == undefined
+                update.$set.quitfromtheme = {}
+            else
+                update.$set.quitfromtheme = room.quitfromtheme
             update.$set.quitfromtheme[req.session.userId] = Date.now()
             M.rooms.update {id:roomid},update,(err)=>
                 if err?
