@@ -110,6 +110,7 @@ messages:
   Elementaler: '请选择要护卫的对象'
   Sacrifice: '请选择要守护的对象'
   Synesthete: '请选择要查看颜色的对象'
+  Hitokotonushinokami: '请选择要占卜的对象'
   GameMaster: 'GM命令'
 
 # Texts for GameMaster form.
