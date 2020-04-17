@@ -75,6 +75,21 @@ input[type="number"]
   max-width 980px
   margin-left auto
   margin-right auto
+  min-height calc(100vh - 60px)
+
+#content:before
+  content ""
+  display table
+// ICP
+#icpfooter
+  font-size smaller
+  max-width 980px
+  margin-left auto
+  margin-right auto
+
+@media (max-width: phone-width)
+  #icpfooter
+    display none
 
 //header
 body > header
