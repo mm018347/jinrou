@@ -149,6 +149,7 @@ jobname:
   CurseWolf: '咒狼'
   Hitokotonushinokami: '一言主神'
   RemoteWorker: '在宅者'
+  IntuitionWolf: '直觉型狼'
   GameMaster: '游戏管理员'
   Helper: '帮手'
   Waiting: '尚未分配'
@@ -922,6 +923,10 @@ Tarzan:
 RemoteWorker:
   # Canceled a punishment.
   cancel: '{{name}} 因为一直宅在家里而免受处刑。'
+
+IntuitionWolf:
+  # Canceled a punishment.
+  guarded: '{{name}} 凭直觉感到自己被 {{target}} 护卫了。'
 
 GameMaster:
   # Failed to revive.
