@@ -267,6 +267,8 @@ foundDetail:
   sacrifice: "献祭"
   santasuicide: "追随圣诞老人自尽"
   fascinatesuicide: "追随月下美人自尽"
+  lorelei: "怨恨的歌声"
+  loreleisuicide: "追随罗蕾莱自尽"
   fallback: "未知原因"
   situation: "{{name}} 的死因是 {{detail}}。"
 
@@ -285,6 +287,7 @@ judge:
   lonewolf: "人狼吃掉了最后一个村民，向着下一个住满了猎物的村庄前进了…"
   raven: "村子被乌鸦支配了。"
   hooligan: "村子被暴徒引发的暴乱破坏殆尽了。"
+  lorelei: "罗蕾莱魅惑了村人们，在漩涡中消失无踪了…"
   draw: "平局。"
   scapegoat: "村子成了替身君的玩物。"
   # short summary
@@ -299,7 +302,7 @@ judge:
     lonewolf: "一匹狼胜利"
     raven: "乌鸦胜利"
     hooligan: "暴徒胜利"
-
+    lorelei: "罗蕾莱胜利"
 
 # Terms for quantum werewolf
 quantum:

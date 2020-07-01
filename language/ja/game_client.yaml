@@ -105,6 +105,7 @@ jobinfo:
     absolutewolves: '绝对狼是 {{names}}'
     santaclauses: '同伴的圣诞老人是 {{names}}'
     listenerNumber: '现在有 {{number}} 名直播观众'
+    loreleis: '罗蕾莱是 {{names}}'
 
 # game-view: speak form.
 speak:

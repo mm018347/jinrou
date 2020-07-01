@@ -150,6 +150,7 @@ jobname:
   Hitokotonushinokami: '一言主神'
   RemoteWorker: '在宅者'
   IntuitionWolf: '直觉型狼'
+  Lorelei: '罗蕾莱'
   GameMaster: '游戏管理员'
   Helper: '帮手'
   Waiting: '尚未分配'
@@ -177,6 +178,7 @@ teamName:
   Cult: '邪教主阵营'
   Raven: '乌鸦阵营'
   Hooligan: '暴徒阵营'
+  Lorelei: '罗蕾莱阵营'
   Neet: 'NEET'
   Others: '其他'
 
@@ -725,6 +727,8 @@ Emma:
     elemental: '{{name}} 被暴走的精灵杀死了。'
     # Sacrifice
     sacrifice: '{{name}} 被作为活祭品献祭了。'
+    # Lorelei
+    lorelei: '{{name}} 被怨恨的歌声诱导了。'
 
 EyesWolf:
   # EyesWolf result strings
@@ -928,6 +932,10 @@ IntuitionWolf:
   # Canceled a punishment.
   guarded: '{{name}} 凭直觉感到自己被 {{target}} 护卫了。'
 
+Lorelei:
+  select: '{{name}} 被罗蕾莱的歌声魅惑了。'
+  song: '罗蕾莱的歌声在村中盘旋。'
+
 GameMaster:
   # Failed to revive.
   reviveFail: '这名玩家无法复活。'
@@ -999,6 +1007,10 @@ FanOfIdol:
   name: '粉丝'
   # message when his idol is dead.
   idolDead: '偶像的死亡导致伤心过度，{{name}} 今晚不能使用能力。'
+
+LoreleiFamilia:
+  name: '罗蕾莱眷属'
+  jobname: '罗蕾莱眷属（{{jobname}}）'
 
 Decider:
   jobname: '{{jobname}}（决定者）'
