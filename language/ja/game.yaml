@@ -69,7 +69,7 @@ error:
     # Helper target does not exist
     helperNotExist: "{{name}} 的帮助对象已不存在。"
     # for 一部闇鍋: selected category is empty (all jobs in it are excluded)
-    categoryAllExcluded: "「{{category}}」的全部职业均被排除，这样的配置无法开始游戏。"
+    categoryAllExcluded: "手调黑暗火锅选项中指定了「{{category}}」人数，但「{{category}}」的全部职业均被排除，这样的配置无法开始游戏。"
     # for 一部闇鍋: do not exclude all jobs in category (Werewolf)
     implicitCategoryAllExcluded: "「{{category}}」的全部职业均被排除，这样的配置无法开始游戏。"
   # Error during sudden death punishment
