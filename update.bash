@@ -1,5 +1,6 @@
 #! /bin/bash
 forever stop jinrou
+git reset HEAD~ --hard
 git pull
 npm i
 cd front/
