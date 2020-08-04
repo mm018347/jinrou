@@ -106,6 +106,7 @@ jobinfo:
     santaclauses: '同伴的圣诞老人是 {{names}}'
     listenerNumber: '现在有 {{number}} 名直播观众'
     loreleis: '罗蕾莱是 {{names}}'
+    gamblerStock: '现在持有{{number}}票'
 
 # game-view: speak form.
 speak:
