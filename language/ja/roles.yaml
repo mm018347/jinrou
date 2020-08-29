@@ -939,10 +939,10 @@ Lorelei:
 
 Gambler:
   form:
-    bet: '賭けに出る'
-    keep: '賭けに出ない'
-  bet: '{{name}}は賭けに出ました。'
-  keep: '{{name}}は賭けに出ませんでした。'
+    bet: '参加赌博'
+    keep: '远离赌博'
+  bet: '{{name}} 加入了赌博。'
+  keep: '{{name}} 没有加入赌博。'
 
 GameMaster:
   # Failed to revive.
