@@ -112,6 +112,7 @@ messages:
   Synesthete: '请选择要查看颜色的对象'
   Hitokotonushinokami: '请选择要占卜的对象'
   Gambler: '请选择是否加入赌博'
+  Faker: '请选择是否加入赌博'
   GameMaster: 'GM命令'
 
 # Texts for GameMaster form.
