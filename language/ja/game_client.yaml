@@ -107,6 +107,7 @@ jobinfo:
     listenerNumber: '现在有 {{number}} 名直播观众'
     loreleis: '罗蕾莱是 {{names}}'
     gamblerStock: '现在持有{{number}}票'
+    bonds: '与 {{names}} 缔结了羁绊'
 
 # game-view: speak form.
 speak:

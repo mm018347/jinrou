@@ -113,6 +113,7 @@ messages:
   Hitokotonushinokami: '请选择要占卜的对象'
   Gambler: '请选择是否加入赌博'
   Faker: '请选择是否加入赌博'
+  Trickster: '请依次选择要缔结羁绊的2人'
   GameMaster: 'GM命令'
 
 # Texts for GameMaster form.

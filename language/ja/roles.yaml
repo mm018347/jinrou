@@ -154,6 +154,9 @@ jobname:
   Gambler: '赌徒'
   Faker: '老千'
   SealWolf: '印狼'
+  CynthiaWolf: '月狼'
+  Trickster: '恶作剧妖精'
+  Sleepwalker: '梦游患者'
   GameMaster: '游戏管理员'
   Helper: '帮手'
   Waiting: '尚未分配'
@@ -946,6 +949,23 @@ Gambler:
   bet: '{{name}} 加入了赌博。'
   keep: '{{name}} 没有加入赌博。'
 
+CynthiaWolf:
+  affected: '{{target}} 被 {{name}} 放出的月亮的气场魅惑了。'
+
+Trickster:
+  # First select.
+  select1: '{{name}} 指定 {{target}} 为羁绊中的第1人。'
+  select2: '{{name}} 指定 {{target}} 为羁绊中的第2人。'
+  # Error: select another player
+  noSelectTwice: '请选择另一个不同的对象。'
+  # Select a target.
+  select: '{{name}} 在 {{target}} 的命运中系上了绳结。'
+  # Became a lover.
+  become: '{{name}} 缔结了命运的羁绊。'
+
+Sleepwalker:
+  awake: '{{name}} 察觉自己的深夜里徘徊。'
+
 GameMaster:
   # Failed to revive.
   reviveFail: '这名玩家无法复活。'
@@ -1021,6 +1041,16 @@ FanOfIdol:
 LoreleiFamilia:
   name: '罗蕾莱眷属'
   jobname: '罗蕾莱眷属（{{jobname}}）'
+
+MoonPhilia:
+  # name for desc
+  name: '月狂病'
+  # jobname
+  jobname: '月狂病（{{jobname}}）'
+
+Bonds:
+  name: '羁绊'
+  jobname: '{{jobname}}（羁绊）'
 
 Decider:
   jobname: '{{jobname}}（决定者）'

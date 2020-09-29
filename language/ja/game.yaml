@@ -168,6 +168,7 @@ system:
     wolfcub: "为狼之子复仇吧，今天可以袭击两个人。"
     # A user is notified to be attacked by a werewolf.
     attacked: "{{name}} 被人狼袭击了。"
+    sleepwalker: "{{results}} 在夜间徘徊。"
   # Logs related to voting
   voting:
     # No player was punished.
@@ -222,6 +223,7 @@ found:
   suicide: "{{name}} 追随着某个人自尽了。"
   infirm: "{{name}} 衰老而死了。"
   hunter: "{{name}} 被猎枪射杀了。"
+  bonds: "{{name}} 像被羁绊拉扯着一样，追随某个人自尽了。"
   gm: "{{name}} 被GM处死了。"
   goneDay: "{{name}} 因为没有及时投票猝死了。猝死是十分令人困扰的行为，请务必不要再犯。"
   goneNight: "{{name}} 因为没有及时使用夜间技能猝死了。猝死是十分令人困扰的行为，请务必不要再犯。"
