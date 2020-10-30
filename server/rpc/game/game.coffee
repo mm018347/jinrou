@@ -10679,6 +10679,10 @@ class Sleepwalker extends Player
                 splashlog game.id,game,log
                 @setFlag true  #使用済
 
+class Disguised extends Player
+    type: "Disguised"
+    isWerewolfVisible:-> true
+
 # ============================
 # 処理上便宜的に使用
 class GameMaster extends Player
@@ -12599,6 +12603,7 @@ jobs=
     CynthiaWolf:CynthiaWolf
     Trickster:Trickster
     Sleepwalker:Sleepwalker
+    Disguised:Disguised
 
     # 特殊
     GameMaster:GameMaster
@@ -12808,6 +12813,7 @@ jobStrength=
     CynthiaWolf:55
     Trickster:30
     Sleepwalker:2
+    Disguised:6
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
@@ -13483,14 +13489,22 @@ module.exports.actions=(req,res,ss)->
                             exceptions.push "Shishimai"
 
                     if month==9 && 30<=d<=31
-                        # ハロウィンなのでかぼちゃとおばけ
-                        if Math.random()<0.2 && frees>0 && !nonavs.Pumpkin
+                        # ハロウィンっぽい役職
+                        if Math.random()<0.15 && frees>0 && !nonavs.Pumpkin
                             joblist.Pumpkin ?= 0
                             joblist.Pumpkin++
                             frees--
-                        else if Math.random()<0.25 && frees>0 && !nonavs.TinyGhost
+                        else if Math.random()<0.25 && frees>0 && !nonavs.Disguised
+                            joblist.Disguised ?= 0
+                            joblist.Disguised++
+                            frees--
+                        else if Math.random()<0.15 && frees>0 && !nonavs.TinyGhost
                             joblist.TinyGhost ?= 0
                             joblist.TinyGhost++
+                            frees--
+                        else if Math.random()<0.15 && frees>0 && !nonavs.Witch
+                            joblist.Witch ?= 0
+                            joblist.Witch++
                             frees--
                     else
                         if Math.random()<0.2
