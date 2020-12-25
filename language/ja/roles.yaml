@@ -158,6 +158,10 @@ jobname:
   Trickster: '恶作剧妖精'
   Sleepwalker: '梦游患者'
   Disguised: '变装者'
+  Oni: '鬼'
+  Saint: '圣子'
+  NetherWolf: '冥狼'
+  DarkWolf: '暗狼'
   GameMaster: '游戏管理员'
   Helper: '帮手'
   Waiting: '尚未分配'
@@ -195,6 +199,7 @@ fortune:
   werewolf: '人狼'
   vampire: '吸血鬼'
   pumpkin: '南瓜'
+  oni: '鬼'
 
 # Psychic result.
 psychic:
@@ -202,6 +207,7 @@ psychic:
   werewolf: '人狼'
   BigWolf: '大狼'
   TinyFox: '小狐'
+  oni: '鬼'
   # delimiter of multiple result in chemical.
   _delimiter: '×'
 
@@ -736,6 +742,8 @@ Emma:
     sacrifice: '{{name}} 被作为活祭品献祭了。'
     # Lorelei
     lorelei: '{{name}} 被怨恨的歌声诱导了。'
+    # Killed by Oni
+    oni: '{{name}} 被鬼捉走了。'
 
 EyesWolf:
   # EyesWolf result strings
@@ -966,6 +974,12 @@ Trickster:
 
 Sleepwalker:
   awake: '{{name}} 察觉自己的深夜里徘徊。'
+
+Oni:
+  select: '{{name}} 准备把 {{target}} 捉走。'
+
+Saint:
+  select: '{{name}} 对 {{target}} 使用了奇迹之力。'
 
 GameMaster:
   # Failed to revive.

@@ -65,6 +65,8 @@ FortuneResult =
     vampire: "vampire"
     # pumpkin
     pumpkin: "pumpkin"
+    # oni
+    oni: "oni"
 
 # Code of psychic result.
 # Actual result may be string of array of string.
@@ -77,12 +79,15 @@ PsychicResult =
     BigWolf: "BigWolf"
     # TinyFox
     TinyFox: "TinyFox"
+    # oni
+    oni: "oni"
     # priority of resutls in chemical.
     _chemicalPriority:
         human: 0
-        werewolf: 1
-        BigWolf: 2
-        TinyFox: 2
+        oni: 1
+        werewolf: 2
+        BigWolf: 3
+        TinyFox: 3
     # function to combine two results in chemical.
     # filter out low priority results.
     combineChemical: (res1, res2)->
@@ -1852,7 +1857,7 @@ class Game
             x = obj.pl
             situation=switch obj.found
                 #死因
-                when "werewolf","werewolf2","trickedWerewolf","poison","hinamizawa","vampire","vampire2","witch","dog","trap","marycurse","psycho","crafty","greedy","tough","lunaticlover","hooligan","dragon","samurai","elemental","sacrifice","lorelei"
+                when "werewolf","werewolf2","trickedWerewolf","poison","hinamizawa","vampire","vampire2","witch","dog","trap","marycurse","psycho","crafty","greedy","tough","lunaticlover","hooligan","dragon","samurai","elemental","sacrifice","lorelei","oni"
                     @i18n.t "found.normal", {name: x.name}
                 when "bomb"
                     @i18n.t "found.normal", {name: x.name}
@@ -1897,7 +1902,7 @@ class Game
                     "foxsuicide","friendsuicide","twinsuicide","dragonknightsuicide","vampiresuicide","santasuicide","fascinatesuicide","loreleisuicide"
                     "infirm","hunter",
                     "gmpunish","gone-day","gone-night","crafty","greedy","tough","lunaticlover",
-                    "hooligan","dragon","samurai","elemental","sacrifice","lorelei"
+                    "hooligan","dragon","samurai","elemental","sacrifice","lorelei","oni"
                 ].includes obj.found
                     detail = @i18n.t "foundDetail.#{obj.found}"
                 else
@@ -1962,6 +1967,8 @@ class Game
                         "lorelei"
                     when "loreleisuicide"
                         "loreleisuicide"
+                    when "oni"
+                        "oni"
                     else
                         null
                 if emma_log?
@@ -3186,6 +3193,8 @@ class Player
 
     # ログが見えるかどうか（通常のゲーム中、個人宛は除外）
     isListener:(game,log)->
+        alives = game.players.filter (x)->!x.dead && x.isJobType("DarkWolf")
+
         if log.mode in ["day","system","nextturn","prepare","monologue","heavenmonologue","skill","will","voteto","gm","gmreply","helperwhisper","probability_table","userinfo","poem","streaming"]
             # 全員に見える
             true
@@ -3193,7 +3202,7 @@ class Player
             # 死んでたら見える
             @dead
         else if log.mode=="voteresult"
-            game.rule.voteresult!="hide"    # 隠すかどうか
+            game.rule.voteresult!="hide" && alives.length==0 # 隠すかどうか
         else
             false
     # 他の人に向けたログが見えるかどうか
@@ -3961,7 +3970,7 @@ class Couple extends Player
     makejobinfo:(game,result)->
         super
         # 共有者は仲間が分かる
-        result.peers=game.players.filter((x)->x.isJobType "Couple").map (x)->
+        result.peers=game.players.filter((x)->x.isJobType("Couple") || x.isJobType("Saint")).map (x)->
             x.publicinfo()
     isListener:(game,log)->
         if log.mode=="couple"
@@ -4352,7 +4361,7 @@ class Fugitive extends Player
         null
     checkDeathResistance:(game, found)->
         # 狼の襲撃・ヴァンパイアの襲撃・魔女の毒薬は回避
-        if Found.isNormalWerewolfAttack(found) || Found.isNormalVampireAttack(found) || found in ["witch"]
+        if Found.isNormalWerewolfAttack(found) || Found.isNormalVampireAttack(found) || found in ["witch", "oni"]
             if @target!=""
                 if Found.isNormalWerewolfAttack found
                     game.addGuardLog @id, AttackKind.werewolf, GuardReason.absent
@@ -5639,6 +5648,7 @@ class MinionSelector extends Player
 # 盗人
 class Thief extends Player
     type:"Thief"
+    team:""
     isWinner:-> false
     formType: FormType.required
     sleeping:(game)->@target?
@@ -9779,8 +9789,8 @@ class AbsoluteWolf extends Werewolf
         me = game.getPlayer @id
         if me.getTeam() != "Werewolf"
             return false
-        # 追加勝利も許さない
-        if me.isCmplType("HooliganMember") || me.isCmplType("LunaticLoved")
+        # 追加勝利も許さない＆絆化していたら死ぬ
+        if me.isCmplType("HooliganMember") || me.isCmplType("LunaticLoved") || me.isCmplType("Bonds")
             return false
         # 残りの狼の数と絶対狼の数が一致していたら喪失
         wolves=game.players.filter (x)->x.isWerewolf() && !x.dead
@@ -10682,6 +10692,116 @@ class Sleepwalker extends Player
 class Disguised extends Player
     type: "Disguised"
     isWerewolfVisible:-> true
+
+class Oni extends Player
+    type: "Oni"
+    team: ""
+    midnightSort: 100
+    formType: FormType.optional
+    fortuneResult: FortuneResult.oni
+    psychicResult: PsychicResult.oni
+    hasDeadResistance:-> true
+    sleeping:->true
+    jobdone:->@target?
+    constructor:->
+        super
+        @setFlag {
+            # 人攫い成功回数
+            successCount: 0
+        }
+    isWinner:(game, team)->
+        # 自身の生存 + 人狼系の生存
+        if @dead
+            return false
+        wolves = game.players.filter (pl)-> pl.isWerewolf()
+        return wolves.some (pl)-> !pl.dead
+    checkDeathResistance:(game, found)->
+        # 30%で狼の襲撃に耐える
+        if Math.random() < 0.3 && Found.isNormalWerewolfAttack found
+            game.addGuardLog @id, AttackKind.werewolf, GuardReason.tolerance
+            return true
+        return false
+    sunset:(game)->
+        if game.day == 1
+            @setTarget ""
+        else
+            @setTarget null
+    job:(game, playerid)->
+        if playerid == @id
+            return game.i18n.t "error.common.noSelectSelf"
+        pl = game.getPlayer playerid
+        unless pl?
+            return game.i18n.t "error.common.nonexistentPlayer"
+        @setTarget playerid
+        log=
+            mode:"skill"
+            to:@id
+            comment: game.i18n.t "roles:Oni.select", {name: @name, target: pl.name}
+        splashlog game.id,game,log
+        null
+    midnight:(game)->
+        pl = game.getPlayer @target
+        unless pl?
+            return
+        successCount = @flag?.successCount ? 0
+        successRate = Math.pow 0.2, successCount
+        if successRate < 0.01
+            successRate = 0.01
+        if Math.random() < successRate
+            pl.die game, "oni", @id
+            @setFlag {
+                successCount: successCount + 1
+            }
+
+class Saint extends Couple
+    type:"Saint"
+    midnightSort:122 # 自分が死亡したときは蘇生しない
+    formType: FormType.optionalOnce # 任意・4日目のみ
+    isReviver:->!@dead
+    job_target:Player.JOB_T_DEAD
+    sunset:(game)->
+        @setTarget (if game.day != 4 then "" else null)
+        if game.players.every((x)->!x.dead)
+            @setTarget ""  # 誰も死んでいないなら能力発動しない
+    job:(game,playerid)->
+        if game.day != 4
+            # まだ発動できない
+            return game.i18n.t "error.common.cannotUseSkillNow"
+        pl=game.getPlayer playerid
+        unless pl?
+            return game.i18n.t "error.common.nonexistentPlayer"
+        unless pl.dead
+            return game.i18n.t "error.common.notDead"
+        @setTarget playerid
+        pl.touched game,@id
+
+        log=
+            mode:"skill"
+            to:@id
+            comment: game.i18n.t "roles:Saint.select", {name: @name, target: pl.name}
+        splashlog game.id,game,log
+        null
+    sleeping:(game)->game.day != 4 || @target?
+    midnight:(game,midnightSort)->
+        return unless @target?
+        pl=game.getPlayer game.skillTargetHook.get @target
+        return unless pl?
+        return unless pl.dead
+
+        # 蘇生
+        @addGamelog game,"raise",true,pl.id
+        pl.revive game
+
+class NetherWolf extends Werewolf
+    type:"NetherWolf"
+    isReviver:->!@dead
+    isListener:(game,log)->
+        if log.mode=="heaven"
+            true
+        else super
+
+class DarkWolf extends Werewolf
+    type:"DarkWolf"
 
 # ============================
 # 処理上便宜的に使用
@@ -12324,6 +12444,8 @@ class Chemical extends Complex
             FortuneResult.vampire
         else if FortuneResult.werewolf in [fsm, fss]
             FortuneResult.werewolf
+        else if FortuneResult.oni in [fsm, fss]
+            FortuneResult.oni
         else
             FortuneResult.human
     getPsychicResult:->
@@ -12604,6 +12726,10 @@ jobs=
     Trickster:Trickster
     Sleepwalker:Sleepwalker
     Disguised:Disguised
+    Oni:Oni
+    Saint:Saint
+    NetherWolf:NetherWolf
+    DarkWolf:DarkWolf
 
     # 特殊
     GameMaster:GameMaster
@@ -12814,6 +12940,10 @@ jobStrength=
     Trickster:30
     Sleepwalker:2
     Disguised:6
+    Oni:11
+    Saint:13
+    NetherWolf:45
+    DarkWolf:55
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'
