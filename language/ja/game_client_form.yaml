@@ -116,6 +116,9 @@ messages:
   Trickster: '请依次选择要缔结羁绊的2人'
   Oni: '请选择要捉走的对象'
   Saint: '请选择要复活的对象'
+  SpaceWerewolfObserver: '请选择要观察的对象'
+  SpaceWerewolfGuard: '请选择要守护的对象'
+  SpaceWerewolfSabotage: '请选择妨碍的对象'
   GameMaster: 'GM命令'
 
 # Texts for GameMaster form.

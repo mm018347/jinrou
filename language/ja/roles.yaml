@@ -162,6 +162,11 @@ jobname:
   Saint: '圣子'
   NetherWolf: '冥狼'
   DarkWolf: '暗狼'
+  SpaceWerewolfCrew: '宇航员'
+  SpaceWerewolfImposter: '诈欺师'
+  SpaceWerewolfObserver: '观察者'
+  SpaceWerewolfGuard: '警戒员'
+  SpaceWerewolfSabotage: '破坏者'
   GameMaster: '游戏管理员'
   Helper: '帮手'
   Waiting: '尚未分配'
@@ -524,6 +529,8 @@ ObstructiveMad:
   select: '{{name}} 妨碍了 {{target}}。'
   # a Diviner is blocked.
   blocked: '{{name}} 占卜了 {{target}} 的身份，但是被不知道什么人妨碍了。'
+  # SpaceWerewolfObserver is blocked
+  spaceWerewolfObserverBlocked: '{{name}} 观察了 {{target}} 的身份，但是被不知道什么人妨碍了。'
 
 TroubleMaker:
   # Select to make a trouble.
@@ -980,6 +987,20 @@ Oni:
 
 Saint:
   select: '{{name}} 对 {{target}} 使用了奇迹之力。'
+
+# Werewolf
+SpaceWerewolfImposter:
+  # Selected a target.
+  select: '以 {{name}} 为首的诈欺师们决定今晚袭击 {{target}}。'
+
+SpaceWerewolfObserver:
+  # Selected a target.
+  select: '{{name}} 观察了 {{target}}。'
+  resultImposter: '根据 {{name}} 对 {{target}} 的观察，{{target}} 是背叛者。'
+  resultNotImposter: '根据 {{name}} 对 {{target}} 的观察，{{target}} 不是背叛者。'
+
+SpaceWerewolfGuard:
+  select: '{{name}} 守护了 {{target}}。'
 
 GameMaster:
   # Failed to revive.

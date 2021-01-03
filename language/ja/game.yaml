@@ -292,6 +292,9 @@ judge:
   lorelei: '罗蕾莱魅惑了村人们，在漩涡中消失无踪了…'
   draw: '平局。'
   scapegoat: '村子成了替身君的玩物。'
+  spaceWerewolf:
+    human: '在宇航员们的奋斗下，所有背叛者都被清除了。'
+    werewolf: '在背叛者老辣的手腕操纵下，任务失败了。'
   # short summary
   short:
     human: '村人胜利'

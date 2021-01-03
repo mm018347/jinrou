@@ -108,6 +108,7 @@ jobinfo:
     loreleis: '罗蕾莱是 {{names}}'
     gamblerStock: '现在持有{{number}}票'
     bonds: '与 {{names}} 缔结了羁绊'
+    spaceWerewolfImposters: '同伴的诈欺师是 {{names}}'
 
 # game-view: speak form.
 speak:
