@@ -162,6 +162,7 @@ jobname:
   Saint: '圣子'
   NetherWolf: '冥狼'
   DarkWolf: '暗狼'
+  Acrobat: '杂耍艺人'
   SpaceWerewolfCrew: '宇航员'
   SpaceWerewolfImposter: '诈欺师'
   SpaceWerewolfObserver: '观察者'
@@ -774,6 +775,8 @@ EyesWolf:
     trap: '向 {{name}} 发起的袭击，被陷阱阻止了。'
     # Guard by a SnowLover
     snow: '向 {{name}} 发起的袭击，被风雪阻止了。'
+    # Target was Acrobat
+    acrobat: '向 {{name}} 发起的袭击，被杂耍般的动作躲开了。'
 
 TongueWolf:
   # Result of TongueWolf skill.
@@ -987,6 +990,9 @@ Oni:
 
 Saint:
   select: '{{name}} 对 {{target}} 使用了奇迹之力。'
+
+Acrobat:
+  cancel: '{{name}} 躲开了人狼的袭击。'
 
 # Werewolf
 SpaceWerewolfImposter:
