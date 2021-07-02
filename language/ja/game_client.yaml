@@ -109,6 +109,7 @@ jobinfo:
     gamblerStock: '现在持有{{number}}票'
     bonds: '与 {{names}} 缔结了羁绊'
     targets: '你的目标是 {{names}}'
+    enemies: '你的宿敌是 {{names}}'
     spaceWerewolfImposters: '同伴的诈欺师是 {{names}}'
 
 # game-view: speak form.

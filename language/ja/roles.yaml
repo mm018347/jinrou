@@ -166,6 +166,8 @@ jobname:
   Hanami: '赏花客'
   GoldOni: '金鬼'
   BloodWolf: '血狼'
+  Reincarnator: '转生者'
+  Duelist: '决斗者'
   SpaceWerewolfCrew: '宇航员'
   SpaceWerewolfImposter: '诈欺师'
   SpaceWerewolfObserver: '观察者'
@@ -198,6 +200,7 @@ teamName:
   Cult: '邪教主阵营'
   Raven: '乌鸦阵营'
   Hooligan: '暴徒阵营'
+  Duel: '决斗者阵营'
   Lorelei: '罗蕾莱阵营'
   Neet: 'NEET'
   Others: '其他'
@@ -755,6 +758,8 @@ Emma:
     lorelei: '{{name}} 被怨恨的歌声诱导了。'
     # Killed by Oni
     oni: '{{name}} 被鬼捉走了。'
+    # Self-Destruct
+    selfdestruct: '{{name}} 自爆了。'
 
 EyesWolf:
   # EyesWolf result strings
@@ -1004,6 +1009,15 @@ BloodWolf:
   using: '{{name}} 以自身为祭品，引出了血月之力。'
   affect: '血月之力封印了村人们的能力。'
 
+Reincarnator:
+  revive: '{{name}} 转生成了 {{target}}。'
+
+Duelist:
+  # Select a target.
+  select: '{{name}} 向 {{target}} 发起了决斗邀请。'
+  # Become a enemy.
+  become: '{{target}} 与 {{name}} 开始决斗了。'
+
 # Werewolf
 SpaceWerewolfImposter:
   # Selected a target.
@@ -1089,6 +1103,12 @@ FanOfIdol:
   name: '粉丝'
   # message when his idol is dead.
   idolDead: '偶像的死亡导致伤心过度，{{name}} 今晚不能使用能力。'
+
+Enemy:
+  # name for desc
+  name: '宿敌'
+  # jobname of Enemy
+  jobname: '宿敌（{{jobname}}）'
 
 LoreleiFamilia:
   name: '罗蕾莱眷属'

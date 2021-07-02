@@ -118,6 +118,7 @@ messages:
   Saint: '请选择要复活的对象'
   GoldOni: '请选择要捉走的对象'
   BloodWolf: '请在准备自爆时选择'
+  Duelist: '请选择你的宿敌'
   SpaceWerewolfObserver: '请选择要观察的对象'
   SpaceWerewolfGuard: '请选择要守护的对象'
   SpaceWerewolfSabotage: '请选择妨碍的对象'

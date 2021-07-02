@@ -139,6 +139,7 @@ system:
     rebirth: '{{name}} 转生了。'
   # gameStart-related logs
   gamestart:
+    shoji: '隔墙须有耳，窗外岂无人。'
     # Diviner result mode is changed
     divinerModeChanged: '由于存在能够左右占卜结果的职业，占卜结果从「立刻知道」变更为「天亮才知道」。'
     # Excluded jobs
@@ -272,6 +273,7 @@ foundDetail:
   lorelei: '怨恨的歌声'
   loreleisuicide: '追随罗蕾莱自尽'
   oni: '被鬼捉走'
+  selfdestruct: '自爆'
   fallback: '未知原因'
   situation: '{{name}} 的死因是 {{detail}}。'
 
