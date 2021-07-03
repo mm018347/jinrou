@@ -1,5 +1,6 @@
 config/
 node_modules/
+tool/
 /client/static/assets/main
 /server/themes/*
 !/server/themes/example.coffee

@@ -1,6 +1,6 @@
 error:
   say:
     # Comment is needed.
-    needComment: "请输入发言内容。"
+    needComment: "請輸入發言內容。"
     # Restricted as banned.
-    banned: "您的账号受限，不能在此处发言。"
+    banned: "您的帳號受到限制，不能於休息室發言。"

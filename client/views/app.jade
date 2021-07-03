@@ -44,7 +44,7 @@ html
         nav
           ul
             li(id="login")
-              a(href="/") 登录
+              a(href="/") 登入
             li
               a(href="/my")= i18n.t('mypage')
             li
@@ -52,11 +52,9 @@ html
             li
               a(href="/rooms")= i18n.t('rooms')
             //li
-              a(href="/logs") 历史检索
+              a(href="/logs") 紀錄搜尋
             li
               a(href="/manual")= i18n.t('manual')
-            li
-              a(href="/backdoor/home")= i18n.t('home')
             li
               a(href="/manual/about")= i18n.t('about')
             li
@@ -75,4 +73,4 @@ html
     #dialogs-overlay
     #menu-overlay
     #icpfooter
-      a(href="https://beian.miit.gov.cn/",target="_blank") 辽ICP备15003172号-2
+      img(class="grading",src="/images/grading_12.png")

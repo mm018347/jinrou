@@ -1,20 +1,20 @@
 # Language file for views
 
 # description of application.
-description: "实时聊天·高自由度的人狼服务器。有100种以上的职业可供使用。"
+description: "即時聊天·高自由度的人狼伺服器。有 100 種以上的職業可供使用。"
 # name of mypage.
-mypage: "个人页面"
+mypage: "個人資訊"
 # name of lobby.
 lobby: "休息室"
 # rooms page.
-rooms: "房间一览"
+rooms: "房間一覽"
 # manual page.
-manual: "参考手册"
+manual: "參考手冊"
 # back to home link.
-home: "返回主页"
+home: "返回首頁"
 # about page
-about: "关于月下人狼"
+about: "關於紫月人狼"
 # settings page
-settings: "设置"
+settings: "設定"
 # label of open menu button
-openMenuLabel: "展开菜单"
+openMenuLabel: "展開選單"

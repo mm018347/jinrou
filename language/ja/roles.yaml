@@ -4,177 +4,180 @@
 jobname:
   Human: '村人'
   Werewolf: '人狼'
-  Diviner: '占卜师'
-  Psychic: '灵能者'
+  Diviner: '占卜師'
+  Psychic: '靈能者'
   Madman: '狂人'
-  Guard: '猎人'
+  Guard: '獵人'
   Couple: '共有者'
   Fox: '妖狐'
   Poisoner: '埋毒者'
   BigWolf: '大狼'
-  TinyFox: '小狐'
+  TinyFox: '子狐'
   Bat: '蝙蝠'
-  Noble: '贵族'
-  Slave: '奴隶'
-  Magician: '魔术师'
-  Spy: '间谍'
-  WolfDiviner: '人狼占卜师'
+  Noble: '貴族'
+  Slave: '奴隷'
+  Magician: '魔術師'
+  Spy: '間諜'
+  WolfDiviner: '人狼占卜師'
   Fugitive: '逃亡者'
   Merchant: '商人'
-  QueenSpectator: '女王观战者'
+  QueenSpectator: '女王觀戰者'
   MadWolf: '狂人狼'
-  Neet: 'NEET'
-  Liar: '骗子'
-  Spy2: '间谍Ⅱ'
+  Neet: '尼特'
+  Liar: '騙子'
+  Spy2: '間諜Ⅱ'
   Copier: '模仿者'
-  Light: '死亡笔记'
+  Light: '死神的筆記'
   Fanatic: '狂信者'
-  Immoral: '背德者'
-  Devil: '恶魔'
-  ToughGuy: '硬汉'
-  Cupid: '丘比特'
-  Stalker: '跟踪狂'
-  Cursed: '被诅咒者'
-  ApprenticeSeer: '见习占卜师'
+  Immoral: '背德'
+  Devil: '惡魔'
+  ToughGuy: '硬漢'
+  Cupid: '邱比特'
+  Stalker: '跟蹤狂'
+  Cursed: '被詛咒者'
+  ApprenticeSeer: '見習占卜師'
   Diseased: '病人'
-  Spellcaster: '咒言师'
-  Lycan: '狼凭'
-  Priest: '圣职者'
+  Spellcaster: '言咒者'
+  Lycan: '狼憑'
+  Priest: '聖職者'
   Prince: '王子'
-  PI: '超常现象研究者'
-  Sorcerer: '妖术师'
-  Doppleganger: '二重身'
+  PI: '超常現象研究者'
+  Sorcerer: '妖術師'
+  Doppleganger: '分身'
   CultLeader: '邪教主'
   Vampire: '吸血鬼'
   LoneWolf: '一匹狼'
-  Cat: '猫又'
+  Cat: '貓又'
   Witch: '魔女'
   Oldman: '老人'
   Tanner: '皮革匠'
   Thief: '小偷'
-  OccultMania: '怪诞狂热者'
+  OccultMania: '怪誕狂熱者'
   WolfCub: '狼之子'
-  WhisperingMad: '低语狂人'
-  Lover: '求爱者'
-  MinionSelector: '仆从选择者'
+  WhisperingMad: '私語狂人'
+  Lover: '求愛者'
+  MinionSelector: '部下選擇者'
   Dog: '犬'
-  Dictator: '独裁者'
-  SeersMama: '占卜师的妈妈'
-  Trapper: '陷阱师'
+  Dictator: '獨裁者'
+  SeersMama: '預言者的母親'
+  Trapper: '陷阱師'
   WolfBoy: '狼少年'
-  Hoodlum: '无赖'
-  QuantumPlayer: '量子人类'
-  RedHood: '小红帽'
-  Counselor: '策士'
+  Hoodlum: '流氓'
+  QuantumPlayer: '量子人類'
+  RedHood: '小紅帽'
+  Counselor: '輔導員'
   Miko: '巫女'
-  GreedyWolf: '贪婪的狼'
-  FascinatingWolf: '魅惑的女狼'
-  SolitudeWolf: '孤独的狼'
-  ToughWolf: '硬汉人狼'
-  ThreateningWolf: '威吓的狼'
-  HolyMarked: '圣痕者'
-  WanderingGuard: '游荡猎人'
-  ObstructiveMad: '碍事的狂人'
-  TroubleMaker: '闹事者'
-  FrankensteinsMonster: '弗兰肯斯坦的怪物'
-  BloodyMary: '血腥玛丽'
-  King: '国王'
-  PsychoKiller: '变态杀人狂'
-  SantaClaus: '圣诞老人'
-  Phantom: '怪盗'
-  BadLady: '恶女'
+  GreedyWolf: '貪婪的狼'
+  FascinatingWolf: '誘惑的狼女'
+  SolitudeWolf: '孤獨的狼'
+  ToughWolf: '專注的狼'
+  ThreateningWolf: '威嚇的狼'
+  HolyMarked: '聖痕者'
+  WanderingGuard: '遊蕩獵人'
+  ObstructiveMad: '礙事狂人'
+  TroubleMaker: '鬧事者'
+  FrankensteinsMonster: '弗蘭肯斯坦的怪物'
+  BloodyMary: '血腥瑪麗'
+  King: '國王'
+  PsychoKiller: '變態殺人狂'
+  SantaClaus: '聖誕老人'
+  Phantom: '怪盜'
+  BadLady: '惡女'
   DrawGirl: '看板娘'
   CautiousWolf: '慎重的狼'
-  Pyrotechnist: '烟火师'
-  Baker: '面包店'
-  Bomber: '炸弹魔'
-  Blasphemy: '亵渎者'
-  Ushinotokimairi: '丑时之女'
-  Patissiere: '女糕点师'
+  Pyrotechnist: '煙火師'
+  Baker: '麵包店'
+  Bomber: '炸彈魔'
+  Blasphemy: '褻瀆者'
+  Ushinotokimairi: '丑刻參'
+  Patissiere: '夢色蛋糕師'
   GotChocolate: '巧克力'
   MadDog: '狂犬'
-  Hypnotist: '催眠师'
+  Hypnotist: '催眠師'
   CraftyWolf: '狡猾的狼'
-  Shishimai: '狮子舞'
+  Shishimai: '獅子舞'
   Pumpkin: '南瓜魔'
-  MadScientist: '疯狂科学家'
-  SpiritPossessed: '恶灵凭依'
-  Forensic: '法医学者'
-  Cosplayer: 'Cosplayer'
-  TinyGhost: '妖怪'
+  MadScientist: '瘋狂科學家'
+  SpiritPossessed: '惡靈憑依'
+  Forensic: '法醫學者'
+  Cosplayer: '角色扮演者'
+  TinyGhost: '鬼魂'
   Ninja: '忍者'
-  Twin: '双胞胎'
-  Hunter: '狩猎者'
-  MadHunter: '复仇者'
+  Twin: '雙子'
+  Hunter: '獵師'
+  MadHunter: '復仇者'
   MadCouple: '尖叫狂人'
-  Emma: '阎魔'
+  Emma: '閻魔'
+  Owlman: '夜梟'
   EyesWolf: '瞳狼'
-  TongueWolf: '舌祸狼'
-  BlackCat: '黑猫'
+  TongueWolf: '舌禍狼'
+  BlackCat: '黑貓'
+  CorruptWolf: '蝕狼'
+  CorruptMadman: '傳道者'
   Idol: '偶像'
   XianFox: '仙狐'
-  LurkingMad: '潜伏者'
+  LurkingMad: '潛伏者'
   SnowLover: '雪女'
-  Raven: '乌鸦'
+  Raven: '烏鴉'
   DecoyWolf: '囮狼'
-  LunaticLover: '狂爱者'
+  LunaticLover: '狂愛者'
   Hooligan: '暴徒'
-  HooliganAttacker: '暴动者'
+  HooliganAttacker: '暴動者'
   HooliganGuard: '保安'
-  HomeComer: '探亲者'
-  Illusionist: '奇术师'
-  DragonKnight: '龙骑士'
-  Satori: '觉'
+  HomeComer: '探親者'
+  Illusionist: '奇術師'
+  DragonKnight: '龍騎士'
+  Satori: '覺'
   Samurai: '武士'
   Dracula: '德古拉'
-  VampireClan: '吸血鬼的眷属'
-  Elementaler: '精灵术士'
-  Poet: '诗人'
+  VampireClan: '吸血鬼眷屬'
+  Elementaler: '精靈術士'
+  Poet: '詩人'
   Amanojaku: '天邪鬼'
   Ascetic: '苦修士'
   DarkClown: '暗小丑'
-  DualPersonality: '二重人格'
+  DualPersonality: '雙重人格'
   Sacrifice: '活祭品'
-  AbsoluteWolf: '绝对狼'
-  Oracle: '预言者'
+  AbsoluteWolf: '絕對狼'
+  Oracle: '預言者'
   NightRabbit: '夜兔'
-  GachaAddicted: '课金者'
-  Fate: '命运之子'
+  GachaAddicted: '課金者'
+  Fate: '命運之子'
   Synesthete: '通感者'
-  Reindeer: '驯鹿'
+  Reindeer: '馴鹿'
   Streamer: '主播'
-  Listener: '直播观众'
+  Listener: '直播觀眾'
   QueenOfNight: '月下美人'
   Tarzan: '野孩子'
   CurseWolf: '咒狼'
   Hitokotonushinokami: '一言主神'
   RemoteWorker: '在宅者'
-  IntuitionWolf: '直觉型狼'
-  Lorelei: '罗蕾莱'
-  Gambler: '赌徒'
+  IntuitionWolf: '直覺型狼'
+  Lorelei: '羅蕾萊'
+  Gambler: '賭徒'
   Faker: '老千'
   SealWolf: '印狼'
   CynthiaWolf: '月狼'
-  Trickster: '恶作剧妖精'
-  Sleepwalker: '梦游患者'
-  Disguised: '变装者'
+  Trickster: '戲弄妖精'
+  Sleepwalker: '夢遊患者'
+  Disguised: '變裝者'
   Oni: '鬼'
-  Saint: '圣子'
+  Saint: '聖子'
   NetherWolf: '冥狼'
   DarkWolf: '暗狼'
-  Acrobat: '杂耍艺人'
-  Hanami: '赏花客'
+  Acrobat: '雜耍藝人'
+  Hanami: '賞花客'
   GoldOni: '金鬼'
   BloodWolf: '血狼'
-  SpaceWerewolfCrew: '宇航员'
-  SpaceWerewolfImposter: '诈欺师'
-  SpaceWerewolfObserver: '观察者'
-  SpaceWerewolfGuard: '警戒员'
-  SpaceWerewolfSabotage: '破坏者'
-  GameMaster: '游戏管理员'
-  Helper: '帮手'
-  Waiting: '尚未分配'
-  Watching: '观战者'
+  SpaceWerewolfCrew: '宇航員'
+  SpaceWerewolfImposter: '詐欺師'
+  SpaceWerewolfObserver: '觀察者'
+  SpaceWerewolfGuard: '警戒員'
+  SpaceWerewolfSabotage: '破壞者'
+  GameMaster: '遊戲GM'
+  Helper: '助手'
+  Waiting: '等待中'
+  Watching: '觀戰者'
 
 # Name of categories.
 categoryName:
@@ -182,24 +185,24 @@ categoryName:
   Werewolf: '人狼系'
   Fox: '妖狐系'
   Madman: '狂人系'
-  Immoral: '背德者系'
-  Switching: '职业变化系'
-  Others: '第三阵营系'
+  Immoral: '背德系'
+  Switching: '職業變化系'
+  Others: '第三陣營系'
 
 # Name of teams.
 teamName:
-  Human: '村人阵营'
-  Werewolf: '人狼阵营'
-  LoneWolf: '人狼阵营'
-  Fox: '妖狐阵营'
-  Friend: '恋人阵营'
-  Devil: '恶魔'
-  Vampire: '吸血鬼阵营'
-  Cult: '邪教主阵营'
-  Raven: '乌鸦阵营'
-  Hooligan: '暴徒阵营'
-  Lorelei: '罗蕾莱阵营'
-  Neet: 'NEET'
+  Human: '村人陣營'
+  Werewolf: '人狼陣營'
+  LoneWolf: '人狼陣營'
+  Fox: '妖狐陣營'
+  Friend: '戀人陣營'
+  Devil: '惡魔'
+  Vampire: '吸血鬼陣營'
+  Cult: '邪教主陣營'
+  Raven: '烏鴉陣營'
+  Hooligan: '暴徒陣營'
+  Lorelei: '羅蕾萊陣營'
+  Neet: '尼特'
   Others: '其他'
 
 # Fortune result.
@@ -215,7 +218,7 @@ psychic:
   human: '村人'
   werewolf: '人狼'
   BigWolf: '大狼'
-  TinyFox: '小狐'
+  TinyFox: '子狐'
   oni: '鬼'
   # delimiter of multiple result in chemical.
   _delimiter: '×'
@@ -226,843 +229,849 @@ Diviner:
   result:
     human: '村人'
   # Today's target is automatically chosen.
-  auto: '{{name}} 今天将会随机占卜一个人。'
+  auto: '{{name}} 今夜的占卜對象將由系統自動決定。'
   # Selected a target.
-  select: '{{name}} 占卜了 {{target}} 的身份。'
+  select: '{{name}} 對 {{target}} 占卜。'
   # Divining result.
-  resultlog: '{{name}} 占卜了 {{target}} 的身份，他是 {{result}}。'
+  resultlog: '{{name}} 對 {{target}} 占卜，是{{result}}。'
 
 # Psychic
 Psychic:
   result:
     human: '村人'
   # Psychi result.
-  resultlog: '根据 {{name}} 的灵能结论，被处刑的 {{target}} 是 {{result}}。'
+  resultlog: '{{name}} 的靈能結果，昨日處刑的 {{target}} 是{{result}}。'
 
 # Werewolf
 Werewolf:
   # Error: Werewolves cannot eat each other
-  noWolfAttack: '人狼之间不能相互袭击。'
+  noWolfAttack: '人狼之間不能相互襲擊。'
   # Selected a target.
-  select: '以 {{name}} 为首的人狼们决定今晚袭击 {{target}}。'
+  select: '以 {{name}} 為首的人狼們決定襲擊 {{target}}。'
 
 # Guard
 Guard:
   # Error: a Guard cannot guard a same player twice in a row
-  noGuardSame: '不能连续守护同一个人。'
+  noGuardSame: '不能連續對同一人護衛。'
   # Selected a target.
-  select: '{{name}} 守护了 {{target}}。'
+  select: '{{name}} 對 {{target}} 護衛。'
   # Log of GJ
-  gj: '{{guard}} 成功守护了 {{name}}。'
+  gj: '{{guard}} 成功護衛 {{name}}。'
 
 # Poisoner
 Poisoner:
-  select: '{{name}} 的毒药泼了 {{target}} 一脸。'
+  select: '{{name}} 對 {{target}} 使用毒藥。'
 
 # TinyFox
 TinyFox:
   # Successful result of divine by TinyFOx.
-  resultlog_success: '根据 {{name}} 的占卜结果，{{target}} 应该是 {{result}} 吧？'
+  resultlog_success: '{{name}} 的占卜結果， {{target}} 應該是{{result}}？'
   # Failure
-  resultlog_fail: '根据 {{name}} 的占卜结果，{{target}} 是一个看不透的怪人。'
+  resultlog_fail: '{{name}} 的占卜結果， {{target}} 感覺非常可疑？'
 
 # Magician
 Magician:
-  select: '{{name}} 对 {{target}} 使用了死者复活术。'
+  select: '{{name}} 對 {{target}} 施展死者復活術。'
 
 # Spy
 Spy:
-  select: '{{name}} 决定要离开村子。'
+  select: '{{name}} 準備脫離村莊。'
 
 # WolfDiviner
 WolfDiviner:
-  select: '人狼占卜师 {{name}} 占卜了 {{target}} 的身份。'
-  resultlog: '人狼占卜师 {{name}} 占卜了 {{target}} 的身份，他是 {{result}}。'
+  select: '{{name}} 對 {{target}} 進行人狼占卜。'
+  resultlog: '{{name}} 對 {{target}} 進行人狼占卜，是{{result}}。'
 
 # Fugitive
 Fugitive:
-  noSelf: '不能逃到自己的家里去。'
-  select: '{{name}} 逃亡到 {{target}} 的家里去了。'
+  noSelf: '不能逃往自己家。'
+  select: '{{name}} 往 {{target}} 的住宅附近逃亡。'
 
 # Merchant
 Merchant:
   # Name of kits.
   kit:
-    Diviner: '占卜套装'
-    Psychic: '灵能套装'
-    Guard: '守护套装'
+    Diviner: '占卜組合'
+    Psychic: '靈能組合'
+    Guard: '獵人組合'
   # Error: cannot send a kit to oneself.
-  noSelf: '不能送给自己'
-  select: '{{name}} 向 {{target}} 寄出了 {{kit}}。'
+  noSelf: '不能贈送給自己。'
+  select: '{{name}} 對 {{target}} 贈送 {{kit}}。'
   # A kit is delivered to a player.
-  delivered: '{{name}} 收到了礼物 {{kit}}。'
+  delivered: '{{name}} 收到了 {{kit}}。'
 
 # Liar
 Liar:
   # Result.
-  resultlog: '虽然不是很自信，根据骗子占卜的结果 {{target}} 大概是 {{result}}，大概。'
+  resultlog: '雖然不是很自信，但根據騙子占卜的結果， {{target}} 大概是{{result}}吧。大概。'
 
 # Spy2
 Spy2:
   # His report is found.
-  found: '发现了 {{name}} 的调查报告书。'
+  found: '發現 {{name}} 的調查報告書。'
 
 # Copier
 Copier:
   # Selected a target.
-  select: '{{name}} 模仿了 {{target}} 的能力。'
+  select: '{{name}} 試圖模仿 {{target}} 的能力。'
 
 # Light
 Light:
   # Selected a target.
-  select: '{{name}} 在死亡笔记上写下了 {{target}} 的名字。'
+  select: '{{name}} 在死神筆記上寫下 {{target}} 的名稱。'
 
 # Devil
 Devil:
   # attacked by a werewolf.
-  attacked: '{{name}} 被人狼袭击了，恶魔的力量大幅增强。'
+  attacked: '{{name}} 被人狼襲擊了，惡魔的力量大幅增強。'
 
 # Cupid
 Cupid:
   # First select.
-  select1: '{{name}} 把 {{target}} 定为恋人中的一人。'
+  select1: '{{name}} 選擇 {{target}} 作為戀人中的一人。'
   # Error: select another player
-  noSelectTwice: '请选择另一个恋人'
+  noSelectTwice: '請再次選擇另一名戀人。'
   # Select a target.
-  select: '{{name}} 向 {{target}} 射出了爱之箭。'
+  select: '{{name}} 對 {{target}} 發射戀之箭。'
   # Became a lover.
-  become: '{{name}} 成为了恋人。'
+  become: '{{name}} 成為了戀人。'
 
 # Stalker
 Stalker:
   # Selected a target.
-  select: '{{name}} 跟踪了 {{target}}（{{job}}）。'
+  select: '{{name}} 對 {{target}} 跟蹤（{{job}}）。'
 
 # Cursed
 Cursed:
   # became a werewolf.
-  becomeWerewolf: '{{name}} 受到诅咒变成了人狼。'
+  becomeWerewolf: '{{name}} 受到詛咒變成了人狼。'
   # became a vampire.
-  becomeVampire: '{{name}} 受到诅咒变成了吸血鬼。'
+  becomeVampire: '{{name}} 受到詛咒變成了吸血鬼。'
 
 # Spellcaster
 Spellcaster:
   # Error: this player is already cursed
-  noSelectTwice: '这个对象已经被咒言诅咒过了。'
+  noSelectTwice: '該對象已經被言咒過了。'
   # Selected a target.
-  select: '{{name}} 夺去了 {{target}} 的声音。'
+  select: '{{name}} 對 {{target}} 施展言咒。'
   # A player is cursed.
-  cursed: '{{name}} 的声音被夺去了。今天白天无法发言。'
+  cursed: '{{name}} 的聲音被奪去了。今日白天將無法發言。'
 
 # Priest
 Priest:
   # Selected a target.
-  select: '{{name}} 以神圣的力量守护了 {{target}}。'
-  protected: '{{name}} 凭借神圣的力量抵抗了 {{found}}。'
+  select: '{{name}} 對 {{target}} 施展神聖之力守護。'
+  protected: '{{name}} 憑藉神聖之力抵抗了 {{found}}。'
 
 # Prince
 Prince:
   # Canceled a punishment.
-  cancel: '{{name}} 是 {{jobname}}。本次处刑被取消了。'
+  cancel: '{{name}} 是 {{jobname}}。處刑被中止了。'
 
 # PI
 PI:
   # selected a target.
-  select: '{{name}} 调查了 {{target}} 和他的左右邻居。'
+  select: '{{name}} 對 {{target}} 和其左右鄰居進行調查。'
   # result (something found)
-  found: '{{name}} 调查了 {{target}} 和他的左右邻居，发现了 {{result}} 活动的迹象。'
+  found: '{{name}} 對 {{target}} 和其左右鄰居進行調查，發現有 {{result}} 活動的跡象。'
   # result (everyone human)
-  notfound: '{{name}} 调查了 {{target}} 和他的左右邻居，发现全员都是村人。'
+  notfound: '{{name}} 對 {{target}} 和其左右鄰居進行調查，發現全員都是村人。'
 
 # Sorcerer
 Sorcerer:
   # Select a target.
-  select: '{{name}} 用妖术调查了 {{target}}。'
+  select: '{{name}} 對 {{target}} 施展妖術調查。'
   # Result (diviner found)
-  found: '{{name}} 用妖术调查了 {{target}}，他是占卜师。'
+  found: '{{name}} 對 {{target}} 施展妖術調查，是占卜師。'
   # Result (diviner not found)
-  notfound: '{{name}} 用妖术调查了 {{target}}，他不是占卜师。'
+  notfound: '{{name}} 對 {{target}} 施展妖術調查，不是占卜師。'
 
 # Doppleganger
 Doppleganger:
   # Select a target.
-  select: '{{name}} 成为了 {{target}} 的二重身。'
+  select: '{{name}} 成爲 {{target}} 的分身。'
 
 # CultLeader
 CultLeader:
   # Select a target.
-  select: '{{name}} 发展 {{target}} 成为信者。'
+  select: '{{name}} 對 {{target}} 發展為信徒。'
   # Became a cult member.
-  become: '{{name}} 成为了教会的信者。'
+  become: '{{name}} 成為了教主信徒。'
 
 # Vampire
 Vampire:
   # Select a target.
-  select: '{{name}} 袭击了 {{target}}。'
+  select: '{{name}} 對 {{target}} 襲擊。'
 
 # Cat
 Cat:
   # Select a target.
-  select: '{{name}} 对 {{target}} 使用了死者复活术。'
-  reviveWrongPlayer: '{{name}} 的手滑了一下，不小心复活了 {{target}}。'
+  select: '{{name}} 對 {{target}} 施展死者復活術。'
+  reviveWrongPlayer: '{{name}} 的手滑了一下，不小心復活了 {{target}}。'
 
 # Witch
 Witch:
   # Select a target of poison.
-  selectPoison: '{{name}} 对 {{target}} 使用了毒药。'
+  selectPoison: '{{name}} 對 {{target}} 使用毒藥。'
   # Select a target of revival.
-  selectRevival: '{{name}} 对 {{target}} 使用了复活药。'
+  selectRevival: '{{name}} 對 {{target}} 使用復活藥。'
 
 # OccultMania
 OccultMania:
   # Select a target.
-  select: '{{name}} 指定了 {{target}}。'
+  select: '{{name}} 對 {{target}} 指定。'
 
 # Lover
 Lover:
   # Select a target.
-  select: '{{name}} 向 {{target}} 求爱了。'
+  select: '{{name}} 對 {{target}} 求愛。'
   # Become a lover.
-  become: '{{name}} 受到求爱变成了恋人。'
+  become: '{{name}} 受到求愛成為了戀人。'
 
 # MinionSelector
 MinionSelector:
   # Select a target.
-  select: '{{name}} 指定 {{target}}（{{jobname}}）成为了狼的仆从。'
+  select: '{{name}} 對 {{target}}（{{jobname}}）指定。'
   # Become a wolfminion.
-  become: '{{name}} 变成了狼的仆从。'
+  become: '{{name}} 成為了狼的部下。'
 
 # Theif
 Thief:
   # Candidates are shown.
-  candidates: '{{name}} 可以选择的职业有 {{jobnames}}。'
+  candidates: '{{name}} 可選擇的職業有 {{jobnames}}。'
 
 # Dog
 Dog:
   # Select an owner.
-  select: '{{name}} 选择 {{target}} 成为了自己的饲主。'
+  select: '{{name}} 選擇 {{target}} 為飼主。'
   # Attack the owner.
-  attack: '{{name}} 袭击了 {{target}}。'
+  attack: '{{name}} 對 {{target}} 襲擊。'
 
 # Dictator
 Dictator:
   # Select a punishment target.
-  select: '独裁者 {{name}} 宣布将要处刑 {{target}}。'
-  sunset: '独裁者 {{name}} 宣布，现在天黑了。'
+  select: '身為獨裁者的 {{name}}，發出對 {{target}} 的處刑宣言。'
+  sunset: '身為獨裁者的 {{name}} 宣佈，迎來黑夜吧。'
 
 # SeersMama
 SeersMama:
   # There is no seer.
-  resultNone: '{{name}} 是占卜师的妈妈。没有占卜师。'
+  resultNone: '{{name}} 是預言者的母親，占卜師並不存在。'
   # There are one or more seer. (number is given as count)
-  result: '{{name}} 是占卜师的妈妈。{{results}} 是占卜师。'
+  result: '{{name}} 是預言者的母親，占卜師是 {{results}}。'
 
 # Trapper
 Trapper:
   # Select a target.
-  select: '{{name}} 用陷阱守护了 {{target}}。'
+  select: '{{name}} 對 {{target}} 設置陷阱。'
   # GJ log.
-  gj: '{{guard}} 的陷阱成功守护了 {{name}}。'
+  gj: '{{guard}} 的陷阱成功守護了 {{name}}。'
 
 # WolfBoy
 WolfBoy:
   # Select a target.
-  select: '{{name}} 把 {{target}} 伪装成了人狼。'
+  select: '{{name}} 對 {{target}} 佯裝。'
 
 # Hoodlum
 Hoodlum:
   # Error: this player is already selected
-  alreadySelected: '{{name}} 已经被选为对象。'
+  alreadySelected: '{{name}} 已被選為對象。'
   # Select a target.
-  select: '{{name}} 憎恨 {{target}}。'
+  select: '{{name}} 對 {{target}} 痛恨。'
 
 # QuantumPlayer
 QuantumPlayer:
   # Cannot divine.
-  cannotDivine: '{{name}} 已经不可能是占卜师，不能进行占卜。'
+  cannotDivine: '{{name}} 已經沒有身為占卜師的可能性，故無法進行占卜。'
 
 # Counselor
 Counselor:
   # Select a target.
-  select: '{{name}} 尝试了策反 {{target}}。'
+  select: '{{name}} 對 {{target}} 諮詢更生。'
   # Rehabilitated
-  rehabilitate: '{{name}} 被策反了。'
+  rehabilitate: '{{name}} 受到諮詢更生了。'
 
 # Miko
 Miko:
   # Select a self protection.
-  select: '{{name}} 用神圣的力量守护了自己。'
-  protected: '{{name}} 凭借神圣的力量抵抗了 {{found}}。'
+  select: '{{name}} 施展神聖之力守護自己。'
+  protected: '{{name}} 憑藉神聖之力抵抗 {{found}}。'
 
 # GreedyWolf
 GreedyWolf:
   # Select a greed.
-  select: '为了满足 {{name}} 的贪欲。人狼们今晚可以多袭击一个人。'
+  select: '為了滿足 {{name}} 的貪欲，今夜人狼們可以額外襲擊 1 人。'
 
 # FascinatingWolf
 FascinatingWolf:
   # Select a target.
-  select: '{{name}} 魅惑了 {{target}}。'
+  select: '{{name}} 對 {{target}} 誘惑。'
   # Affected by her.
-  affected: '{{name}} 被狼魅惑了。'
+  affected: '{{name}} 被人狼誘惑。'
 
 # SolitudeWolf
 SolitudeWolf:
   # A turn of solitudewolf comes
-  turn: '{{name}} 现在可以袭击他人了。'
+  turn: '{{name}} 已經能夠進行襲擊。'
   # Another wolf's turn!
-  noturn: '其他的人狼还活着。{{name}} 现在不能袭击他人。'
+  noturn: '似乎還有其他人狼的樣子，{{name}} 目前還不能進行襲擊。'
 
 # ToughWolf
 ToughWolf:
   # Select a tough attack
-  select: '{{name}} 抱着舍身的觉悟袭击了 {{target}}。'
+  select: '{{name}} 抱持著捨身的覺悟對 {{target}} 襲擊。'
 # ThreateningWolf
 ThreateningWolf:
   # Select a threatening.
-  select: '{{name}} 威吓了 {{target}}。'
+  select: '{{name}} 對 {{target}} 威嚇。'
   # Affected by threatening.
-  affected: '{{name}} 受到了威吓。今晚的能力无法发动。'
+  affected: '{{name}} 被威嚇了，今夜的能力將無效化。'
 
 WanderingGuard:
   # This player cannot be guarded anymore.
-  noGuardMode: '{{name}} 不能护卫 {{target}}。'
+  noGuardMode: '{{name}} 再也不能對 {{target}} 護衛。'
 
 ObstructiveMad:
   # Select a target.
-  select: '{{name}} 妨碍了 {{target}}。'
+  select: '{{name}} 對 {{target}} 妨礙。'
   # a Diviner is blocked.
-  blocked: '{{name}} 占卜了 {{target}} 的身份，但是被不知道什么人妨碍了。'
+  blocked: '{{name}} 對 {{target}} 占卜，但是不知道被誰妨礙了。'
   # SpaceWerewolfObserver is blocked
-  spaceWerewolfObserverBlocked: '{{name}} 观察了 {{target}} 的身份，但是被不知道什么人妨碍了。'
+  spaceWerewolfObserverBlocked: '{{name}} 觀察了 {{target}} 的身份，但是不知道被誰妨礙了。'
 
 TroubleMaker:
   # Select to make a trouble.
-  select: '{{name}} 在村子里引发了混乱。'
+  select: '{{name}} 試圖於村莊內引起糾紛。'
   # System announce that a trouble has happened.
   # A number of punished players is given as count.
-  announce: '闹事者在村子里引发了混乱。今日将会处刑 {{count}} 个人。'
+  announce: '鬧事者使村莊變得混亂了，今日將處刑 {{count}} 人。'
 
 FrankensteinsMonster:
   # Drained a role from a body.
-  drain: '{{name}} 从 {{target}} 的尸体里吸收了 {{jobname}} 的能力。'
+  drain: '{{name}} 吸收 {{target}} 的屍體，獲得 {{jobname}} 的能力。'
   # separator ob jobs.
   separator: '、'
 
 BloodyMary:
   # Select a target.
-  select: '{{name}} 诅咒了 {{target}}。'
+  select: '{{name}} 對 {{target}} 咒殺。'
   # name of normal Mary.
-  mary: '玛丽'
+  mary: '瑪麗'
 
 SantaClaus:
   # Error: this player is already given a present.
-  noSelectTwice: '这个人已经不能继续接受礼物了。'
+  noSelectTwice: '該對象已經收到過禮物。'
   # Select a target.
-  select: '{{name}} 向 {{target}} 赠送了礼物。'
+  select: '{{name}} 對 {{target}} 贈送禮物。'
   # Name of thing.
   thing:
-    HolyMarked: '圣痕者套装'
+    HolyMarked: '聖痕者組合'
     Oldman: '玉手箱（老人）'
-    Priest: '圣职者套装'
-    Miko: '巫女套装'
-    Diviner: '占卜套装'
-    Guard: '守护套装'
-    Psychic: '灵能套装'
+    Priest: '聖職者組合'
+    Miko: '角色扮演組合（巫女）'
+    Diviner: '占卜組合'
+    Guard: '獵人組合'
+    Psychic: '靈能組合'
   # Log of delivered presents.
   deliver:
     # A poison present is delivered.
-    poison: '{{name}} 收到了剧毒的礼物。'
+    poison: '{{name}} 收到了有毒的禮物。'
     # internal: a template for present delivery.
-    _log: '{{name}} 收到了礼物 {{thing}}。'
+    _log: '{{name}} 收到了{{thing}}。'
 
 Phantom:
   # Select not to seal a role.
-  selectNoSteal: '{{name}} 没有盗取职业。'
+  selectNoSteal: '{{name}} 放棄盜取角色。'
   # Select to steal.
-  select: '{{name}} 盗取了 {{target}} 的职业。{{target}} 被盗之前是 {{jobname}}。'
+  select: '{{name}} 對 {{target}} 盜取角色。{{target}} 是{{jobname}}。'
   # option not to steal.
-  noStealOption: '放弃盗取'
+  noStealOption: '不盜取'
   # A job is stolen.
-  stolen: '{{name}} 的职业被盗走了，变成了 {{jobname}}。'
+  stolen: '{{name}} 的角色被盜取了，變成了 {{jobname}}。'
 
 BadLady:
   # Select a main friend.
-  selectMain: '{{name}} 选择了 {{target}} 作为自己的本命对象。'
+  selectMain: '{{name}} 對 {{target}} 選為本命對象。'
   # Select a keep friend.
-  selectKeep: '{{name}} 选择了 {{target}} 作为玩弄的对象。'
+  selectKeep: '{{name}} 對 {{target}} 選為玩弄對象。'
 
 DrawGirl:
   # Reveal that a player is a DrawGirl.
-  reveal: '{{name}} 是看板娘。今日将有 {{count}} 人被处刑。'
+  reveal: '{{name}} 是看板娘，今日將處刑 {{count}} 人。'
 
 CautiousWolf:
   # Select not to attack.
-  selectNoAttack: '以 {{name}} 为首的人狼们决定今晚不发动袭击。'
+  selectNoAttack: '以 {{name}} 為首的人狼們決定今夜不進行襲擊。'
   # option not to attack.
-  noAttackOption: '不袭击'
+  noAttackOption: '不襲擊'
 
 Pyrotechnist:
   # Select to launch fireworks.
-  select: '{{name}} 准备释放烟火了。'
+  select: '{{name}} 準備發射煙火。'
   # System log that fireworks is fired.
-  affect: '美丽的烟火被打上了天空。今晚不能使用能力。'
+  affect: '漂亮的煙火綻放著。今夜將不能行使能力。'
 
 Baker:
   # System log that a Baker is alive.
-  alive: '面包店烤好了美味的面包。'
+  alive: '麵包店烤好了美味的麵包。'
   # System log that a Baker has dead.
-  dead: '今天开始没有美味的面包吃了。'
+  dead: '從今以後再也吃不到美味的麵包了。'
 
 Bomber:
   # Select to set a bomb.
-  select: '{{name}} 向 {{target}} 送出了炸弹。'
+  select: '{{name}} 對 {{target}} 設置炸彈。'
 
 Blasphemy:
   # Select to perform a blasphemy.
-  select: '{{name}} 亵渎了 {{target}}。'
+  select: '{{name}} 對 {{target}} 褻瀆。'
 
 Ushinotokimairi:
   # Select to perform a curse.
-  select: '{{name}} 诅咒了 {{target}}。'
+  select: '{{name}} 對 {{target}} 詛咒。'
 
 Patissiere:
   # select a main friend.
-  select: '{{name}} 选择了 {{target}} 作为自己的本命对象。'
+  select: '{{name}} 將 {{target}} 選為本命對象。'
   # Chocolate is delivered.
   deliver: '{{name}} 收到了巧克力。'
   # Become a lover with.
-  become: '{{name}} 与 {{target}} 结为恋人。'
+  become: '{{name}} 和 {{target}} 成為了戀人。'
 
 GotChocolate:
   # I'm a main friend!
-  main: '{{name}} 吃下的巧克力是本命巧克力。{{name}} 与 {{target}} 结为恋人。'
+  main: '{{name}} 食用了本命巧克力。{{name}} 和 {{target}} 成為了戀人。'
   # I'm not a main friend!
-  sub: '{{name}} 吃下的巧克力是义理巧克力。'
+  sub: '{{name}} 食用了義理巧克力。'
   # Rare pattern: no lover.
-  noLover: '{{name}} 吃下了巧克力，什么都没有发生。'
+  noLover: '{{name}} 食用了巧克力，但什麼都沒有發生。'
   # Chocolate results
   result:
     # Cursed chocolate
-    cursed: '{{name}} 吃下的巧克力是被诅咒的巧克力，下一天白天不能发言。'
+    cursed: '{{name}} 食用的巧克力是詛咒的巧克力，隔日白天不能發言。'
     # Black chocolate
-    black: '{{name}} 吃下的巧克力是黑巧克力，占卜·灵能结果将变为「人狼」。'
+    black: '{{name}} 食用的巧克力是黑巧克力，占卜・靈能結果變為人狼。'
     # White chocolate
-    white: '{{name}} 吃下的巧克力是白巧克力，占卜·灵能结果将变为「村人」。'
+    white: '{{name}} 食用的巧克力是白巧克力，占卜・靈能結果變為村人。'
     # Poison chocolate
-    poison: '{{name}} 吃下的巧克力是毒巧克力，将被毒死。'
+    poison: '{{name}} 食用的巧克力是有毒的巧克力。'
     # Stalker
-    stalker: '{{name}} 凭借执念找到了巧克力的送出人，{{name}} 成为了 {{target}} 的跟踪狂。'
+    stalker: '{{name}} 憑著執念找到了巧克力的發送者。{{name}} 變化為 {{target}} 的跟蹤狂。'
     # Vampire chocolate
-    vampire: '{{name}} 吃下的巧克力不知为何有铁锈的味道，占卜结果将变为「吸血鬼」。'
+    vampire: '{{name}} 食用的巧克力不知為何有鐵銹味，占卜結果變為吸血鬼。'
     # Priest
-    priest: '{{name}} 吃下的巧克力蕴含着神圣的力量，{{name}} 可以使用一次「圣职者」的能力。'
+    priest: '{{name}} 食用的巧克力是神聖的巧克力，可以行使一次聖職者的能力。'
 
 MadDog:
   # Select a target of an attack.
-  select: '{{name}} 袭击了 {{target}}。'
+  select: '{{name}} 對 {{target}} 襲擊。'
 
 Hypnotist:
   # Select a target of hypnosis.
-  select: '{{name}} 催眠了 {{target}}。'
+  select: '{{name}} 對 {{target}} 催眠。'
 
 CraftyWolf:
   # Select to craft a fake die
-  select: '{{name}} 假死了。'
+  select: '{{name}} 假死。'
   # Select to cancel a fake die
-  cancel: '{{name}} 取消假死了。'
+  cancel: '{{name}} 解除假死。'
 
 Shishimai:
   # Error: that player is already bitten
-  noSelectTwice: '这个玩家已经被咀嚼过了。'
+  noSelectTwice: '該對象已經被咀嚼過。'
   # Select a target.
-  select: '{{name}} 咀嚼了 {{target}}。'
+  select: '{{name}} 對 {{target}} 咀嚼。'
 
 Pumpkin:
   # Select a pumpkinize target.
-  select: '{{name}} 把 {{target}} 变成了南瓜。'
+  select: '{{name}} 對 {{target}} 變化成南瓜。'
 
 MadScientist:
   # Select a revival target.
-  select: '{{name}} 对 {{target}} 实施了复活手术。'
+  select: '{{name}} 對 {{target}} 實施復活手術。'
 
 Forensic:
   # Select a target.
-  select: '{{name}} 调查了 {{target}} 的尸体。'
+  select: '{{name}} 對 {{target}} 驗屍。'
   # The target had a death resistance.
-  resultYes: '根据 {{name}} 的尸检结果，{{target}} 持有死亡耐性。'
+  resultYes: '{{name}} 的驗屍結果，{{target}} 擁有死亡耐性。'
   # The target did not have a death resistance.
-  resultNo: '根据 {{name}} 的尸检结果，{{target}} 没有死亡耐性。'
+  resultNo: '{{name}} 的驗屍結果，{{target}} 沒有死亡耐性。'
 
 Ninja:
   # Select a target.
-  select: '{{name}} 侦查了 {{target}}。'
+  select: '{{name}} 對 {{target}} 偵察。'
   # Result (yes)
-  resultYes: '根据 {{name}} 的侦查结果，{{target}} 可以在夜间行动。'
+  resultYes: '{{name}} 的偵察結果， {{target}} 於夜晚有行動的可能性。'
   # Result (no)
-  resultNo: '根据 {{name}} 的侦查结果，{{target}} 不能在夜间行动。'
+  resultNo: '{{name}} 的偵察結果， {{target}} 於夜晚不能行動。'
 
 Hunter:
   # Select a hunting target.
-  select: '{{name}} 向 {{target}} 开枪了。'
+  select: '{{name}} 對 {{target}} 槍擊。'
 
 Emma:
   # Emma result strings
   result:
     # killed by werewolf
-    werewolf: '{{name}} 成为了人狼的食物。'
+    werewolf: '{{name}} 成為人狼的食物。'
     # killed with poison
-    poison: '{{name}} 由于中毒死去了。'
+    poison: '{{name}} 中毒死亡。'
     # Killed by QueenSpectator
-    hinamizawa: '{{name}} 由于雏见泽症候群发作死去了。'
+    hinamizawa: '{{name}} 得到傳染病而死。'
     # Killed by a vampire
-    vampire: '{{name}} 成为了吸血鬼的食物。'
+    vampire: '{{name}} 成為吸血鬼的食物。'
     # Killed by a dog
-    dog: '{{name}} 成为了犬的食物。'
+    dog: '{{name}} 成為犬的食物。'
     # Killed with traps
-    trap: '{{name}} 由于落入陷阱死去了。'
+    trap: '{{name}} 觸發陷阱致死。'
     # Killed by a curse
-    curse: '{{name}} 被咒杀了。'
+    curse: '{{name}} 被詛咒殺害。'
     # Killed by a PsychoKiller
-    psycho: '{{name}} 被变态杀人狂杀死了。'
+    psycho: '{{name}} 被變態殺人狂殺害。'
     # Killed a LunaticLover
-    lunaticlover: '{{name}} 被狂爱者杀死了。'
+    lunaticlover: '{{name}} 被狂愛者殺害。'
     # Suicided after fox
-    foxsuicide: '{{name}} 追随着妖狐自尽了。'
+    foxsuicide: '{{name}} 追隨妖狐之後自盡。'
     # Suicided after friend
-    friendsuicide: '{{name}} 追随着恋人自尽了。'
+    friendsuicide: '{{name}} 追隨戀人之後自盡。'
     # Suicided after his twin
-    twinsuicide: '{{name}} 追随着双胞胎自尽了。'
+    twinsuicide: '{{name}} 追隨雙子之後自盡。'
     # DragonKnight's suicide
-    dragonknightsuicide: '{{name}} 由于自责选择了自杀。'
+    dragonknightsuicide: '{{name}} 因自責選擇自盡。'
     # Suicided after vampires
-    vampiresuicide: '{{name}} 追随着吸血鬼自尽了。'
+    vampiresuicide: '{{name}} 追隨吸血鬼選擇自盡。'
     # Suicided after Santaclause
-    santasuicide: '{{name}} 追随着圣诞老人自尽了。'
+    santasuicide: '{{name}} 追隨聖誕老人選擇自盡。'
     # Suicided after QueenOfNight
-    fascinatesuicide: '{{name}} 似乎因为沉迷于什么而自尽了。'
+    fascinatesuicide: '{{name}} 似乎因沉迷什麼選擇自盡。'
     # Killed by hooligan
-    hooligan: '{{name}} 被暴动者杀死了。'
+    hooligan: '{{name}} 被暴動者殺害。'
     # Killed by DragonKnight
-    dragon: '{{name}} 被炽热的龙息烧死了。'
+    dragon: '{{name}} 被熾熱的龍息燒死。'
     # Killed by Samurai
-    samurai: '{{name}} 被武士一刀两断了。'
+    samurai: '{{name}} 被武士一刀兩斷。'
     # Killed by Elementaler
-    elemental: '{{name}} 被暴走的精灵杀死了。'
+    elemental: '{{name}} 被暴走的精靈殺害。'
     # Sacrifice
-    sacrifice: '{{name}} 被作为活祭品献祭了。'
+    sacrifice: '{{name}} 作為活祭品獻祭。'
     # Lorelei
-    lorelei: '{{name}} 被怨恨的歌声诱导了。'
+    lorelei: '{{name}} 被怨恨的歌聲誘導。'
     # Killed by Oni
-    oni: '{{name}} 被鬼捉走了。'
+    oni: '{{name}} 被鬼捕捉。'
 
 EyesWolf:
   # EyesWolf result strings
   # Wolves' attack failed because ...
   result:
     # Has tolerance to wolf attack
-    tolerance: '向 {{name}} 发起的袭击，被耐性阻止了。'
+    tolerance: '對 {{name}} 的襲擊因耐性導致失敗。'
     # Guard
-    guard: '向 {{name}} 发起的袭击，被守卫阻止了。'
+    guard: '對 {{name}} 的襲擊因護衛導致失敗。'
     # Cover by someone
-    cover: '向 {{name}} 发起的袭击，因为另一个人的牺牲失败了。'
+    cover: '對 {{name}} 的襲擊因某人的犧牲導致失敗。'
     # Target was absent
-    absent: '向 {{name}} 发起的袭击，因为 {{name}} 的逃亡扑了个空。'
+    absent: '對 {{name}} 的襲擊因 {{name}} 的逃亡導致失敗。'
     # Devil's power
-    devil: '向 {{name}} 发起的袭击，被恶魔的力量阻止了。'
+    devil: '對 {{name}} 的襲擊因惡魔之力導致失敗。'
     # Curse power
-    cursed: '向 {{name}} 发起的袭击，被诅咒的力量阻止了。'
+    cursed: '對 {{name}} 的襲擊因詛咒之力導致失敗。'
     # Holy power
-    holy: '向 {{name}} 发起的袭击，被神圣的力量阻止了。'
+    holy: '對 {{name}} 的襲擊因神聖之力導致失敗。'
     # Guard by a trap
-    trap: '向 {{name}} 发起的袭击，被陷阱阻止了。'
+    trap: '對 {{name}} 的襲擊因陷阱導致失敗。'
     # Guard by a SnowLover
-    snow: '向 {{name}} 发起的袭击，被风雪阻止了。'
+    snow: '對 {{name}} 的襲擊因雪之力導致失敗。'
     # Target was Acrobat
-    acrobat: '向 {{name}} 发起的袭击，被杂耍般的动作躲开了。'
+    acrobat: '對 {{name}} 的襲擊因雜耍般的動作迴避導致失敗。'
 
 TongueWolf:
   # Result of TongueWolf skill.
-  result: '根据 {{name}} 品尝的结果，{{target}} 是 {{job}}。'
+  result: '{{name}} 品嚐的結果，{{target}} 是 {{job}} 。'
   # Result when the skill is lost.
-  resultLost: '根据 {{name}} 品尝的结果，{{target}} 是 {{job}}。从此以后无法再知道袭击目标的职业了。'
+  resultLost: '{{name}} 品嚐的結果，{{target}} 是 {{job}} 。今後將不能得知襲擊目標的職業。'
 
+# Owlman
+Owlman:
+  # Select a target.
+  select: '{{name}} 對 {{target}} 詛咒。'
 Idol:
   # Select a fan,
-  select: '{{name}} 把 {{target}} 变成自己的粉丝了。'
+  select: '{{name}} 使 {{target}} 成為粉絲。'
   # Becoming a fan of idol.
-  become: '{{name}} 被 {{idol}} 圈粉了。'
+  become: '{{name}} 成為 {{idol}} 的粉絲。'
   # Result of observation.
-  result: '根据 {{name}} 的敏锐观察，现在村人阵营的人数有 {{count}} 人。'
-  
+  result: '根據 {{name}} 的敏銳觀察，村人陣營的人數為 {{count}} 名。'
+
 XianFox:
   # Select a target.
-  select: '{{name}} 透视了 {{target}} 的职业。'
+  select: '{{name}} 對 {{target}} 透視。'
   # Result of skill (announced to everyone).
-  result: '昨晚仙狐透视的结果是 {{result}}。'
-  
+  result: '昨夜仙狐的透視結果為 {{result}}。'
+
 SnowLover:
   # Select a target.
-  select: '{{name}} 向 {{target}} 求爱了。'
+  select: '{{name}} 對 {{target}} 求愛。'
   # Become a lover.
-  become: '{{name}} 受到求爱变成了恋人。'
+  become: '{{name}} 受到求愛，成為了戀人。'
 
 Raven:
   # message when 1 or less Ravens are alive.
-  message: '乌鸦的啼鸣响彻村子的上空。'
+  message: '烏鴉的啼叫聲在村莊裡迴響著。'
   
 DecoyWolf:
   # Use skill.
-  select: '{{name}} 潜入 {{target}} 的家里变成了诱饵。'
+  select: '{{name}} 潛入 {{target}} 的住家變成誘餌。'
 
 LunaticLover:
   # Select a target of lunatic love.
-  select: '{{name}} 把 {{target}} 选为自己疯狂爱慕的对象。'
+  select: '{{name}} 對 {{target}} 愛慕。'
   
 Hooligan:
   # Select a new member of hooligan.
-  select: '{{name}} 鼓动 {{target}} 加入了暴动。'
+  select: '{{name}} 對 {{target}} 鼓動。'
   # Become a HooliganMember.
-  become: '{{name}} 加入了暴动。'
+  become: '{{name}} 參與暴動。'
   # Found a guard.
-  foundGuard: '{{name}} 试图鼓动 {{target}} 加入暴动，却发现 {{target}} 是保安。'
+  foundGuard: '{{name}} 對 {{target}} 鼓動，卻發現 {{target}} 是保安。'
 
 HooliganAttacker:
   # name of HooliganMember.
-  jobname: '{{jobname}}（暴动者）'
+  jobname: '{{jobname}}（暴動者）'
   # select a target of attack.
-  select: '{{name}} 向 {{target}} 施加暴行。'
+  select: '{{name}} 對 {{target}} 施暴。'
   # HooliganMember was arrested (for original Hooligan)
-  arrested: '{{name}} 由于被保安逮捕，没能成功的施加暴行。'
+  arrested: '{{name}} 由於被保安逮捕，未能成功施暴。'
   # HooliganMember was uncomplexed
-  uncomplex: '{{name}} 由于被保安逮捕，退出了暴动。'
+  uncomplex: '{{name}} 由於被保安逮捕，退出了暴動。'
 
 HooliganGuard:
   # name of HooliganGuardComplex.
   jobname: '{{jobname}}（保安）'
   # become a guard at first night.
-  become: '由于村子里潜入了暴徒，{{name}} 被任命为保安。'
+  become: '由於村莊裡潛入暴徒，{{name}} 被任命為保安。'
   # select a target of arrest.
-  select: '{{name}} 逮捕了 {{target}}。'
+  select: '{{name}} 對 {{target}} 逮捕。'
   
 HomeComer:
   # select a target of gift.
-  select: '{{name}} 向 {{target}} 赠送了 {{kit}}。'
+  select: '{{name}} 對 {{target}} 贈送 {{kit}}。'
 
 Illusionist:
   # select a target of illusion.
-  select: '{{name}} 把今晚人狼的袭击目标改变成了 {{target}}。'
+  select: '{{name}} 將今夜人狼的襲擊目標轉移為 {{target}}。'
 
 DragonKnight:
   # select a target of kill.
-  killSelect: '{{name}} 袭击了 {{target}}。'
+  killSelect: '{{name}} 對 {{target}} 襲擊。'
 
 Satori:
   # Today's target is automatically chosen.
-  auto: '{{name}} 今天将会随机选择一个人进行读心。'
+  auto: '{{name}} 今日將會隨機抽選一人進行讀心。'
   # select a target of mind reading.
-  select: '{{name}} 对 {{target}} 使用了读心术。'
+  select: '{{name}} 對 {{target}} 讀心。'
   # log of result.
-  resultlog: '根据 {{name}} 的读心结果，{{target}} 是 {{result}}。'
+  resultlog: '根據 {{name}} 的讀心結果，{{target}} 是 {{result}}。'
 
 Dracula:
   # select today's target of Dracula
-  select: '{{name}} 想要试试看吸 {{target}} 的血。'
+  select: '{{name}} 對 {{target}} 吸血。'
   # decided target
-  decide: '德古拉吸了 {{target}} 的血。'
+  decide: '{{target}} 被德古拉吸血。'
   # there was a dracula attack.
-  attackLog: '德古拉成功吸血了。'
+  attackLog: '德古拉的吸血成功。'
   # there was no attack.
-  noAttackLog: '德古拉吸血失败了。'
+  noAttackLog: '德古拉的吸血失敗。'
 
 Elementaler:
   # select target of guard
-  select: '{{name}} 使用精灵的力量守护了 {{target}}。'
+  select: '{{name}} 施展精靈之力守護 {{target}}。'
 
 Poet:
   # select destination of poem.
-  select: '{{name}} 向 {{target}} 赠诗。'
+  select: '{{name}} 對 {{target}} 贈詩。'
   # received from someone.
-  become: '{{name}} 收到了来自 {{sender}} 的赠诗，变成了诗人。'
+  become: '{{name}} 收到來自 {{sender}} 的贈詩，變化為詩人。'
 
 DarkClown:
   # System log that a DarkClown is alive.
-  alive: '小丑潜入了村子，村民们开始失去理智。'
+  alive: '小丑潛入村莊，村莊的住民們開始失去理智。'
   # System log that a DarkClown has dead.
-  dead: '小丑从村子中离开了，村民们逐渐寻回了理智。'
+  dead: '小丑離開了村莊離開，村莊的住民們逐漸尋回了理智。'
   
 DualPersonality:
   # Your team is 'werewolf'.
-  werewolf: '今天 {{name}} 的主导人格是人狼侧的。'
+  werewolf: '今日 {{name}} 的主導人格為人狼陣營。'
   # Your team is 'human'.
-  human: '今天 {{name}} 的主导人格是村人侧的。'
+  human: '今日 {{name}} 的主導人格為村人陣營。'
 
 Sacrifice:
   # Selected a target.
-  select: '{{name}} 为了守护 {{target}} 而甘愿成为活祭品。'
-  protected: '{{name}} 献上了活祭品，成功抵抗了 {{found}}。'
+  select: '{{name}} 爲守護 {{target}} 而甘願成為活祭品。'
+  protected: '{{name}} 獻上活祭品，成功抵抗 {{found}}。'
 
 AbsoluteWolf:
-  protected: '{{name}} 凭借自身的绝对实力抵抗了 {{found}}。'
+  protected: '{{name}} 憑藉自身的絕對實力抵抗 {{found}}。'
 
 Oracle:
-  friend: '{{name}} 得到了神谕。恋人阵营马上就要获胜了。'
-  fox: '{{name}} 得到了神谕。妖狐阵营马上就要获胜了。'
-  werewolf: '{{name}} 得到了神谕。人狼阵营马上就要获胜了。'
+  friend: '{{name}} 得到神諭。即將迎來戀人陣營的勝利。'
+  fox: '{{name}} 得到神諭。即將迎來妖狐陣營的勝利。'
+  werewolf: '{{name}} 得到神諭。即將迎來人狼陣營的勝利。'
 
 GachaAddicted:
   type:
     normal: '普通抽卡'
     premium: '稀有抽卡'
-  gacha: '{{name}} 在 {{gachaType}} 抽卡后获得了 {{rarity}}【{{jobname}}】。'
-  commit: '{{name}} 决定使用抽到的【{{jobname}}】。'
+  gacha: '{{name}} 於 {{gachaType}} 抽卡，獲得 {{rarity}}【{{jobname}}】。'
+  commit: '{{name}} 使用抽到的【{{jobname}}】。'
 
 Fate:
-  changeRole: '{{name}} 明悉了自己乃是命运之子，决意作为一名 {{result}} 生存下去。'
+  changeRole: '{{name}} 明悉自己乃是命運之子，決意作為一名 {{result}} 生存下去。'
 
 Synesthete:
-  select: '{{name}} 使用通感的能力查看了 {{target}} 的颜色。'
-  result: '{{name}} 使用通感的能力查看了 {{target}} 的颜色，那是一片 {{result}}。'
+  select: '{{name}} 對 {{target}} 通感。'
+  result: '根據 {{name}} 對 {{target}} 的通感結果，確認到對方的顏色，那是一片 {{result}}。'
   color:
-    - 赤色
+    - 紅色
     - 茶色
     - 橙色
-    - 小麦色
-    - 黄色
-    - 土黄色
-    - 绿色
-    - 淡蓝色
-    - 蓝色
+    - 小麥色
+    - 黃色
+    - 土黃色
+    - 綠色
+    - 淡藍色
+    - 藍色
     - 青色
     - 紫色
-    - 樱色
+    - 櫻色
     - 金色
-    - 银色
+    - 銀色
     - 灰色
 
 Streamer:
-  becomeListener: '{{name}} 变成了 {{target}} 的直播观众。'
-  getJob: '{{name}} 在今晚将要尝试 {{job}} 的职业。'
-  retire: '{{name}} 因为失去了直播观众而引退了，现在变成了 {{job}}。'
+  becomeListener: '{{name}} 成為 {{target}} 的直播觀眾。'
+  getJob: '{{name}} 於今夜試圖嘗試 {{job}} 的職業被盜竊了。'
+  retire: '{{name}} 由於失去直播觀眾而引退，現在變化為 {{job}}。'
 
 QueenOfNight:
-  FascinatePlayer: '{{name}} 骚乱了 {{target}} 的心。'
+  FascinatePlayer: '{{name}} 對 {{target}} 騷亂。'
 
 Tarzan:
   # Result of skill.
-  result: '{{name}} 察觉到了 {{count}} 名人狼的气息。'
+  result: '{{name}} 察覺到仍有 {{count}} 名人狼的氣息。'
 
 RemoteWorker:
   # Canceled a punishment.
-  cancel: '{{name}} 因为一直宅在家里而免受处刑。'
+  cancel: '{{name}} 因為一直宅在家裡而免受處刑。'
 
 IntuitionWolf:
   # Canceled a punishment.
-  guarded: '{{name}} 凭直觉感到自己被 {{target}} 护卫了。'
+  guarded: '{{name}} 憑藉直覺察覺自己受到 {{target}} 護衛。'
 
 Lorelei:
-  select: '{{name}} 被罗蕾莱的歌声魅惑了。'
-  song: '罗蕾莱的歌声在村中盘旋。'
+  select: '{{name}} 被羅蕾萊的歌聲魅惑。'
+  song: '羅蕾萊的歌聲於村莊中迴響。'
 
 Gambler:
   form:
-    bet: '参加赌博'
-    keep: '远离赌博'
-  bet: '{{name}} 加入了赌博。'
-  keep: '{{name}} 没有加入赌博。'
+    bet: '參與賭博'
+    keep: '遠離賭博'
+  bet: '{{name}} 參與賭博。'
+  keep: '{{name}} 並未參與賭博。'
 
 CynthiaWolf:
-  affected: '{{target}} 被 {{name}} 放出的月亮的气场魅惑了。'
+  affected: '{{name}} 被 {{target}} 散發的月之氣場魅惑。'
 
 Trickster:
   # First select.
-  select1: '{{name}} 指定 {{target}} 为羁绊中的第1人。'
-  select2: '{{name}} 指定 {{target}} 为羁绊中的第2人。'
+  select1: '{{name}} 指定 {{target}} 為羈絆中的第 1 人。'
+  select2: '{{name}} 指定 {{target}} 為羈絆中的第 2 人。'
   # Error: select another player
-  noSelectTwice: '请选择另一个不同的对象。'
+  noSelectTwice: '請選擇另一名不同的對象。'
   # Select a target.
-  select: '{{name}} 在 {{target}} 的命运中系上了绳结。'
+  select: '{{name}} 對 {{target}} 的命運繫結羈絆。'
   # Became a lover.
-  become: '{{name}} 缔结了命运的羁绊。'
+  become: '{{name}} 繫結了命運的羈絆。'
 
 Sleepwalker:
-  awake: '{{name}} 察觉自己的深夜里徘徊。'
+  awake: '{{name}} 察覺自己的深夜裡徘徊。'
 
 Oni:
-  select: '{{name}} 准备把 {{target}} 捉走。'
+  select: '{{name}} 對 {{target}} 捕捉。'
 
 Saint:
-  select: '{{name}} 对 {{target}} 使用了奇迹之力。'
+  select: '{{name}} 對 {{target}} 施展奇蹟之力。'
 
 Acrobat:
-  cancel: '{{name}} 躲开了人狼的袭击。'
+  cancel: '{{name}} 迴避人狼的襲擊。'
 
 Hanami:
-  drunk: '{{name}} 与友人们赏花过后尽兴归去了，其中似乎有人酩酊大醉。'
+  drunk: '{{name}} 與友人們賞花過後盡興歸去了，其中似乎有人酩酊大醉。'
 
 BloodWolf:
-  using: '{{name}} 以自身为祭品，引出了血月之力。'
-  affect: '血月之力封印了村人们的能力。'
+  using: '{{name}} 以自身為祭品，引出血月之力。'
+  affect: '血月之力封印了村人們的能力。'
 
 # Werewolf
 SpaceWerewolfImposter:
   # Selected a target.
-  select: '以 {{name}} 为首的诈欺师们决定今晚袭击 {{target}}。'
+  select: '以 {{name}} 為首的詐欺師們決定今夜襲擊 {{target}}。'
 
 SpaceWerewolfObserver:
   # Selected a target.
-  select: '{{name}} 观察了 {{target}}。'
-  resultImposter: '根据 {{name}} 对 {{target}} 的观察，{{target}} 是背叛者。'
-  resultNotImposter: '根据 {{name}} 对 {{target}} 的观察，{{target}} 不是背叛者。'
+  select: '{{name}} 對 {{target}} 觀察。'
+  resultImposter: '根據 {{name}} 對 {{target}} 的觀察，{{target}} 是背叛者。'
+  resultNotImposter: '根據 {{name}} 對 {{target}} 的觀察，{{target}} 不是背叛者。'
 
 SpaceWerewolfGuard:
-  select: '{{name}} 守护了 {{target}}。'
+  select: '{{name}} 守護 {{target}}。'
 
 GameMaster:
   # Failed to revive.
-  reviveFail: '这名玩家无法复活。'
+  reviveFail: '該玩家無法被復活。'
   # Failed to shorten time.
-  shortenFail: '无法继续缩短剩余时间。'
+  shortenFail: '剩餘時間太短無法縮短。'
   # GM log to heaven.
-  heavenLog: 'GM→灵界'
+  heavenLog: 'GM {{name}} →靈界'
   # GM log to audience.
-  audienceLog: 'GM→观战者'
+  audienceLog: 'GM {{name}} →觀戰'
   # GM monologue name.
-  monologueLog: 'GM自言自语'
+  monologueLog: 'GM {{name}} 的自言自語'
+  # GM Log name.
+  gamemasterLog: 'GM {{name}}'
 
 Helper:
   # Select a help target.
-  select: '{{name}} 成为了 {{target}} 的帮手。'
+  select: '{{name}} 擔任 {{target}} 的助手。'
 
 Waiting:
   # No preference.
-  none: '随机'
+  none: '不指定'
   # Select a preference of job.
-  select: '{{name}} 希望成为 {{jobname}}。'
+  select: '{{name}} 希望擔任 {{jobname}}。'
   # Select none.
-  selectNone: '{{name}} 决定随机选择职业。'
+  selectNone: '{{name}} 決定隨機抽選職業。'
 
 ##### Sub jobs!
 Friend:
   # name for desc
-  name: '恋人'
+  name: '戀人'
   # jobname of Friend
-  jobname: '恋人（{{jobname}}）'
+  jobname: '戀人（{{jobname}}）'
 
 CultMember:
   # name for desc
-  name: '教会信者'
+  name: '教主信徒'
   # jobname
-  jobname: '教会信者（{{jobname}}）'
+  jobname: '教主信徒（{{jobname}}）'
 
 WolfMinion:
   # name for desc
-  name: '狼的仆从'
+  name: '狼的部下'
   # jobname
-  jobname: '狼的仆从（{{jobname}}）'
+  jobname: '狼的部下（{{jobname}}）'
 
 HolyProtected:
-  guarded: '{{name}} 被神圣的力量守护了。'
+  guarded: '{{name}} 被神聖之力守護。'
 
 Drunk:
   # jobname
@@ -1075,24 +1084,24 @@ Counseled:
   jobname: '更生者（{{jobname}}）'
 
 KeepedLover:
-  fakeName: '恋人'
-  jobname: '手玉（{{jobname}}）'
-  fakeJobname: '恋人（{{jobname}}）'
+  fakeName: '戀人'
+  jobname: '玩弄（{{jobname}}）'
+  fakeJobname: '戀人（{{jobname}}）'
 
 FoxMinion:
-  jobname: '狐凭（{{jobname}}）'
+  jobname: '狐憑（{{jobname}}）'
   
 GotChocolateTrue:
   jobname: '本命（{{jobname}}）'
 
 FanOfIdol:
-  name: '粉丝'
+  name: '粉絲'
   # message when his idol is dead.
-  idolDead: '偶像的死亡导致伤心过度，{{name}} 今晚不能使用能力。'
+  idolDead: '由於偶像喪命的打擊，{{name}} 今夜不能使用能力。'
 
 LoreleiFamilia:
-  name: '罗蕾莱眷属'
-  jobname: '罗蕾莱眷属（{{jobname}}）'
+  name: '羅蕾萊眷屬'
+  jobname: '羅蕾萊眷屬（{{jobname}}）'
 
 MoonPhilia:
   # name for desc
@@ -1101,14 +1110,22 @@ MoonPhilia:
   jobname: '月狂病（{{jobname}}）'
 
 Bonds:
-  name: '羁绊'
-  jobname: '{{jobname}}（羁绊）'
+  name: '羈絆'
+  jobname: '{{jobname}}（羈絆）'
 
 Decider:
-  jobname: '{{jobname}}（决定者）'
+  jobname: '{{jobname}}（決定者）'
 
 Authority:
-  jobname: '{{jobname}}（权力者）'
+  jobname: '{{jobname}}（權力者）'
+  
+Critical_vote:
+  jobname: '{{jobname}}（必殺）'
+  on: '{{name}} 使出必殺百票。'
+  
+Critical_luck:
+  jobname: '{{jobname}}（要害）'
+  on: '{{name}} 的要害隱隱作痛，呃啊！'             
 
 Chemical:
   jobname: '{{left}}×{{right}}'

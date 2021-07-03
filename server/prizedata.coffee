@@ -14,16 +14,16 @@ Shared=
 #   phonetics:{}
 # }
 makePrize=(cb)->
-    # 胜利と败北を読み込む
+    # 勝利と敗北を読み込む
     result={
         names: {}
         phonetics: {}
     }
     cb2 = (result)->
         libi18n.addResourceLoadCallback ->
-            # 残り
+            # 殘り
             makeOtherPrize result
-            # 称号IDと名前の対応表を作る
+            # 稱號IDと名前の対応表を作る
             makeNames result
             cb result
 
@@ -56,14 +56,14 @@ exports.makePrize=makePrize
 # win.csv,lose.csvを読み込む
 loadTable=(arr)->
     result={}
-    # 1行目は番号
+    # 1行目は番號
     nums=arr.shift()
     # 1列目は見出しなのでいらない
     nums.shift()
-    normals=[]  #通常职业
-    specials=[] #特殊职业
+    normals=[]  #通常職業
+    specials=[] #特殊職業
     normaljobs=["all","Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","Fox"]
-    # 数をパースする
+    # 數をパースする
     for num in nums
         res=num.match /^(\d+)(?:\(\d+\))?$/
         if res
@@ -72,9 +72,9 @@ loadTable=(arr)->
                 specials.push parseInt res[2]
             else
                 specials.push parseInt res[1]
-    # 残りをパースする
+    # 殘りをパースする
     for row in arr
-        # 最初は职业名
+        # 最初は職業名
         jobname=row.shift()
         normalflag = jobname in normaljobs
         result[jobname]=obj={}
@@ -134,7 +134,7 @@ makeOtherPrize=(result)->
         cursekill:
             names: prizedata.counter.cursekill
             func:(game,pl)->
-                # 呪殺を数える
+                # 呪殺を數える
                 game.gamelogs.filter((x)->x.id==pl.id && x.event=="cursekill").length
         # 初日黒
         divineblack2:
@@ -147,7 +147,7 @@ makeOtherPrize=(result)->
             names: prizedata.counter.GJ
             func:(game,pl)->
                 game.gamelogs.filter((x)->x.id==pl.id && x.event=="GJ").length
-        # 恋人の胜利回数
+        # 戀人の勝利回數
         lovers_wincount:
             names: prizedata.counter.lovers_wincount
             func:(game,pl)->
@@ -155,7 +155,7 @@ makeOtherPrize=(result)->
                     1
                 else
                     0
-        # 恋人の败北回数
+        # 戀人の敗北迴數
         lovers_losecount:
             names: prizedata.counter.lovers_losecount
             func:(game,pl)->
@@ -163,17 +163,17 @@ makeOtherPrize=(result)->
                     1
                 else
                     0
-        # 商品を受け取った回数
+        # 商品を受け取った回數
         getkits_merchant:
             names: prizedata.counter.getkits_merchant
             func:(game,pl)->
                 game.gamelogs.filter((x)->x.target==pl.id && x.event=="sendkit").length
-        # 商品を人狼侧に送った回数
+        # 商品を人狼側に送った回數
         sendkits_to_wolves:
             names: prizedata.counter.sendkits_to_wolves
             func:(game,pl)->
                 game.gamelogs.filter((x)->x.id==pl.id && x.event=="sendkit" && getTeamByType(getTypeAtTime(game,x.target,x.day))=="Werewolf").length
-        # 模仿者せずに终了
+        # 模仿者せずに終了
         nocopy:
             names: prizedata.counter.nocopy
             func:(game,pl)->
@@ -181,7 +181,7 @@ makeOtherPrize=(result)->
                     1
                 else
                     0
-        # 2日目昼に吊られた
+        # 2日目晝に吊られた
         day2hanged:
             names: prizedata.counter.day2hanged
             func:(game,pl)->
@@ -189,7 +189,7 @@ makeOtherPrize=(result)->
                     x.id==pl.id && x.event=="found" && x.flag=="punish" && x.day==2
                 ).length
 
-        # 総試合数
+        # 総試合數
         allgamecount:
             names: prizedata.counter.allgamecount
             func:(game,pl)->1
@@ -213,97 +213,60 @@ makeOtherPrize=(result)->
                 game.gamelogs.filter((x)->x.target==pl.id && x.event=="brainwash").length
         # 猝死する
         gone:
-            names: {}
+            names: 
+                1:"暴斃/暴斃"
             func:(game,pl)->
                 game.gamelogs.filter((x)->x.id==pl.id && x.event=="found" && x.flag in ["gone-day","gone-night"]).length
-        # 狮子舞に噛まれる
+        # 獅子舞に噛まれる
         shishimaibit:
             names: prizedata.counter.shishimaibit
             func:(game,pl)->
                 game.gamelogs.filter((x)->x.target==pl.id && x.event=="shishimaibit").length
-        # 春节特别称号
-        happychinesenewyear:
+        # 2017聖誕節特別稱號
+        happy2017merrychristmas:
             names:
                 1:[
-                    "丁酉年/丁酉年"
-                    "大年初一/大年初一"
-                    "谨贺新春/谨贺新春"
+                    "聖誕快樂/聖誕快樂"
+                    "平安/平安"
+                    "夜/夜"
+                    "茫茫/茫茫"
                 ]
-                5:"鸡年大吉/鸡年大吉"
-                10:"认真过年少玩人狼/认真过年少玩人狼"
+                3:"繽紛/繽紛"
+                5:"鈴聲/鈴聲"
+                7:"喜樂/喜樂"
+                10:"白雪/白雪"
             func:(game,pl)->
                 date = new Date()
                 month=date.getMonth()
                 year=date.getFullYear()
                 d=date.getDate()
-                if month==0 && d==28 && year==2017
+                if month==11 && 25<=d<=31 && year==2017
                     1
                 else
                     0
-        happychinesenewyear2018:
+        # 2018年新年特別稱號
+        happy2018newyear:
             names:
                 1:[
                     "戊戌年/戊戌年"
-                    "谨贺新春/谨贺新春"
+                    "大年初一/大年初一"
+                    "謹賀新春/謹賀新春"
                 ]
-                5:[
-                    "狗年/狗年"
-                    "健康/健康"
-                ]
-                20:"珍惜假期/珍惜假期"
+                2:"恭喜發財/恭喜發財"
+                3:"紅包/紅包"
+                4:"Happy New Year/Happy New Year"
+                5:"狗年大吉/狗年大吉"
+                6:"新的開始/新的開始"
+                7:"大吉大利/大吉大利"
+                8:"謹祝/謹祝"
+                9:"拿來/拿來"
+                10:"過年/過年"
             func:(game,pl)->
                 date = new Date()
                 month=date.getMonth()
                 year=date.getFullYear()
                 d=date.getDate()
-                if month==1 && 16<=d<=22 && year==2018
-                    1
-                else
-                    0
-        happychinesenewyear2019:
-            names:
-                1:[
-                    "己亥年/己亥年"
-                    "谨贺新春/谨贺新春"
-                ]
-                5:[
-                    "猪年/猪年"
-                    "啥是佩奇/啥是佩奇"
-                ]
-                20:"佩奇/佩奇"
-            func:(game,pl)->
-                date = new Date()
-                month=date.getMonth()
-                year=date.getFullYear()
-                d=date.getDate()
-                if month==1 && 5<=d<=20 && year==2019
-                    1
-                else
-                    0
-        happychinesenewyear2020:
-            names:
-                1:[
-                    "庚子年/庚子年"
-                    "谨贺新春/谨贺新春"
-                ]
-                5:[
-                    "鼠年/鼠年"
-                    "鼠你好运/鼠你好运"
-                ]
-                20:[
-                    "Jerry/Jerry"
-                ]
-                50:[
-                    "Tom/Tom"
-                ]
-            func:(game,pl)->
-                date = new Date()
-                month=date.getMonth()
-                year=date.getFullYear()
-                d=date.getDate()
-                if month==0 && 24<=d<=31 && year==2020
-                    1
-                else if month==1 && 1<=d<=8 && year==2020
+                if month==0 && 1<=d<=7 && year==2018
                     1
                 else
                     0
@@ -327,20 +290,20 @@ chkCmplType=(obj,cmpltype)->
         obj.Complex_type==cmpltype || chkCmplType obj.Complex_main,cmpltype
     else
         false
-# プレイヤー的职业を調べる
+# プレイヤー的職業を調べる
 getType=(pl)->
     if pl.type=="Complex"
         getType pl.Complex_main
     else
         pl.type
-# もともと的职业を調べる
+# もともと的職業を調べる
 getOriginalType=(game,userid)->
     # originalType情報を使用
     pl = getpl game, userid
     if pl?.originalType
         return pl.originalType
     getTypeAtTime game,userid,0
-# あるプレイヤーのある時点で的职业を調べる
+# あるプレイヤーのある時點で的職業を調べる
 getTypeAtTime=(game,userid,day)->
     id=(pl=getpl(game,userid)).id
     ls=game.gamelogs.filter (x)->x.event=="transform" && x.id==id && x.day>day  # 変化履歴を調べる

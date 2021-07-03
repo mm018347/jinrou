@@ -47,13 +47,13 @@ tabs=
                 if query.command
                     ss.rpc "admin.doCommand", query,(result)->
                         if result.error?
-                            Index.util.message "错误",result.error
+                            Index.util.message "錯誤",result.error
                             return
-                        Index.util.message "报告",result.result
+                        Index.util.message "報告",result.result
                 else
                     ss.rpc "admin.dataExport", query,(result)->
                         if result.error?
-                            Index.util.message "错误",result.error
+                            Index.util.message "錯誤",result.error
                             return
                         window.open result.file
     update:
@@ -66,7 +66,7 @@ tabs=
                         $("#pullresult").text result.error
                     else
                         $("#pullresult").text result.result
-                    Index.util.ask "管理界面","要停止人狼服务器吗?",(result)->
+                    Index.util.ask "管理界面","要停止人狼伺服器嗎?",(result)->
                         if result
                             ss.rpc "admin.end",(result)->
     news:
@@ -80,7 +80,7 @@ tabs=
 
 
 exports.start=->
-    Index.util.prompt "管理界面","请输入管理密码",{type:"password"},(pass)->
+    Index.util.prompt "管理界面","請輸入管理密碼",{type:"password"},(pass)->
         ss.rpc "admin.register", {password:pass},(err)->
             if err?
                 Index.util.message "管理界面",err
@@ -121,7 +121,7 @@ initblisttable=(page=0)->
                 cell.textContent = doc.ip
             
             cell=row.insertCell 2
-            cell.textContent=(if doc.expires? then new Date(doc.expires).toLocaleString() else "无期限")
+            cell.textContent=(if doc.expires? then new Date(doc.expires).toLocaleString() else "無期限")
             
             cell=row.insertCell 3
             cell.textContent= doc.types?.join(", ")
@@ -131,11 +131,11 @@ initblisttable=(page=0)->
 
             cell=row.insertCell 5
             if doc.forgiveDate?
-                cell.textContent = "已经解除"
+                cell.textContent = "已經解除"
                 input=document.createElement "input"
                 input.type="button"
                 input.dataset.setbanid=doc.id
-                input.value="再设定"
+                input.value="再設定"
                 cell.appendChild input
             else if not doc.id?
                 cell.textContent = "解除不可"

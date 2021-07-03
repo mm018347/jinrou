@@ -1,18 +1,18 @@
 section.admin#admin
-  h1 菜单
-  p 请从下列菜单选择要管理的项目:
+  h1 菜單
+  p 請從下列菜單選擇要管理的專案:
   ul
-    li(data-opener="blacklist") 黑名单管理
-    li(data-opener="grandalert") 全体告知
-    li(data-opener="dataexport") 数据库导出
+    li(data-opener="blacklist") 黑名單管理
+    li(data-opener="grandalert") 全體通知
+    li(data-opener="dataexport") 導出數據庫
     li(data-opener="update") 更新
     li(data-opener="news") 通知管理
   section#blacklist(hidden)
-    h1 黑名单管理
+    h1 黑名單管理
     table
       thead
         tr
-          th 账号
+          th 帳號
           th IP地址
           th 期限
           th 禁止項目
@@ -21,76 +21,76 @@ section.admin#admin
       tbody#blacklisttable
     form#blistpager
       p
-        input(type="button",name="prev",value="上一页")
+        input(type="button",name="prev",value="上一頁")
         span#page
         /
         span#total
-        input(type="button",name="next",value="下一页")
-    h2 新建黑名单
+        input(type="button",name="next",value="下一頁")
+    h2 建立黑名單
     form#newbanform
       fieldset
         dl
-          dt 黑名单账号
+          dt 黑名單帳號
           dd
             input(name="userid",size="20",required)
           dt 期限
           dd
             label
               input(type="radio",name="expire",value="forever",checked)
-              无期限
+              無期限
             | |
             input(type="radio",name="expire",value="some")
             input(name="month",type="number",step="1",value="0",min="0")
             | 月
             input(name="day",type="number",step="1",value="0",min="0")
             | 天
-          dt 禁止项目
+          dt 禁止專案
           dd
             ul
               li
                 label
                   input(type="checkbox",name="create_account",value="on",checked)
-                  | 账号注册
+                  | 帳號註冊
               li
                 label
                   input(type="checkbox",name="lobby_say",value="on",checked)
-                  | 聊天室发言
+                  | 聊天室發言
               li
                 label
                   input(type="checkbox",name="watch_say",value="on",checked)
-                  | 观战发言
+                  | 觀戰發言
               li
                 label
                   input(type="checkbox",name="play",value="on",checked)
-                  | 参加游戏
+                  | 參加遊戲
           dt 理由
           dd
             input(name="reason",type="text")
         p
           input(type="submit",value="OK")
   section#grandalert(hidden)
-    h1 全体告知
+    h1 全體告知
     form#alertform
       p
-        | 标题:
+        | 標題:
         input(name="title",size="20",value="通知")
       p
-        | 内容:
-        input(name="message",size="50",placeholder="消息",required)
+        | 內容:
+        input(name="message",size="50",placeholder="訊息",required)
       p
         label
           input(type="checkbox",name="system",value="on",checked)
-          | 月下人狼内へ
+          | 於 紫月人狼
         label
           input(type="checkbox",name="twitter",value="on")
-          | twitterへ
+          | 於 Twitter
         
-      p: input(type="submit",value="发送")
+      p: input(type="submit",value="發送")
   section#dataexport(hidden)
-    h1 数据库导出
+    h1 數據庫導出
     form#dataexportform
       p
-        | 密码
+        | 密碼
         input(name="pass",size="30",required)
       p
         | 命令
@@ -108,13 +108,13 @@ section.admin#admin
       thead
         tr
           th _id
-          th 时间
-          th 内容
+          th 時間
+          th 內容
       tbody#newstable
-    h2 新建通知
+    h2 建立通知
     form#newnewsform
       p
-        | 内容
+        | 內容
         input(name="message",size="100",required)
       p
         input(type="submit",value="OK")

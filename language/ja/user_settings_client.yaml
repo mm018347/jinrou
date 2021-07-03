@@ -1,103 +1,103 @@
 # Language file for user settings page.
 
 # title of page.
-title: '用户设定'
+title: '玩家設定'
 
 # loading text.
-loading: '正在读取…'
+loading: '讀取中…'
 
 # back to mypage link.
-backLink: '返回个人页面'
+backLink: '返回個人資訊'
 
 # description of settings page.
-description: '用户设定将保存到所有终端。'
+description: '玩家設定將儲存於所有裝置。'
 
 # colors.
 color:
   # default name of profile (without number).
-  defaultProfile: '默认设定'
+  defaultProfile: '預設設定'
   # saved profiles
-  savedProfiles: '已保存的配色设置'
+  savedProfiles: '已儲存的配色設定'
   # title of colors tab.
-  title: '配色设置'
+  title: '配色設定'
   # text color.
-  textColor: '文字颜色'
+  textColor: '文字顏色'
   # background color.
-  backgroundColor: '背景颜色'
+  backgroundColor: '背景顏色'
   # sample text
-  sampleText: '示例文字 Sample Text'
+  sampleText: '範例文字 Sample Text'
   # text that indicates currently color is edited
-  editing: '编辑中'
+  editing: '編輯中'
   # button to edit profile.
-  editButton: '编辑'
+  editButton: '編輯'
   # button to delete profile,
-  deleteButton: '删除'
+  deleteButton: '刪除'
   # button to use this profile.
-  useButton: '使用此设定'
+  useButton: '使用該設定'
   # button label when this is currently used.
   usedButtonLabel: '正在使用'
   # button to add a new profile.
-  addButton: '追加'
+  addButton: '新增'
   # new name dialog.
   profileNameDialog:
-    title: '编辑设定'
-    newMessage: '请为新的设定命名。'
-    ok: '决定'
+    title: '編輯設定'
+    newMessage: '請輸入新設定的名稱。'
+    ok: '確定'
     cancel: '取消'
   # delete profile dialog.
   deleteProfileDialog:
-    title: '删除设定'
-    message: '确认要删除设定「{{name}}」？'
-    ok: '删除'
+    title: '刪除設定'
+    message: '確認要刪除設定「{{name}}」？'
+    ok: '刪除'
     cancel: '取消'
   # name of each color settings.
   colorSetting:
-    day: '白天的背景色与文字色'
-    night: '夜间的背景色与文字色'
-    heaven: '灵界的背景色与文字色'
-    system: '系统通知'
-    nextturn: '回合前进通知'
-    audience: '旁观者的发言'
-    couple: '共有者的会话'
-    fox: '妖狐的会话'
-    gm1: 'GM的发言1'
-    gm2: 'GM的发言2'
-    heavenmonologue: '灵界的自言自语'
-    half_day: '恶灵凭依的发言（灵界）'
-    helperwhisper: '帮手的发言'
-    hidden: '不公开情报'
-    inlog: 'Endless黑暗火锅的加入通知'
-    madcouple: '尖叫狂人的发言'
-    monologue: '自言自语'
-    poem: '诗人的诗'
-    probability_table: '量子人狼的概率表'
-    streaming: '主播的直播内容'
-    userinfo: '拒绝复活'
-    skill: '职业的能力'
+    day: '白天的背景色與文字色'
+    night: '夜晚的背景色與文字色'
+    heaven: '靈界的背景色與文字色'
+    system: '系統通知'
+    nextturn: '回合進展通知'
+    audience: '旁觀者的發言'
+    couple: '共有者的會話'
+    fox: '妖狐的會話'
+    gm1: 'GM 的發言 1'
+    gm2: 'GM 的發言 2'
+    heavenmonologue: '靈界的自言自語'
+    half_day: '惡靈憑依的發言（靈界）'
+    helperwhisper: '助手的發言'
+    hidden: '不公開的訊息'
+    inlog: '無盡闇鍋的參與通知'
+    madcouple: '尖叫狂人的發言'
+    monologue: '自言自語'
+    poem: '詩人的詩'
+    probability_table: '量子人狼的機率表'
+    streaming: '主播的直播內容'
+    userinfo: '拒絕復活'
+    skill: '職業的能力'
     voteto: '投票'
-    werewolf: '人狼的会话'
-    will: '遗言'
+    werewolf: '人狼的會話'
+    will: '遺言'
 
 # phone-ui.
 phone:
   # title of phone-ui tab.
-  title: '手机浏览器的设定'
+  title: '手機瀏覽器的設定'
   # ui for smartphone.
   ui:
-    title: '使用手机浏览器模式显示'
+    title: '使用手機瀏覽器模式顯示'
     yes: '使用'
     no: '不使用'
   # font size for smartphones.
   fontSize:
     title: '文字的大小'
-    description: '设置游戏画面中的字号大小。'
+    description: '設定遊戲畫面中的字體大小。'
     large: '大'
     normal: '中'
     small: '小'
-    'very-small': '极小'
+    'very-small': '極小'
   # position of speak form
   speakFormPosition:
-    title: '发言框的位置'
-    description: '设置游戏画面中发言框的位置。'
-    normal: '随页面滚动'
-    fixed: '固定于下方'
+    title: '發言輸入欄的位置'
+    description: '設定遊戲畫面中發言輸入欄的位置。'
+    normal: '隨頁面滾動'
+    fixed: '固定於下方'

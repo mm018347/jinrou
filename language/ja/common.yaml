@@ -3,45 +3,45 @@
 # basic information of app.
 app:
   # name of app.
-  name: "月下人狼"
+  name: "紫月人狼"
 
 error:
   # Common heading indicating error.
-  error: "错误"
+  error: "錯誤"
   # You need to log in.
-  needLogin: "请先登录。"
+  needLogin: "請先登入。"
   # Input is invalid.
-  invalidInput: "输入的内容无效。"
+  invalidInput: "輸入的內容無效。"
 
 # Message dialog.
 messageDialog:
   # close button.
-  close: "关闭"
+  close: "關閉"
 
 # Error dialog.
 errorDialog:
   # title.
-  title: "错误"
+  title: "錯誤"
   # close button.
-  close: "关闭"
+  close: "關閉"
 
 # Text for login form.
 loginForm:
   # title of login form.
-  title: "登录"
+  title: "登入"
   # button to login.
-  ok: "登录"
+  ok: "登入"
   # cancel button.
   cancel: "取消"
   # label for userid input.
-  userid: "账号"
+  userid: "帳號"
   # label for password.
-  password: "密码"
+  password: "密碼"
   # link to sign up form.
-  signup: "注册"
+  signup: "註冊"
   # link to help page.
-  help: "帮助"
+  help: "幫助"
   # link to password reset page.
-  passwordReset: "忘记密码"
+  passwordReset: "忘記密碼"
   # error when login failed.
-  error: "账号或密码错误。"
+  error: "帳號或密碼錯誤。"

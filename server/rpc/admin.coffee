@@ -12,7 +12,7 @@ i18n = libi18n.getWithDefaultNS 'admin'
 oauth=require './../oauth.coffee'
 exports.actions =(req,res,ss)->
     req.use 'session'
-    # 现在のセッションを管理者として承認する
+    # 現在のセッションを管理者として承認する
     register:(query)->
         flag=false
         req.session.administer=false
@@ -171,7 +171,7 @@ exports.actions =(req,res,ss)->
         res {}
 
     # ------------- news関係
-    # news一览を得る
+    # news一覽を得る
     getNews:(query)->
         unless req.session.maintenance
             res {error: i18n.t "error.notAdmin"}
@@ -190,4 +190,4 @@ exports.actions =(req,res,ss)->
                 M.news.insert addquery,{safe:true},(err,doc)->
                     res null
 
-pro=null    # 现在のプロセス
+pro=null    # 現在のプロセス

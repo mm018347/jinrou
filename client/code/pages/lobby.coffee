@@ -56,7 +56,7 @@ exports.start=->
         je.preventDefault()
         ss.rpc "lobby.say", je.target.elements["comment"].value,(result)->
             if result?.error?
-                Index.util.message "错误", result.error
+                Index.util.message "錯誤", result.error
         je.target.reset()
     socids=[
         Index.socket.on "log",null,getlog

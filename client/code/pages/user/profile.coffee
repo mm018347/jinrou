@@ -97,7 +97,7 @@ exports.start=(user)->
                                 dialog.showMessageDialog {
                                     modal: true
                                     title: "通知"
-                                    message: "密码变更成功。"
+                                    message: "密碼變更成功。"
                                     ok: "OK"
                                 }
                             resolve true

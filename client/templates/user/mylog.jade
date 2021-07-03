@@ -1,33 +1,33 @@
 section.mylog
-  h1 战绩
+  h1 戰績
   if !loggedin
-    p 查看自己的战绩前，请先登录。
+    p 於確認自己的戰績前，請先登入。
   else
     p
-      a(href="/rooms/my") 参加过的房间一览
+      a(href="/rooms/my") 參加過的房間一覽
 
-    h2 最近的战绩
+    h2 最近的戰績
     p
       label.mylog-open
         i.far.fa-fw.fa-id-card#open-recent-icon
-        | 是否向其他玩家公开自己的最近战绩
+        | 是否向其他玩家公開自己的最近戰績
         input#open-recent(type="checkbox", disabled)
-      i.far.fa-question-circle.mylog-desc-of-open(data-helpicon, title="即使设为不公开，也会显示猝死率。")
+      i.far.fa-question-circle.mylog-desc-of-open(data-helpicon, title="即使設為不公開，也會顯示暴斃率。")
 
     #recentdata
       p
         i.fa.fa-spinner.fa-pulse
-        | 正在载入……
+        | 讀取中……
 
-    h2 全部战绩
+    h2 全部戰績
     p
       label.mylog-open
         i.far.fa-fw.fa-id-card#open-all-icon
-        | 是否向其他玩家公开自己的全部战绩
+        | 是否向其他玩家公開自己的全部戰績
         input#open-all(type="checkbox", disabled)
-      i.far.fa-question-circle.mylog-desc-of-open(data-helpicon, title="如果选中此项，将在用户页面显示注册以来总的对战数・胜利数・败北数。")
+      i.far.fa-question-circle.mylog-desc-of-open(data-helpicon, title="若勾選該選項，將在玩家頁面顯示註冊以來總的對戰數・勝利數・敗北數。")
     #alldata
       p
         i.fa.fa-spinner.fa-pulse
-        | 正在载入……
+        | 讀取中……
 

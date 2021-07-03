@@ -1,80 +1,80 @@
 # title of mypage
-title: '个人页面'
+title: '個人資訊'
 
 # profile section
 profile:
-  title: '个人资料'
+  title: '個人資訊'
   # label of edit button
-  edit: '编辑'
-  userid: '账号'
-  name: '名字'
-  nameHelp: '加入游戏时显示的名字。'
-  comment: '简介'
-  commentHelp: '在自己的个人资料中显示。'
-  mailAddress: '邮箱地址'
-  mailAddressHelp: '绑定邮箱地址后，如果遗忘了密码可以通过邮箱找回。邮箱地址不会用于其他目的。'
-  mailAddressNotVerified: '没有认证：请在您输入的邮箱中按照邮件的指示完成认证。'
-  mailAddressChanging: '正在变更：请在您输入的邮箱中按照邮件的指示操作，以完成邮箱认证·邮箱变更操作。'
-  icon: '头像'
+  edit: '編輯'
+  userid: '帳號'
+  name: '暱稱'
+  nameHelp: '參與遊戲時顯示的暱稱。'
+  comment: '自我介紹'
+  commentHelp: '於自己的個人資訊中顯示。'
+  mailAddress: '電子信箱'
+  mailAddressHelp: '綁定電子信箱後，若忘記密碼則可透過綁定的電子信箱進行查詢。綁定的電子信箱並不會被使用於其他目的。'
+  mailAddressNotVerified: '尚未驗證：請於您所輸入的電子信箱中，收信並依據信件的指示以完成驗證電子信箱操作。'
+  mailAddressChanging: '正在變更：請於您所輸入的電子信箱中，收信並依據信件的指示以完成驗證·變更電子信箱操作。'
+  icon: '頭像'
   # icon select button
-  iconSelect: '头像选择'
+  iconSelect: '選擇頭像'
   # delete icon button
-  iconDelete: '取消头像'
+  iconDelete: '移除頭像'
   # save button
-  save: '保存变更'
+  save: '儲存變更'
   # "enter password" prompt
   savePrompt:
-    message: '请输入密码以保存变更。'
+    message: '請輸入密碼以儲存變更。'
     ok: 'OK'
     cancel: '取消'
 
 # mail confirm security section
 security:
-  title: '安全性设置'
-  mailConfirmSecurity: '锁定密码·邮箱地址'
-  mailConfirmSecurityHelp: '如果锁定了密码与邮箱地址，将必须通过邮件认证的方式才能恢复解锁。'
+  title: '安全性設定'
+  mailConfirmSecurity: '鎖定密碼·電子信箱'
+  mailConfirmSecurityHelp: '若鎖定密碼與電子信箱，僅限透過信件驗證的方式才可解除鎖定。'
   # password change
-  changePassword: '修改密码'
-  newPassword: '新密码'
-  newPassword2: '再输入一次新密码'
-  currentPassword: '当前密码'
-  passwordSave: '保存变更'
+  changePassword: '修改密碼'
+  newPassword: '新密碼'
+  newPassword2: '再輸入一次新密碼'
+  currentPassword: '目前密碼'
+  passwordSave: '儲存變更'
 
 # news section
 news:
   title: '通知'
-  loading: '正在载入'
+  loading: '讀取中'
   date: '日期'
-  message: '内容'
+  message: '內容'
 
 # ban section
 ban:
-  announcement: '您的账号受到限制，因此将无法完成部分操作。'
+  announcement: '您的帳號受到限制，故無法完成部分操作。'
   reason: '理由：'
-  period: '受限时长：'
-  periodDayHour: '尚余{{days}}天{{hours}}小时'
-  periodHourMinute: '尚余{{hours}}小时{{minutes}}分钟'
-  periodMinute: '尚余{{minutes}}分钟'
-  periodLessThanMinute: '尚余不足1分钟'
-  notice: '如果在受限时长结束后，限制仍未解除的，请尝试刷新页面。'
+  period: '限制時長：'
+  periodDayHour: '尚餘 {{days}} 天 {{hours}} 小時'
+  periodHourMinute: '尚餘 {{hours}} 小時 {{minutes}} 分鐘'
+  periodMinute: '尚餘 {{minutes}} 分鐘'
+  periodLessThanMinute: '尚餘不足 1 分鐘'
+  notice: '若於限制時長結束後，仍未解除限制的場合，請嘗試重新整理頁面。'
 
 # links section
 links:
   rooms:
-    title: '房间一览'
+    title: '房間一覽'
   mylog:
-    title: '战绩'
-    description: '查看自己参加过的房间一览、胜率等数据。'
+    title: '戰績'
+    description: '確認自己參與過的房間一覽、勝率等數據。'
   prize:
-    title: '称号'
-    description: '查看已经获得的称号，设定加入游戏时在名字前面显示的头衔。'
-    number: '称号获得数：{{count}}'
-    current: '现在的头衔：{{data}}'
+    title: '稱號'
+    description: '確認已經獲得的稱號，設定加入遊戲時在暱稱前面顯示的稱號。'
+    number: '稱號獲得數：{{count}}'
+    current: '目前的稱號：{{data}}'
   gameTutorial:
-    title: '练习房间'
-    description: '用于熟悉游戏流程的1人用房间。'
+    title: '練習房間'
+    description: '用於熟悉遊戲流程的 1 人用房間。'
   settings:
-    title: '设定'
-    description: '变更各种设定。'
+    title: '設定'
+    description: '變更各種設定。'
   logout:
-    title: '退出'
+    title: '登出'

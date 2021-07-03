@@ -2,20 +2,19 @@ extends winskeleton
 block icon
   i.fa.fa-user-circle-o
 block title
-  | 头像选择
+  | 選擇頭像
 block closebutton
   button.closer(type="button",name="cancel")
     i.fa.fa-times
 block wincontent
   form(aciton="/")#iconform
     div.window-content
-      p （URL留空的时候不显示头像）
-      p  QQ空间、百度、Pixiv等网站禁止图片外链，推荐引用新浪微博的图片或请自行寻找适当的允许外链的免费图床。
-      figure(style="float:left"): img#selecticondisp(width="48",height="48",alt="头像")
+      p （若網址留空則不顯示頭像）
+      figure(style="float:left"): img#selecticondisp(width="48",height="48",alt="頭像")
       p
-        input(type="button",name="urliconbutton",value="输入URL")
+        input(type="button",name="urliconbutton",value="輸入網址")
       p
-        input(type="button",name="twittericonbutton",value="从twitter导入",disabled="disabled")
+        input(type="button",name="twittericonbutton",value="從 Twitter 匯入",disabled="disabled")
     p: input(type="submit",value="OK")
 
 

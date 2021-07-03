@@ -1,11 +1,11 @@
 # Language file for server connection information box.
 
 # unconnected message
-unconnected: "已失去与服务器的连接。"
+unconnected: "與伺服器的連線已中斷。"
 # connected message
-connected: "已连接到服务器。"
+connected: "已連線至伺服器。"
 
 # message that says reconnection is attemted.
-connecting: "正在尝试重新连接，请稍候……"
+connecting: "正在嘗試重新連線，請稍候……"
 # message that internet connection itself is offline.
-offline: "未连接到因特网。"
+offline: "並未連線至網際網路。"

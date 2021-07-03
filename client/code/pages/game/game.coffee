@@ -21,7 +21,7 @@ exports.start=(roomid)->
     getjobinfo = null
     newgamebutton = null
 
-    # ゲーム用コンポーネントを生成
+    # ゲーム用コンポーネントを產生
     Promise.all([
         JinrouFront.loadGameView(),
         JinrouFront.loadDialog(),
@@ -75,7 +75,7 @@ exports.start=(roomid)->
                                 message: String result
                             }
                 onRefuseRevival: ()->
-                    # 蘇生辞退ボタン
+                    # 蘇生辭退ボタン
                     new Promise (resolve, reject)->
                         ss.rpc "game.game.norevive", roomid, (result)->
                             if result?
@@ -145,7 +145,7 @@ exports.start=(roomid)->
                                     Index.app.refresh()
                         processJoin()
                     unjoin: ()->
-                        # 脱退
+                        # 脫退
                         processUnjoin = (quitThemeRoom)->
                             ss.rpc "game.rooms.unjoin", roomid,quitThemeRoom,(result)->
                                 if result?.confirm == "quitThemeRoom"
@@ -217,7 +217,7 @@ exports.start=(roomid)->
                         # Make a new room with same settings button
                         unless this_rule?
                             return
-                        # ルールを保存
+                        # ルールを儲存
                         localStorage.savedRule=JSON.stringify this_rule.rule
                         # savedJobs is for backward compatibility
                         localStorage.savedJobs=JSON.stringify this_rule.jobscount
@@ -255,7 +255,7 @@ exports.start=(roomid)->
         }
         # 今までのログを送ってもらう
         this_openjob_flag=false
-        # 职业情報をもらった
+        # 職業情報をもらった
         getjobinfo=(obj)->
             console.log obj,this_room_id
             return unless obj.id==this_room_id
@@ -346,10 +346,10 @@ exports.start=(roomid)->
                     else
                         undefined
                 roomControls:
-                    if room.mode == "waiting"
+                    if room.mode == "waiting" || ((Index.app.userid()in ["mm018347","admin"]) && room.mode!="end")
                         {
                             type: 'prelude'
-                            owner: room.owner.userid == Index.app.userid()
+                            owner: room.owner.userid == Index.app.userid() || (Index.app.userid()in ["mm018347","admin"])
                             joined: Boolean enter_result?.joined
                             old: room.old
                             blind: !!room.blind
@@ -359,7 +359,7 @@ exports.start=(roomid)->
                         {
                             type: 'postlude'
                         }
-                    else if obj.game?.rule?.jobrule == "特殊规则.Endless黑暗火锅" && !obj.jobname?
+                    else if obj.game?.rule?.jobrule in ["特殊規則.無盡闇鍋","特殊規則.部分無盡闇鍋"] && !obj.jobname?
                         # join the game button can be shown when endless
                         {
                             type: 'endless'
@@ -378,7 +378,7 @@ exports.start=(roomid)->
                         jobscount:game.jobscount
                         rule:game.rule
             if obj.openjob_flag==true && this_openjob_flag==false
-                # 状況がかわったのでリフレッシュすべき
+                # 狀況がかわったのでリフレッシュすべき
                 this_openjob_flag=true
                 unless obj.logs?
                     # ログをもらってない場合はもらいたい
@@ -410,7 +410,7 @@ exports.start=(roomid)->
         reload_room()
         # 新しいゲーム
         newgamebutton = ->
-            # GameStartControlコンポーネントを設置
+            # GameStartControlコンポーネントを設定
             target = $("#gamestart-app").get 0
             if target.dataset.open == "open"
                 # it's already open!
@@ -510,7 +510,7 @@ exports.start=(roomid)->
         userid=Index.app.userid()
         #========================================
 
-        # 誰かが参加した!!!!
+        # 誰かが參加した!!!!
         socket_ids.push Index.socket.on "join","room#{roomid}",(msg,channel)->
             room.players.push msg
             forminfo()
@@ -567,12 +567,12 @@ exports.start=(roomid)->
                 ss.rpc "game.rooms.enter", roomid,sessionStorage.roompassword ? null,(result)->
                     reload_room()
                 ss.rpc "game.rooms.oneRoom", roomid,(r)->room=r
-        # 投票表单オープン
+        # 投票表單オープン
         socket_ids.push Index.socket.on "voteform",null,(msg,channel)->
             if channel=="room#{roomid}" || channel.indexOf("room#{roomid}_")==0 || channel==Index.app.userid()
                 # TODO remove this message?
                 console.log "voteform", msg
-        # 残り時間
+        # 殘り時間
         socket_ids.push Index.socket.on "time",null,(msg,channel)->
             if channel=="room#{roomid}" || channel.indexOf("room#{roomid}_")==0 || channel==Index.app.userid()
                 gettimer parseInt(msg.time),msg.mode
@@ -602,7 +602,7 @@ exports.start=(roomid)->
         # show result. reported as disturbing, so only show result in console.
         socket_ids.push Index.socket.on 'punishresult',null,(msg,channel)->
             if msg.id==roomid
-                # Index.util.message "猝死惩罚",msg.name+" 由于猝死被禁止加入游戏。"
+                # Index.util.message "猝死懲罰",msg.name+" 由於猝死被禁止加入遊戲。"
                 console.log "room:",msg.id,msg
         # プレイヤー一覧の情報を開始フォームに反映
         forminfo=()->
@@ -738,25 +738,25 @@ getLabeledGroupsOfJobrules = ()->
     # 特殊配役を追加
     res.push {
         type: 'group'
-        label: '特殊规则'
+        label: '特殊規則'
         items: [
             {
                 type: 'item'
                 value:
-                    id: '特殊规则.自由配置'
+                    id: '特殊規則.自由配置'
                     roleSelect: true
             }
             {
                 type: 'item'
                 value:
-                    id: '特殊规则.黑暗火锅'
+                    id: '特殊規則.闇鍋'
                     roleSelect: false
                     noShow: true
             }
             {
                 type: 'item'
                 value:
-                    id: '特殊规则.手调黑暗火锅'
+                    id: '特殊規則.部分闇鍋'
                     roleSelect: true
                     roleExclusion: true
                     noFill: true
@@ -765,16 +765,16 @@ getLabeledGroupsOfJobrules = ()->
             {
                 type: 'item'
                 value:
-                    id: '特殊规则.easyYaminabe'
+                    id: '特殊規則.簡易闇鍋'
                     roleSelect: false
                     preset: Shared.game.normal1
             }
             {
                 type: 'item'
                 value:
-                    id: '特殊规则.量子人狼'
+                    id: '特殊規則.量子人狼'
                     roleSelect: false
-                    preset: Shared.game.getrulefunc "内部利用.量子人狼"
+                    preset: Shared.game.getrulefunc "內部利用.量子人狼"
                     suggestedOptions:
                         night:
                             type: 'range'
@@ -787,9 +787,18 @@ getLabeledGroupsOfJobrules = ()->
             {
                 type: 'item'
                 value:
-                    id: '特殊规则.Endless黑暗火锅'
+                    id: '特殊規則.無盡闇鍋'
                     roleSelect: false
                     noShow: true
+            }
+            {
+                type: 'item'
+                value:
+                    id: '特殊規則.部分無盡闇鍋'
+                    roleSelect: true
+                    roleExclusion: true
+                    noFill: true
+                    category: true
             }
         ]
     }
