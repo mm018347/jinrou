@@ -118,6 +118,7 @@ messages:
   Saint: '請選擇行使復活的對象'
   GoldOni: '請選擇行使捕捉的對象'
   BloodWolf: '欲行使自爆的場合請點擊'
+  Duelist: '請選擇成為宿敵的對象'
   SpaceWerewolfObserver: '請選擇行使觀察的對象'
   SpaceWerewolfGuard: '請選擇行使守護的對象'
   SpaceWerewolfSabotage: '請選擇行使妨礙的對象'
