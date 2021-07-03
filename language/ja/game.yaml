@@ -139,7 +139,7 @@ system:
     rebirth: '{{name}} 轉生了。'
   # gameStart-related logs
   gamestart:
-    shoji: '隔墙须有耳，窗外岂无人。'
+    shoji: '隔墻須有耳，窗外豈無人。'
     # Diviner result mode is changed
     divinerModeChanged: '因配置中存在能夠左右占卜結果的職業，該房間規則的占卜結果顯示時機從「立即得知」變更為「隔日白天才得知」。'
     # Excluded jobs

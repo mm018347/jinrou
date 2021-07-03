@@ -1016,13 +1016,13 @@ BloodWolf:
   affect: '血月之力封印了村人們的能力。'
 
 Reincarnator:
-  revive: '{{name}} 转生成了 {{target}}。'
+  revive: '{{name}} 轉生為 {{target}}。'
 
 Duelist:
   # Select a target.
-  select: '{{name}} 向 {{target}} 发起了决斗邀请。'
+  select: '{{name}} 對 {{target}} 發起決鬥。'
   # Become a enemy.
-  become: '{{target}} 与 {{name}} 开始决斗了。'
+  become: '{{target}} 與 {{name}} 開始決鬥。'
 
 # Werewolf
 SpaceWerewolfImposter:
@@ -1114,9 +1114,9 @@ FanOfIdol:
 
 Enemy:
   # name for desc
-  name: '宿敌'
+  name: '宿敵'
   # jobname of Enemy
-  jobname: '宿敌（{{jobname}}）'
+  jobname: '宿敵（{{jobname}}）'
 
 LoreleiFamilia:
   name: '羅蕾萊眷屬'
