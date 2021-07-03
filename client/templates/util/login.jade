@@ -2,7 +2,7 @@ extends winskeleton
 block icon
   i.fa.fa-user
 block title
-  | 登录
+  | 登入
 block closebutton
   button.closer(type="button",name="cancel")
     i.fa.fa-times
@@ -10,29 +10,29 @@ block wincontent
   form(aciton="/")#loginform
     p
       label
-        | 账号
-        input(type="text",size="30",name="userid",pattern="\\\\w+",title="账号只能使用半角英数字",required)
+        | 帳號
+        input(type="text",size="30",name="userid",pattern="\\\\w+",title="帳號僅可輸入半形英數字",required)
     p
       label
-        | 密码
+        | 密碼
         input(type="password",size="30",name="password",pattern="[\\\\x20-\\\\x7e]+",required,autocomplete="current-password")
     p
-      input(type="submit",value="登录")
+      input(type="submit",value="登入")
       label
-        | 记住登录状态
+        | 記住登入狀態
         input(type="checkbox",name="remember_me",checked)
     p#loginerror.error
-  h2 注册
+  h2 註冊
   form(aciton="/")#newentryform
     p
       label
-        | 账号
+        | 帳號
         input(type="text",size="30",name="userid",required)
     p
       label
-        | 密码
+        | 密碼
         input(type="password",size="30",name="password",required,autocomplete="new-password")
     p
-      input(type="submit",value="注册")
+      input(type="submit",value="註冊")
     p#newentryerror.error
-    p: a(href="/manual/login",target="_blank") 帮助
+    p: a(href="/manual/login",target="_blank") 幫助

@@ -1,29 +1,29 @@
 # Language file for rooms
 
 # title of rooms component
-title: "房间一览"
+title: "房間一覽"
 
 # message show when no room is avaiable.
-noRoom: "现在没有房间。"
+noRoom: "目前沒有房間。"
 
 # loading message
-loading: "正在读取"
+loading: "讀取中"
 # error message for loading failure.
-loadFailed: "房间一览获取失败。"
+loadFailed: "房間一覽讀取失敗。"
 
 status:
   # room is waiting.
-  waiting: "募集中"
+  waiting: "招募中"
   # room is playing.
-  playing: "对战中"
+  playing: "進行中"
   # room is ended.
-  end: "结束"
+  end: "結束"
 
 # gm is on
 gm: "GM"
 
 # player number
-playerNumber: "{{count}}人"
+playerNumber: "{{count}} 人"
 
 # title of owner name
 ownerTitle: "房主"
@@ -31,20 +31,20 @@ ownerTitle: "房主"
 ownerHidden: "???"
 
 # previous page button
-prevPageButton: "上一页"
+prevPageButton: "上一頁"
 # next page button
-nextPageButton: "下一页"
+nextPageButton: "下一頁"
 
 # link to other pages / modes.
 link:
-  newRoom: "新建房间"
-  new: "活动房间一览"
-  old: "陈旧房间一览"
-  log: "结束房间一览"
+  newRoom: "建立房間"
+  new: "活動房間一覽"
+  old: "陳舊房間一覽"
+  log: "結束房間一覽"
 
 # game result.
 result:
-  win: "胜利"
-  lose: "败北"
-  draw: "平局"
+  win: "勝利"
+  lose: "敗北"
+  draw: "平手"
 

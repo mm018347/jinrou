@@ -1,210 +1,210 @@
 # room info bar.
 roominfo:
   # has room password
-  password: '有密码'
+  password: '有密碼'
   # blind mode
-  blind: '匿名（结束后公开ID）'
+  blind: '匿名（結束後公開帳號）'
   # complete blind mode
-  blindComplete: '强匿名（结束后不公开ID）'
+  blindComplete: '強匿名（結束後不公開帳號）'
   # no watchspeak
-  noWatchSpeak: '禁止观战者发言'
+  noWatchSpeak: '禁止觀戰者發言'
   # using theme
-  theme: '使用主题「{{fullname}}」'
+  theme: '採用主題「{{fullname}}」'
   # theme has been removed
-  themeRemoved: '此主题已被移除'
+  themeRemoved: '該主題已被移除'
 # Game start control.
 gamestart:
   # information shown to an owner.
   info:
     # Current number of players.
-    playerNumber: '现在的人数: {{count}}人'
+    playerNumber: '目前人數: {{count}} 人'
     # Players are too few.
-    playerTooFew: '人数不足。这个配置的人数最低为{{count}}人。'
+    playerTooFew: '人數不足。該配置的人數最低為 {{count}} 人。'
     # Players are too many.
-    playerTooMany: '人数过多。这个配置的人数最高为{{count}}人。'
+    playerTooMany: '人數太多。該配置的人數最多為 {{count}} 人。'
   # game start control.
   control:
     # legend: 'roles'
-    roles: 职业・配置
+    roles: 職業・配置
     # legend: 'rules'
-    rules: 规则设定
+    rules: 規則設定
     # minutes
     minutes: 分
     # seconds
     seconds: 秒
     # Game start button
-    start: 开始
+    start: 開始
     # Legend of category query.
-    categorySelection: 手调黑暗火锅选项
+    categorySelection: 部分闇鍋選項
   # confirmation messages.
   confirm:
     # suggestion of rule based on casting.
     ruleSuggestion:
       # confirmation message
-      message: '此配置中的选项「{{name}}」推荐为{{suggestion}}。确定就这样开始吗？'
+      message: '於該配置推薦將「{{name}}」選項設定為 {{suggestion}}。確定以這樣的設定開始嗎？'
       # yes: rearrange rule setting.
       yes: '返回'
       # no: continue.
-      no: '就这样开始'
+      no: '確定以這樣開始'
       # value suggestion.
       valueSuggestion: '「{{value}}」'
       # range-based suggestions
-      rangeSuggestionMin: '{{min}}以上'
-      rangeSuggestionMax: '{{max}}以下'
-      rangeSuggestionMinMax: '{{min}}以上{{max}}以下'
+      rangeSuggestionMin: '{{min}} 以上'
+      rangeSuggestionMax: '{{max}} 以下'
+      rangeSuggestionMinMax: '{{min}} 以上 {{max}} 以下'
   # error message.
   error:
     # rule value is invalid.
-    ruleInvalid: '房间选项「{{name}}」的内容无效。'
-    ruleTooSmall: '房间选项「{{name}}」的值过小。'
+    ruleInvalid: '房間選項「{{name}}」的內容無效。'
+    ruleTooSmall: '房間選項「{{name}}」的值太小。'
 
 # game-view: job info control.
 jobinfo:
   # your status.
-  status: '你的身份是 {{job}}（{{details}}）'
+  status: '您的職業為 {{job}}（{{details}}）'
   # you won.
-  win: '胜利了'
+  win: '勝利'
   # you lose.
-  lose: '败北了'
+  lose: '敗北'
   # show your team.
   team:
     # message when no team.
-    none: '你没有初始阵营'
+    none: '您沒有初始陣營'
     # other.
-    message: '你的初始阵营是 {{team}}'
+    message: '您的初始陣營為 {{team}}'
     # short message for no team.
-    none_short: '阵营：无'
+    none_short: '陣營：無'
     # short message for usual team.
-    message_short: '阵营：{{team}}'
+    message_short: '陣營：{{team}}'
   # detail of jobs.
-  detail_one: '详细'
-  detail: '{{job}}的详细'
+  detail_one: '詳細'
+  detail: '{{job}}的詳細'
   # Info of peers.
   peers:
-    wolves: '同伴的人狼是 {{names}}'
-    peers: '同伴的共有者是 {{names}}'
-    madpeers: '同伴的尖叫狂人是 {{names}}'
-    foxes: '同伴的妖狐是 {{names}}'
-    nobles: '贵族是 {{names}}'
-    queens: '女王观战者是 {{names}}'
-    spy2s: '间谍Ⅱ是 {{names}}'
-    friends: '恋人是 {{names}}'
-    cultmembers: '教会信者是 {{names}}'
-    vampires: '同伴的吸血鬼是 {{names}}'
-    twins: '同伴的双胞胎是 {{names}}'
-    myfans: '粉丝是 {{names}}'
-    ravens: '乌鸦是 {{names}}'
-    stalking: '你是 {{name}} 的跟踪狂'
-    supporting: '向 {{name}}（{{job}}）提供帮助'
-    dogOwner: '你的饲主是 {{name}}'
-    quantumwerewolfNumber: '你的玩家编号是 {{number}}'
-    fanof: '你是 {{name}} 的粉丝'
-    hooligans: '现在的暴动者有 {{names}}'
-    draculas: '同伴的德古拉是 {{names}}'
-    draculaBitten: '吸过血的对象有 {{names}}'
-    absolutewolves: '绝对狼是 {{names}}'
-    santaclauses: '同伴的圣诞老人是 {{names}}'
-    listenerNumber: '现在有 {{number}} 名直播观众'
-    loreleis: '罗蕾莱是 {{names}}'
-    gamblerStock: '现在持有{{number}}票'
-    bonds: '与 {{names}} 缔结了羁绊'
-    targets: '你的目标是 {{names}}'
-    enemies: '你的宿敌是 {{names}}'
-    spaceWerewolfImposters: '同伴的诈欺师是 {{names}}'
+    wolves: '同伴的人狼為 {{names}}'
+    peers: '同伴的共有者為 {{names}}'
+    madpeers: '同伴的尖叫狂人為 {{names}}'
+    foxes: '同伴的妖狐為 {{names}}'
+    nobles: '貴族為 {{names}}'
+    queens: '女王觀戰者為 {{names}}'
+    spy2s: '間諜Ⅱ為 {{names}}'
+    friends: '戀人為 {{names}}'
+    cultmembers: '教會信徒為 {{names}}'
+    vampires: '同伴的吸血鬼為 {{names}}'
+    twins: '同伴的雙子為 {{names}}'
+    myfans: '粉絲為 {{names}}'
+    ravens: '烏鴉為 {{names}}'
+    stalking: '您的跟蹤對象為 {{name}}'
+    supporting: '您的協助對象為 {{name}}（{{job}}'
+    dogOwner: '您的飼主為 {{name}}'
+    quantumwerewolfNumber: '您的玩家編號為 {{number}}'
+    fanof: '您是 {{name}} 的粉絲'
+    hooligans: '目前參與暴動的對象為 {{names}}'
+    draculas: '同伴的德古拉為 {{names}}'
+    draculaBitten: '曾被吸血的對象為 {{names}}'
+    absolutewolves: '絕對狼為 {{names}}'
+    santaclauses: '同伴的聖誕老人為 {{names}}'
+    listenerNumber: '目前有 {{number}} 名直播觀眾'
+    loreleis: '羅蕾萊為 {{names}}'
+    gamblerStock: '現在持有 {{number}} 票'
+    bonds: '與 {{names}} 締結了羈絆'
+    targets: '您的目標為 {{names}}'
+    enemies: '您的宿敌為 {{names}}'
+    spaceWerewolfImposters: '同伴的詐欺師為 {{names}}'
 
 # game-view: speak form.
 speak:
-  say: '发言'
+  say: '發言'
   # size of comment.
   size:
     # description of size selection.
-    description: '发言字体大小'
-    small: '小字号'
+    description: '發言字體大小'
+    small: '小聲'
     normal: '普通'
-    big: '大字号'
+    big: '大聲'
   # kind of speech.
   kind:
-    description: '发言种类'
+    description: '發言種類'
     # speech before beginning of game.
-    prepare: '向全员发言'
+    prepare: '向全員發言'
     # say to everyone.
-    day: '向全员发言'
+    day: '向全員發言'
     # speech among audience.
-    audience: '观战者的会话'
+    audience: '觀戰者的會話'
     # monologue in day and night.
-    monologue: '自言自语'
+    monologue: '自言自語'
     # talk between werewolves.
-    werewolf: '人狼的会话'
+    werewolf: '人狼的會話'
     # talk between couples.
-    couple: '共有者的会话'
+    couple: '共有者的會話'
     # talk between MadCouples.
-    madcouple: '尖叫狂人的会话'
+    madcouple: '尖叫狂人的會話'
     # talk between foxes.
-    fox: '妖狐的会话'
+    fox: '妖狐的會話'
     # announce from GM to everyone.
-    gm: '致全员'
+    gm: '致全員'
     # announce from GM to the heaven.
-    gmheaven: '致灵界'
+    gmheaven: '致靈界'
     # announce from GM to audience.
-    gmaudience: '致观战者'
+    gmaudience: '致觀戰者'
     # monologue of GM.
-    gmmonologue: '自言自语'
+    gmmonologue: '自言自語'
     # talk of helpers.
-    helperwhisper: '建议'
+    helperwhisper: '建議'
     # talk of streamer.
-    streaming: '直播内容'
+    streaming: '直播內容'
     # reply from GM to someone.
-    gmreply: '→{{target}}'
+    gmreply: '→ {{target}}'
   # label of multiline checkbox.
   multiline: '多行'
   # label of wide page checkbox.
-  widepage: '宽页面'
+  widepage: '寬頁面'
   # will button.
   will:
     # click to open button.
-    open: '遗言'
+    open: '遺言'
     # click to close button.
-    close: '折叠遗言'
+    close: '摺疊遺言'
     # 'Input your will' message,
-    message: '输入遗言'
+    message: '輸入遺言'
     # save will button.
-    save: '保存遗言'
+    save: '儲存遺言'
     # Message shown when a change is made to will
     # 'Press save button to save your new will'
-    changed: '请点击保存按钮以更新你的遗言'
+    changed: '請點擊儲存按鈕以更新遺言'
   # show rule button.
-  rule: '规则'
+  rule: '規則'
   # log visibility.
   logVisibility:
     # description of log visibility of control.
-    description: '记录显示'
+    description: '顯示記錄'
     # show all.
     all: '全部'
     # show today's log.
     today: '今日'
     # label of one-day options.
-    onedayLabel: '单日'
+    onedayLabel: '單日'
     # show one day.
-    oneday: '第{{day}}天'
+    oneday: '第 {{day}} 日'
   # label of refuse revival button.
-  refuseRevival: '拒绝复活'
+  refuseRevival: '拒絕復活'
   # text shown when watch speak is not allowed.
-  noWatchSpeak: '观战者不能发言。'
+  noWatchSpeak: '觀戰者不能發言。'
 
 # navigation shown at the bottom of view on phone.
 navigation:
-  players: '参加者一览'
+  players: '玩家一覽'
   skill: '能力・投票'
-  speak: '发言'
+  speak: '發言'
 
 # Game view: refuse revival.
 refuseRevival:
   # name of the refuse revival feature.
-  title: '拒绝复活'
+  title: '拒絕復活'
   # Confirm whether one really wants to refuse revival.
-  confirm: '一旦拒绝复活将不能撤销。确定要这样做吗？'
+  confirm: '一旦拒絕復活將不能取消。確定要拒絕復活嗎？'
   # result of logic.
-  result: '成功拒绝复活。'
+  result: '已經拒絕復活。'
   # yes/no
   yes: 'OK'
   no: '取消'
@@ -213,30 +213,30 @@ log:
   # ote result log.
   voteResult:
     # Caption of vote result table.
-    caption: '投票结果'
+    caption: '投票結果'
     # Count of votes.
     count: '{{count}}票'
   # Probability table.
   probabilityTable:
     # Caption of probability table.
-    caption: '概率表'
+    caption: '機率表'
     # Name of player.
-    name: '名字'
+    name: '名稱'
     # Villager column.
     Villager: '村人'
     # Diviner column,
-    Diviner: '占卜师'
+    Diviner: '占卜師'
     # Human column.
-    Human: '人类'
+    Human: '人類'
     Werewolf: '人狼'
     dead: '死亡'
-  # 自言自语
-  monologue: '{{name}}的自言自语'
+  # 自言自語
+  monologue: '{{name}} 的自言自語'
   # 遺言
-  will: '{{name}}的遗言'
+  will: '{{name}} 的遺言'
   # poem sent by Poet
   poem:
-    description: '{{target}} 收到了来自 {{name}} 的赠诗。'
+    description: '{{target}} 收到來自 {{name}} 的贈詩。'
   # streaming
   streaming: '{{name}} 的直播'
 # Game view: player box.
@@ -244,161 +244,161 @@ playerbox:
   # Alt for the dead image.
   dead: '死亡'
   # Indication of winner.
-  win: '胜利'
+  win: '勝利'
   # Indication of loser.
-  lose: '败北'
+  lose: '敗北'
   # Labels for flag.
   flags:
     ready: 'ready'
     gm: 'GM'
     helper: 'helper'
-    norevive: '拒绝复活'
+    norevive: '拒絕復活'
   # label for alive numbers.
-  aliveNum: '生存: {{count}}人'
+  aliveNum: '生存: {{count}} 人'
   # label for dead numbers.
-  deadNum: '死亡: {{count}}人'
+  deadNum: '死亡: {{count}} 人'
 
 # Room control buttons.
 room:
   # join button
-  join: '加入游戏'
+  join: '參與房間'
   # unjoin button
-  unjoin: '退出游戏'
+  unjoin: '離開遊戲'
   # ready/unready button.
-  ready: '准备/取消准备'
+  ready: '準備/取消準備'
   # description of ready/unready button.
-  readyDescription: '全员准备好后即可开始游戏。'
+  readyDescription: '全員皆已準備後，房主將可開始遊戲。'
   # helper button.
-  helper: '帮手'
+  helper: '助手'
   # description of helper button.
-  helperDescription: '成为他人的帮手后，将不会直接参与游戏，而是向帮助的对象提供建议。'
+  helperDescription: '擔任他人的助手後，將不會直接參與遊戲，而是向協助的對象提供建言。'
   # open game start control button.
-  openGameStart: '展开游戏开始界面'
+  openGameStart: '展開開始遊戲界面'
   # kick player button.
-  kick: '将参加者踢出游戏'
+  kick: '踢出房間'
   # reset ready button.
-  resetReady: '重置[ready]状态'
+  resetReady: '重置 [ready] 標記'
   # Discard this room button.
-  discard: '废弃这个房间'
+  discard: '廢棄房間'
   # open a new room with same setting button.
-  newRoom: '以相同设定建立新房间'
+  newRoom: '以相同設定建立新房間'
   # that room does not exist.
-  roomDoesNotExist: '这个房间不存在。'
+  roomDoesNotExist: '找不到該房間。'
   # Player information dialog.
   playerDialog:
     # title of player dialog.
-    title: '加入游戏'
+    title: '參與房間'
     # message of player dialog.
-    message: '请输入昵称。'
+    message: '請輸入暱稱。'
     # ok button
-    ok: '加入'
+    ok: '參與'
     # cancel button
     cancel: '取消'
   # helper select dialog.
   helperDialog:
-    title: '帮手'
-    message: '想要成为谁的帮手？'
-    ok: '选择'
+    title: '助手'
+    message: '請選擇協助的對象？'
+    ok: '選擇'
     cancel: '取消'
     # label for no helper.
-    nohelper: '停止做帮手'
+    nohelper: '停止擔任助手'
   # reset ready confirmation dialog.
   resetReadyDialog:
-    title: '重置[ready]状态'
-    message: '要解除全员的[ready]状态吗？'
-    yes: '解除'
+    title: '重置 [ready] 標記'
+    message: '確定重置全員的 [ready] 標記嗎？'
+    yes: '重置'
     no: '取消'
   # discard room confirmation dialog.
   discardDialog:
-    title: '废弃房间'
-    message: '确定要废弃这个房间吗？'
-    yes: '废弃'
+    title: '廢棄房間'
+    message: '確定廢棄該房間嗎？'
+    yes: '廢棄'
     no: '取消'
   # room password dialog.
   enterPasswordDialog:
-    title: '房间'
-    message: '房间已加密，请输入密码。'
-    ok: '进入'
+    title: '房間'
+    message: '該房間有設定密碼，請輸入密碼。'
+    ok: '進入'
     cancel: '取消'
   # unjoin theme room confirmation dialog.
   unjoinThemeRoomDialog:
-    title: '退出主题房间'
-    message: '一旦退出主题房间，在10秒内将无法再次加入此房间。确定要退出吗？'
-    quit: '退出'
+    title: '離開主題房間'
+    message: '一旦離開主題房間，於 10 秒內將無法再次參與該房間。確定要離開嗎？'
+    quit: '離開'
     stay: '取消'
 
 # Icon select dialog.
 iconSelect:
   # title of icon select dialog.
-  title: '头像选择'
+  title: '選擇頭像'
   # message for icon select dialog.
-  message: '直接输入图片的URL，或者输入Twitter账号获取Twitter头像。'
+  message: '請直接輸入頭像圖片的網址，或輸入 Twitter 的帳號以讀取該帳號的頭像。'
   # button for no icon.
   no: '取消'
   # save button.
   save: 'OK'
   # label for url.
-  url: 'URL'
+  url: '網址'
   # label for twitter account
-  twitter: 'Twitter账号'
+  twitter: 'Twitter 帳號'
   # message when icon could not be found with API.
-  apiFail: '头像获取失败，请稍后再试。'
+  apiFail: '頭像讀取失敗，請稍後再試。'
 
 # kick user dialog
 kick:
   # title of kick user dialog.
-  title: '将参加者踢出游戏'
+  title: '踢出房間'
   # message for the dialog.
-  message: '请选择要踢出的人。'
+  message: '請選擇踢出的對象。'
   # cancel button.
   cancel: '取消'
   # ok button.
-  ok: '选择'
+  ok: '選擇'
   # Label for no re-entry button.
-  noentry: '禁止再次加入'
+  noentry: '禁止再次參與'
   manager:
     # Name of kick manager.
-    title: '踢出管理'
+    title: '禁止管理'
     # Message shown at kick manager.
-    message: '请选中想要解除禁止的参与者。'
+    message: '請選取解除禁止的玩家。'
     # message when kicked list user is empty.
-    empty: '现在没有被禁止参加的人。'
+    empty: '目前尚無被禁止參與的玩家。'
 
 # role description dialog
 roleDesc:
   # title of role description dialog.
-  title: '职业说明 - {{role}}'
+  title: '職業說明 - {{role}}'
   # close button
-  close: '关闭'
+  close: '關閉'
 
 # sudden death punishment dialog.
 suddenDeathPunish:
-  title: '猝死惩罚'
-  message: '以下玩家在本局游戏中猝死，请投票选择对其中的某些人进行处罚，每人每票将为其带来{{count}}分钟封禁。'
+  title: '暴斃死懲罰'
+  message: '下述玩家於該場遊戲中觸發暴斃死，請選擇欲懲罰的對象，每人每票將對該玩家施加 {{count}} 分鐘的限制。'
   ok: '投票'
-  cancel: '关闭'
+  cancel: '關閉'
 
 # share button
 share:
-  title: '分享'
+  title: '分享至 Twitter'
 
 # report form (only applicable when report form is enabled via setting)
 reportForm:
-  title: '上报'
+  title: '回報'
   # description shown at the top of form.
   description: |
-    如发现系统bug或恶意用户，请于此处报告。
-    ※对于来自此处的报告不会一一回复邮件。如果状况十分紧急或者需要回信，请通过其他手段联系管理者。
+    若發現系統 bug 或惡意玩家，請於這邊報告。
+    ※對於來自這邊的報告並不會一一回覆。若為十分緊急的狀況或有回信的需求，請透過其他方式聯繫管理者。
   # legend of kind select.
-  kind: '报告类型'
+  kind: '報告類型'
   # legend of report content.
-  content: '报告内容'
+  content: '報告內容'
   # placeholder of report content.
-  contentPlaceHolder: '请输入详细内容'
+  contentPlaceHolder: '請輸入詳細內容'
   # label of send button.
-  send: '发送'
+  send: '發送'
   # message when report is sent.
-  thankyou: '报告发送成功。感谢您的协助。'
+  thankyou: '已成功發送報告。感謝您的協助。'
   # button to close message sent dialog.
-  close: '关闭'
+  close: '關閉'
 

@@ -18,7 +18,7 @@ libi18n      = require '../libs/i18n.coffee'
 
 i18n = libi18n.getWithDefaultNS 'user'
 
-# 内部関数的なログイン
+# 內部関數的なログイン
 login= (query,req,cb,ss)->
     #req.session.authenticate './session_storage/internal.coffee', query, (response)=>
     Server.auth.authenticate query,(response)=>
@@ -116,7 +116,7 @@ exports.actions =(req,res,ss)->
             res()
 
 # 新規登録
-# cb: 错误メッセージ（成功なら偽）
+# cb: 錯誤メッセージ（成功なら偽）
     newentry: (query)->
         unless libblacklist.checkPermission "create_account", req.session.ban
             res {
@@ -212,7 +212,7 @@ exports.actions =(req,res,ss)->
             res userProfile(u, req.session.ban)
         else
             res null
-    # 自分の称号一覧を取得
+    # 自分の稱號一覧を取得
     getMyPrizes: ->
         unless req.session.userId
             # not logged in
@@ -231,7 +231,7 @@ exports.actions =(req,res,ss)->
                 res {error:err}
                 return
             res results
-# twitter头像を調べてあげる
+# twitter頭像を調べてあげる
     getTwitterIcon:(id)->
         Server.oauth.getTwitterIcon id,(url)->
             res url
@@ -298,7 +298,7 @@ exports.actions =(req,res,ss)->
         timestamp = Number query.timestamp
         # console.log query
         M.users.findOne {"mail.token":token,"mail.timestamp":timestamp},(err,doc)->
-            # 有效时间：1小时
+            # 有效時間：1小時
             if err?
                 res {error: i18n.t "error.confirmMail.expired"}
                 return
@@ -386,7 +386,7 @@ exports.actions =(req,res,ss)->
             if record.mailconfirmsecurity
                 res {error: i18n.t "error.changePassword.locked"}
                 return
-            # saltを新しく生成
+            # saltを新しく產生
             newsalt = Server.auth.gensalt()
             M.users.update {"userid":req.session.userId}, {
                 $set:{
@@ -438,7 +438,7 @@ exports.actions =(req,res,ss)->
 
 
     usePrize: (query)->
-        # 表示する称号を変える query.prize
+        # 表示する稱號を変える query.prize
         M.users.findOne {"userid":req.session.userId},(err,record)=>
             if err?
                 res {error: String err}
@@ -447,13 +447,13 @@ exports.actions =(req,res,ss)->
                 res {error: i18n.t "error.authFail"}
                 return
             if typeof query.prize?.every=="function"
-                # 称号構成を得る
+                # 稱號構成を得る
                 comp=Shared.prize.getPrizesComposition record.prize.length
                 if query.prize.every((x,i)->x.type==comp[i])
                     # 合致する
                     if query.prize.every((x)->
                         if x.type=="prize"
-                            !x.value || x.value in record.prize # 持っている称号のみ
+                            !x.value || x.value in record.prize # 持っている稱號のみ
                         else
                             !x.value || x.value in Shared.prize.conjunctions
                     )
@@ -506,7 +506,7 @@ exports.actions =(req,res,ss)->
                 return
             usersummary = doc
             next()
-    # 战绩公開設定を変更
+    # 戰績公開設定を変更
     changeDataOpenSetting:(query)->
         unless req.session.userId
             res {error: i18n.t "common:error.needLogin"}
@@ -527,7 +527,7 @@ exports.actions =(req,res,ss)->
             else
                 res {error: i18n.t "common:error.invalidInput"}
                 return
-        # 对战数をチェック
+        # 對戰數をチェック
         M.userlogs.findOne {
             userid: req.session.userId
         }, {'counter.allgamecount': 1}, (err, doc)->
@@ -573,16 +573,16 @@ makeuserdata=(query)->
         icon:"" # iconのURL
         comment: ""
         mailconfirmsecurity: false
-        win:[]  # 胜利試合
-        lose:[] # 败北試合
+        win:[]  # 勝利試合
+        lose:[] # 敗北試合
         gone:[] # 行方不明試合
         ip:""   # IPアドレス
-        prize:[]# 现在持っている称号
-        ownprize:[] # 何かで与えられた称号（prizeに含まれる）
-        nowprize:null   # 现在设定している肩書き
+        prize:[]# 現在持っている稱號
+        ownprize:[] # 何かで與えられた稱號（prizeに含まれる）
+        nowprize:null   # 現在設定している肩書き
                 # [{type:"prize",value:(prizeid)},{type:"conjunction",value:"が"},...]
-        data_open_recent: false # 最近の战绩を公開するかどうか
-        data_open_all: false # 全期間の战绩を公開するかどうか
+        data_open_recent: false # 最近の戰績を公開するかどうか
+        data_open_all: false # 全期間の戰績を公開するかどうか
     }
 
 # profileに表示する用のユーザーデータをdocから作る
@@ -593,7 +593,7 @@ userProfile = (doc, ban)->
         "???"
     else
         "#{(doc.win.length/(doc.win.length+doc.lose.length)*100).toPrecision(2)}%"
-    # 称号は現在のもののみ文字列に変換して送る
+    # 稱號は現在のもののみ文字列に変換して送る
     doc.nowprizeData =
         (doc.nowprize ? []).map((obj)->
             if obj.type == "prize"
@@ -628,7 +628,7 @@ userProfile = (doc, ban)->
     # backward compatibility
     doc.mailconfirmsecurity = !!doc.mailconfirmsecurity
     return doc
-# 称号の処理を行う
+# 稱號の処理を行う
 generatePrizeDataForClient = (prizeIds)->
     prizeIds.map (x)->{id:x,name:Server.prize.prizeName(x),phonetic:Server.prize.prizePhonetic(x) ? ""}
 

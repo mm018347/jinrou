@@ -23,7 +23,7 @@ ss.server.on 'disconnect', ->
         serverConnectionPlace.store.setConnection false
     else
         # fallback to legacy way of notifying user
-        util.message "服务器","连接已断开。"
+        util.message "伺服器","連線已中斷。"
 ss.server.on 'reconnect', ->
     if serverConnectionPlace?
         serverConnectionPlace.store.setConnection true
@@ -34,7 +34,7 @@ ss.server.on 'reconnect', ->
             reconnect()
     else
         # fallback to legacy way of notifying user
-        util.message "服务器","连接已恢复，请刷新页面。"
+        util.message "伺服器","連線已恢復，請重新整理。"
 libban = require '/ban'
 
 
@@ -89,7 +89,7 @@ exports.init = ->
         t = je.currentTarget
         JinrouFront.loadDialog().then (dialog)->
             dialog.showMessageDialog {
-                title: "帮助"
+                title: "幫助"
                 message: t.getAttribute("data-title") || t.getAttribute('title')
                 ok: "OK"
             }
@@ -241,7 +241,7 @@ exports.showUrl=showUrl=(url,query={},nohistory=false)->
                     timestamp: query.timestamp
                 }, (result)->
                     if result?.error?
-                        Index.util.message "错误",result.error
+                        Index.util.message "錯誤",result.error
                         return
                     if result?.info?
                         Index.util.message "通知",result.info
@@ -264,7 +264,7 @@ exports.showUrl=showUrl=(url,query={},nohistory=false)->
             ss.rpc "user.getMyPrizes", (result)->
                 if result?.error?
                     # TODO
-                    Index.util.message "错误",result.error
+                    Index.util.message "錯誤",result.error
                     return
 
                 page "user-prize", {}, Index.user.prize, {
@@ -429,7 +429,7 @@ exports.processLoginResult = processLoginResult = (uid, result, cb)->
                 notice=document.createElement "div"
                 notice.classList.add "notice"
                 notice.id="newNewsNotice"
-                notice.textContent="有新的通知，请前往个人页面查看。"
+                notice.textContent="有新的通知，請前往個人資訊確認。"
                 $("#content").before notice
 
         cb? true

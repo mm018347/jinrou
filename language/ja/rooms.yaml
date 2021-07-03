@@ -1,87 +1,87 @@
 # Error messages
 error:
   # nonexistent room id.
-  noSuchRoom: "这个房间不存在"
+  noSuchRoom: "找不到該房間。"
   # a GM cannot be a helper.
-  gmCannotBeHelper: "GM不能成为帮手"
+  gmCannotBeHelper: "GM 不能擔任助手。"
   # a player cannot be a helper of oneself.
-  noSelfHelper: "不能成为自己的帮手"
+  noSelfHelper: "不能擔任自己的助手。"
   # This room has already started.
-  alreadyStarted: "游戏已经开始"
+  alreadyStarted: "遊戲已經開始。"
   # You have not join this room.
-  notMember: "尚未加入游戏"
+  notMember: "並未參與遊戲。"
 
   newRoom:
     # A room name is required.
-    noName: "房间名不能为空"
+    noName: "房間名稱不能留空。"
     # Room name is too long.
-    nameTooLong: "房间名过长"
+    nameTooLong: "房間名稱太長。"
     # Comment is too long.
-    commentTooLong: "简介过长"
+    commentTooLong: "附註太長。"
     # Other parameter is invalid.
-    invalidParameter: "参数无效"
+    invalidParameter: "參數不正確。"
     # Cannot make a room because banned
-    banned: "您的账号受限，不能创建房间。"
+    banned: "您的帳號受到限制，無法建立房間。"
     # max player number is too small
-    maxNumberTooSmall: "房间的最大人数过少。"
+    maxNumberTooSmall: "房間的最多人數太少。"
 
   theme:
     # nonexistent theme
-    noTheme: "该主题不存在。"
+    noTheme: "找不到該主題。"
     # This theme is unavailable right now.
-    notAvailable: "主题「{{name}}」当前不可用。"
+    notAvailable: "主題「{{name}}」目前不能使用。"
     # This theme cannot be locked.
-    notLockable: "主题「{{name}}」不允许房间设置密码。"
+    notLockable: "主題「{{name}}」僅限沒有設定密碼的房間可使用。"
     # A room with theme must be blind.
-    notBlind: "主题房间必须为匿名。"
+    notBlind: "主題房間必須搭配匿名模式一併使用。"
     # The number of players cannot be greater than the number of built-in skins of the theme. 
-    playerTooMuch: "主题「{{name}}」的房间人数不能多于「{{length}}」。"
+    playerTooMuch: "主題「{{name}}」的房間人數不能多於「{{length}}」。"
     # Forbid players to quit and join too frequent.
-    tooFrequent: "不能频繁地退出、加入主题房间，请等待{{time}}秒。"
+    tooFrequent: "不能頻繁地離開、進入主題房間，請稍候 {{time}} 秒後再重新嘗試。"
 
   join:
     # Cannot join because banned
-    banned: "您的账号受限，不能加入房间。"
+    banned: "您的帳號受到限制，無法參與房間。"
     # You are already in the room.
-    alreadyJoined: "已经加入"
+    alreadyJoined: "您已參與該房間。"
     # You are already kicked from this room
-    kicked: "被禁止加入此房间"
+    kicked: "您被禁止參與該房間。"
     # This name is already used.
-    nameUsed: "昵称「{{name}}」已经存在。"
+    nameUsed: "暱稱「{{name}}」已經被使用。"
     # This room is full.
-    full: "房间已满"
+    full: "該房間已經額滿。"
     # Name is needed.
-    nameNeeded: "请输入昵称"
+    nameNeeded: "請輸入暱稱。"
     # Name is too long.
-    nameTooLong: "昵称过长"
+    nameTooLong: "暱稱太長。"
     # Icon URL is too long.
-    iconTooLong: "头像链接过长。"
+    iconTooLong: "頭像圖片的網址太長。"
     # Name cannot be only spaces.
-    nameOnlySpaces: "昵称不能仅为空格。"
+    nameOnlySpaces: "暱稱不能留空。"
   unjoin:
     # a GM cannot leave.
-    noGMLeave: "GM不能退出房间"
+    noGMLeave: "GM 不能離開房間。"
 
   kick:
     # a GM cannot be kicked.
-    noKickGM: "GM无法被踢出游戏"
+    noKickGM: "GM 不能被踢出房間。"
 
   find:
     # Find feature is disabled now.
-    disabled: "现在无法使用检索。"
+    disabled: "目前不開放使用紀錄搜尋。"
 
 # Tweet
 tweet:
   # A new room is made
   newRoom:
     # Tweet body
-    main: "「{{name}}」（房间号：{{id}} {{options}}）建成了。"
+    main: "「{{name}}」（{{id}} 號 {{options}}）已建立。 #紫月人狼"
     # Password option
-    password: "🔒有密码"
+    password: "🔒有密碼"
     # Blind option
     blind: "👤匿名模式"
     # GM option
-    gm: "有GM"
+    gm: "有 GM"
     # delimiter between options
     delimiter: "・"
 

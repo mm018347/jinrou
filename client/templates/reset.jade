@@ -1,22 +1,22 @@
 section
-  h1 重置密码
-  p 如果您已经为账号绑定了邮箱，可以通过此途径重置您的密码。
+  h1 重置密碼
+  p 若您的帳號已綁定電子信箱，可以透過該方式重置您的密碼。
   form(aciton="/")#resetform
     p
       label
-        | 账号
-        input(type="text",size="30",name="userid",pattern="\\\\w+",title="账号只能使用半角英数字",required)
+        | 帳號
+        input(type="text",size="30",name="userid",pattern="\\\\w+",title="帳號只能使用半形英數字",required)
     p
       label
-        | 邮箱
+        | 信箱
         input(type="email",size="30",name="mail",required)
     p
       label
-        | 新密码
+        | 新密碼
         input(name="newpass",type="password",size="20",required,autocomplete="new-password")
     p
       label
-        | 再输入一次
+        | 再輸入一次
         input(name="newpass2",type="password",size="20",required,autocomplete="new-password")
     p
       input(type="submit",value="下一步")

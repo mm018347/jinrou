@@ -1,69 +1,69 @@
 # laguage file for new room page
 
 # title of newroom component
-title: "新建房间"
+title: "建立房間"
 
 # label of show description button.
-showDescriptionButton: "显示说明"
+showDescriptionButton: "顯示說明"
 
 # name of room
 roomname:
-  title: "房间名"
+  title: "房間名稱"
 
 # password
 password:
-  title: "密码"
-  description: "设定密码的房间，必须有正确的密码才能进入。"
+  title: "密碼"
+  description: "有設定密碼的房間，必須輸入正確的密碼才能閱覽該房間。"
   # no password
-  no: "无密码"
+  no: "無密碼"
   # use password
-  yes: "有密码"
+  yes: "有密碼"
   # placeholder for password input.
-  placeholder: "输入密码"
+  placeholder: "輸入密碼"
 
 # comment of room
 comment:
-  title: "简介"
-  description: "简介将于房间一览页面显示，可以留空。"
+  title: "附註"
+  description: "附註將於房間一覽頁面中顯示，可留空。"
 
 # maximum number of room.
 maxnumber:
-  title: "最大人数"
-  description: "指定房间的最大人数。不需要达到最大人数也可以开始游戏。"
+  title: "最多人數"
+  description: "設定房間可參與的玩家數上限。另外，即使並未達到最多人數仍可開始遊戲。"
 
 # blind mode
 blind:
   title: "匿名模式"
-  description: "匿名模式下，游戏中各个玩家的ID不会公开。"
+  description: "於匿名模式中，房間內各玩家的帳號將不會公開顯示。"
   no: "不匿名"
 
 # themes
 theme:
-  title: "主题房间"
-  description: "匿名模式下的主题房间，玩家的昵称将由系统随机分配。"
+  title: "主題房間"
+  description: "必須開啟匿名模式才可開啟主題房間，於主題房間中，各玩家的頭像、暱稱及稱號將由系統從所選的主題隨機選擇。"
   # label for no theme.
-  none: "无"
+  none: "無"
 
 
 # GM
 gm:
-  title: "GM"
-  description: "设为「有」时，房间的建造人将成为房间的GM。"
-  no: "无"
+  title: "遊戲 GM"
+  description: "設定為「有」的場合，房主將成為該房間的遊戲 GM。"
+  no: "無"
   yes: "有"
 
 # watchSpeak
 watchSpeak:
-  title: "观战者发言"
-  description: "设为「禁止」时，未加入游戏的人将不能在房间内发言。"
+  title: "觀戰者發言"
+  description: "設定為「禁止」的場合，未參與房間的玩家將不能於房間內進行發言。"
   no: "禁止"
-  yes: "允许"
+  yes: "允許"
 
 # label of create button.
-create: "建成房间"
+create: "建立房間"
 
 # confirmation dialog-related text.
 confirm:
-  message: "确认按这样的配置建成房间吗？"
-  yes: "建成房间"
+  message: "確定以這樣的設定建立房間嗎？"
+  yes: "建立房間"
   no: "取消"

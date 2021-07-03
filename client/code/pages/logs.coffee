@@ -28,18 +28,18 @@ exports.start=->
                         parent.appendChild option
             # TODO definitions of these rules are duplicate.
             setjobrule Shared.game.jobrules.concat([
-                name:"特殊规则"
+                name:"特殊規則"
                 rule:[
                     {
                         name:"自由配置"
                         rule:null
                     }
                     {
-                        name:"黑暗火锅"
+                        name:"闇鍋"
                         rule:null
                     }
                     {
-                        name:"手调黑暗火锅"
+                        name:"部分闇鍋"
                         rule:null
                     }
                     {
@@ -47,7 +47,11 @@ exports.start=->
                         rule:null
                     }
                     {
-                        name:"Endless黑暗火锅"
+                        name:"無盡闇鍋"
+                        rule:null
+                    }
+                    {
+                        name:"部分無盡闇鍋"
                         rule:null
                     }
                 ]
@@ -72,7 +76,7 @@ exports.start=->
                 form=je.target
                 je.preventDefault()
                 query={}
-                # 数値
+                # 數値
                 for x in ["min_number","max_number","min_day","max_day"]
                     unless form.elements[x].disabled
                         query[x]=parseInt form.elements[x].value

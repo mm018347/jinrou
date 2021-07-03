@@ -1,45 +1,45 @@
 # Language data for prizes page
 
 # title of page
-title: "称号"
+title: "稱號"
 
 # description of prizes
-description: "称号需要达成一定的胜利次数·败北次数，或者达成其他的特定条件才能够获得。"
+description: "稱號需要達成一定的勝利次數·敗北次數，或者達成其他的特定條件才能夠獲得。"
 
 # back to mypage link.
-backLink: "返回个人页面"
+backLink: "返回個人資訊"
 
 # list of prizes
 list:
   # title of prize list section
-  title: "获得称号一览"
+  title: "獲得稱號一覽"
   # number of available prizes
-  prizeNumber: "获得称号数: {{count}}"
+  prizeNumber: "獲得稱號數: {{count}}"
   # label of unshrink-prize-list button.
-  unshrinkLabel: "查看全部称号"
+  unshrinkLabel: "確認全部稱號"
   # label of shrink-prize-list button,
-  shrinkLabel: "返回称号一览"
+  shrinkLabel: "返回稱號一覽"
 
 # edit my prize
 edit:
   # title of edit section
-  title: "头衔"
+  title: "稱號"
   # description of edit section
-  description: "通过组合“称号”和“连接词”来设定头衔。设定的头衔会在加入房间时显示。"
+  description: "透過組合「稱號」和「連接詞」以設定稱號。設定的稱號於參與房間時會顯示。"
   # instruction of how to edit prize
-  instruction: "通过点击或拖动「称号・连接词」到头衔的格子中来编辑头衔。"
+  instruction: "透過點擊或拖曳「稱號・連接詞」至稱號的格子中以編輯稱號。"
   # title of conjunction list
-  conjunctionListTitle: "连接词"
+  conjunctionListTitle: "連接詞"
   # title of current prize
-  nowPrizeTitle: "现在的头衔"
+  nowPrizeTitle: "目前的稱號"
   # trash description
-  trash: "垃圾箱"
+  trash: "垃圾筒"
 
 
 # save area
 save:
   # label of save button
-  label: "保存头衔"
+  label: "儲存稱號"
   # reminder to save
-  reminder: "请点击「保存头衔」来使变更生效。"
+  reminder: "請點擊「儲存稱號」以儲存變更。"
 

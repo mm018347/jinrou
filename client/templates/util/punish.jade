@@ -2,7 +2,7 @@ section.window
   h1
     = title
     input.closer(type="button",value="×",name="cancel")
-  p 以下玩家在本局游戏中猝死，请投票选择对其中的某些人进行处罚，每人每票将为其带来#{time}分钟封禁
+  p 下述玩家於該場遊戲中觸發暴斃死，請選擇欲懲罰的對象，每人每票將對該玩家施加 #{time} 分鐘的限制
   form(name="punish",aciton="/")#punishform
     div(id="prePunishUser")
     p

@@ -152,7 +152,7 @@ exports.kickprompt=(options,cb)->
 
     win = showWindow "util-kick",{
         title: title ? "踢出"
-        message: message ? "请选择要被踢出的人"
+        message: message ? "請選擇欲踢出房間的對象"
         icon: icon ? 'user-times'
     }
     sel=win.find("select.prompt").get(0)
@@ -216,7 +216,7 @@ exports.loginWindow=(cb=->app.refresh())->
                 cb()
                 closeWindow win
             else
-                $("#loginerror").text "账号或密码错误。"
+                $("#loginerror").text "帳號或密碼錯誤。"
     $("#newentryform").submit (je)->
         je.preventDefault()
         form=je.target
@@ -231,7 +231,7 @@ exports.loginWindow=(cb=->app.refresh())->
                 localStorage.setItem "password", q.password
                 closeWindow win
                 # 初期情報を入力してもらう
-                util.blindName {title:"情报输入",message:"请设定用户名"},(obj)->
+                util.blindName {title:"輸入情報",message:"請設定玩家帳號"},(obj)->
                     # 登録する感じの
                     ss.rpc "user.changeProfile", {
                         password:q.password
@@ -239,17 +239,17 @@ exports.loginWindow=(cb=->app.refresh())->
                         icon:obj.icon
                     },(obj)->
                         if obj?.error?
-                            #错误
-                            util.message "错误",obj.error
+                            #錯誤
+                            util.message "錯誤",obj.error
                         else
-                            util.message "注册","注册成功。"
+                            util.message "註冊","註冊成功。"
                             app.setUserid q.userid
                             cb()
 
 exports.iconSelectWindow=(def,cb)->
     win = showWindow "util-iconselect"
     form=$("#iconform").get 0
-    # 头像决定
+    # 頭像決定
     okicon=(url)->
         setHTTPSicon $("#selecticondisp").get(0), url
         def=url # 書き換え
@@ -263,18 +263,18 @@ exports.iconSelectWindow=(def,cb)->
                 cb def  # 変わっていない
                 break
             else if t.name=="urliconbutton"
-                util.prompt "头像","请输入头像图片的URL",null,(url)->
+                util.prompt "頭像","請輸入頭像圖片的網址",null,(url)->
                     okicon url ? ""
                 break
             else if t.name=="twittericonbutton"
-                util.prompt "头像","请输入twitterID",null,(id)->
+                util.prompt "頭像","請輸入 Twitter 帳號",null,(id)->
                     if id
                         # It's 1.0!
                         # okicon "http://api.twitter.com/1/users/profile_image/#{id}"
                         ss.rpc "user.getTwitterIcon",id,(url)->
-                            # 头像を取得
+                            # 頭像を取得
                             unless url
-                                util.message "错误","头像获取失败，请稍后再试。"
+                                util.message "錯誤","頭像讀取失敗，請稍後再試。"
                                 okicon ""
                             else
                                 okicon url
@@ -285,11 +285,11 @@ exports.iconSelectWindow=(def,cb)->
     $("#iconform").submit (je)->
         je.preventDefault()
         closeWindow win
-        cb def  #结果通知
+        cb def  #結果通知
 exports.blindName=(opt={},cb)->
     win = showWindow "util-blindname",{
-        title:opt.title ? "加入游戏"
-        message:opt.message ? "请输入昵称"
+        title:opt.title ? "參與房間"
+        message:opt.message ? "請輸入暱稱"
         icon: "user-secret"
     }
     def=null
@@ -350,7 +350,7 @@ exports.setHTTPSicon = setHTTPSicon = (img, url, cacheObject)->
     # HTTPSに直す
     if /^http:/.test url
         url = "https:" + url.slice 5
-        # HTTPSが错误だったらHTTPになる
+        # HTTPSが錯誤だったらHTTPになる
         handler1 = (ev)->
             img.removeEventListener "error", handler1, false
             img.removeEventListener "load", handler2, false
@@ -379,7 +379,7 @@ exports.LoadingIcon = class LoadingIcon
         # 戻す
         @newicon.parentNode.replaceChild @icon, @newicon
 
-#猝死惩罚
+#猝死懲罰
 exports.punish=(title,message,cb)->
     win = showWindow "util-punish",{title:title,time:message.time}
     for user in message.userlist

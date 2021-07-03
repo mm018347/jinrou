@@ -10,7 +10,7 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 "Hunter","Cupid",
 # 特殊役職?
 "Poisoner","BigWolf","TinyFox","Cat",
-# るる鯖で見つけた职业
+# るる鯖で見つけた職業
 "Fanatic","Immoral"
 # 特殊役職2
 "Devil","Stalker","WhisperingMad","Dog",
@@ -25,7 +25,7 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 "BloodyMary",
 # うそつき人狼の役職
 "Dictator","SeersMama","Trapper","WolfBoy","King",
-# Twitter人狼的职业
+# Twitter人狼的職業
 "Counselor","Miko","GreedyWolf","FascinatingWolf","SolitudeWolf","ToughWolf","ThreateningWolf",
 # dat人狼
 "Sleepwalker",
@@ -33,20 +33,20 @@ exports.jobs=["Human","Werewolf","Diviner","Psychic","Madman","Guard","Couple","
 "CurseWolf",
 # 人狼議事
 "Trickster",
-# 人狼物語（瓜科国）
+# 人狼物語（瓜科國）
 "MadCouple",
-# 人狼物語（薔薇の下国）
+# 人狼物語（薔薇の下國）
 "NightRabbit",
-# 人狼物語（深海国）
+# 人狼物語（深海國）
 "Fate","QueenOfNight","CynthiaWolf","Saint",
-# 人狼物語（三日月国）
+# 人狼物語（三日月國）
 "Tarzan",
-# 天国系の役職
-"Lover", # 人狼天国
-"ObstructiveMad", # 人狼天国
-"WanderingGuard", # 錠前天国
-"BadLady", # 蒼汁天国、人狼天国
-# ねじれ天国
+# 天國系の役職
+"Lover", # 人狼天國
+"ObstructiveMad", # 人狼天國
+"WanderingGuard", # 錠前天國
+"BadLady", # 蒼汁天國、人狼天國
+# ねじれ天國
 "Bomber","Blasphemy","Ushinotokimairi","DualPersonality","GachaAddicted",
 "Gambler","Faker","NetherWolf",
 # 人狼式
@@ -123,7 +123,7 @@ exports.teams=teams=
     Others:["Bat","Stalker","Doppleganger","Copier","Tanner","Thief","Hoodlum","QuantumPlayer","Shishimai","HooliganGuard","Amanojaku","DarkClown","DualPersonality","Oni","GoldOni"],
     Neet:["Neet"]
 
-# カテゴリ分け(手调黑暗火锅でつかうぞ!)
+# カテゴリ分け(部分闇鍋でつかうぞ!)
 exports.categories=
     Human: teams.Human.filter((x)->
         not (x in ["GotChocolate", "Phantom", "OccultMania", "Cursed", "BloodyMary","Listener","SpaceWerewolfCrew","SpaceWerewolfObserver","SpaceWerewolfGuard"]))
@@ -167,7 +167,7 @@ exports.gachaData =
         "Illusionist", "DragonKnight"]
     6: ["Neet", "Helper", "Watching"]
 
-# 役職ルールたち 役職人数一覧を返す（Humanは向こうで補完）
+# 役職ルールたち 役職人數一覧を返す（Humanは向こうで補完）
 normal1=(number)->
     ret={}
     #狼
@@ -186,10 +186,10 @@ normal1=(number)->
     if number>=22
         ret.Diviner++
     if number>=8
-        ret.Psychic=1 #灵能
+        ret.Psychic=1 #靈能
     if number>=6
         ret.Madman=1 #狂人
-        ret.Guard=1 #猎人
+        ret.Guard=1 #獵人
         if 18 <= number <= 19 || number >= 23
             ret.Madman++
         if number>=20
@@ -217,15 +217,15 @@ normal2=(number)->
                     ret.Werewolf++
                     if number>=29
                         ret.Werewolf++
-    ret.Diviner=1 #占卜师
+    ret.Diviner=1 #占卜師
     if number>=8
-        ret.Psychic=1 #灵能者
+        ret.Psychic=1 #靈能者
     if number>=10
         ret.Madman=1 #狂人
         if number>=28
             ret.Madman++
     if number>=11
-        ret.Guard=1 #猎人
+        ret.Guard=1 #獵人
     if number>=13
         ret.Couple=2 #共有者
         if number>=28
@@ -264,10 +264,10 @@ exports.jobrules=[
     ]
   }
   {
-    name:"特殊职业配置"
+    name:"特殊職業配置"
     rule:[
       {
-        name:"恋人"
+        name:"戀人"
         rule:(number)->
           ret=normal1 number
           if ret.Fox>0  #NaNかも
@@ -277,7 +277,7 @@ exports.jobrules=[
           ret
       }
       {
-        name:"背德者"
+        name:"背德"
         rule:(number)->
           ret=normal1 number
           if ret.Fox>0
@@ -294,7 +294,7 @@ exports.jobrules=[
           ret
       }
       {
-        name:"猫又"
+        name:"貓又"
         rule:(number)->
           ret=normal1 number
           ret.Cat=1
@@ -302,7 +302,7 @@ exports.jobrules=[
           ret
       }
       {
-        name:"低语狂人"
+        name:"私語狂人"
         rule:(number)->
           ret=normal1 number
           if ret.Madman>0
@@ -327,7 +327,7 @@ exports.jobrules=[
           ret
       }
       {
-        name:"贵族奴隶"
+        name:"貴族奴隸"
         rule:(number)->
           ret=normal1 number
           ret.Noble=1
@@ -344,14 +344,14 @@ exports.jobrules=[
           ret
       }
       {
-        name:"魔术师"
+        name:"魔術師"
         rule:(number)->
           ret=normal1 number
           ret.Magician=1
           ret
       }
       {
-        name:"间谍"
+        name:"間諜"
         rule:(number)->
           ret=normal1 number
           ret.Spy=1
@@ -360,7 +360,7 @@ exports.jobrules=[
           ret
       }
       {
-        name:"人狼占卜师"
+        name:"人狼占卜師"
         rule:(number)->
           ret=normal1 number
           ret.Werewolf--
@@ -379,10 +379,10 @@ exports.jobrules=[
     ]
   }
   {
-      name:"主题配置"
+      name:"主題配置"
       rule:[
         {
-          name:"变化村"
+          name:"變化村"
           minNumber:6
           rule:(number)->
             ret={}
@@ -435,7 +435,7 @@ exports.jobrules=[
           minNumber:6
           rule:(number)->
             ret={}
-            # 狼凭
+            # 狼憑
             ret.Lycan=1
             if number>=10
               ret.Lycan++
@@ -544,13 +544,72 @@ exports.jobrules=[
               ret.Tanner=1
             ret
         }
+        {
+          name:"打靶村"
+          minNumber:5
+          maxNumber:25
+          suggestedOption:
+            scapegoat:"off"
+            day_minute:"1"
+            day_second:"0"
+            night_minute:"1"
+            night_second:"0"
+            hunter_lastattack:"no"
+          rule:(number)->
+            ret={}
+            ret.Hunter=2
+            ret.MadHunter=2
+            ret.WolfDiviner=1
+            if number>=6
+              ret.Tanner=1
+            if number>=7
+              ret.Werewolf=1
+            if number>=8
+              ret.MadHunter++
+            if number>=9
+              ret.Hunter++
+            if number>=10
+              ret.Blasphemy=1
+            if number==11
+              ret.MadHunter++
+            if number>=12
+              ret.Hunter++
+              ret.Werewolf++
+            if number>=13
+              ret.MadHunter++
+            if number>=14
+              ret.Patissiere=1
+            if number>=15
+              ret.Hunter++
+            if number>=16
+              ret.Copier=1
+            if number>=17
+              ret.MadHunter++
+            if number>=18
+              ret.Miko=1
+            if number>=19
+              ret.Copier++
+            if number>=20
+              ret.Priest=1
+            if number>=21
+              ret.WolfDiviner++
+            if number>=22
+              ret.MadHunter++
+            if number>=23
+              ret.Hunter++
+            if number>=24
+              ret.Patissiere++
+            if number>=25
+              ret.Copier++
+            ret
+        }
       ]
   }
   {
     name:"其他"
     rule:[
       {
-        name:"疯狂的世界"
+        name:"狂人世界"
         rule:(number)->
           ret={}
           count=3
@@ -570,14 +629,14 @@ exports.jobrules=[
                 if number>=24
                   ret.Werewolf++
                   count++
-          # 占卜师
+          # 占卜師
           if number>=12
             ret.Diviner++
             count++
             if number>=20
               ret.Diviner++
               count++
-          # 妖术师
+          # 妖術師
           if number>=8
             ret.Sorcerer=1
             count++
@@ -585,7 +644,7 @@ exports.jobrules=[
               ret.Sorcerer++
               count++
 
-          # 灵能者
+          # 靈能者
           if number>=16
             ret.Psychic=1
             count++
@@ -593,7 +652,7 @@ exports.jobrules=[
           if number>=17
             ret.Fanatic=1
             count++
-          # 独裁者
+          # 獨裁者
           if number>=7
             ret.Dictator=1
             count++
@@ -611,11 +670,11 @@ exports.jobrules=[
           if number>=18
             ret.Witch=1
             count++
-          ret.Madman=number-count   #残り全部狂人
+          ret.Madman=number-count   #殘り全部狂人
           ret
       }
       {
-        name:"六方混战"
+        name:"六方混戰"
         rule:(number)->
           ret={}
           ret.Diviner=1
@@ -688,7 +747,7 @@ exports.jobrules=[
 # ルールオブジェクトを得る
 getruleobj=(name)->
     # オブジェクトから探す
-    if name=="特殊规则.量子人狼"
+    if name=="特殊規則.量子人狼"
         # 特殊だ!
         return {
             name:"量子人狼"
@@ -699,18 +758,18 @@ getruleobj=(name)->
         }
     names= name.split "."
     obj=Shared.game.jobrules
-    for branch in names #.区切りでオブジェクト名
+    for branch in names #.區切りでオブジェクト名
         ruleobj=obj.filter((x)->x.name==branch)[0]
         unless ruleobj  # そんな配置は見つからない
             return
         if "function"==typeof ruleobj.rule
-            # 目当てのものを見つけた
+            # 目當てのものを見つけた
             return ruleobj
         obj=ruleobj.rule
     null
-# 规则関数を得る
+# 規則関數を得る
 exports.getrulefunc=(name)->
-    if name=="内部利用.量子人狼"
+    if name=="內部利用.量子人狼"
         # 量子人狼のときは
         return (number)->
             ret={}
@@ -1117,14 +1176,14 @@ exports.jobinfo=
 
 # TODO temporal new version
 exports.new_rules=[
-    # 黑暗火锅関係
+    # 闇鍋関係
     {
         type: 'group'
         label:
             id: 'yaminabe_option'
             visible: (rule)->
                 # 闇鍋モードのみ
-                (rule.casting ? rule.jobrule) in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅"]
+                (rule.casting ? rule.jobrule) in ["特殊規則.闇鍋","特殊規則.部分闇鍋","特殊規則.無盡闇鍋","特殊規則.部分無盡闇鍋"]
         items: [
             {
                 type: 'item'
@@ -1172,7 +1231,7 @@ exports.new_rules=[
             }
         ]
     }
-    # 標準规则
+    # 標準規則
     {
         type: 'group'
         label:
@@ -1545,7 +1604,7 @@ exports.new_rules=[
             }
         ]
     }
-    # 灵能
+    # 靈能
     {
         type: 'group'
         label:
@@ -1592,7 +1651,7 @@ exports.new_rules=[
             }
         ]
     }
-    # 护卫职业
+    # 護衛職業
     {
         type: 'group'
         label:
@@ -1649,7 +1708,7 @@ exports.new_rules=[
             }
         ]
     }
-    # 狩猎者
+    # 狩獵者
     {
         type: 'group'
         label:
@@ -1671,7 +1730,7 @@ exports.new_rules=[
             }
         ]
     }
-    # 埋毒者、猫又
+    # 埋毒者、貓又
     {
         type: 'group'
         label:
@@ -1693,7 +1752,7 @@ exports.new_rules=[
             }
         ]
     }
-    # 恋人
+    # 戀人
     {
         type: 'group'
         label:
@@ -1731,7 +1790,7 @@ exports.new_rules=[
         type: 'group'
         label:
             id: 'quantum'
-            visible:(rule)->rule.casting=="特殊规则.量子人狼"
+            visible:(rule)->rule.casting=="特殊規則.量子人狼"
         items:[
             {
                 type: 'item'
@@ -1846,7 +1905,7 @@ exports.jobinfos=[
 
 # 全ての役職が現れる可能性があるモードかどうか
 isAllJobsMode=(rule)->
-   if (rule.casting ? rule.jobrule) in ["特殊规则.黑暗火锅","特殊规则.手调黑暗火锅","特殊规则.Endless黑暗火锅", "特殊规则.easyYaminabe"]
+   if (rule.casting ? rule.jobrule) in ["特殊規則.闇鍋","特殊規則.部分闇鍋","特殊規則.無盡闇鍋","特殊規則.部分無盡闇鍋", "特殊規則.簡易闇鍋"]
        return true
    if rule.rules.get("yaminabe_hidejobs") != ""
        # 役職が隠されている場合もtrue
