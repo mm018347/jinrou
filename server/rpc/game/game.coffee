@@ -2304,7 +2304,7 @@ class Game
                 @werewolf_target_remain = 0
 
     # 勝敗決定
-    judge:->
+    judge:(gmteam)->
         # 既に終了している場合は再度判定しない
         if @finished
             return true
@@ -2488,6 +2488,9 @@ class Game
         if @revote_num>=4 && !team?
             # 再投票多すぎ
             team="Draw" # 引き分け
+            
+        if gmteam?
+            team=gmteam
 
         if team?
             # 勝敗決定
@@ -11078,6 +11081,89 @@ class Duelist extends Player
 
         null
 
+class Owlman extends Player
+    type:"Owlman"
+    midnightSort:100
+    sleeping:->true
+    jobdone:->@target?
+    sunset:(game)->
+        @setTarget (if game.day == 1 then "" else null)
+    job:(game, playerid)->
+        if @target?
+            return game.i18n.t "error.common.alreadyUsed"
+        pl=game.getPlayer playerid
+        unless pl?
+            return game.i18n.t "error.common.nonexistentPlayer"
+        pl.touched game,@id
+        log=
+            mode:"skill"
+            to:@id
+            comment: game.i18n.t "roles:Owlman.select", {name: @name, target: pl.name}
+        splashlog game.id,game,log
+        @setTarget playerid
+        null
+    midnight:(game,midnightSort)->
+        return unless @target?
+        pl = game.getPlayer @target
+        return unless pl?
+        return if pl.dead
+        if pl.isWerewolf() && pl.getTeam() != "Human"
+            @addGamelog game, "owlmanFailure", null, @id
+            return
+        else if pl.isFox() && pl.getTeam() != "Human"
+            @addGamelog game, "owlmanFailure", null, @id
+            return
+        else if pl.isVampire() && pl.getTeam() != "Human"
+            @addGamelog game, "owlmanFailure", null, @id
+            return
+        else
+            pl.die game, "curse", @id
+            @addGamelog game, "owlmankill", null, pl.id
+
+class CorruptWolf extends Werewolf
+    type:"CorruptWolf"
+    dying:(game,found,from)->
+        super
+        unless found in ["punish","gone-day","gone-night","gmpunish"]
+            # 蝕狼の侵蝕
+            canbedead = game.players.filter (x)-> !x.dead && !x.isWerewolf()
+            return if canbedead.length==0
+            r=Math.floor Math.random()*canbedead.length
+            pl=canbedead[r] # 被害者
+            newpl=Player.factory "CorruptWolf", game
+            pl.transProfile newpl
+            pl.transferData newpl
+            log=
+                mode:"skill"
+                to:@id
+                comment: game.i18n.t "system.changeRoleFrom", {name: pl.name, old: pl.jobname, result: newpl.jobname}
+            splashlog game.id,game,log
+            pl.transform game,newpl,false
+            # 更新
+            game.ss.publish.user newpl.realid,"refresh",{id:game.id}
+            
+class CorruptMadman extends Madman
+    type:"CorruptMadman"
+    dying:(game,found,from)->
+        super
+        unless found in ["punish","gone-day","gone-night","gmpunish"]
+            # 蝕狂の侵蝕
+            canbedead = game.players.filter (x)-> !x.dead && !x.isWerewolf()
+            return if canbedead.length==0
+            r=Math.floor Math.random()*canbedead.length
+            pl=canbedead[r] # 被害者
+            newpl=Player.factory "CorruptMadman", game
+            pl.transProfile newpl
+            pl.transferData newpl
+            log=
+                mode:"skill"
+                to:@id
+                comment: game.i18n.t "system.changeRoleFrom", {name: pl.name, old: pl.jobname, result: newpl.jobname}
+            splashlog game.id,game,log
+            pl.transform game,newpl,false
+            # 更新
+            game.ss.publish.user newpl.realid,"refresh",{id:game.id}
+            
 # ============================
 # Roles for Space Werewolf
 
@@ -11243,10 +11329,183 @@ class GameMaster extends Player
             when "shorter"
                 # 時間短縮
                 remains = game.timer_start + game.timer_remain - Date.now()/ 1000
-                if remains <= 30 || Phase.isRemain(game.phase) && remains <= 60
+                if remains <= 30 || Phase.isRemain(game.phase) && remains <= 40
                     return game.i18n.t "roles:GameMaster.shortenFail"
                 clearTimeout game.timerid
                 game.timer remains-30
+                return null
+            when "job"
+                # 職業修改
+                pl=game.getPlayer playerid
+                unless pl?
+                    return "這個對象不正確"
+                newpl=Player.factory query.Job_kit, game
+                pl.transProfile newpl
+                pl.transferData newpl
+                newpl.sunset game
+                pl.transform game,newpl,false
+                log=
+                    mode:"skill"
+                    to:pl.id
+                    comment:"GM #{@name} 將 #{pl.name} 變化為 #{newpl.getJobDisp()}。"
+                splashlog game.id,game,log
+                game.splashjobinfo()
+                return null
+            when "alljob"
+                # 全員職業修改
+                allplayers = game.players.map((x)-> x.id)
+                #allplayers = game.players.filter((x)->!x.dead).map((x)-> x.id)
+                for plid in allplayers
+                    pl = game.getPlayer plid
+                    if pl.id != @id
+                        newpl=Player.factory query.Job_kit, game
+                        pl.transProfile newpl
+                        pl.transferData newpl
+                        newpl.sunset game
+                        pl.transform game, newpl, false
+                        log=
+                            mode:"skill"
+                            to: pl.id
+                            comment: "GM #{@name} 將 #{pl.name} 變化為 #{newpl.getJobDisp()}。"
+                        splashlog game.id,game,log
+                        game.splashjobinfo()
+                return null
+            when "sub", "subploff"
+                # 副職業修改
+                subname=""
+                pl=game.getPlayer playerid
+                unless pl?
+                    return "這個對象不正確"
+                if query.Sub_kit == "Decider"
+                    newpl=Player.factory null, game, pl,null,Decider
+                    pl.transProfile newpl
+                    pl.transform game,newpl,true,true
+                    subname="決定者"
+                else if query.Sub_kit == "Authority"
+                    newpl=Player.factory null, game,pl,null,Authority
+                    pl.transProfile newpl
+                    pl.transform game,newpl,true,true
+                    subname="必殺"
+                else if query.Sub_kit == "Critical_vote"
+                    newpl=Player.factory null, game,pl,null,Critical_vote
+                    pl.transProfile newpl
+                    pl.transform game,newpl,true,true
+                    subname="要害"
+                else if query.Sub_kit == "Critical_luck"
+                    newpl=Player.factory null, game,pl,null,Critical_luck
+                    pl.transProfile newpl
+                    pl.transform game,newpl,true,true
+                    subname="權力者"
+                else if query.Sub_kit == "Drunk"
+                    newpl=Player.factory null, game, pl,null,Drunk
+                    pl.transProfile newpl
+                    pl.transform game,newpl,true,true
+                    subname="喝醉"
+                else if query.Sub_kit == "WolfMinion"
+                    newpl=Player.factory null, game, pl,null,WolfMinion
+                    pl.transProfile newpl
+                    pl.transform game,newpl,true,true
+                    subname="狼的部下"
+                else if query.Sub_kit == "CultMember"
+                    newpl=Player.factory null, game, pl,null,CultMember
+                    pl.transProfile newpl
+                    pl.transform game,newpl,true,true
+                    subname="教主信徒"
+                else if query.Sub_kit == "Counseled"
+                    newpl=Player.factory null, game, pl,null,Counseled
+                    pl.transProfile newpl
+                    pl.transform game,newpl,true,true
+                    subname="更生者"
+                else if query.Sub_kit == "FoxMinion"
+                    newpl=Player.factory null, game, pl,null,FoxMinion
+                    pl.transProfile newpl
+                    pl.transform game,newpl,true,true
+                    subname="狐憑"
+                else if query.Sub_kit == "Friend"
+                    # return "選擇的副職業不正確"
+                    newpl=Player.factory null, game, pl,null,Friend
+                    pl.transProfile newpl
+                    pl.transform game,newpl,true,true
+                    subname="戀人"
+                else if query.Sub_kit == "KeepedLover"
+                    return "玩弄因為有問題所以不開放修改"
+                    newpl=Player.factory null, game, pl,null,KeepedLover
+                    pl.transProfile newpl
+                    pl.transform game,newpl,true,true
+                    subname="玩弄"
+                else if query.Sub_kit == "GotChocolate"
+                    # return "選擇的副職業不正確"
+                    sub = Player.factory "GotChocolate"
+                    pl.transProfile sub
+                    sub.sunset game
+                    newpl = Player.factory null, game, pl, sub, GotChocolateFalse
+                    # newpl.cmplFlag=@id
+                    pl.transProfile newpl
+                    pl.transferData newpl
+                    pl.transform game, newpl, true
+                    subname="義理巧克力"
+                else
+                    sub=Player.factory query.Sub_kit, game
+                    pl.transProfile sub
+                    
+                    newpl=Player.factory null, game, pl,sub,Complex
+                    pl.transProfile newpl
+                    pl.transform game,newpl,true
+                    subname=sub.getJobDisp()
+                if subname? && query?.commandname == "sub"
+                    log=
+                        mode:"skill"
+                        to:pl.id
+                        comment:"GM #{@name} 對 #{pl.name} 附加 #{subname}。"
+                    splashlog game.id,game,log
+                else if subname? 
+                    log=
+                        mode:"skill"
+                        to:@id
+                        comment:"GM #{@name} 秘密地對 #{pl.name} 附加 #{subname}。"
+                    splashlog game.id,game,log
+                    game.splashjobinfo()
+                return null
+            when "gmjudge"
+                # 結束判定
+                game.judge()
+                return null
+            when "gmteam"
+                # 宣布獲勝陣營
+                Teamname=""
+                switch query.Team_kit
+                    when "Draw"
+                        Teamname="平手"
+                    when "Human"
+                        Teamname="村人"
+                    when "Werewolf"
+                        Teamname="人狼"
+                    when "LoneWolf"
+                        Teamname="一匹狼"
+                    when "Fox"
+                        Teamname="妖狐"
+                    when "Vampire"
+                        Teamname="吸血鬼"
+                    when "Friend"
+                        Teamname="戀人"
+                    when "Cult"
+                        Teamname="邪教主"
+                    when "Devil"
+                        Teamname="惡魔"
+                    when "Raven"
+                        Teamname="烏鴉"
+                    when "Hooligan"
+                        Teamname="暴徒"
+                    when "Duel"
+                        Teamname="決鬥者"
+                    when "Lorelei"
+                        Teamname="羅蕾萊"
+                log=
+                    mode:"skill"
+                    to:@id
+                    comment:"GM #{@name} 宣布 #{Teamname} 陣營獲勝。"
+                splashlog game.id, game, log
+                game.judge(query.Team_kit)
                 return null
         return null
     isListener:(game,log)->true # 全て見える
@@ -11264,8 +11523,10 @@ class GameMaster extends Player
         })
     checkJobValidity:(game,query)->
         switch query?.commandname
+            #when "longer", "shorter", "gmjudge", "gmteam", "alljob"
             when "longer", "shorter"
                 return true
+            #when "kill", "revive", "job", "sub", "subploff"
             when "kill", "revive"
                 return super
             else
@@ -13162,6 +13423,9 @@ jobs=
     SpaceWerewolfObserver:SpaceWerewolfObserver
     SpaceWerewolfGuard:SpaceWerewolfGuard
     SpaceWerewolfSabotage:SpaceWerewolfSabotage
+    Owlman:Owlman
+    CorruptWolf:CorruptWolf
+    CorruptMadman:CorruptMadman
 
     # 特殊
     GameMaster:GameMaster
@@ -13383,6 +13647,9 @@ jobStrength=
     BloodWolf:46
     Reincarnator:15
     Duelist:18
+    Owlman:15
+    CorruptWolf:70
+    CorruptMadman:20
 
 module.exports.actions=(req,res,ss)->
     req.use 'user.fire.wall'

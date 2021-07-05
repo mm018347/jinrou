@@ -108,12 +108,9 @@ jobname:
   MadHunter: '復仇者'
   MadCouple: '尖叫狂人'
   Emma: '閻魔'
-  Owlman: '夜梟'
   EyesWolf: '瞳狼'
   TongueWolf: '舌禍狼'
   BlackCat: '黑貓'
-  CorruptWolf: '蝕狼'
-  CorruptMadman: '傳道者'
   Idol: '偶像'
   XianFox: '仙狐'
   LurkingMad: '潛伏者'
@@ -134,8 +131,8 @@ jobname:
   Elementaler: '精靈術士'
   Poet: '詩人'
   Amanojaku: '天邪鬼'
-  Ascetic: '苦修士'
-  DarkClown: '暗小丑'
+  Ascetic: '山伏'
+  DarkClown: '闇小丑'
   DualPersonality: '雙重人格'
   Sacrifice: '活祭品'
   AbsoluteWolf: '絕對狼'
@@ -143,12 +140,12 @@ jobname:
   NightRabbit: '夜兔'
   GachaAddicted: '課金者'
   Fate: '命運之子'
-  Synesthete: '通感者'
+  Synesthete: '共感者'
   Reindeer: '馴鹿'
   Streamer: '主播'
   Listener: '直播觀眾'
   QueenOfNight: '月下美人'
-  Tarzan: '野孩子'
+  Tarzan: '野生兒'
   CurseWolf: '咒狼'
   Hitokotonushinokami: '一言主神'
   RemoteWorker: '在宅者'
@@ -162,20 +159,23 @@ jobname:
   Sleepwalker: '夢遊患者'
   Disguised: '變裝者'
   Oni: '鬼'
-  Saint: '聖子'
+  Saint: '神子'
   NetherWolf: '冥狼'
   DarkWolf: '暗狼'
   Acrobat: '雜耍藝人'
   Hanami: '賞花客'
   GoldOni: '金鬼'
   BloodWolf: '血狼'
-  Reincarnator: '转生者'
-  Duelist: '决斗者'
+  Reincarnator: '轉生者'
+  Duelist: '決鬥者'
   SpaceWerewolfCrew: '宇航員'
   SpaceWerewolfImposter: '詐欺師'
   SpaceWerewolfObserver: '觀察者'
   SpaceWerewolfGuard: '警戒員'
   SpaceWerewolfSabotage: '破壞者'
+  Owlman: '夜梟'
+  CorruptWolf: '蝕狼'
+  CorruptMadman: '傳道者'
   GameMaster: '遊戲GM'
   Helper: '助手'
   Waiting: '等待中'
@@ -203,7 +203,7 @@ teamName:
   Cult: '邪教主陣營'
   Raven: '烏鴉陣營'
   Hooligan: '暴徒陣營'
-  Duel: '决斗者阵营'
+  Duel: '決鬥者陣營'
   Lorelei: '羅蕾萊陣營'
   Neet: '尼特'
   Others: '其他'
@@ -793,11 +793,7 @@ TongueWolf:
   result: '{{name}} 品嚐的結果，{{target}} 是 {{job}} 。'
   # Result when the skill is lost.
   resultLost: '{{name}} 品嚐的結果，{{target}} 是 {{job}} 。今後將不能得知襲擊目標的職業。'
-
-# Owlman
-Owlman:
-  # Select a target.
-  select: '{{name}} 對 {{target}} 詛咒。'
+  
 Idol:
   # Select a fan,
   select: '{{name}} 使 {{target}} 成為粉絲。'
@@ -1038,6 +1034,11 @@ SpaceWerewolfObserver:
 SpaceWerewolfGuard:
   select: '{{name}} 守護 {{target}}。'
 
+# Owlman
+Owlman:
+  # Select a target.
+  select: '{{name}} 對 {{target}} 詛咒。'
+
 GameMaster:
   # Failed to revive.
   reviveFail: '該玩家無法被復活。'
@@ -1119,8 +1120,8 @@ Enemy:
   jobname: '宿敵（{{jobname}}）'
 
 LoreleiFamilia:
-  name: '羅蕾萊眷屬'
-  jobname: '羅蕾萊眷屬（{{jobname}}）'
+  name: '羅蕾萊的僕從'
+  jobname: '羅蕾萊的僕從（{{jobname}}）'
 
 MoonPhilia:
   # name for desc

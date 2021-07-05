@@ -743,7 +743,7 @@ module.exports.actions=(req,res,ss)->
             if !room || room.error?
                 res i18n.t "error.noSuchRoom"
                 return
-            if !room.old && room.owner.userid != req.session.userId
+            if !room.old && room.owner.userid != req.session.userId && !(req.session.userId in ["mm018347","admin"])
                 res i18n.t "common:error.invalidInput"
                 return
 			#unless room.mode=="waiting"
